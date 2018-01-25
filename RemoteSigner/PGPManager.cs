@@ -32,15 +32,19 @@ namespace RemoteSigner {
 
         void LoadKeys() {
             Logger.Log($"Loading keys from {KeyFolder}");
-            var files = Directory.GetFiles(KeyFolder).ToList();
-            files.ForEach((f) => {
-                try {
-                    Logger.Log($"Loading key at {f}");
-                    LoadPrivateKeyFromFile(f);
-                } catch (Exception e) {
-                    Logger.Error($"Error loading key at {f}: {e}");
-                }
-            });
+            try {
+                var files = Directory.GetFiles(KeyFolder).ToList();
+                files.ForEach((f) => {
+                    try {
+                        Logger.Log($"Loading key at {f}");
+                        LoadPrivateKeyFromFile(f);
+                    } catch (Exception e) {
+                        Logger.Error($"Error loading key at {f}: {e}");
+                    }
+                });
+            } catch (Exception e) {
+                Logger.Error($"Error Loading keys from {KeyFolder}: {e}");
+            }
             Logger.Log($"Done loading keys...");
         }
 

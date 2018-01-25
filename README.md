@@ -16,11 +16,18 @@ TODO
 *   Add Public / Private Key API
 *   List Public / Private Key API
 *   Increment this document with models and enums 
+*   Encrypt / Decrypt calls
 
 Usage
 =====
 
 This application opens up a WebServer listening on port *5100* and have a base URL defined as `/remoteSigner`.
+
+#### Setting up GPG Private Keys
+
+By default QRS searchs for encrypted private keys at `./keys`. Put all the private keys you want to use in Encrypted Ascii Armored Format inside it. It will iterate over all files and load them. If you don't have one, you can either create using the `gpg` toolkit or by calling the create api. Notice that calling the create API does not automatically store the key at the `keys` folder.
+
+The keys folder can be overrided by the `PRIVATE_KEY_FOLDER` environment variable.
 
 #### Creating a GPG Key
 
@@ -47,6 +54,16 @@ dJ6gPA5fDURGAbt9xdAqWvlkT9xagHqylVSG1A1CxOmeP3p+Vfjh/IhCgZ/nbi52
 s+iBthuraYJAIPB9snASniMIqYs7sWTpC8T4m+WYEZGB2ejvVscmEgXFNWn6hzKI
 (...)
 -----END PGP PRIVATE KEY BLOCK-----
+```
+
+#### Unlocking a Private Key
+Before any sign operation can be done, you need to decrypt the loaded private keys. If the keys is stored in a non-encrypted format (no password) you don't need to do that step. Simple call `/remoteSigner/gpg/unlockKey` with the following JSON payload:
+
+```json
+{
+  "FingerPrint": "D7362B4CC546DB11",
+  "Password": "123456"
+}
 ```
 
 #### Signing Data
@@ -120,4 +137,27 @@ You might also want to verify in `Quanto Signature` format. To do so, you can se
 ```
 
 
+Building
+========
 
+For Windows just use the newest version of Visual Studio and hit build. You should have a executable in folder `bin/Debug` or `bin/Release`.
+
+For Linux you will need `mono` and `nuget`. On `Ubuntu 16.04` you can run:
+```bash
+sudo apt install mono-complete nuget
+git clone https://github.com/quan-to/remote-signer
+cd remote-signer
+nuget restore
+msbuild /p:Configuration=Release
+mkdir binaries
+cp RemoteSigner/bin/Release/* binaries
+mkdir binaries/keys
+cd binaries
+```
+Aditionally, you can compile an executable that does not need mono to be ran by using mkbundle:
+
+```bash
+mkbundle -z --static --deps RemoteSigner.exe -L /usr/lib/mono/4.5 -o RemoteSigner
+```
+
+This will generate a static binary called `RemoteSigner`.
