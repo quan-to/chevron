@@ -83,6 +83,7 @@
     <Compile Include="Models\ArgumentModels\GPGUnlockKeyData.cs" />
     <Compile Include="Models\ArgumentModels\GPGVerifySignatureData.cs" />
     <Compile Include="Models\ArgumentModels\GPGSignData.cs" />
+    <Compile Include="Models\ArgumentModels\GPGGenerateKeyData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

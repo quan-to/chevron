@@ -10,6 +10,22 @@ namespace RemoteSigner.HttpData.Endpoints {
         [Inject]
         readonly PGPManager pgpManager;
 
+        [POST("/generateKey")]
+        public string GenerateKey(GPGGenerateKeyData data) {
+            try {
+                var genTask = pgpManager.GenerateGPGKey(data.Identifier, data.Password, data.Bits);
+                genTask.Wait();
+                return genTask.Result;
+            } catch (Exception e) {
+                throw new ErrorObjectException(new ErrorObject {
+                    ErrorCode = ErrorCodes.InvalidFieldData,
+                    ErrorField = "Password",
+                    ErrorData = e,
+                    Message = "Cannot Decrypt Key"
+                });
+            }
+        }
+
         [POST("/unlockKey")]
         public string UnlockKey(GPGUnlockKeyData unlockData) {
             try {
