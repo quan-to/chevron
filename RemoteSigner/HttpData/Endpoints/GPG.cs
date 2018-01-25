@@ -1,4 +1,5 @@
 ﻿using System;
+using Org.BouncyCastle.Bcpg;
 using RemoteSigner.Exceptions;
 using RemoteSigner.Models;
 using RemoteSigner.Models.ArgumentModels;
@@ -59,6 +60,62 @@ namespace RemoteSigner.HttpData.Endpoints {
                     Message = "Cannot Verify Signature"
                 });
             }
+        }
+
+
+        [POST("/signQuanto")]
+        public string SignQuanto(GPGSignData data) {
+            try {
+                byte[] signData = Convert.FromBase64String(data.Base64Data);
+                var sigTask = pgpManager.SignData(data.FingerPrint, signData);
+                sigTask.Wait();
+
+                return Tools.GPG2Quanto(sigTask.Result, data.FingerPrint, HashAlgorithmTag.Sha512);
+            } catch (ErrorObjectException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new ErrorObjectException(new ErrorObject {
+                    ErrorCode = ErrorCodes.InvalidFieldData,
+                    ErrorField = "Signature",
+                    ErrorData = e,
+                    Message = "Cannot Verify Signature"
+                });
+            }
+        }
+
+        [POST("/verifySignatureQuanto")]
+        public string VerifySignatureQuanto(GPGVerifySignatureData data) {
+            try {
+                byte[] verifyData = Convert.FromBase64String(data.Base64Data);
+                string pgpSignature = Tools.Quanto2GPG(data.Signature);
+
+                if (pgpSignature == null) {
+                    throw new ErrorObjectException(new ErrorObject {
+                        ErrorCode = ErrorCodes.InvalidSignature,
+                        ErrorField = "Signature",
+                        Message = "The provided Signature is invalid"
+                    });
+                }
+
+                if (!pgpManager.VerifySignature(verifyData, pgpSignature)) {
+                    throw new ErrorObjectException(new ErrorObject {
+                        ErrorCode = ErrorCodes.InvalidSignature,
+                        ErrorField = "Signature",
+                        Message = "The provided Signature is invalid"
+                    });
+                }
+            } catch (ErrorObjectException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new ErrorObjectException(new ErrorObject {
+                    ErrorCode = ErrorCodes.InvalidFieldData,
+                    ErrorField = "Signature",
+                    ErrorData = e,
+                    Message = "Cannot Verify Signature"
+                });
+            }
+
+            return "OK";
         }
 
         [POST("/verifySignature")]

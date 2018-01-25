@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Org.BouncyCastle.Bcpg;
 
 namespace RemoteSigner {
     public static class Tools {
@@ -20,6 +21,39 @@ namespace RemoteSigner {
             writer.Flush();
             stream.Seek(0, SeekOrigin.Begin);
             return stream;
+        }
+
+        public static String Quanto2GPG(string signature) {
+            var sig = "-----BEGIN PGP SIGNATURE-----\nVersion: Quanto\n";
+            var s = signature.Split('$');
+            if (s.Length != 3) {
+                s = signature.Split('_');
+            }
+            if (s.Length != 3) {
+                return null;
+            }
+            string gpgSig = s[2];
+            string checksum = gpgSig.Substring(gpgSig.Length - 4, 4);
+            for (int i = 0; i < gpgSig.Length - 4; i++) {
+                if (i % 64 == 0) {
+                    sig += '\n';
+                }
+                sig += gpgSig[i];
+            }
+            return $"{sig}\n{checksum}\n-----END PGP SIGNATURE-----";
+        }
+
+        public static String GPG2Quanto(string signature, string fingerPrint, HashAlgorithmTag hash) {
+            string hashName = hash.ToString().ToUpper();
+            string cutSig = "";
+
+            string[] s = signature.Trim().Split('\n');
+
+            for (int i = 2; i < s.Length - 1; i++) {
+                cutSig += s[i];
+            }
+
+            return $"{fingerPrint}_{hashName}_{cutSig}";
         }
 
         public static String H16FP(string fingerPrint) {
