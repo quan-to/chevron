@@ -21,6 +21,7 @@ namespace RemoteSigner {
         public Http(int port = 5100) {
             Port = port;
             listener.Prefixes.Add($"http://127.0.0.1:{port}/");
+            listener.Prefixes.Add($"http://localhost:{port}/");
             listenerThread = null;
             running = false;
             restProcessor = new RestProcessor();
