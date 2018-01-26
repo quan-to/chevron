@@ -39,6 +39,7 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
@@ -84,6 +85,9 @@
     <Compile Include="Models\ArgumentModels\GPGVerifySignatureData.cs" />
     <Compile Include="Models\ArgumentModels\GPGSignData.cs" />
     <Compile Include="Models\ArgumentModels\GPGGenerateKeyData.cs" />
+    <Compile Include="SKSManager.cs" />
+    <Compile Include="HttpData\Endpoints\SKS.cs" />
+    <Compile Include="Models\ArgumentModels\SKSAddKeyData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

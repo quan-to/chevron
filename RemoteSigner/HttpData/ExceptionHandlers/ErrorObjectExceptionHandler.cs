@@ -13,7 +13,7 @@ namespace RemoteSigner.HttpData.ExceptionHandlers {
 
             RestResult result = new RestResult() {
                 ContentType = MimeTypes.JSON,
-                StatusCode = System.Net.HttpStatusCode.OK,
+                StatusCode = System.Net.HttpStatusCode.InternalServerError,
                 Result = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(ce.ErrorObject))
             };
             return result;
