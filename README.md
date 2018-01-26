@@ -7,7 +7,7 @@ A simple Web Server to act as a GPG Creator / Signer / Verifier. This abstracts 
 
 Please notice that this application is *NOT inteded to ran public in the internet*. This is inteded to be a helper service to your application be able to sign / verify data (same as local gpg in the system). Because of that, it only listens for localhost.
 
-It is based off in [racerxdl](https://github.com/racerxdl) [AppServer](https://github.com/racerxdl/AppServer) to provide a REST web server. It is authorized by the owner to be licensed at MIT here (check the Owner Signature at the commit that adds this README as the proof)
+It is used internally the [racerxdl's](https://github.com/racerxdl) [AppServer](https://github.com/racerxdl/AppServer) to provide a REST web server. It is authorized by the owner to be licensed at MIT here (check the Owner Signature at the commit that adds this README as the proof)
 
 TODO
 ====
@@ -230,8 +230,17 @@ git clone https://github.com/quan-to/remote-signer
 cd remote-signer
 nuget restore
 xbuild /p:Configuration=Release
-mkdir -p binaries/keys
-cp RemoteSigner/bin/Release/* binaries
-cd binaries
-open ./
+cd RemoteSigner/bin/Release/
+mkdir keys
+mono RemoteSigner.exe
 ```
+
+Aditionally, you can compile an executable that does not need mono to be ran by using mkbundle:
+
+```bash
+export CC="cc -framework CoreFoundation -lobjc -liconv "
+mkbundle -z --static --deps RemoteSigner.exe -L /usr/local/Cellar/mono/5.4.1.6/lib/mono/4.5 -o RemoteSigner
+```
+
+This will generate a static binary called RemoteSigner.
+
