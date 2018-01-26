@@ -196,9 +196,11 @@ These are the Environment Variables that you can set to manage the webserver:
 Building
 ========
 
-For Windows just use the newest version of Visual Studio and hit build. You should have a executable in folder `bin/Debug` or `bin/Release`.
+# For Windows
+Just use the newest version of Visual Studio and hit build. You should have a executable in folder `bin/Debug` or `bin/Release`.
 
-For Linux you will need `mono` and `nuget`. On `Ubuntu 16.04` you can run:
+# For Linux
+You will need `mono` and `nuget`. On `Ubuntu 16.04` you can run:
 ```bash
 sudo apt install mono-complete nuget
 git clone https://github.com/quan-to/remote-signer
@@ -217,3 +219,19 @@ mkbundle -z --static --deps RemoteSigner.exe -L /usr/lib/mono/4.5 -o RemoteSigne
 ```
 
 This will generate a static binary called `RemoteSigner`.
+
+# For Mac
+
+You will need `mono` and `nuget`. With [Brew](https://brew.sh/) you can run:
+
+```bash
+brew install mono nuget
+git clone https://github.com/quan-to/remote-signer
+cd remote-signer
+nuget restore
+xbuild /p:Configuration=Release
+mkdir -p binaries/keys
+cp RemoteSigner/bin/Release/* binaries
+cd binaries
+open ./
+```
