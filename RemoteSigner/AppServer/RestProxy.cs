@@ -34,7 +34,7 @@ namespace RemoteSigner.AppServer {
                     } else {
                         Logger.Log("RestProxy", $"Creating injectable instance for class {ft.FullName}");
                         injectableInstance = Activator.CreateInstance(ft);
-                        injectables.Add(ft.Name, injectableInstance);
+                        injectables.Add(ft.FullName, injectableInstance);
                     }
                     field.SetValue(instance, injectableInstance);
                 }

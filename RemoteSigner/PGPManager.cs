@@ -93,6 +93,10 @@ namespace RemoteSigner {
             }
         }
 
+        public void SavePrivateKey(string fingerPrint, string privateKey) {
+            File.WriteAllText(Path.Combine(KeyFolder, $"{fingerPrint}.key"), privateKey);
+        }
+
         public Task<string> SignData(string fingerPrint, byte[] data, HashAlgorithmTag hash = HashAlgorithmTag.Sha512) {
             if (!decryptedKeys.ContainsKey(fingerPrint)) {
                 throw new KeyNotDecryptedException(fingerPrint);
@@ -173,6 +177,21 @@ namespace RemoteSigner {
                     return reader.ReadToEnd();
                 }
             });
+        }
+
+        public string GetPublicKeyASCII(string fingerPrint) {
+            var publicKey = krm[fingerPrint];
+            if (publicKey == null) {
+                throw new KeyNotLoadedException(fingerPrint);
+            }
+            using (var ms = new MemoryStream()) {
+                var s = new ArmoredOutputStream(ms);
+                publicKey.Encode(s);
+                s.Close();
+                ms.Seek(0, SeekOrigin.Begin);
+                var reader = new StreamReader(ms);
+                return reader.ReadToEnd();
+            }
         }
 
         #region Private Methods

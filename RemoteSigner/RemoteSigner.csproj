@@ -90,6 +90,7 @@
     <Compile Include="Models\ArgumentModels\SKSAddKeyData.cs" />
     <Compile Include="HttpData\Endpoints\KeyRing.cs" />
     <Compile Include="KeyRingManager.cs" />
+    <Compile Include="Models\ArgumentModels\KeyRingAddPrivateKeyData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
