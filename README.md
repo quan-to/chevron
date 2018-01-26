@@ -113,7 +113,7 @@ D7362B4CC546DB11_SHA512_iQIcBAABCgAGBQJaale3AAoJENc2K0zFRtsRe3IP/jVE19IeT9fWXl1w
 
 #### Verifing Signatures
 
-The process to verify a signature is similar to signing data. First you need to make sure the public key is loaded into the server (if the private key is, the public is as well) and then encode the test data in Base64 format and POST the following payload to `/remoteSigner/gpg/verifySignature`
+The process to verify a signature is similar to signing data. First you need to make sure the public key is loaded into the server (if the private key is, the public is as well) or it is available in the specified SKS Server and then encode the test data in Base64 format and POST the following payload to `/remoteSigner/gpg/verifySignature`
 
 ```json
 {
@@ -132,6 +132,65 @@ You might also want to verify in `Quanto Signature` format. To do so, you can se
   "signature":"D7362B4CC546DB11_SHA512_iQIcBAABCgAGBQJaale3AAoJENc2K0zFRtsRe3IP/jVE19IeT9fWXl1wbSfZ4VLRY8HePogfyGMVELrkqoRQjUwQB3s2cBio/uAZNNzyvYGqkdFVeeSO83GRAsobts8Q94Q//jAJxeYDy6qAzs6JbzOYAf1b8KWhjzosQDnvmqlvyH+95IoxTEXcDK/WFox5XrZGqRda3rlv+9CywzYreAiFHnSuF5LFJ0K+KkPCMjEJ8EgRZQ/WN0gcDNcabgI85ncpJ7gQ6rSzOmvK3tDd3oNyFFfzYGNaGWThQsYKLOwZA3MSri95y86CcBW9SkaLdqT9LRSGW+pEjXYXax4WU13+YlrUa5axT87sHZs0awORKkHZ2Wik082cFN7M903qd1+fUkKNaz3nG1rwbUAp5KiKabQUcvOhz+guXYnZlqeL0IWRBvagAnBDjWLd3O4X9RIhhl4RjqeiHzgzpx3hBbUQRxyDopdnQMGuqIH9PaffJzFUnzqChTgUhnxntYqkISPsYy5DMzzvlLIIESvIgCHOgQu9kxj/upTE6OoDjWMXjBJn3ytpwf2xjsdtKEn0QRe0PV1uCa+P+z5Qg41ZvP0krhxomr1wmNmNvDkPL/uIYD06fN6bWwnuMQf5nI5DS/X4ysp1AN5EEesrwjh9ygBGxpFa4+jlwuJYa7b2HdmesQG3JVzMhkHtNCCMIo7GAHKCc8vhG08eQ0FtAdPr=rV18" 
 }
 ```
+
+#### Adding Encrypted Private Key through API
+
+To add a private key, you can make a POST to `/remoteSigner/keyRing/addPrivateKey` with the following payload:
+
+```json
+{
+  "EncryptedPrivateKey": "-----BEGIN PGP PRIVATE KEY BLOCK-----\nVersion: GnuPG (...) JSlmyLSuTHXzeKo72hP40y3Xkf\nuugqVOWHeE7v7ARMu1mhXS6qWzZmxsjixV1d0kXSo9LzUyFqNtkasUiL2aoXQ70z\nlbMia0X7KJbYnbG5XLEDiMjzDQ==\n=JwWd\n-----END PGP PRIVATE KEY BLOCK-----",
+  "SaveToDisk": true
+}
+```
+
+The `SaveToDisk` parameter tells the server to save that private keys in the `KeysFolder`.
+
+#### List Cached Public Keys
+
+Execute GET to `/remoteSigner/keyRing/cachedKeys`
+
+Returns:
+
+```json
+[
+    {
+        "FingerPrint": "D7362B4CC546DB11",
+        "Identifier":"Benchmark Test Key",
+        "Bits": 4096,
+        "ContainsPrivateKey": false,
+        "PrivateKeyDecrypted": false
+    }
+]
+```
+
+#### List Loaded Private Keys
+Execute GET to `/remoteSigner/keyRing/privateKeys`
+
+Returns:
+
+```json
+[
+    {
+        "FingerPrint": "D7362B4CC546DB11",
+        "Identifier": "Benchmark Test Key",
+        "Bits": 4096,
+        "ContainsPrivateKey": true,
+        "PrivateKeyDecrypted": false
+    }
+]
+```
+
+Environment Variables
+=====================
+
+These are the Environment Variables that you can set to manage the webserver:
+
+*   `SYSLOG_IP` => IP of the Syslog Server to send Console Messages _(defaults to '127.0.0.1')_ *Does not apply for Windows*
+*   `SYSLOG_FACILITY` => Facility of the Syslog to use. _(defaults to 'LOG_USER')_
+*   `PRIVATE_KEY_FOLDER` => Folder to load / store encrypted private keys. _(defaults to './keys')_
+*   `SKS_SERVER` => SKS Server to fetch / put public keys. _(defaults to 'http://pgp.mit.edu/')_
+*   `MAX_KEYRING_CACHE_SIZE` => Maximum Number of Public Keys to cache (does not include Private Keys derived Public Keys). _(defaults to 1000)_
 
 
 Building
