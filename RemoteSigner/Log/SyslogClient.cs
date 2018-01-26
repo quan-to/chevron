@@ -51,7 +51,7 @@ namespace RemoteSigner.Log {
 
                 if (IsActive) {
                     int priority = (int)FacilityMap[message.Facility] * 8 + message.Level;
-                    string msg = System.String.Format("<{0}>{1} {2} {3}", priority, DateTime.Now.ToString("MMM dd HH:mm:ss"), "XRIT", message.Text);
+                    string msg = System.String.Format("<{0}>{1} {2} {3}", priority, DateTime.Now.ToString("MMM dd HH:mm:ss"), "RemoteSigner", message.Text);
                     byte[] bytes = System.Text.Encoding.ASCII.GetBytes(msg);
                     udpClient.Send(bytes, bytes.Length);
                 }

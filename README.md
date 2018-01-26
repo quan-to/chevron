@@ -244,3 +244,25 @@ mkbundle -z --static --deps RemoteSigner.exe -L /usr/local/Cellar/mono/5.4.1.6/l
 
 This will generate a static binary called RemoteSigner.
 
+Enabling Syslog Support
+=======================
+
+To be able to output to syslog, you need to add UDP support to syslog server.
+
+Edit the file `/etc/rsyslog.conf` and search for these lines:
+
+```
+# provides UDP syslog reception
+#module(load="imudp")
+#input(type="imudp" port="514")
+```
+
+If you find, uncomment the last two, if you dont find, just add to the end of the file.
+
+```
+# provides UDP syslog reception
+module(load="imudp")
+input(type="imudp" port="514")
+```
+
+Then restart syslog. On Ubuntu: `service rsyslog restart`
