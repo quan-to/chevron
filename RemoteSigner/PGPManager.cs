@@ -19,6 +19,7 @@ namespace RemoteSigner {
 
         Dictionary<string, PgpSecretKey> privateKeys;
         Dictionary<string, PgpPrivateKey> decryptedKeys;
+        Dictionary<string, string> FP8TO16;
 
         KeyRingManager krm;
 
@@ -28,7 +29,7 @@ namespace RemoteSigner {
             privateKeys = new Dictionary<string, PgpSecretKey>();
             decryptedKeys = new Dictionary<string, PgpPrivateKey>();
             krm = new KeyRingManager();
-
+            FP8TO16 = new Dictionary<string, string>();
             LoadKeys();
         }
 
@@ -51,6 +52,9 @@ namespace RemoteSigner {
         }
 
         public void UnlockKey(string fingerPrint, string password) {
+            if (fingerPrint.Length == 8 && FP8TO16.ContainsKey(fingerPrint)) {
+                fingerPrint = FP8TO16[fingerPrint];
+            }
             if (privateKeys.ContainsKey(fingerPrint)) {
                 if (decryptedKeys.ContainsKey(fingerPrint)) {
                     Logger.Debug($"Key {fingerPrint} is already unlocked.");
@@ -84,6 +88,7 @@ namespace RemoteSigner {
             string fingerPrint = Tools.H16FP(pgpSec.PublicKey.GetFingerprint().ToHexString());
             Logger.Debug($"Loaded key {fingerPrint}");
             privateKeys[fingerPrint] = pgpSec;
+            FP8TO16[Tools.H8FP(fingerPrint)] = fingerPrint;
             krm.AddKey(pgpSec.PublicKey, true);
             return fingerPrint;
         }
@@ -113,6 +118,9 @@ namespace RemoteSigner {
         }
 
         public Task<string> SignData(string fingerPrint, byte[] data, HashAlgorithmTag hash = HashAlgorithmTag.Sha512) {
+            if (fingerPrint.Length == 8 && FP8TO16.ContainsKey(fingerPrint)) {
+                fingerPrint = FP8TO16[fingerPrint];
+            }
             if (!decryptedKeys.ContainsKey(fingerPrint)) {
                 throw new KeyNotDecryptedException(fingerPrint);
             }
@@ -151,7 +159,8 @@ namespace RemoteSigner {
 
             var sig = p3[0];
             if (publicKey == null) {
-                string fingerPrint = Tools.H16FP(sig.KeyId.ToString("X").ToUpper());
+                string keyId = sig.KeyId.ToString("X").ToUpper();
+                string fingerPrint = keyId.Length < 16 ? Tools.H8FP(keyId) : Tools.H16FP(sig.KeyId.ToString("X").ToUpper());
                 publicKey = krm[fingerPrint];
                 if (publicKey == null) {
                     throw new KeyNotLoadedException(fingerPrint);
@@ -206,6 +215,20 @@ namespace RemoteSigner {
                 ms.Seek(0, SeekOrigin.Begin);
                 var reader = new StreamReader(ms);
                 return reader.ReadToEnd();
+            }
+        }
+
+
+        public PgpSecretKey GetKey(string fingerPrint) {
+            if (fingerPrint.Length == 8 && FP8TO16.ContainsKey(fingerPrint)) {
+                fingerPrint = FP8TO16[fingerPrint];
+            }
+            return privateKeys.ContainsKey(fingerPrint) ? privateKeys[fingerPrint] : null;
+        }
+
+        public PgpSecretKey this[string key] {
+            get {
+                return GetKey(key);
             }
         }
 

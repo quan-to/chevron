@@ -70,7 +70,9 @@ namespace RemoteSigner.HttpData.Endpoints {
                 var sigTask = pgpManager.SignData(data.FingerPrint, signData);
                 sigTask.Wait();
 
-                return Tools.GPG2Quanto(sigTask.Result, data.FingerPrint, HashAlgorithmTag.Sha512);
+                var key = pgpManager[data.FingerPrint];
+
+                return Tools.GPG2Quanto(sigTask.Result, key.PublicKey.GetFingerprint().ToHexString(), HashAlgorithmTag.Sha512);
             } catch (ErrorObjectException e) {
                 throw e;
             } catch (Exception e) {

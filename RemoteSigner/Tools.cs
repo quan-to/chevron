@@ -63,6 +63,13 @@ namespace RemoteSigner {
             return fingerPrint.Substring(fingerPrint.Length - 16, 16);
         }
 
+        public static String H8FP(string fingerPrint) {
+            if (fingerPrint.Length < 8) {
+                throw new ArgumentException("FingerPrint string has less than 8 chars!");
+            }
+            return fingerPrint.Substring(fingerPrint.Length - 8, 8);
+        }
+
         public static string ToHexString(this byte[] ba) {
             StringBuilder hex = new StringBuilder(ba.Length * 2);
             foreach (byte b in ba)

@@ -15,11 +15,14 @@ namespace RemoteSigner {
         Queue<string> fingerPrints;
         SKSManager sks;
 
+        Dictionary<string, string> FP8TO16;
+
         public KeyRingManager() {
             MaxCacheKeys = Configuration.MaxKeyRingCache;
             publicKeys = new Dictionary<string, PgpPublicKey>();
             publicKeysInfo = new Dictionary<string, KeyInfo>();
             fingerPrints = new Queue<string>();
+            FP8TO16 = new Dictionary<string, string>();
             sks = new SKSManager();
         }
 
@@ -36,6 +39,7 @@ namespace RemoteSigner {
             var fingerPrint = Tools.H16FP(publicKey.GetFingerprint().ToHexString());
             if (!publicKeys.ContainsKey(fingerPrint)) {
                 publicKeys[fingerPrint] = publicKey;
+                FP8TO16[Tools.H8FP(fingerPrint)] = fingerPrint;
                 publicKeysInfo[fingerPrint] = new KeyInfo {
                     FingerPrint = fingerPrint,
                     Identifier = publicKey.GetUserIds().Cast<string>().First(),
@@ -59,11 +63,11 @@ namespace RemoteSigner {
         }
 
         public bool ContainsKey(string fingerPrint) {
-            return publicKeys.ContainsKey(fingerPrint);
+            return fingerPrint.Length == 8 ? FP8TO16.ContainsKey(fingerPrint) && publicKeys.ContainsKey(FP8TO16[fingerPrint]) : publicKeys.ContainsKey(fingerPrint);
         }
 
         public PgpPublicKey GetKey(string fingerPrint) {
-            if (!publicKeys.ContainsKey(fingerPrint)) {
+            if (!ContainsKey(fingerPrint)) {
                 Logger.Log("KeyRingManager", $"Key {fingerPrint} not found in local keyring. Fetching from SKS...");
                 var getTask = sks.GetSKSKey(fingerPrint);
                 getTask.Wait();
@@ -74,7 +78,7 @@ namespace RemoteSigner {
                 AddKey(getTask.Result);
             }
 
-            return publicKeys[fingerPrint];
+            return fingerPrint.Length == 8 ? publicKeys[FP8TO16[fingerPrint]] : publicKeys[fingerPrint];
         }
 
         public PgpPublicKey this[string key] {
