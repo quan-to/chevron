@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Org.BouncyCastle.Bcpg.OpenPgp;
 using RemoteSigner.Log;
+using RemoteSigner.Models;
 
 namespace RemoteSigner {
     public class KeyRingManager {
@@ -9,12 +11,14 @@ namespace RemoteSigner {
         public int Count { get { return fingerPrints.Count; } }
 
         Dictionary<string, PgpPublicKey> publicKeys;
+        Dictionary<string, KeyInfo> publicKeysInfo;
         Queue<string> fingerPrints;
         SKSManager sks;
 
         public KeyRingManager() {
             MaxCacheKeys = Configuration.MaxKeyRingCache;
             publicKeys = new Dictionary<string, PgpPublicKey>();
+            publicKeysInfo = new Dictionary<string, KeyInfo>();
             fingerPrints = new Queue<string>();
             sks = new SKSManager();
         }
@@ -23,17 +27,7 @@ namespace RemoteSigner {
             using (var s = Tools.GenerateStreamFromString(publicKey)) {
                 var pgpPub = new PgpPublicKeyRing(PgpUtilities.GetDecoderStream(s));
                 var pubKey = pgpPub.GetPublicKey();
-                var fingerPrint = Tools.H16FP(pubKey.GetFingerprint().ToHexString());
-                if (!publicKeys.ContainsKey(fingerPrint)) {
-                    publicKeys[fingerPrint] = pubKey;
-                    if (!nonErasable) {
-                        fingerPrints.Enqueue(fingerPrint);
-                    }
-                    if (Count > MaxCacheKeys) {
-                        string fpToRemove = fingerPrints.Dequeue();
-                        publicKeys.Remove(fpToRemove);
-                    }
-                }
+                AddKey(pubKey, nonErasable);
             }
         }
 
@@ -42,14 +36,26 @@ namespace RemoteSigner {
             var fingerPrint = Tools.H16FP(publicKey.GetFingerprint().ToHexString());
             if (!publicKeys.ContainsKey(fingerPrint)) {
                 publicKeys[fingerPrint] = publicKey;
+                publicKeysInfo[fingerPrint] = new KeyInfo {
+                    FingerPrint = fingerPrint,
+                    Identifier = publicKey.GetUserIds().Cast<string>().First(),
+                    Bits = publicKey.BitStrength,
+                    ContainsPrivateKey = false,
+                    PrivateKeyDecrypted = false
+                };
                 if (!nonErasable) {
                     fingerPrints.Enqueue(fingerPrint);
                 }
                 if (Count > MaxCacheKeys) {
                     string fpToRemove = fingerPrints.Dequeue();
                     publicKeys.Remove(fpToRemove);
+                    publicKeysInfo.Remove(fpToRemove);
                 }
             }
+        }
+
+        public List<KeyInfo> CachedKeys {
+            get { return publicKeysInfo.Values.ToList(); }
         }
 
         public bool ContainsKey(string fingerPrint) {

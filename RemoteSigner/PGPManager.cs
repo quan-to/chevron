@@ -11,6 +11,7 @@ using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Security;
 using RemoteSigner.Exceptions;
 using RemoteSigner.Log;
+using RemoteSigner.Models;
 
 namespace RemoteSigner {
     public class PGPManager {
@@ -85,6 +86,20 @@ namespace RemoteSigner {
             privateKeys[fingerPrint] = pgpSec;
             krm.AddKey(pgpSec.PublicKey, true);
             return fingerPrint;
+        }
+
+        public List<KeyInfo> GetCachedKeys() {
+            return krm.CachedKeys;
+        }
+
+        public List<KeyInfo> GetLoadedPrivateKeys() {
+            return privateKeys.Keys.Select((k) => new KeyInfo {
+                FingerPrint = k,
+                Identifier = privateKeys[k].UserIds.Cast<string>().First(),
+                ContainsPrivateKey = true,
+                PrivateKeyDecrypted = decryptedKeys.ContainsKey(k),
+                Bits = privateKeys[k].PublicKey.BitStrength
+            }).ToList();
         }
 
         public string LoadPrivateKey(string key) {

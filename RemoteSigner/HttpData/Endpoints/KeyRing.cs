@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using RemoteSigner.Exceptions;
 using RemoteSigner.Models;
 using RemoteSigner.Models.ArgumentModels;
@@ -14,6 +15,16 @@ namespace RemoteSigner.HttpData.Endpoints {
         [GET("/getKey")]
         public string GenerateKey([QueryParam] string fingerPrint) {
             return pgpManager.GetPublicKeyASCII(fingerPrint);
+        }
+
+        [GET("/cachedKeys")]
+        public List<KeyInfo> GetCachedKeys() {
+            return pgpManager.GetCachedKeys();
+        }
+
+        [GET("/privateKeys")]
+        public List<KeyInfo> GetPrivatedKeys() {
+            return pgpManager.GetLoadedPrivateKeys();
         }
 
         [POST("/addPrivateKey")]
