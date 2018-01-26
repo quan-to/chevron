@@ -12,10 +12,9 @@ It is based off in [racerxdl](https://github.com/racerxdl) [AppServer](https://g
 TODO
 ====
 
-*   Load public keys from SKS
 *   Add Public / Private Key API
 *   List Public / Private Key API
-*   Increment this document with models and enums 
+*   Increment this document with models and enums
 *   Encrypt / Decrypt calls
 
 Usage

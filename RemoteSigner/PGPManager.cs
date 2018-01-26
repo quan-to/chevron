@@ -17,15 +17,16 @@ namespace RemoteSigner {
         public String KeyFolder { private set; get; }
 
         Dictionary<string, PgpSecretKey> privateKeys;
-        Dictionary<string, PgpPublicKey> publicKeys;
         Dictionary<string, PgpPrivateKey> decryptedKeys;
+
+        KeyRingManager krm;
 
         public PGPManager() {
             KeyFolder = Configuration.PrivateKeyFolder;
 
             privateKeys = new Dictionary<string, PgpSecretKey>();
             decryptedKeys = new Dictionary<string, PgpPrivateKey>();
-            publicKeys = new Dictionary<string, PgpPublicKey>();
+            krm = new KeyRingManager();
 
             LoadKeys();
         }
@@ -82,7 +83,7 @@ namespace RemoteSigner {
             string fingerPrint = Tools.H16FP(pgpSec.PublicKey.GetFingerprint().ToHexString());
             Logger.Debug($"Loaded key {fingerPrint}");
             privateKeys[fingerPrint] = pgpSec;
-            publicKeys[fingerPrint] = pgpSec.PublicKey;
+            krm.AddKey(pgpSec.PublicKey, true);
             return fingerPrint;
         }
 
@@ -132,10 +133,10 @@ namespace RemoteSigner {
             var sig = p3[0];
             if (publicKey == null) {
                 string fingerPrint = Tools.H16FP(sig.KeyId.ToString("X").ToUpper());
-                if (!publicKeys.ContainsKey(fingerPrint)) {
+                publicKey = krm[fingerPrint];
+                if (publicKey == null) {
                     throw new KeyNotLoadedException(fingerPrint);
                 }
-                publicKey = publicKeys[fingerPrint];
             }
             sig.InitVerify(publicKey);
             sig.Update(data);
@@ -173,14 +174,6 @@ namespace RemoteSigner {
                 }
             });
         }
-
-        public Task<string> FetchKeyFromSKS(string fingerPrint) {
-            return Task.Run(() => {
-                // TODO
-                return "HUEBR";
-            });
-        }
-
 
         #region Private Methods
         /**
