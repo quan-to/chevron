@@ -181,6 +181,52 @@ Returns:
 ]
 ```
 
+#### Encrypt Data using public key
+Ensure that the public key you want to use is loaded and execute POST to `/remoteSigner/gpg/encrypt` with following payload:
+
+```json
+{
+  "Base64Data": "eyJxdWVyeSI6InF1ZXJ5IHsgR2V0QmFua1N5c3RlbVN0YXR1cyAoYmFua051bWJlcjogXCI2MzNcIikgfSJ9Cg==",
+  "FingerPrint": "870AFA59"
+}
+```
+
+Returns:
+```
+-----BEGIN PGP MESSAGE-----
+Version: BCPG C# v1.8.1.0
+
+hQIMAwAWqcqHCvpZAQ//TtD4Ne8dC+R7xHa3ED4dcOAVWBhiZ/h/GS8TZHrn7TQE
+MeEg46yF/xbDB1ryivvikubXKRHKcxB1N7DHX1yJc9zI1uWdrePBsheXJMJuFOs9
+(...)
+cKIB0DoBAJ+AcKT89elQ4CgNIUQZzof64gLPNpFq+yknNYR3CifBCQoCMk8WZev8
+ffy3cx45u+q2SkVT+pAIJXZ7PgmaNLGIAWTW+2JaTxv657ZeWW8dhzHTKU+rDqzR
+rnBaQD23nV45ZvmFd6GjvdE=
+=nPAx
+-----END PGP MESSAGE-----
+```
+
+#### Decrypt Data using decrypted private key
+Ensure that the private key from the data you're trying to decrypt is loaded and decrypted, then execute a POST to `/remoteSigner/gpg/decrypt` with the following payload:
+
+```json
+{
+  "AsciiArmoredData": "-----BEGIN PGP MESSAGE-----\nVersion: BCPG C# v1.8.1.0\n\nhQILAwAWqcqHCvpZAQ/4vF53gHVus8aKyKGkzb7jn2R4aZB3KCQ08S2xhAUvZFF8\n0qaeLxPGDdOo4X43zNmOvfIth4IwnDFF/SlD6E9ToxI+oDBC2hU92GyQZmlrb0dm\nHfVtKxCP9D6bAUHb9/G2QrbLSwov7TKlYs4gcqv72Lh4It8wVZaUm+qWb1EL4I33\nM+RHPSkmDPpCVWJxPQv/5Bt0h48wX9V7JtFc2FXJgJhYyrRxxIEFDcof4jdbvH/2\ncd5DDoLJPq3w4R4GKLxgQisgK2fp9jsl5AUzBiNy++l80rJW3m9TL3hLHUqqvL2R\nZrglp5KCR367uB0b6H+oXCRkxsgulTtXWM111HfTEJ0FYkYMfjxwYLdgjeduilhP\n7bkLDXFJgR3TaxHweUx4tOYRREsRSnzlDEDt+RdCHnP27mn/8QOi2wzi5zTP/KIr\nHlNfb+yw1BlFS5swFp+QLj7/QfkZefsneQC+zKfzyV9Hyz0b5tqXmsn+aVREF9D7\nQpqbEyHO1E/amz0hPIqu8CIIxr9Exmjxj5jV4MRgqVZ+5ukjiahG4jnnGuMPMvlp\nYjdZ1lAq0LDs+XSf9QbZE63j4YDT5tuJXNhUYojhb+DSSlL5LmQCuzTtZLNZaS+S\n26fQ5R3NYTWsJF3gvqwyXCr/49gYDxU2YNOBGdHGvOsDqnqchceRqWXfCJ8QlNKG\nAXLylUqQH0y58X0DTbEUEDtKRHAk42f9hicpxQY0FfnrUnggIBFubs385k6LIIDR\n4Xs6LwwjGFT9XqWzNa7adi+60sfrlN2iTYRZJGsNdvGmnMTClS0e6i6rlgQJAqHe\nl5rf7WGniCF+sAjxmbJ53TPBrh/sUlMMl0acXmXz4EZxnaENBJg=\n=n4Ks\n-----END PGP MESSAGE-----",
+}
+```
+
+Returns:
+
+```json
+{
+  "FingerPrint": "0016A9CA870AFA59",
+  "Base64Data": "eyJxdWVyeSI6InF1ZXJ5IHsgR2V0QmFua1N5c3RlbVN0YXR1cyAoYmFua051bWJlcjogXCI2MzNcIikgfSJ9Cg==",
+  "Filename": "QuantoEncrypt-1518071090398.bin",
+  "IsIntegrityProtected": true,
+  "IsIntegrityOK": true
+}
+```
+
 Environment Variables
 =====================
 
