@@ -12,6 +12,7 @@ using Org.BouncyCastle.Security;
 using RemoteSigner.Exceptions;
 using RemoteSigner.Log;
 using RemoteSigner.Models;
+using RemoteSigner.Models.ArgumentModels;
 
 namespace RemoteSigner {
     public class PGPManager {
@@ -142,6 +143,121 @@ namespace RemoteSigner {
                     }
                 }
             });
+        }
+
+        public GPGDecryptedDataReturn Decrypt(string data) {
+            using (var stream = PgpUtilities.GetDecoderStream(Tools.GenerateStreamFromString(data))) {
+                var pgpF = new PgpObjectFactory(stream);
+                var o = pgpF.NextPgpObject();
+                var enc = o as PgpEncryptedDataList;
+                if (enc == null) {
+                    enc = (PgpEncryptedDataList)pgpF.NextPgpObject();
+                }
+
+                PgpPublicKeyEncryptedData pbe = null;
+                PgpPrivateKey pgpPrivKey = null;
+                PgpSecretKey pgpSec = null;
+                string lastFingerPrint = "None";
+                foreach (PgpPublicKeyEncryptedData pked in enc.GetEncryptedDataObjects()) {
+                    string keyId = pked.KeyId.ToString("X").ToUpper();
+                    string fingerPrint = keyId.Length < 16 ? FP8TO16[Tools.H8FP(keyId)] : Tools.H16FP(keyId);
+                    lastFingerPrint = fingerPrint;
+                    if (!decryptedKeys.ContainsKey(fingerPrint)) {
+                        continue;
+                    }
+
+                    pgpSec = privateKeys[fingerPrint];
+                    pgpPrivKey = decryptedKeys[fingerPrint];
+                    pbe = pked;
+                    break;
+                }
+
+                if (pbe == null) {
+                    throw new KeyNotLoadedException(lastFingerPrint);
+                }
+
+                var clear = pbe.GetDataStream(pgpPrivKey);
+                var plainFact = new PgpObjectFactory(clear);
+                var message = plainFact.NextPgpObject();
+                var outData = new GPGDecryptedDataReturn {
+                    FingerPrint = lastFingerPrint,
+                };
+                if (message is PgpCompressedData) {
+                    var cData = (PgpCompressedData)message;
+                    var pgpFact = new PgpObjectFactory(cData.GetDataStream());
+                    message = pgpFact.NextPgpObject();
+                }
+
+                if (message is PgpLiteralData) {
+                    var ld = (PgpLiteralData) message;
+                    outData.Filename = ld.FileName;
+                    var iss = ld.GetInputStream();
+                    byte[] buffer = new byte[16 * 1024];
+                    using (var ms = new MemoryStream()) {
+                        int read;
+                        while ((read = iss.Read(buffer, 0, buffer.Length)) > 0) {
+                            ms.Write(buffer, 0, read);
+                        }
+                        outData.Base64Data = Convert.ToBase64String(ms.ToArray());
+                    }
+                } else if (message is PgpOnePassSignatureList) {
+                    throw new PgpException("Encrypted message contains a signed message - not literal data.");
+                } else {
+                    throw new PgpException("Message is not a simple encrypted file - type unknown.");
+                }
+
+                outData.IsIntegrityProtected = pbe.IsIntegrityProtected();
+
+                if (outData.IsIntegrityProtected) {
+                    outData.IsIntegrityOK = pbe.Verify();
+                }
+
+                return outData;
+            }
+
+            return null;
+        }
+
+        public string Encrypt(string filename, byte[] data, string fingerPrint) {
+            if (fingerPrint.Length == 8 && FP8TO16.ContainsKey(fingerPrint)) {
+                fingerPrint = FP8TO16[fingerPrint];
+            }
+
+            var publicKey = krm[fingerPrint];
+            if (publicKey == null) {
+                throw new KeyNotLoadedException(fingerPrint);
+            }
+
+            return Encrypt(filename, data, publicKey);
+        }
+
+        public string Encrypt(string filename, byte[] data, PgpPublicKey publicKey) {
+            using (MemoryStream encOut = new MemoryStream(), bOut = new MemoryStream()) {
+                var comData = new PgpCompressedDataGenerator(CompressionAlgorithmTag.Zip);
+                var cos = comData.Open(bOut); // open it with the final destination
+                var lData = new PgpLiteralDataGenerator();
+                var pOut = lData.Open(
+                    cos,                    // the compressed output stream
+                    PgpLiteralData.Binary,
+                    filename,               // "filename" to store
+                    data.Length,            // length of clear data
+                    DateTime.UtcNow         // current time
+                );
+                pOut.Write(data, 0, data.Length);
+                lData.Close();
+                comData.Close();
+                var cPk = new PgpEncryptedDataGenerator(SymmetricKeyAlgorithmTag.Cast5, true, new SecureRandom());
+                cPk.AddMethod(publicKey);
+                byte[] bytes = bOut.ToArray();
+                var s = new ArmoredOutputStream(encOut);
+                var cOut = cPk.Open(s, bytes.Length);
+                cOut.Write(bytes, 0, bytes.Length);  // obtain the actual bytes from the compressed stream
+                cOut.Close();
+                s.Close();
+                encOut.Seek(0, SeekOrigin.Begin);
+                var reader = new StreamReader(encOut);
+                return reader.ReadToEnd();
+            }
         }
 
         public bool VerifySignature(byte[] data, string signature, PgpPublicKey publicKey = null) {

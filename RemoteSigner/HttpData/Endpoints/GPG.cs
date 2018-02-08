@@ -144,5 +144,40 @@ namespace RemoteSigner.HttpData.Endpoints {
 
             return "OK";
         }
+
+        [POST("/encrypt")]
+        public string Encrypt(GPGEncryptData data) {
+            try {
+                string filename = data.Filename ?? $"QuantoEncrypt-{Tools.TimestampMS()}.bin";
+                byte[] encryptData = Convert.FromBase64String(data.Base64Data);
+                return pgpManager.Encrypt(filename, encryptData, data.FingerPrint);
+            } catch (ErrorObjectException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new ErrorObjectException(new ErrorObject {
+                    ErrorCode = ErrorCodes.InvalidFieldData,
+                    ErrorField = "",
+                    ErrorData = e,
+                    Message = "Cannot Encrypt Data"
+                });
+            }
+        }
+
+        [POST("/decrypt")]
+        public GPGDecryptedDataReturn Decrypt(GPGDecryptData data) {
+            try {
+                return pgpManager.Decrypt(data.AsciiArmoredData);
+            } catch (ErrorObjectException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new ErrorObjectException(new ErrorObject {
+                    ErrorCode = ErrorCodes.InvalidFieldData,
+                    ErrorField = "AsciiArmoredData",
+                    ErrorData = e,
+                    Message = "Cannot Decrypt Data"
+                });
+            }
+        }
+
     }
 }

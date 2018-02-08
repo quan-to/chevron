@@ -92,6 +92,9 @@
     <Compile Include="KeyRingManager.cs" />
     <Compile Include="Models\ArgumentModels\KeyRingAddPrivateKeyData.cs" />
     <Compile Include="Models\KeyInfo.cs" />
+    <Compile Include="Models\ArgumentModels\GPGEncryptData.cs" />
+    <Compile Include="Models\ArgumentModels\GPGDecryptedDataReturn.cs" />
+    <Compile Include="Models\ArgumentModels\GPGDecryptData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

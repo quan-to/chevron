@@ -20,8 +20,6 @@ namespace RemoteSigner {
 
         public Http(int port = 5100) {
             Port = port;
-            // listener.Prefixes.Add($"http://127.0.0.1:{port}/");
-            // listener.Prefixes.Add($"http://localhost:{port}/");
             listener.Prefixes.Add($"http://*:{port}/");
             listenerThread = null;
             running = false;
@@ -125,7 +123,8 @@ namespace RemoteSigner {
                     return restProcessor.CallEndPoint(path, method, req);
                 } catch (Exception e) {
                     string exceptionName = e.InnerException.GetType().Name;
-                    IRestExceptionHandler handler = restProcessor.GetExceptionHandler(exceptionName);
+                    string baseName = e.InnerException.GetType().BaseType.Name;
+                    IRestExceptionHandler handler = restProcessor.GetExceptionHandler(exceptionName) ?? restProcessor.GetExceptionHandler(baseName);
                     if (handler != null) {
                         return handler.HandleException(e.InnerException);
                     }

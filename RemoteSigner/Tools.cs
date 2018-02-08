@@ -77,6 +77,10 @@ namespace RemoteSigner {
             return hex.ToString().ToUpper();
         }
 
+        public static long TimestampMS() {
+            return (Int64)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds;
+        }
+
         public static Type[] GetTypesInNamespace(Assembly assembly, string nameSpace) {
             return assembly.GetTypes().Where(t => String.Equals(t.Namespace, nameSpace, StringComparison.Ordinal)).ToArray();
         }
