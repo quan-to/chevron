@@ -13,7 +13,6 @@ TODO
 ====
 
 *   Increment this document with models and enums
-*   Encrypt / Decrypt calls
 
 Usage
 =====
