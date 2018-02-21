@@ -10,6 +10,9 @@ namespace RemoteSigner.HttpData.Endpoints {
         [Inject]
         readonly SKSManager sks;
 
+        [Inject]
+        readonly HKPManager hkp;
+
         [GET("/getKey")]
         public string GenerateKey([QueryParam] string fingerPrint) {
             var getTask = sks.GetSKSKey(fingerPrint);

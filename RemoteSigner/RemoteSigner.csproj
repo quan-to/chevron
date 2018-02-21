@@ -36,10 +36,10 @@
     <Reference Include="BouncyCastle.OpenPgp">
       <HintPath>..\packages\BouncyCastle.OpenPgp.1.8.1.1\lib\net20\BouncyCastle.OpenPgp.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System.Net.Http" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
@@ -95,6 +95,13 @@
     <Compile Include="Models\ArgumentModels\GPGEncryptData.cs" />
     <Compile Include="Models\ArgumentModels\GPGDecryptedDataReturn.cs" />
     <Compile Include="Models\ArgumentModels\GPGDecryptData.cs" />
+    <Compile Include="HttpData\Endpoints\PKS.cs" />
+    <Compile Include="HKPManager.cs" />
+    <Compile Include="Models\HKP\Operation.cs" />
+    <Compile Include="Exceptions\HKP\HKPBaseException.cs" />
+    <Compile Include="HttpData\ExceptionHandlers\HKPExceptionHandler.cs" />
+    <Compile Include="Exceptions\HKP\UnknownOperationException.cs" />
+    <Compile Include="Exceptions\HKP\OperationNotImplemented.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -109,6 +116,8 @@
     <Folder Include="HttpData\Endpoints\" />
     <Folder Include="HttpData\ExceptionHandlers\" />
     <Folder Include="Models\ArgumentModels\" />
+    <Folder Include="Models\HKP\" />
+    <Folder Include="Exceptions\HKP\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
