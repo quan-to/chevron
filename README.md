@@ -9,11 +9,12 @@ Please notice that this application is *NOT inteded to ran public in the interne
 
 It is used internally the [racerxdl's](https://github.com/racerxdl) [AppServer](https://github.com/racerxdl/AppServer) to provide a REST web server. It is authorized by the owner to be licensed at MIT here (check the Owner Signature at the commit that adds this README as the proof)
 
+*If you want to use RethinkDB SKS Driver please check the license of RethinkDb.Driver since for SSL/TLS connections to rethinkdb (for an unknown reason) you need to pay a license fee.*
+
 TODO
 ====
 
 *   Increment this document with models and enums
-*   Encrypt / Decrypt calls
 
 Usage
 =====

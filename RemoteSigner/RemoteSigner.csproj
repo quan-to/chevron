@@ -40,6 +40,16 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.11.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="Common.Logging.Core">
+      <HintPath>..\packages\Common.Logging.Core.3.3.0\lib\net40\Common.Logging.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Common.Logging">
+      <HintPath>..\packages\Common.Logging.3.3.0\lib\net40\Common.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="RethinkDb.Driver">
+      <HintPath>..\packages\RethinkDb.Driver.2.3.20\lib\net45\RethinkDb.Driver.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
@@ -102,9 +112,20 @@
     <Compile Include="HttpData\ExceptionHandlers\HKPExceptionHandler.cs" />
     <Compile Include="Exceptions\HKP\UnknownOperationException.cs" />
     <Compile Include="Exceptions\HKP\OperationNotImplemented.cs" />
+    <Compile Include="Database\Models\GPGKey.cs" />
+    <Compile Include="Database\Models\GPGKeyUid.cs" />
+    <Compile Include="Database\DatabaseManager.cs" />
+    <Compile Include="Database\Attributes\DBIndex.cs" />
+    <Compile Include="Database\Attributes\DBTable.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="..\LICENSE">
+      <Link>LICENSE</Link>
+    </None>
+    <None Include="..\README.md">
+      <Link>README.md</Link>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Log\" />
@@ -118,6 +139,9 @@
     <Folder Include="Models\ArgumentModels\" />
     <Folder Include="Models\HKP\" />
     <Folder Include="Exceptions\HKP\" />
+    <Folder Include="Database\" />
+    <Folder Include="Database\Models\" />
+    <Folder Include="Database\Attributes\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

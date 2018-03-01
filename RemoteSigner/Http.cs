@@ -59,7 +59,7 @@ namespace RemoteSigner {
             Assembly a = Assembly.GetExecutingAssembly();
             string[] namespaces = a.GetTypes().Select(x => x.Namespace).Distinct().ToArray();
             foreach (string n in namespaces) {
-                if (n.StartsWith("RemoteSigner.HttpData")) {
+                if (n.StartsWith("RemoteSigner.HttpData", StringComparison.InvariantCultureIgnoreCase)) {
                     Logger.Log("HTTP Server", $"Loading REST calls for {n}");
                     restProcessor.Init(a, n);
                 }

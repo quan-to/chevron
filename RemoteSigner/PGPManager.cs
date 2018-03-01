@@ -182,14 +182,12 @@ namespace RemoteSigner {
                 var outData = new GPGDecryptedDataReturn {
                     FingerPrint = lastFingerPrint,
                 };
-                if (message is PgpCompressedData) {
-                    var cData = (PgpCompressedData)message;
+                if (message is PgpCompressedData cData) {
                     var pgpFact = new PgpObjectFactory(cData.GetDataStream());
                     message = pgpFact.NextPgpObject();
                 }
 
-                if (message is PgpLiteralData) {
-                    var ld = (PgpLiteralData) message;
+                if (message is PgpLiteralData ld) {
                     outData.Filename = ld.FileName;
                     var iss = ld.GetInputStream();
                     byte[] buffer = new byte[16 * 1024];
