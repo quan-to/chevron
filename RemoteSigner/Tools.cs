@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Org.BouncyCastle.Bcpg;
 using Org.BouncyCastle.Bcpg.OpenPgp;
 using RemoteSigner.Database.Models;
@@ -15,6 +17,18 @@ namespace RemoteSigner {
         static readonly Regex NameObsEmailGPGReg = new Regex("(.*)\\s?(\\(.*\\))?\\s?<(.*)>", RegexOptions.IgnoreCase);
         static readonly Regex NameObsGPGReg = new Regex("(.*)\\s?\\((.*)\\)", RegexOptions.IgnoreCase);
         static readonly Regex NameEmailGPGReg = new Regex("(.*)\\s?<(.*)>", RegexOptions.IgnoreCase);
+        static readonly HttpClient client = new HttpClient();
+
+        public static async Task<string> Post(string url, string content) {
+            var httpContent = new StringContent(content, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync(url, httpContent);
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        public static async Task<string> Get(string url) {
+            var response = await client.GetAsync(url);
+            return await response.Content.ReadAsStringAsync();
+        }
 
         public static GPGKey AsciiArmored2GPGKey(string asciiArmored) {
             GPGKey key = null;

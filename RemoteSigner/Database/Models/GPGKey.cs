@@ -90,7 +90,7 @@ namespace RemoteSigner.Database.Models {
                     .Filter(
                         (r) => r["Names"].Filter((n) => n.Match(valueData)).Count().Gt(0)   // On Names
                         .Or(r["FullFingerPrint"].Match($"{valueData}$"))                    // On FingerPrint
-                        .Or(r["Email"].Filter((e) => e.Match(valueData)).Count().Gt(0)))    // On Email
+                        .Or(r["Emails"].Filter((e) => e.Match(valueData)).Count().Gt(0)))    // On Email
                     .Slice(pageStart.GetValueOrDefault(DEFAULT_PAGE_START), pageEnd.GetValueOrDefault(DEFAULT_PAGE_END))
                     .CoerceTo("array")
                     .Run<List<GPGKey>>(conn);

@@ -16,6 +16,9 @@ using RemoteSigner.Models.ArgumentModels;
 
 namespace RemoteSigner {
     public class PGPManager {
+
+        const string PGPManagerLog = "PGPManager";
+
         public String KeyFolder { private set; get; }
 
         Dictionary<string, PgpSecretKey> privateKeys;
@@ -35,21 +38,21 @@ namespace RemoteSigner {
         }
 
         void LoadKeys() {
-            Logger.Log($"Loading keys from {KeyFolder}");
+            Logger.Log(PGPManagerLog, $"Loading keys from {KeyFolder}");
             try {
                 var files = Directory.GetFiles(KeyFolder).ToList();
                 files.ForEach((f) => {
                     try {
-                        Logger.Log($"Loading key at {f}");
+                        Logger.Log(PGPManagerLog, $"Loading key at {f}");
                         LoadPrivateKeyFromFile(f);
                     } catch (Exception e) {
-                        Logger.Error($"Error loading key at {f}: {e}");
+                        Logger.Error(PGPManagerLog, $"Error loading key at {f}: {e}");
                     }
                 });
             } catch (Exception e) {
-                Logger.Error($"Error Loading keys from {KeyFolder}: {e}");
+                Logger.Error(PGPManagerLog, $"Error Loading keys from {KeyFolder}: {e}");
             }
-            Logger.Log($"Done loading keys...");
+            Logger.Log(PGPManagerLog, $"Done loading keys...");
         }
 
         public void UnlockKey(string fingerPrint, string password) {
@@ -58,10 +61,10 @@ namespace RemoteSigner {
             }
             if (privateKeys.ContainsKey(fingerPrint)) {
                 if (decryptedKeys.ContainsKey(fingerPrint)) {
-                    Logger.Debug($"Key {fingerPrint} is already unlocked.");
+                    Logger.Debug(PGPManagerLog, $"Key {fingerPrint} is already unlocked.");
                     return;
                 }
-                Logger.Debug($"Decrypting key {fingerPrint}");
+                Logger.Debug(PGPManagerLog, $"Decrypting key {fingerPrint}");
                 var sec = privateKeys[fingerPrint];
                 try {
                     var dec = sec.ExtractPrivateKey(password.ToCharArray());
@@ -73,7 +76,7 @@ namespace RemoteSigner {
                     throw new InvalidKeyPasswordException(fingerPrint);
                 }
             } else {
-                Logger.Error($"Key {fingerPrint} is not loaded!");
+                Logger.Error(PGPManagerLog, $"Key {fingerPrint} is not loaded!");
                 throw new KeyNotLoadedException(fingerPrint);
             }
         }
@@ -87,7 +90,7 @@ namespace RemoteSigner {
         public string LoadPrivateKey(Stream s) {
             var pgpSec = ReadSecretKey(s);
             string fingerPrint = Tools.H16FP(pgpSec.PublicKey.GetFingerprint().ToHexString());
-            Logger.Debug($"Loaded key {fingerPrint}");
+            Logger.Debug(PGPManagerLog, $"Loaded key {fingerPrint}");
             privateKeys[fingerPrint] = pgpSec;
             FP8TO16[Tools.H8FP(fingerPrint)] = fingerPrint;
             krm.AddKey(pgpSec.PublicKey, true);
@@ -212,8 +215,6 @@ namespace RemoteSigner {
 
                 return outData;
             }
-
-            return null;
         }
 
         public string Encrypt(string filename, byte[] data, string fingerPrint) {
@@ -389,7 +390,7 @@ namespace RemoteSigner {
 
                 return VerifySignature(testData, signature, publicKey);
             } catch (Exception e) {
-                Logger.Error($"Error verifing private key: {e}");
+                Logger.Error(PGPManagerLog, $"Error verifing private key: {e}");
                 return false;
             }
         }

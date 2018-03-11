@@ -8,12 +8,15 @@ namespace RemoteSigner {
         public static string SyslogFacility { get; private set; }
         public static string PrivateKeyFolder { get; private set; }
         public static string SKSServer { get; private set; }
+        public static int HttpPort { get; private set; }
         public static int MaxKeyRingCache { get; private set; }
         public static bool EnableRethinkSKS { get; private set; }
         public static string RethinkDBHost { get; private set; }
         public static int RethinkDBPort { get; private set; }
         public static int RethinkDBPoolSize { get; private set; }
         public static string DatabaseName { get; private set; }
+        public static string MasterGPGKeyPath { get; private set; }
+        public static string MasterGPGKeyPasswordPath { get; private set; }
 
         static Configuration() {
             SyslogServer = Environment.GetEnvironmentVariable("SYSLOG_IP") ?? "127.0.0.1";
@@ -24,6 +27,9 @@ namespace RemoteSigner {
             var mkrc = Environment.GetEnvironmentVariable("MAX_KEYRING_CACHE_SIZE") ?? "1000";
             MaxKeyRingCache = int.Parse(mkrc);
 
+            var hp = Environment.GetEnvironmentVariable("HTTP_PORT") ?? "5100";
+            HttpPort = int.Parse(hp);
+
             EnableRethinkSKS = true; // Environment.GetEnvironmentVariable("ENABLE_RETHINKDB_SKS") == "true"; // TODO: Change-me
             RethinkDBHost = Environment.GetEnvironmentVariable("RETHINKDB_HOST") ?? "localhost";
             var rdbport = Environment.GetEnvironmentVariable("RETHINKDB_PORT") ?? "28015";
@@ -32,6 +38,9 @@ namespace RemoteSigner {
             RethinkDBPoolSize = int.Parse(rdbpool);
 
             DatabaseName = Environment.GetEnvironmentVariable("DATABASE_NAME") ?? "remote_signer";
+
+            MasterGPGKeyPath = "keys/870AFA59.key"; // Environment.GetEnvironmentVariable("MASTER_GPG_KEY_PATH") ?? null; // TODO: Change-me
+            MasterGPGKeyPasswordPath = "pass.txt"; // Environment.GetEnvironmentVariable("MASTER_GPG_KEY_PASSWORD_PATH") ?? null; // TODO: Change-me
 
 #pragma warning disable RECS0022 // A catch clause that catches System.Exception and has an empty body
             try { Directory.CreateDirectory(PrivateKeyFolder); } catch (Exception) { }

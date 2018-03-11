@@ -11,6 +11,9 @@ namespace RemoteSigner.HttpData.Endpoints {
         [Inject]
         readonly PGPManager pgpManager;
 
+        [Inject]
+        readonly SecretsManager sm;
+
         [POST("/generateKey")]
         public string GenerateKey(GPGGenerateKeyData data) {
             try {
@@ -31,6 +34,7 @@ namespace RemoteSigner.HttpData.Endpoints {
         public string UnlockKey(GPGUnlockKeyData unlockData) {
             try {
                 pgpManager.UnlockKey(unlockData.FingerPrint, unlockData.Password);
+                sm.PutKeyPassword(unlockData.FingerPrint, unlockData.Password);
             } catch (Exception e) {
                 throw new ErrorObjectException(new ErrorObject {
                     ErrorCode = ErrorCodes.InvalidFieldData,
