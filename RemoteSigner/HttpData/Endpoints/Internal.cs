@@ -19,5 +19,13 @@ namespace RemoteSigner.HttpData.Endpoints {
         public Dictionary<string, string> GetUnlockPasswords() {
             return sm.GetKeys();
         }
+
+        [POST("/__postEncryptedPasswords")]
+        public string PostEncryptedPasswords(Dictionary<string, string> encryptedPasswords) {
+            foreach (var key in encryptedPasswords.Keys) {
+                sm.PutEncryptedKeyPassword(key, encryptedPasswords[key]);
+            }
+            return "OK";
+        }
     }
 }

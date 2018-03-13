@@ -121,6 +121,7 @@
     <Compile Include="HttpData\Endpoints\Internal.cs" />
     <Compile Include="RancherManager.cs" />
     <Compile Include="Models\RancherNode.cs" />
+    <Compile Include="RancherThread.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

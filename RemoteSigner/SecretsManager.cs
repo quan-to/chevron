@@ -36,6 +36,14 @@ namespace RemoteSigner {
             EncryptedPasswords[fingerPrint] = gpg.Encrypt($"key-password-utf8-{fingerPrint}.txt", Encoding.UTF8.GetBytes(password), masterKeyFingerprint);
         }
 
+        public void PutEncryptedKeyPassword(string fingerPrint, string password) {
+            if (masterKeyFingerprint == null) {
+                Logger.Warn("SecretsManager", "Not saving password. Master Key not loaded.");
+                return;
+            }
+            EncryptedPasswords[fingerPrint] = password;
+        }
+
         public Dictionary<string, string> GetKeys() {
             var dict = new Dictionary<string, string>(); // Copy Passwords
             foreach (var key in EncryptedPasswords.Keys) {

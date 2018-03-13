@@ -48,11 +48,13 @@ namespace RemoteSigner {
                 Logger.Log(RancherManagerLog, $"Checking node {nodeS}");
                 var nodeData = nodeS.Split('=');
                 var uuid = await Tools.Get($"{RancherMetadata}/self/service/containers/{nodeData[0]}/uuid/");
+                var ipaddr = await Tools.Get($"{RancherMetadata}/self/service/containers/{nodeData[0]}/primary_ip/");
                 return new RancherNode {
                     UUID = uuid,
                     IsSelf = uuid == UUID,
                     Name = nodeData[1],
                     ID = int.Parse(nodeData[0]),
+                    IPAddress = ipaddr,
                 };
             }));
             return results.ToList();
