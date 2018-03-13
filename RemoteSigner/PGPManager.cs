@@ -70,14 +70,14 @@ namespace RemoteSigner {
             return decryptedKeys.ContainsKey(fingerPrint);
         }
 
-        public void UnlockKey(string fingerPrint, string password) {
+        public string UnlockKey(string fingerPrint, string password) {
             if (fingerPrint.Length == 8 && FP8TO16.ContainsKey(fingerPrint)) {
                 fingerPrint = FP8TO16[fingerPrint];
             }
             if (privateKeys.ContainsKey(fingerPrint)) {
                 if (decryptedKeys.ContainsKey(fingerPrint)) {
                     Logger.Debug(PGPManagerLog, $"Key {fingerPrint} is already unlocked.");
-                    return;
+                    return fingerPrint;
                 }
                 Logger.Debug(PGPManagerLog, $"Decrypting key {fingerPrint}");
                 var sec = privateKeys[fingerPrint];
@@ -94,6 +94,7 @@ namespace RemoteSigner {
                 Logger.Error(PGPManagerLog, $"Key {fingerPrint} is not loaded!");
                 throw new KeyNotLoadedException(fingerPrint);
             }
+            return fingerPrint;
         }
 
         public string LoadPrivateKeyFromFile(string filename) {

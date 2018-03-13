@@ -6,9 +6,14 @@ namespace RemoteSigner.HttpData.Endpoints {
     [REST("/__internal")]
     public class Internal {
 
+        #region Injection
+        // Disable Warning about null. This is a runtime injection.
+        #pragma warning disable CS0649
         [Inject]
         readonly SecretsManager sm;
 
+        #pragma warning restore CS0649
+        #endregion
         [GET("/__triggerKeyUnlock")]
         public string TriggerKeyUnlock() {
             sm.UnlockLocalKeys().Wait();

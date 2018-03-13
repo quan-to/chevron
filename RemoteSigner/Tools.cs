@@ -108,8 +108,8 @@ namespace RemoteSigner {
                 return null;
             }
             string gpgSig = s[2];
-            string checksum = gpgSig.Substring(gpgSig.Length - 4, 4);
-            for (int i = 0; i < gpgSig.Length - 4; i++) {
+            string checksum = gpgSig.Substring(gpgSig.Length - 5, 5);
+            for (int i = 0; i < gpgSig.Length - 5; i++) {
                 if (i % 64 == 0) {
                     sig += '\n';
                 }

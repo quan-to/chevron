@@ -10,12 +10,18 @@ using RemoteSigner.Models.Attributes;
 namespace RemoteSigner.HttpData.Endpoints {
     [REST("/sks")]
     public class SKS {
+        
+        #region Injection
+        // Disable Warning about null. This is a runtime injection.
+        #pragma warning disable CS0649
         [Inject]
         readonly SKSManager sks;
 
         [Inject]
         readonly DatabaseManager dm;
 
+        #pragma warning restore CS0649
+        #endregion
         [GET("/getKey")]
         public string GetKey([QueryParam] string fingerPrint) {
             if (!Configuration.EnableRethinkSKS) {
