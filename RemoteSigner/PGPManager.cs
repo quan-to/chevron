@@ -42,10 +42,19 @@ namespace RemoteSigner {
             try {
                 var files = Directory.GetFiles(KeyFolder).ToList();
                 files.ForEach((f) => {
-                    if ((Configuration.KeyPrefix.Length > 0 && f.StartsWith(Configuration.KeyPrefix, StringComparison.InvariantCultureIgnoreCase)) || Configuration.KeyPrefix.Length == 0) {
+                    string basename = Path.GetFileName(f);
+                    if ((Configuration.KeyPrefix.Length > 0 && basename.StartsWith(Configuration.KeyPrefix, StringComparison.InvariantCultureIgnoreCase)) || Configuration.KeyPrefix.Length == 0) {
                         try {
                             Logger.Log(PGPManagerLog, $"Loading key at {f}");
-                            LoadPrivateKeyFromFile(f);
+                            string filename = f;
+                            if (Configuration.KeysBase64Encoded) {
+                                string keyData = File.ReadAllText(filename);
+                                byte[] data = Convert.FromBase64String(keyData);
+                                string fname = Path.GetTempFileName();
+                                File.WriteAllBytes(fname, data);
+                                filename = fname;
+                            }
+                            LoadPrivateKeyFromFile(filename);
                         } catch (Exception e) {
                             Logger.Error(PGPManagerLog, $"Error loading key at {f}: {e}");
                         }
@@ -55,6 +64,10 @@ namespace RemoteSigner {
                 Logger.Error(PGPManagerLog, $"Error Loading keys from {KeyFolder}: {e}");
             }
             Logger.Log(PGPManagerLog, $"Done loading keys...");
+        }
+
+        public bool IsKeyUnlocked(string fingerPrint) {
+            return privateKeys.ContainsKey(fingerPrint);
         }
 
         public void UnlockKey(string fingerPrint, string password) {

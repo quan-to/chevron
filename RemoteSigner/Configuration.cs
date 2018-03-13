@@ -18,6 +18,8 @@ namespace RemoteSigner {
         public static string DatabaseName { get; private set; }
         public static string MasterGPGKeyPath { get; private set; }
         public static string MasterGPGKeyPasswordPath { get; private set; }
+        public static bool MasterGPGKeyBase64Encoded { get; private set; }
+        public static bool KeysBase64Encoded { get; private set; }
 
         static Configuration() {
             SyslogServer = Environment.GetEnvironmentVariable("SYSLOG_IP") ?? "127.0.0.1";
@@ -32,7 +34,7 @@ namespace RemoteSigner {
             var hp = Environment.GetEnvironmentVariable("HTTP_PORT") ?? "5100";
             HttpPort = int.Parse(hp);
 
-            EnableRethinkSKS = true; // Environment.GetEnvironmentVariable("ENABLE_RETHINKDB_SKS") == "true"; // TODO: Change-me
+            EnableRethinkSKS = Environment.GetEnvironmentVariable("ENABLE_RETHINKDB_SKS") == "true";
             RethinkDBHost = Environment.GetEnvironmentVariable("RETHINKDB_HOST") ?? "localhost";
             var rdbport = Environment.GetEnvironmentVariable("RETHINKDB_PORT") ?? "28015";
             RethinkDBPort = int.Parse(rdbport);
@@ -41,8 +43,10 @@ namespace RemoteSigner {
 
             DatabaseName = Environment.GetEnvironmentVariable("DATABASE_NAME") ?? "remote_signer";
 
-            MasterGPGKeyPath = "keys/870AFA59.key"; // Environment.GetEnvironmentVariable("MASTER_GPG_KEY_PATH") ?? null; // TODO: Change-me
-            MasterGPGKeyPasswordPath = "pass.txt"; // Environment.GetEnvironmentVariable("MASTER_GPG_KEY_PASSWORD_PATH") ?? null; // TODO: Change-me
+            MasterGPGKeyPath = Environment.GetEnvironmentVariable("MASTER_GPG_KEY_PATH") ?? null;
+            MasterGPGKeyPasswordPath = Environment.GetEnvironmentVariable("MASTER_GPG_KEY_PASSWORD_PATH") ?? null;
+            MasterGPGKeyBase64Encoded = Environment.GetEnvironmentVariable("MASTER_GPG_KEY_BASE64_ENCODED") == "true";
+            KeysBase64Encoded = Environment.GetEnvironmentVariable("KEYS_BASE64_ENCODED") == "true";
 
 #pragma warning disable RECS0022 // A catch clause that catches System.Exception and has an empty body
             try { Directory.CreateDirectory(PrivateKeyFolder); } catch (Exception) { }

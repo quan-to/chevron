@@ -19,7 +19,15 @@ namespace RemoteSigner {
             EncryptedPasswords = new Dictionary<string, string>();
             gpg = new PGPManager();
             if (Configuration.MasterGPGKeyPath != null) {
-                masterKeyFingerprint = gpg.LoadPrivateKeyFromFile(Configuration.MasterGPGKeyPath);
+                string keyPath = Configuration.MasterGPGKeyPath;
+                if (Configuration.MasterGPGKeyBase64Encoded) {
+                    string keyData = File.ReadAllText(Configuration.MasterGPGKeyPath);
+                    byte[] data = Convert.FromBase64String(keyData);
+                    string fname = Path.GetTempFileName();
+                    File.WriteAllBytes(fname, data);
+                    keyPath = fname;
+                }
+                masterKeyFingerprint = gpg.LoadPrivateKeyFromFile(keyPath);
             } else {
                 masterKeyFingerprint = null;
                 Logger.Warn("SecretsManager", "No master key specified. No Secrets master available...");
@@ -62,9 +70,11 @@ namespace RemoteSigner {
 
                 Logger.Log("SecretsManager", "Loading encrypted keys");
                 var keys = GetKeys();
-                Logger.Log("SecretsManager", "Decrypting master key");
-                string pass = File.ReadAllText(Configuration.MasterGPGKeyPasswordPath, Encoding.UTF8);
-                gpg.UnlockKey(masterKeyFingerprint, pass);
+                if (!gpg.IsKeyUnlocked(masterKeyFingerprint)) {
+                    Logger.Log("SecretsManager", "Decrypting master key");
+                    string pass = File.ReadAllText(Configuration.MasterGPGKeyPasswordPath, Encoding.UTF8);
+                    gpg.UnlockKey(masterKeyFingerprint, pass);
+                }
                 Logger.Log("SecretsManager", "Starting key unlock");
                 foreach (var key in keys.Keys) {
                     Logger.Log("SecretsManager", $"Unlocking key {key}");

@@ -11,10 +11,14 @@ namespace RemoteSigner {
         const string RancherMetadata = "http://rancher-metadata/2015-12-19";
         const string RancherManagerLog = "RancherManager";
 
-        public readonly static bool InRancher;
-        public readonly static string UUID;
+        public static bool InRancher { get; private set; }
+        public static string UUID { get; private set; }
 
         static RancherManager() {
+
+        }
+
+        public static void Init() {
             Logger.Log(RancherManagerLog, "Checking if running in rancher");
             var check = CheckInRancher();
             check.Wait();
@@ -33,6 +37,7 @@ namespace RemoteSigner {
                 return true;
             } catch (Exception e) {
                 Logger.Warn(RancherManagerLog, $"Probably not in Rancher Mode: {e.Message}");
+                Logger.Warn(RancherManagerLog, e.StackTrace);
                 return false;
             }
         }
@@ -43,7 +48,7 @@ namespace RemoteSigner {
 
         public static async Task<List<RancherNode>> GetServiceNodes() {
             var nodesString = await Tools.Get($"{RancherMetadata}/self/service/containers");
-            var nodes = nodesString.Split('\n').ToList();
+            var nodes = nodesString.Split('\n').Where(x => !string.IsNullOrEmpty(x)).ToList();
             var results = await Task.WhenAll(nodes.Select(async (nodeS) => {
                 Logger.Log(RancherManagerLog, $"Checking node {nodeS}");
                 var nodeData = nodeS.Split('=');

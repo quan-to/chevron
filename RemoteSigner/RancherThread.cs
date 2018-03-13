@@ -53,21 +53,23 @@ namespace RemoteSigner {
         async Task ThreadFunc() {
             try {
                 var nodes = await RancherManager.GetServiceNodes();
-                Logger.Log(RancherThreadLog, $"There are {nodes.Count} nodes available. Fetching encrypted passwords.");
+                Logger.Log(RancherThreadLog, $"There are {nodes.Count} nodes available (including me). Fetching encrypted passwords.");
                 foreach (var node in nodes) {
                     try {
-                        var getUrl = $"http://{node.IPAddress}:5100/__internal/__getUnlockPasswords";
-                        var postUrl = $"http://localhost:5100/__internal/__postEncryptedPasswords";
-                        var jsonData = await Tools.Get(getUrl);
-                        var keys = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonData);
-                        Logger.Log(RancherThreadLog, $"Got {keys.Keys.Count} passwords for node {node.IPAddress}. Adding to local password holder.");
-                        await Tools.Post(postUrl, jsonData);
+                        if (!node.IsSelf) {
+                            var getUrl = $"http://{node.IPAddress}:5100/remoteSigner/__internal/__getUnlockPasswords";
+                            var postUrl = $"http://localhost:5100/remoteSigner/__internal/__postEncryptedPasswords";
+                            var jsonData = await Tools.Get(getUrl);
+                            var keys = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonData);
+                            Logger.Log(RancherThreadLog, $"Got {keys.Keys.Count} passwords for node {node.IPAddress}. Adding to local password holder.");
+                            await Tools.Post(postUrl, jsonData);
+                        }
                     } catch (Exception e) {
                         Logger.Error(RancherThreadLog, $"Error checking node passwords: {e.Message}");
                     }
                 }
                 Logger.Log(RancherThreadLog, $"Passwords added. Triggering local unlock.");
-                await Tools.Get("http://localhost:5100/__internal/__triggerKeyUnlock");
+                await Tools.Get("http://localhost:5100/remoteSigner/__internal/__triggerKeyUnlock");
             } catch (Exception e) {
                 Logger.Error(RancherThreadLog, $"There was an error checking for other nodes: {e.Message}");
             }
