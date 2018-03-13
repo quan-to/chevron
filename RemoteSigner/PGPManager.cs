@@ -42,11 +42,13 @@ namespace RemoteSigner {
             try {
                 var files = Directory.GetFiles(KeyFolder).ToList();
                 files.ForEach((f) => {
-                    try {
-                        Logger.Log(PGPManagerLog, $"Loading key at {f}");
-                        LoadPrivateKeyFromFile(f);
-                    } catch (Exception e) {
-                        Logger.Error(PGPManagerLog, $"Error loading key at {f}: {e}");
+                    if ((Configuration.KeyPrefix.Length > 0 && f.StartsWith(Configuration.KeyPrefix, StringComparison.InvariantCultureIgnoreCase)) || Configuration.KeyPrefix.Length == 0) {
+                        try {
+                            Logger.Log(PGPManagerLog, $"Loading key at {f}");
+                            LoadPrivateKeyFromFile(f);
+                        } catch (Exception e) {
+                            Logger.Error(PGPManagerLog, $"Error loading key at {f}: {e}");
+                        }
                     }
                 });
             } catch (Exception e) {

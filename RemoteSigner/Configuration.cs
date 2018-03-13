@@ -7,6 +7,7 @@ namespace RemoteSigner {
         public static string SyslogServer { get; private set; }
         public static string SyslogFacility { get; private set; }
         public static string PrivateKeyFolder { get; private set; }
+        public static string KeyPrefix { get; private set; }
         public static string SKSServer { get; private set; }
         public static int HttpPort { get; private set; }
         public static int MaxKeyRingCache { get; private set; }
@@ -23,6 +24,7 @@ namespace RemoteSigner {
             SyslogFacility = Environment.GetEnvironmentVariable("SYSLOG_FACILITY") ?? "LOG_USER";
             PrivateKeyFolder = Environment.GetEnvironmentVariable("PRIVATE_KEY_FOLDER") ?? "./keys";
             SKSServer = Environment.GetEnvironmentVariable("SKS_SERVER") ?? "http://pgp.mit.edu/";
+            KeyPrefix = Environment.GetEnvironmentVariable("KEY_PREFIX") ?? "";
 
             var mkrc = Environment.GetEnvironmentVariable("MAX_KEYRING_CACHE_SIZE") ?? "1000";
             MaxKeyRingCache = int.Parse(mkrc);
