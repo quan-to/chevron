@@ -67,7 +67,7 @@ namespace RemoteSigner {
         }
 
         public bool IsKeyUnlocked(string fingerPrint) {
-            return privateKeys.ContainsKey(fingerPrint);
+            return decryptedKeys.ContainsKey(fingerPrint);
         }
 
         public void UnlockKey(string fingerPrint, string password) {

@@ -77,19 +77,24 @@ namespace RemoteSigner {
                 }
                 Logger.Log("SecretsManager", "Starting key unlock");
                 foreach (var key in keys.Keys) {
-                    Logger.Log("SecretsManager", $"Unlocking key {key}");
-                    string enc = keys[key];
-                    var dec = gpg.Decrypt(enc);
-                    var decPass = Encoding.UTF8.GetString(Convert.FromBase64String(dec.Base64Data));
+                    try {
+                        Logger.Log("SecretsManager", $"Unlocking key {key}");
+                        string enc = keys[key];
+                        var dec = gpg.Decrypt(enc);
+                        var decPass = Encoding.UTF8.GetString(Convert.FromBase64String(dec.Base64Data));
 
-                    var payload = new GPGUnlockKeyData {
-                        FingerPrint = key,
-                        Password = decPass,
-                    };
+                        var payload = new GPGUnlockKeyData {
+                            FingerPrint = key,
+                            Password = decPass,
+                        };
 
-                    string response = await Tools.Post("http://localhost:5100/remoteSigner/gpg/unlockKey", JsonConvert.SerializeObject(payload));
-                    if (response != "OK") {
-                        Logger.Error("SecretsManager", $"Error unlocking key: {response}");
+                        string response = await Tools.Post("http://localhost:5100/remoteSigner/gpg/unlockKey", JsonConvert.SerializeObject(payload));
+                        if (response != "OK") {
+                            Logger.Error("SecretsManager", $"Error unlocking key: {response}");
+                        }
+                    } catch (Exception e) {
+                        Logger.Error("SecretsManager", $"Error unlocking key: {e.Message}");
+                        Logger.Error("SecretsManager", e.StackTrace);
                     }
                 }
             });

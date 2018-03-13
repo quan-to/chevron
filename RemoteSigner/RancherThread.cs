@@ -37,7 +37,7 @@ namespace RemoteSigner {
         }
 
         void ThreadLoop() {
-            int randomWaitTime = (new Random().Next(15)) * 1000 + 5 * 1000;
+            int randomWaitTime = (new Random().Next(5)) * 1000 + 1 * 1000;
             Logger.Log(RancherThreadLog, "To avoid concurrency on cluster starting we're waiting 5 seconds plus some random time");
             Logger.Log(RancherThreadLog, $"The exact time is {randomWaitTime} ms");
             Thread.Sleep(randomWaitTime);
