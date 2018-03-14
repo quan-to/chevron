@@ -9,9 +9,14 @@ namespace RemoteSigner.HttpData.Endpoints {
     [REST("/keyRing")]
     public class KeyRing {
 
+        #region Injection
+        // Disable Warning about null. This is a runtime injection.
+        #pragma warning disable CS0649
         [Inject]
         readonly PGPManager pgpManager;
 
+        #pragma warning restore CS0649
+        #endregion
         [GET("/getKey")]
         public string GenerateKey([QueryParam] string fingerPrint) {
             return pgpManager.GetPublicKeyASCII(fingerPrint);

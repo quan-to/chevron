@@ -6,7 +6,13 @@ namespace RemoteSigner {
 
         public static void Main(string[] args) {
             Logger.GlobalEnableDebug = true;
-            Http httpServer = new Http();
+            RancherThread rt = new RancherThread();
+            RancherManager.Init();
+            if (RancherManager.InRancher) {
+                Logger.Log("Application", "Running in rancher. Starting Rancher Sentinel.");
+                rt.Start();
+            }
+            Http httpServer = new Http(Configuration.HttpPort);
             httpServer.StartSync();
         }
     }

@@ -8,9 +8,16 @@ using RemoteSigner.Models.Attributes;
 namespace RemoteSigner.HttpData.Endpoints {
     [REST("/gpg")]
     public class GPG {
+        #region Injection
+        // Disable Warning about null. This is a runtime injection.
+        #pragma warning disable CS0649
         [Inject]
         readonly PGPManager pgpManager;
 
+        [Inject]
+        readonly SecretsManager sm;
+        #pragma warning restore CS0649
+        #endregion
         [POST("/generateKey")]
         public string GenerateKey(GPGGenerateKeyData data) {
             try {
@@ -30,7 +37,8 @@ namespace RemoteSigner.HttpData.Endpoints {
         [POST("/unlockKey")]
         public string UnlockKey(GPGUnlockKeyData unlockData) {
             try {
-                pgpManager.UnlockKey(unlockData.FingerPrint, unlockData.Password);
+                string fingerPrint = pgpManager.UnlockKey(unlockData.FingerPrint, unlockData.Password);
+                sm.PutKeyPassword(fingerPrint, unlockData.Password);
             } catch (Exception e) {
                 throw new ErrorObjectException(new ErrorObject {
                     ErrorCode = ErrorCodes.InvalidFieldData,

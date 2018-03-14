@@ -36,10 +36,20 @@
     <Reference Include="BouncyCastle.OpenPgp">
       <HintPath>..\packages\BouncyCastle.OpenPgp.1.8.1.1\lib\net20\BouncyCastle.OpenPgp.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System.Net.Http" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="RethinkDb.Driver">
+      <HintPath>..\packages\RethinkDb.Driver.2.3.20\lib\net45\RethinkDb.Driver.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Common.Logging.Core">
+      <HintPath>..\packages\Common.Logging.Core.3.4.1\lib\net40\Common.Logging.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Common.Logging">
+      <HintPath>..\packages\Common.Logging.3.4.1\lib\net40\Common.Logging.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
@@ -95,9 +105,32 @@
     <Compile Include="Models\ArgumentModels\GPGEncryptData.cs" />
     <Compile Include="Models\ArgumentModels\GPGDecryptedDataReturn.cs" />
     <Compile Include="Models\ArgumentModels\GPGDecryptData.cs" />
+    <Compile Include="HttpData\Endpoints\PKS.cs" />
+    <Compile Include="HKPManager.cs" />
+    <Compile Include="Models\HKP\Operation.cs" />
+    <Compile Include="Exceptions\HKP\HKPBaseException.cs" />
+    <Compile Include="HttpData\ExceptionHandlers\HKPExceptionHandler.cs" />
+    <Compile Include="Exceptions\HKP\UnknownOperationException.cs" />
+    <Compile Include="Exceptions\HKP\OperationNotImplemented.cs" />
+    <Compile Include="Database\Models\GPGKey.cs" />
+    <Compile Include="Database\Models\GPGKeyUid.cs" />
+    <Compile Include="Database\DatabaseManager.cs" />
+    <Compile Include="Database\Attributes\DBIndex.cs" />
+    <Compile Include="Database\Attributes\DBTable.cs" />
+    <Compile Include="SecretsManager.cs" />
+    <Compile Include="HttpData\Endpoints\Internal.cs" />
+    <Compile Include="RancherManager.cs" />
+    <Compile Include="Models\RancherNode.cs" />
+    <Compile Include="RancherThread.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="..\LICENSE">
+      <Link>LICENSE</Link>
+    </None>
+    <None Include="..\README.md">
+      <Link>README.md</Link>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Log\" />
@@ -109,6 +142,11 @@
     <Folder Include="HttpData\Endpoints\" />
     <Folder Include="HttpData\ExceptionHandlers\" />
     <Folder Include="Models\ArgumentModels\" />
+    <Folder Include="Models\HKP\" />
+    <Folder Include="Exceptions\HKP\" />
+    <Folder Include="Database\" />
+    <Folder Include="Database\Models\" />
+    <Folder Include="Database\Attributes\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -12,6 +12,7 @@ namespace RemoteSigner.Log {
       * A simple logger that outputs to console and syslog
       */
     public class Logger {
+        const int STRING_PADDING = 20;
         static Logger GlobalConsole;
         static readonly SyslogClient syslog = new SyslogClient();
 
@@ -80,16 +81,16 @@ namespace RemoteSigner.Log {
         }
 
         public static void Log(string context, string message) {
-            GlobalConsole._Log($"{context} - {message}");
+            GlobalConsole._Log($"{context,STRING_PADDING} - {message}");
         }
         public static void Warn(string context, string message) {
-            GlobalConsole._Warn($"{context} - {message}");
+            GlobalConsole._Warn($"{context,STRING_PADDING} - {message}");
         }
         public static void Error(string context, string message) {
-            GlobalConsole._Error($"{context} - {message}");
+            GlobalConsole._Error($"{context,STRING_PADDING} - {message}");
         }
         public static void Debug(string context, string message) {
-            GlobalConsole._Debug($"{context} - {message}");
+            GlobalConsole._Debug($"{context,STRING_PADDING} - {message}");
         }
 
         public void _Log(string message) {

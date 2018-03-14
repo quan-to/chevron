@@ -1,12 +1,87 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Org.BouncyCastle.Bcpg;
+using Org.BouncyCastle.Bcpg.OpenPgp;
+using RemoteSigner.Database.Models;
 
 namespace RemoteSigner {
     public static class Tools {
+
+        static readonly Regex NameObsEmailGPGReg = new Regex("(.*)\\s?(\\(.*\\))?\\s?<(.*)>", RegexOptions.IgnoreCase);
+        static readonly Regex NameObsGPGReg = new Regex("(.*)\\s?\\((.*)\\)", RegexOptions.IgnoreCase);
+        static readonly Regex NameEmailGPGReg = new Regex("(.*)\\s?<(.*)>", RegexOptions.IgnoreCase);
+        static readonly HttpClient client = new HttpClient();
+
+        public static async Task<string> Post(string url, string content) {
+            var httpContent = new StringContent(content, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync(url, httpContent);
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        public static async Task<string> Get(string url) {
+            var response = await client.GetAsync(url);
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        public static GPGKey AsciiArmored2GPGKey(string asciiArmored) {
+            GPGKey key = null;
+            using (var s = GenerateStreamFromString(asciiArmored)) {
+                var pgpPub = new PgpPublicKeyRing(PgpUtilities.GetDecoderStream(s));
+                var pubKey = pgpPub.GetPublicKey();
+                key = new GPGKey {
+                    Id = null,
+                    FullFingerPrint = pubKey.GetFingerprint().ToHexString(),
+                    AsciiArmoredPublicKey = asciiArmored,
+                    AsciiArmoredPrivateKey = null,
+                    Emails = new List<string>(),
+                    Names = new List<string>(),
+                    KeyUids = new List<GPGKeyUid>(),
+                    KeyBits = pubKey.BitStrength,
+                };
+
+                foreach(string userId in pubKey.GetUserIds()) {
+                    var m = NameObsEmailGPGReg.Match(userId);
+                    var m2 = NameEmailGPGReg.Match(userId);
+                    var email = "";
+                    var name = "";
+                    var obs = "";
+                    if (m.Success && m.Groups.Count == 4) {
+                        email = m.Groups[3].Value.Trim();
+                        obs = m.Groups[2].Value.Trim();
+                        key.Emails.Add(email);
+                        var z = NameObsGPGReg.Match(m.Groups[1].Value);
+                        if (z.Success && z.Groups.Count == 3) {
+                            name = z.Groups[1].Value;
+                            obs = z.Groups[2].Value;
+                            key.Names.Add(name);
+                        }
+                    } else if (m2.Success && m2.Groups.Count == 3) {
+                        name = m2.Groups[1].Value;
+                        email = m2.Groups[2].Value;
+                        key.Names.Add(name);
+                        key.Emails.Add(email);
+                    } else {
+                        name = userId;
+                        key.Names.Add(name);
+                    }
+
+                    key.KeyUids.Add(new GPGKeyUid {
+                        Name = name,
+                        Email = email,
+                        Description = obs,
+                    });
+                }
+            }
+            return key;
+        }
+
         public static bool IsLinux {
             get {
                 int p = (int)Environment.OSVersion.Platform;
@@ -33,8 +108,8 @@ namespace RemoteSigner {
                 return null;
             }
             string gpgSig = s[2];
-            string checksum = gpgSig.Substring(gpgSig.Length - 4, 4);
-            for (int i = 0; i < gpgSig.Length - 4; i++) {
+            string checksum = gpgSig.Substring(gpgSig.Length - 5, 5);
+            for (int i = 0; i < gpgSig.Length - 5; i++) {
                 if (i % 64 == 0) {
                     sig += '\n';
                 }
