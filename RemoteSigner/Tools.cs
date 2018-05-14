@@ -90,6 +90,11 @@ namespace RemoteSigner {
             }
         }
 
+        /// <summary>
+        /// Adds CRC24 to signatures that does not have it.
+        /// </summary>
+        /// <returns>The fix.</returns>
+        /// <param name="signature">Signature.</param>
         public static string SignatureFix(string signature) {
             var retSig = signature;
             var m = PGPSig.Match(signature);
@@ -99,9 +104,7 @@ namespace RemoteSigner {
                 var save = false;
                 data.ToList().ForEach((l) => {
                     if (!save) {
-                        if (l.Length == 0) {
-                            save = true;
-                        }
+                        save |= l.Length == 0;
                         if (l.Length > 2 && l.Substring(0, 2) == "iQ") { // Workarround for a GPG Bug in production
                             save = true;
                             sig += l;
@@ -128,8 +131,8 @@ namespace RemoteSigner {
                     retSig += Convert.ToBase64String(crcu8);
                     retSig += "\n-----END PGP SIGNATURE-----";
                     return retSig;
-                } catch (Exception e) {
-                    
+                } catch (Exception) {
+                    // Signature is already with checksum
                 }
             }
 
