@@ -17,6 +17,7 @@ namespace RemoteSigner {
         static readonly Regex NameObsEmailGPGReg = new Regex("(.*)\\s?(\\(.*\\))?\\s?<(.*)>", RegexOptions.IgnoreCase);
         static readonly Regex NameObsGPGReg = new Regex("(.*)\\s?\\((.*)\\)", RegexOptions.IgnoreCase);
         static readonly Regex NameEmailGPGReg = new Regex("(.*)\\s?<(.*)>", RegexOptions.IgnoreCase);
+        static readonly Regex PGPSig = new Regex("-----BEGIN PGP SIGNATURE-----(.*)-----END PGP SIGNATURE-----", RegexOptions.IgnoreCase | RegexOptions.Singleline);
         static readonly HttpClient client = new HttpClient();
 
         public static async Task<string> Post(string url, string content) {
@@ -87,6 +88,61 @@ namespace RemoteSigner {
                 int p = (int)Environment.OSVersion.Platform;
                 return (p == 4) || (p == 6) || (p == 128);
             }
+        }
+
+        public static string SignatureFix(string signature) {
+            var retSig = signature;
+            var m = PGPSig.Match(signature);
+            if (m.Groups.Count > 1) {
+                var sig = "";
+                var data = m.Groups[1].Value.Split('\n');
+                var save = false;
+                data.ToList().ForEach((l) => {
+                    if (!save) {
+                        if (l.Length == 0) {
+                            save = true;
+                        }
+                        if (l.Length > 2 && l.Substring(0, 2) == "iQ") { // Workarround for a GPG Bug in production
+                            save = true;
+                            sig += l;
+                        }
+                    } else {
+                        sig += l;
+                    }
+                });
+                try {
+                    byte[] bData = Convert.FromBase64String(sig);
+                    // Append checksum
+                    var crc24 = new Crc24();
+                    foreach (var b in bData) {
+                        crc24.Update(b);
+                    }
+                    var crc = crc24.Value;
+                    var crcu8 = new byte[3];
+                    crcu8[0] = (byte)(crc >> 16 & 0xFF);
+                    crcu8[1] = (byte)(crc >> 8 & 0xFF);
+                    crcu8[2] = (byte)(crc & 0xFF);
+
+                    retSig = "-----BEGIN PGP SIGNATURE-----\n\n";
+                    retSig += sig + "\n=";
+                    retSig += Convert.ToBase64String(crcu8);
+                    retSig += "\n-----END PGP SIGNATURE-----";
+                    return retSig;
+                } catch (Exception e) {
+                    
+                }
+            }
+
+            return retSig;
+        }
+
+        public static Stream GenerateStreamFromByteArray(byte[] data) {
+            MemoryStream stream = new MemoryStream();
+            StreamWriter writer = new StreamWriter(stream);
+            writer.Write(data);
+            writer.Flush();
+            stream.Seek(0, SeekOrigin.Begin);
+            return stream;
         }
 
         public static Stream GenerateStreamFromString(string s) {

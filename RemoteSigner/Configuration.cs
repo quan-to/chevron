@@ -25,7 +25,7 @@ namespace RemoteSigner {
             SyslogServer = Environment.GetEnvironmentVariable("SYSLOG_IP") ?? "127.0.0.1";
             SyslogFacility = Environment.GetEnvironmentVariable("SYSLOG_FACILITY") ?? "LOG_USER";
             PrivateKeyFolder = Environment.GetEnvironmentVariable("PRIVATE_KEY_FOLDER") ?? "./keys";
-            SKSServer = Environment.GetEnvironmentVariable("SKS_SERVER") ?? "http://pgp.mit.edu/";
+            SKSServer = Environment.GetEnvironmentVariable("SKS_SERVER") ?? "http://localhost:11371";
             KeyPrefix = Environment.GetEnvironmentVariable("KEY_PREFIX") ?? "";
 
             var mkrc = Environment.GetEnvironmentVariable("MAX_KEYRING_CACHE_SIZE") ?? "1000";

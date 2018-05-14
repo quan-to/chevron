@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using Org.BouncyCastle.Bcpg;
 using RemoteSigner.Exceptions;
 using RemoteSigner.Models;
@@ -108,6 +109,41 @@ namespace RemoteSigner.HttpData.Endpoints {
                 }
 
                 if (!pgpManager.VerifySignature(verifyData, pgpSignature)) {
+                    throw new ErrorObjectException(new ErrorObject {
+                        ErrorCode = ErrorCodes.InvalidSignature,
+                        ErrorField = "Signature",
+                        Message = "The provided Signature is invalid"
+                    });
+                }
+            } catch (ErrorObjectException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new ErrorObjectException(new ErrorObject {
+                    ErrorCode = ErrorCodes.InvalidFieldData,
+                    ErrorField = "Signature",
+                    ErrorData = e,
+                    Message = "Cannot Verify Signature"
+                });
+            }
+
+            return "OK";
+        }
+
+        [POST("/verifySignatureQuanto2")]
+        public string VerifySignatureQuanto2(GPGVerifySignatureData data) {
+            try {
+                string verifyData = Encoding.UTF8.GetString(Convert.FromBase64String(data.Base64Data));
+                string pgpSignature = Tools.Quanto2GPG(data.Signature);
+
+                if (pgpSignature == null) {
+                    throw new ErrorObjectException(new ErrorObject {
+                        ErrorCode = ErrorCodes.InvalidSignature,
+                        ErrorField = "Signature",
+                        Message = "The provided Signature is invalid"
+                    });
+                }
+
+                if (!pgpManager.VerifyAsStringSignature(verifyData, pgpSignature)) {
                     throw new ErrorObjectException(new ErrorObject {
                         ErrorCode = ErrorCodes.InvalidSignature,
                         ErrorField = "Signature",
