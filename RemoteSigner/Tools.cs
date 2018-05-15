@@ -100,19 +100,23 @@ namespace RemoteSigner {
             var m = PGPSig.Match(signature);
             if (m.Groups.Count > 1) {
                 var sig = "";
-                var data = m.Groups[1].Value.Split('\n');
+                var data = m.Groups[1].Value.TrimStart().TrimEnd().Split('\n');
                 var save = false;
-                data.ToList().ForEach((l) => {
-                    if (!save) {
-                        save |= l.Length == 0;
-                        if (l.Length > 2 && l.Substring(0, 2) == "iQ") { // Workarround for a GPG Bug in production
-                            save = true;
+                if (data.Length == 1) {
+                    sig = data[0];
+                } else {
+                    data.ToList().ForEach((l) => {
+                        if (!save) {
+                            save |= l.Length == 0;
+                            if (l.Length > 2 && l.Substring(0, 2) == "iQ") { // Workarround for a GPG Bug in production
+                                save = true;
+                                sig += l;
+                            }
+                        } else {
                             sig += l;
                         }
-                    } else {
-                        sig += l;
-                    }
-                });
+                    });
+                }
                 try {
                     byte[] bData = Convert.FromBase64String(sig);
                     // Append checksum
