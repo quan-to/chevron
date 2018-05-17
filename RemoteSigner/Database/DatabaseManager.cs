@@ -14,10 +14,16 @@ namespace RemoteSigner.Database {
         static readonly RethinkDB R = RethinkDB.R;
         readonly List<Connection> connectionPool;
 
+        public static DatabaseManager GlobalDm { get; private set; }
+
         int currentConn;
         int globalRetryCount;
 
-        public DatabaseManager() {
+        static DatabaseManager() {
+            GlobalDm = new DatabaseManager();
+        }
+
+        DatabaseManager() {
             connectionPool = new List<Connection>();
             currentConn = 0;
             globalRetryCount = 0;
@@ -87,10 +93,15 @@ namespace RemoteSigner.Database {
                     }
                     // Get Indexes
                     var properties = tClass.GetProperties().ToList();
-                    properties.AsParallel().ForAll((prop) => {
-                        var idx = prop.GetCustomAttribute(typeof(DBIndex));
+                    List<string> existingIndexes = R.Table(tableName)
+                     .IndexList()
+                     .CoerceTo("array")
+                     .Run<List<string>>(c);
+                    properties.ForEach((prop) => {
+                        var idx = prop.Name != "Id" ? prop.GetCustomAttribute(typeof(DBIndex)) : null;
                         if (idx != null) {
-                            if (!R.Table(tableName).IndexList().Contains(prop.Name).RunAtom<bool>(c)) {
+                            Logger.Debug("DatabaseManager", $"Checking Index {prop.Name} on table {tableName}");
+                            if (!existingIndexes.Contains(prop.Name)) {
                                 Logger.Warn("DatabaseManager", $"Index {prop.Name} does not exists in table {tableName}. Creating it...");
                                 var propType = prop.PropertyType;
                                 if (propType.IsGenericType && propType.GetGenericTypeDefinition() == typeof(List<>)) {

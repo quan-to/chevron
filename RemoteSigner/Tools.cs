@@ -28,7 +28,22 @@ namespace RemoteSigner {
 
         public static async Task<string> Get(string url) {
             var response = await client.GetAsync(url);
+            if (response.StatusCode != System.Net.HttpStatusCode.OK) {
+                throw new Exception("Status Code != 200");
+            }
             return await response.Content.ReadAsStringAsync();
+        }
+
+        public static string ValidateAndTrimGPGKey(string gpgKey) {
+            try {
+                using (var s = GenerateStreamFromString(gpgKey)) {
+                    var pgpPub = new PgpPublicKeyRing(PgpUtilities.GetDecoderStream(s));
+                    var pubKey = pgpPub.GetPublicKey();
+                    return gpgKey;
+                }
+            } catch (Exception e) {
+                throw e; // TODO
+            }
         }
 
         public static GPGKey AsciiArmored2GPGKey(string asciiArmored) {

@@ -1,4 +1,5 @@
-﻿using RemoteSigner.Models.Attributes;
+﻿using System;
+using RemoteSigner.Models.Attributes;
 
 namespace RemoteSigner.HttpData.Endpoints {
     /// <summary>
@@ -10,9 +11,6 @@ namespace RemoteSigner.HttpData.Endpoints {
         #region Injection
         // Disable Warning about null. This is a runtime injection.
         #pragma warning disable CS0649
-        [Inject]
-        readonly SKSManager sks;
-
         [Inject]
         readonly HKPManager hkp;
         #pragma warning restore CS0649
@@ -30,7 +28,7 @@ namespace RemoteSigner.HttpData.Endpoints {
         /// <param name="search">Search Data</param>
         [GET("/lookup")]
         public string Lookup([QueryParam] string op, [QueryParam] string options, [QueryParam] string mr, [QueryParam] string nm, [QueryParam] string fingerprint, [QueryParam] string exact, [QueryParam] string search) {
-            return hkp.Lookup(sks, op, options, mr, nm, fingerprint, exact, search);
+            return hkp.Lookup(op, options, mr, nm, fingerprint, exact, search);
         }
 
         /// <summary>
@@ -40,7 +38,12 @@ namespace RemoteSigner.HttpData.Endpoints {
         /// <param name="keyData">ASCII Armored Public Key</param>
         [POST("/add")]
         public void Add(string keyData) {
-            hkp.Add(sks, keyData);
+            var s = keyData.Split('=');
+            if (s.Length != 2) {
+                throw new Exception("Invalid Payload");
+            }
+            var key = Uri.UnescapeDataString(s[1]);
+            hkp.Add(key);
         }
     }
 }
