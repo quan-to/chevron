@@ -44,7 +44,9 @@ namespace RemoteSigner {
             DatabaseName = Environment.GetEnvironmentVariable("DATABASE_NAME") ?? "remote_signer";
 
             MasterGPGKeyPath = Environment.GetEnvironmentVariable("MASTER_GPG_KEY_PATH") ?? null;
+            MasterGPGKeyPath = MasterGPGKeyPath == null || MasterGPGKeyPath.Trim().Length > 0 ? MasterGPGKeyPath : null;
             MasterGPGKeyPasswordPath = Environment.GetEnvironmentVariable("MASTER_GPG_KEY_PASSWORD_PATH") ?? null;
+            MasterGPGKeyPasswordPath = MasterGPGKeyPasswordPath == null || MasterGPGKeyPasswordPath.Trim().Length > 0 ? MasterGPGKeyPasswordPath : null;
             MasterGPGKeyBase64Encoded = Environment.GetEnvironmentVariable("MASTER_GPG_KEY_BASE64_ENCODED") == "true";
             KeysBase64Encoded = Environment.GetEnvironmentVariable("KEYS_BASE64_ENCODED") == "true";
 
