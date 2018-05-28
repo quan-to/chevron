@@ -127,38 +127,46 @@ namespace RemoteSigner.Database {
         }
 
         public Connection GetConnection() {
-            Connection c;
-            lock (connectionPool) {
-                if (connectionPool.Count == 0) {
-                    Logger.Error("Empty connection pool! Running InitPool");
-                    InitPool();
-                }
-                currentConn = currentConn + 1 >= connectionPool.Count ? 0 : currentConn + 1;
-                c = connectionPool[currentConn];
-            }
             try {
-                c.CheckOpen();
-            } catch (Exception e) {
-                Logger.Warn("DatabaseManager", $"One rethinkdb connection is dead. Retrying. {e}");
-                c.Close();
-                c.Reconnect();
-            }
-
-            try {
-                c.CheckOpen();
-            } catch (Exception e) {
-                Logger.Warn("DatabaseManager", $"Could not reconnect {e}");
-                globalRetryCount++;
-                if (globalRetryCount > 10) {
-                    throw new ApplicationException($"Max Retries of 10 trying to connect to database.");
-                }
+                Connection c;
                 lock (connectionPool) {
-                    connectionPool.Remove(c);
+                    if (connectionPool.Count == 0) {
+                        Logger.Error("Empty connection pool! Running InitPool");
+                        InitPool();
+                    }
+                    currentConn = (currentConn + 1) % connectionPool.Count;
+                    c = connectionPool[currentConn];
                 }
-                return GetConnection();
-            }
+                try {
+                    c.CheckOpen();
+                } catch (Exception e) {
+                    Logger.Warn("DatabaseManager", $"One rethinkdb connection is dead. Retrying. {e}");
+                    c.Close();
+                    c.Reconnect();
+                }
 
-            return c;
+                try {
+                    c.CheckOpen();
+                } catch (Exception e) {
+                    Logger.Warn("DatabaseManager", $"Could not reconnect {e}");
+                    globalRetryCount++;
+                    if (globalRetryCount > 10) {
+                        throw new ApplicationException($"Max Retries of 10 trying to connect to database.");
+                    }
+                    lock (connectionPool) {
+                        connectionPool.Remove(c);
+                    }
+                    return GetConnection();
+                }
+
+                return c;
+            } catch (Exception e) {
+                Logger.Error("DatabaseManager", $"Fatal Error at GetConnection(): {e.Message}" +
+                             $"\tCurrent Conn: {currentConn}" +
+                             $"\tPool Size: {connectionPool.Count}" +
+                             $"\tStack Trace: {e.StackTrace}");
+                throw new ApplicationException(e.Message);
+            }
         }
     }
 }
