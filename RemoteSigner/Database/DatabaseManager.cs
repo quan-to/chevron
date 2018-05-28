@@ -31,6 +31,7 @@ namespace RemoteSigner.Database {
         }
 
         void InitPool() {
+            // DO NOT LOCK HERE
             if (Configuration.EnableRethinkSKS) {
                 Logger.Log("DatabaseManager", $"Initializing RethinkDB Connection Pool for SKS at {Configuration.RethinkDBHost}:{Configuration.RethinkDBPort} with pool size {Configuration.RethinkDBPoolSize}");
                 int tryCount = 0;
@@ -128,6 +129,11 @@ namespace RemoteSigner.Database {
         public Connection GetConnection() {
             Connection c;
             lock (connectionPool) {
+                if (connectionPool.Count == 0) {
+                    Logger.Error("Empty connection pool! Running InitPool");
+                    InitPool();
+                }
+                currentConn = currentConn + 1 >= connectionPool.Count ? 0 : currentConn + 1;
                 c = connectionPool[currentConn];
             }
             try {
@@ -152,7 +158,6 @@ namespace RemoteSigner.Database {
                 return GetConnection();
             }
 
-            currentConn = currentConn + 1 >= connectionPool.Count ? 0 : currentConn + 1;
             return c;
         }
     }
