@@ -122,6 +122,7 @@
     <Compile Include="RancherManager.cs" />
     <Compile Include="Models\RancherNode.cs" />
     <Compile Include="RancherThread.cs" />
+    <Compile Include="PublicKeyStore.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

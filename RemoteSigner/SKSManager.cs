@@ -16,7 +16,8 @@ namespace RemoteSigner {
         }
 
         public async Task<string> GetSKSKey(string fingerPrint) {
-            var response = await client.GetAsync($"{SKSURL}/pks/lookup?op=get&options=mr&search=0x{fingerPrint}");
+            var response = await (new HttpClient()).GetAsync($"{SKSURL}/pks/lookup?op=get&options=mr&search=0x{fingerPrint}");
+            Console.WriteLine($"{SKSURL}/pks/lookup?op=get&options=mr&search=0x{fingerPrint}");
             if (response.StatusCode == HttpStatusCode.OK) {
                 return await response.Content.ReadAsStringAsync();
             }

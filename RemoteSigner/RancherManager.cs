@@ -37,7 +37,7 @@ namespace RemoteSigner {
                 return true;
             } catch (Exception e) {
                 Logger.Warn(RancherManagerLog, $"Probably not in Rancher Mode: {e.Message}");
-                Logger.Warn(RancherManagerLog, e.StackTrace);
+                // Logger.Warn(RancherManagerLog, e.StackTrace);
                 return false;
             }
         }

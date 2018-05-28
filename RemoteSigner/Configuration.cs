@@ -25,7 +25,7 @@ namespace RemoteSigner {
             SyslogServer = Environment.GetEnvironmentVariable("SYSLOG_IP") ?? "127.0.0.1";
             SyslogFacility = Environment.GetEnvironmentVariable("SYSLOG_FACILITY") ?? "LOG_USER";
             PrivateKeyFolder = Environment.GetEnvironmentVariable("PRIVATE_KEY_FOLDER") ?? "./keys";
-            SKSServer = Environment.GetEnvironmentVariable("SKS_SERVER") ?? "http://pgp.mit.edu/";
+            SKSServer = Environment.GetEnvironmentVariable("SKS_SERVER") ?? "http://localhost:11371";
             KeyPrefix = Environment.GetEnvironmentVariable("KEY_PREFIX") ?? "";
 
             var mkrc = Environment.GetEnvironmentVariable("MAX_KEYRING_CACHE_SIZE") ?? "1000";
@@ -44,7 +44,9 @@ namespace RemoteSigner {
             DatabaseName = Environment.GetEnvironmentVariable("DATABASE_NAME") ?? "remote_signer";
 
             MasterGPGKeyPath = Environment.GetEnvironmentVariable("MASTER_GPG_KEY_PATH") ?? null;
+            MasterGPGKeyPath = MasterGPGKeyPath == null || MasterGPGKeyPath.Trim().Length > 0 ? MasterGPGKeyPath : null;
             MasterGPGKeyPasswordPath = Environment.GetEnvironmentVariable("MASTER_GPG_KEY_PASSWORD_PATH") ?? null;
+            MasterGPGKeyPasswordPath = MasterGPGKeyPasswordPath == null || MasterGPGKeyPasswordPath.Trim().Length > 0 ? MasterGPGKeyPasswordPath : null;
             MasterGPGKeyBase64Encoded = Environment.GetEnvironmentVariable("MASTER_GPG_KEY_BASE64_ENCODED") == "true";
             KeysBase64Encoded = Environment.GetEnvironmentVariable("KEYS_BASE64_ENCODED") == "true";
 

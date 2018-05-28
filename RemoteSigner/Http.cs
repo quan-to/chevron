@@ -108,11 +108,13 @@ namespace RemoteSigner {
             string app = ePath[0];
 
             if (app != "remoteSigner") {
-                return new RestResult(new ErrorObject {
+                /*return new RestResult(new ErrorObject {
                     ErrorCode = ErrorCodes.NotFound,
                     Message = $"Application {app} not found",
                     ErrorField = "url"
-                }.ToJSON(), MimeTypes.JSON, HttpStatusCode.NotFound);
+                }.ToJSON(), MimeTypes.JSON, HttpStatusCode.NotFound);*/
+                // Bypass
+                path = "/" + ePath[0] + path;
             }
 
             Logger.Debug("HTTP Server", $"Processing HTTP Call for App {app}: {method} {path}");

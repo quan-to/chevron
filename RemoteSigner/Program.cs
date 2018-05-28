@@ -1,4 +1,5 @@
-﻿using RemoteSigner.Log;
+﻿using RemoteSigner.Database;
+using RemoteSigner.Log;
 
 namespace RemoteSigner {
 
@@ -6,6 +7,10 @@ namespace RemoteSigner {
 
         public static void Main(string[] args) {
             Logger.GlobalEnableDebug = true;
+            if (Configuration.EnableRethinkSKS) {
+                var dm = DatabaseManager.GlobalDm.GetConnection();
+                Logger.Log("Application", $"Database Hostname: {dm.Hostname}");
+            }
             RancherThread rt = new RancherThread();
             RancherManager.Init();
             if (RancherManager.InRancher) {

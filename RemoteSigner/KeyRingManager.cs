@@ -13,7 +13,7 @@ namespace RemoteSigner {
         Dictionary<string, PgpPublicKey> publicKeys;
         Dictionary<string, KeyInfo> publicKeysInfo;
         Queue<string> fingerPrints;
-        SKSManager sks;
+        PublicKeyStore pks;
 
         Dictionary<string, string> FP8TO16;
 
@@ -23,7 +23,7 @@ namespace RemoteSigner {
             publicKeysInfo = new Dictionary<string, KeyInfo>();
             fingerPrints = new Queue<string>();
             FP8TO16 = new Dictionary<string, string>();
-            sks = new SKSManager();
+            pks = new PublicKeyStore();
         }
 
         public void AddKey(string publicKey, bool nonErasable = false) {
@@ -68,14 +68,13 @@ namespace RemoteSigner {
 
         public PgpPublicKey GetKey(string fingerPrint) {
             if (!ContainsKey(fingerPrint)) {
-                Logger.Log("KeyRingManager", $"Key {fingerPrint} not found in local keyring. Fetching from SKS...");
-                var getTask = sks.GetSKSKey(fingerPrint);
-                getTask.Wait();
-                if (getTask.Result == null) {
-                    Logger.Error("KeyRingManager", $"Key {fingerPrint} not found in SKS server.");
+                Logger.Log("KeyRingManager", $"Key {fingerPrint} not found in local keyring. Fetching from KeyStore...");
+                var key = pks.GetKey(fingerPrint);
+                if (key == null) {
+                    Logger.Error("KeyRingManager", $"Key {fingerPrint} not found in KeyStore.");
                     return null;
                 }
-                AddKey(getTask.Result);
+                AddKey(key);
             }
 
             return fingerPrint.Length == 8 ? publicKeys[FP8TO16[fingerPrint]] : publicKeys[fingerPrint];

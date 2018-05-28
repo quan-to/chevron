@@ -277,6 +277,7 @@ namespace RemoteSigner {
 
         public bool VerifySignature(byte[] data, string signature, PgpPublicKey publicKey = null) {
             PgpSignatureList p3 = null;
+            signature = Tools.SignatureFix(signature);
             using (var inputStream = PgpUtilities.GetDecoderStream(Tools.GenerateStreamFromString(signature))) {
                 var pgpFact = new PgpObjectFactory(inputStream);
                 var o = pgpFact.NextPgpObject();
@@ -299,6 +300,35 @@ namespace RemoteSigner {
             }
             sig.InitVerify(publicKey);
             sig.Update(data);
+
+            return sig.Verify();
+        }
+
+        public bool VerifyAsStringSignature(string data, string signature, PgpPublicKey publicKey = null) {
+            PgpSignatureList p3 = null;
+            signature = Tools.SignatureFix(signature);
+            using (var inputStream = PgpUtilities.GetDecoderStream(Tools.GenerateStreamFromString(signature))) {
+                var pgpFact = new PgpObjectFactory(inputStream);
+                var o = pgpFact.NextPgpObject();
+                if (o is PgpCompressedData c1) {
+                    pgpFact = new PgpObjectFactory(c1.GetDataStream());
+                    p3 = (PgpSignatureList)pgpFact.NextPgpObject();
+                } else {
+                    p3 = (PgpSignatureList)o;
+                }
+            }
+
+            var sig = p3[0];
+            if (publicKey == null) {
+                string keyId = sig.KeyId.ToString("X").ToUpper();
+                string fingerPrint = keyId.Length < 16 ? Tools.H8FP(keyId) : Tools.H16FP(sig.KeyId.ToString("X").ToUpper());
+                publicKey = krm[fingerPrint];
+                if (publicKey == null) {
+                    throw new KeyNotLoadedException(fingerPrint);
+                }
+            }
+            sig.InitVerify(publicKey);
+            sig.Update(Encoding.UTF8.GetBytes(data));
 
             return sig.Verify();
         }
