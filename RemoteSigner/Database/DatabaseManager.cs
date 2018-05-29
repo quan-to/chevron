@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using RemoteSigner.Database.Attributes;
 using RemoteSigner.Log;
 using RethinkDb.Driver;
@@ -165,6 +166,8 @@ namespace RemoteSigner.Database {
                              $"\tCurrent Conn: {currentConn}" +
                              $"\tPool Size: {connectionPool.Count}" +
                              $"\tStack Trace: {e.StackTrace}");
+                Logger.Error("DatabaseManager", "Waiting 10 seconds before continuing...");
+                Thread.Sleep(10);
                 throw new ApplicationException(e.Message);
             }
         }
