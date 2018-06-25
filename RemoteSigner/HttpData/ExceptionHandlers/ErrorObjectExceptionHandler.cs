@@ -11,10 +11,23 @@ namespace RemoteSigner.HttpData.ExceptionHandlers {
         public RestResult HandleException(Exception e) {
             var ce = e as ErrorObjectException;
 
-            RestResult result = new RestResult() {
+            RestResult result = new RestResult {
                 ContentType = MimeTypes.JSON,
                 StatusCode = System.Net.HttpStatusCode.InternalServerError,
                 Result = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(ce.ErrorObject))
+            };
+            return result;
+        }
+    }
+    [RestExceptionHandler(typeof(ErrorObjectsException))]
+    public class ErrorObjectsExceptionHandler : IRestExceptionHandler {
+        public RestResult HandleException(Exception e) {
+            var ce = e as ErrorObjectsException;
+
+            RestResult result = new RestResult() {
+                ContentType = MimeTypes.JSON,
+                StatusCode = System.Net.HttpStatusCode.InternalServerError,
+                Result = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(ce.ErrorObjects))
             };
             return result;
         }

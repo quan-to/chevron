@@ -379,6 +379,12 @@ namespace RemoteSigner {
             }
         }
 
+        public PgpPrivateKey GetPrivate(string fingerPrint) {
+            if (fingerPrint.Length == 8 && FP8TO16.ContainsKey(fingerPrint)) {
+                fingerPrint = FP8TO16[fingerPrint];
+            }
+            return decryptedKeys.ContainsKey(fingerPrint) ? decryptedKeys[fingerPrint] : null;
+        }
 
         public PgpSecretKey GetKey(string fingerPrint) {
             if (fingerPrint.Length == 8 && FP8TO16.ContainsKey(fingerPrint)) {
