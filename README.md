@@ -291,6 +291,15 @@ mkbundle -z --static --deps RemoteSigner.exe -L /usr/local/Cellar/mono/5.4.1.6/l
 
 This will generate a static binary called RemoteSigner.
 
+# Adding your private key into keys folder
+
+If you're using `gpg` command line tools, you can export your key directly into keys folder in text format:
+
+```bash
+gpg --export-secret-keys -a <your fingerprint> > ./keys/the-name-you-want.key
+```
+> note: the `.key` extension is not required although it's recommended for better understanding.
+
 Enabling Syslog Support
 =======================
 
