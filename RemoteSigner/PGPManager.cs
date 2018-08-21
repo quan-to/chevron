@@ -164,19 +164,22 @@ namespace RemoteSigner {
             });
         }
 
-        public GPGDecryptedDataReturn Decrypt(string data) {
-            using (var stream = PgpUtilities.GetDecoderStream(Tools.GenerateStreamFromString(data))) {
+        public GPGDecryptedDataReturn Decrypt(string data, bool dataOnly = false) {
+            var str = data;
+            if (dataOnly) {
+                str = Tools.Raw2AsciiArmored(Convert.FromBase64String(data));
+            }
+            using (var stream = PgpUtilities.GetDecoderStream(Tools.GenerateStreamFromString(str))) {
                 var pgpF = new PgpObjectFactory(stream);
                 var o = pgpF.NextPgpObject();
-                var enc = o as PgpEncryptedDataList;
-                if (enc == null) {
+                if (!(o is PgpEncryptedDataList enc)) {
                     enc = (PgpEncryptedDataList)pgpF.NextPgpObject();
                 }
 
                 PgpPublicKeyEncryptedData pbe = null;
                 PgpPrivateKey pgpPrivKey = null;
                 PgpSecretKey pgpSec = null;
-                string lastFingerPrint = "None";
+                var lastFingerPrint = "None";
                 foreach (PgpPublicKeyEncryptedData pked in enc.GetEncryptedDataObjects()) {
                     string keyId = pked.KeyId.ToString("X").ToUpper();
                     string fingerPrint = keyId.Length < 16 ? FP8TO16[Tools.H8FP(keyId)] : Tools.H16FP(keyId);
@@ -233,7 +236,7 @@ namespace RemoteSigner {
             }
         }
 
-        public string Encrypt(string filename, byte[] data, string fingerPrint) {
+        public string Encrypt(string filename, byte[] data, string fingerPrint, bool dataOnly = false) {
             if (fingerPrint.Length == 8 && FP8TO16.ContainsKey(fingerPrint)) {
                 fingerPrint = FP8TO16[fingerPrint];
             }
@@ -243,10 +246,10 @@ namespace RemoteSigner {
                 throw new KeyNotLoadedException(fingerPrint);
             }
 
-            return Encrypt(filename, data, publicKey);
+            return Encrypt(filename, data, publicKey, dataOnly);
         }
 
-        public string Encrypt(string filename, byte[] data, PgpPublicKey publicKey) {
+        public string Encrypt(string filename, byte[] data, PgpPublicKey publicKey, bool dataOnly = false) {
             using (MemoryStream encOut = new MemoryStream(), bOut = new MemoryStream()) {
                 var comData = new PgpCompressedDataGenerator(CompressionAlgorithmTag.Zip);
                 var cos = comData.Open(bOut); // open it with the final destination
@@ -263,15 +266,27 @@ namespace RemoteSigner {
                 comData.Close();
                 var cPk = new PgpEncryptedDataGenerator(SymmetricKeyAlgorithmTag.Cast5, true, new SecureRandom());
                 cPk.AddMethod(publicKey);
-                byte[] bytes = bOut.ToArray();
-                var s = new ArmoredOutputStream(encOut);
-                var cOut = cPk.Open(s, bytes.Length);
-                cOut.Write(bytes, 0, bytes.Length);  // obtain the actual bytes from the compressed stream
-                cOut.Close();
-                s.Close();
-                encOut.Seek(0, SeekOrigin.Begin);
-                var reader = new StreamReader(encOut);
-                return reader.ReadToEnd();
+                var bytes = bOut.ToArray();
+
+                // Raw GPG Encoded
+                if (dataOnly) {
+                    var cOut = cPk.Open(encOut, bytes.Length);
+                    cOut.Write(bytes, 0, bytes.Length);  // obtain the actual bytes from the compressed stream
+                    cOut.Flush();
+                    cOut.Close();
+//                    encOut.Close();
+                    encOut.Seek(0, SeekOrigin.Begin);
+                    return Convert.ToBase64String(encOut.ToArray());
+                } else {
+                    var s = new ArmoredOutputStream(encOut);
+                    var cOut = cPk.Open(s, bytes.Length);
+                    cOut.Write(bytes, 0, bytes.Length);  // obtain the actual bytes from the compressed stream
+                    cOut.Close();
+                    s.Close();
+                    encOut.Seek(0, SeekOrigin.Begin);
+                    var reader = new StreamReader(encOut);
+                    return reader.ReadToEnd();
+                }
             }
         }
 
