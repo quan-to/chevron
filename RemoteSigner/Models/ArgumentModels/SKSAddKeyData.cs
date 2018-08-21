@@ -1,6 +1,6 @@
 ﻿using System;
 namespace RemoteSigner.Models.ArgumentModels {
-    public class SKSAddKeyData {
+    public struct SKSAddKeyData {
         public String PublicKey { get; set; }
     }
 }

@@ -159,8 +159,8 @@ namespace RemoteSigner {
         }
 
         public static Stream GenerateStreamFromByteArray(byte[] data) {
-            MemoryStream stream = new MemoryStream();
-            StreamWriter writer = new StreamWriter(stream);
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
             writer.Write(data);
             writer.Flush();
             stream.Seek(0, SeekOrigin.Begin);
@@ -168,12 +168,22 @@ namespace RemoteSigner {
         }
 
         public static Stream GenerateStreamFromString(string s) {
-            MemoryStream stream = new MemoryStream();
-            StreamWriter writer = new StreamWriter(stream);
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
             writer.Write(s);
             writer.Flush();
             stream.Seek(0, SeekOrigin.Begin);
             return stream;
+        }
+
+        public static string Raw2AsciiArmored(byte[] b) {
+            var encOut = new MemoryStream();
+            var s = new ArmoredOutputStream(encOut);
+            s.Write(b);
+            s.Close();
+            encOut.Seek(0, SeekOrigin.Begin);
+            var reader = new StreamReader(encOut);
+            return reader.ReadToEnd();
         }
 
         public static String Quanto2GPG(string signature) {

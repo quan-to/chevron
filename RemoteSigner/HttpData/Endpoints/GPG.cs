@@ -192,9 +192,9 @@ namespace RemoteSigner.HttpData.Endpoints {
         [POST("/encrypt")]
         public string Encrypt(GPGEncryptData data) {
             try {
-                string filename = data.Filename ?? $"QuantoEncrypt-{Tools.TimestampMS()}.bin";
-                byte[] encryptData = Convert.FromBase64String(data.Base64Data);
-                return pgpManager.Encrypt(filename, encryptData, data.FingerPrint);
+                var filename = data.Filename ?? $"QuantoEncrypt-{Tools.TimestampMS()}.bin";
+                var encryptData = Convert.FromBase64String(data.Base64Data);
+                return pgpManager.Encrypt(filename, encryptData, data.FingerPrint, data.DataOnly);
             } catch (ErrorObjectException e) {
                 throw e;
             } catch (Exception e) {
@@ -210,7 +210,7 @@ namespace RemoteSigner.HttpData.Endpoints {
         [POST("/decrypt")]
         public GPGDecryptedDataReturn Decrypt(GPGDecryptData data) {
             try {
-                return pgpManager.Decrypt(data.AsciiArmoredData);
+                return pgpManager.Decrypt(data.AsciiArmoredData, data.DataOnly);
             } catch (ErrorObjectException e) {
                 throw e;
             } catch (Exception e) {
