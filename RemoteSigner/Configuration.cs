@@ -14,6 +14,8 @@ namespace RemoteSigner {
         public static bool EnableRethinkSKS { get; private set; }
         public static string RethinkDBHost { get; private set; }
         public static int RethinkDBPort { get; private set; }
+        public static string RethinkDBUsername { get; private set; }
+        public static string RethinkDBPassword { get; private set; }
         public static int RethinkDBPoolSize { get; private set; }
         public static string DatabaseName { get; private set; }
         public static string MasterGPGKeyPath { get; private set; }
@@ -36,6 +38,8 @@ namespace RemoteSigner {
 
             EnableRethinkSKS = Environment.GetEnvironmentVariable("ENABLE_RETHINKDB_SKS") == "true";
             RethinkDBHost = Environment.GetEnvironmentVariable("RETHINKDB_HOST") ?? "localhost";
+            RethinkDBUsername = Environment.GetEnvironmentVariable("RETHINKDB_USERNAME") ?? "admin";
+            RethinkDBPassword = Environment.GetEnvironmentVariable("RETHINKDB_PASSWORD") ?? "";
             var rdbport = Environment.GetEnvironmentVariable("RETHINKDB_PORT") ?? "28015";
             RethinkDBPort = int.Parse(rdbport);
             var rdbpool = Environment.GetEnvironmentVariable("RETHINKDB_POOL_SIZE") ?? "10";

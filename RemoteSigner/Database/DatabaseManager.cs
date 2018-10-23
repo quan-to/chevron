@@ -43,6 +43,7 @@ namespace RemoteSigner.Database {
                                  .Hostname(Configuration.RethinkDBHost)
                                  .Port(Configuration.RethinkDBPort)
                                  .Timeout(60)
+                                 .User(Configuration.RethinkDBUsername, Configuration.RethinkDBPassword)
                                  .Connect();
                         connectionPool.Add(c);
                         tryCount = 0;
