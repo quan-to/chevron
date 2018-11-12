@@ -2,22 +2,27 @@
 using RemoteSigner.Log;
 
 namespace RemoteSigner {
-
-    class MainClass {
-
+    static class MainClass {
         public static void Main(string[] args) {
             Logger.GlobalEnableDebug = true;
             if (Configuration.EnableRethinkSKS) {
                 var dm = DatabaseManager.GlobalDm.GetConnection();
                 Logger.Log("Application", $"Database Hostname: {dm.Hostname}");
             }
-            RancherThread rt = new RancherThread();
+            
             RancherManager.Init();
+            Kubernetes.Init();
+
             if (RancherManager.InRancher) {
                 Logger.Log("Application", "Running in rancher. Starting Rancher Sentinel.");
+                var rt = new RancherThread();
                 rt.Start();
             }
-            Http httpServer = new Http(Configuration.HttpPort);
+
+            if (Kubernetes.InKubernetes) {
+                Logger.Log("Application", "Running in kubernetes. Starting Kubernetes Sentinel.");
+            }
+            var httpServer = new Http(Configuration.HttpPort);
             httpServer.StartSync();
         }
     }

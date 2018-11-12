@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -55,6 +55,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Kubernetes.cs" />
+    <Compile Include="KubernetesThread.cs" />
+    <Compile Include="Models\Kubernetes\Phase.cs" />
+    <Compile Include="Models\Kubernetes\Pod.cs" />
+    <Compile Include="Models\Kubernetes\Pods.cs" />
+    <Compile Include="Models\Kubernetes\PodStatus.cs" />
+    <Compile Include="Models\Kubernetes\Service.cs" />
+    <Compile Include="Models\Kubernetes\ServiceItem.cs" />
+    <Compile Include="Models\Kubernetes\ItemMetadata.cs" />
+    <Compile Include="Models\Kubernetes\ServiceItemSpec.cs" />
+    <Compile Include="Models\Kubernetes\ServiceItemSpecPort.cs" />
+    <Compile Include="Models\Rancher\RancherNode.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PGPManager.cs" />
@@ -123,7 +135,6 @@
     <Compile Include="SecretsManager.cs" />
     <Compile Include="HttpData\Endpoints\Internal.cs" />
     <Compile Include="RancherManager.cs" />
-    <Compile Include="Models\RancherNode.cs" />
     <Compile Include="RancherThread.cs" />
     <Compile Include="PublicKeyStore.cs" />
     <Compile Include="HttpData\Endpoints\JsonFieldCipher.cs" />

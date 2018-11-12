@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -28,6 +29,16 @@ namespace RemoteSigner {
 
         public static async Task<string> Get(string url) {
             var response = await client.GetAsync(url);
+            if (response.StatusCode != System.Net.HttpStatusCode.OK) {
+                throw new Exception("Status Code != 200");
+            }
+            return await response.Content.ReadAsStringAsync();
+        }
+        
+        public static async Task<string> Get(string url, string authorization) {
+            var authClient = new HttpClient();
+            authClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer ${authorization}");
+            var response = await authClient.GetAsync(url);
             if (response.StatusCode != System.Net.HttpStatusCode.OK) {
                 throw new Exception("Status Code != 200");
             }

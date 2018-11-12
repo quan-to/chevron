@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using RemoteSigner.Log;
-using RemoteSigner.Models;
+using RemoteSigner.Models.Rancher;
 
 namespace RemoteSigner {
     public static class RancherManager {
