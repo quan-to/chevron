@@ -1,5 +1,5 @@
 ﻿using System;
-namespace RemoteSigner.Models {
+namespace RemoteSigner.Models.Rancher {
     public class RancherNode {
         public string UUID { get; set; }
         public string Name { get; set; }
