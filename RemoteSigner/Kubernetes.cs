@@ -81,8 +81,7 @@ namespace RemoteSigner {
         }
         
         private static void LoadKubeCA() {
-            KubeCA = File.ReadAllText($"{ServiceAccountPath}/ca.crt");
-            KubeCAX509 = new X509Certificate(KubeCA);
+            KubeCAX509 = new X509Certificate($"{ServiceAccountPath}/ca.crt");
             Logger.Log(KubernetesLog, $"Loaded Kube CA: {KubeCAX509.GetCertHashString()}");
             ServicePointManager.ServerCertificateValidationCallback += KubernetesSslCheck;
         }
