@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Security;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -20,7 +23,7 @@ namespace RemoteSigner {
         static readonly Regex NameEmailGPGReg = new Regex("(.*)\\s?<(.*)>", RegexOptions.IgnoreCase);
         static readonly Regex PGPSig = new Regex("-----BEGIN PGP SIGNATURE-----(.*)-----END PGP SIGNATURE-----", RegexOptions.IgnoreCase | RegexOptions.Singleline);
         static readonly HttpClient client = new HttpClient();
-
+        
         public static async Task<string> Post(string url, string content) {
             var httpContent = new StringContent(content, Encoding.UTF8, "application/json");
             var response = await client.PostAsync(url, httpContent);
