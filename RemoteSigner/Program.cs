@@ -21,6 +21,8 @@ namespace RemoteSigner {
 
             if (Kubernetes.InKubernetes) {
                 Logger.Log("Application", "Running in kubernetes. Starting Kubernetes Sentinel.");
+                var rt = new KubernetesThread();
+                rt.Start();
             }
             var httpServer = new Http(Configuration.HttpPort);
             httpServer.StartSync();
