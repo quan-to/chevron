@@ -1,4 +1,4 @@
-FROM mono:5.8
+FROM mono:5.16
 
 MAINTAINER Lucas Teske <lucas@contaquanto.com.br>
 

@@ -36,6 +36,7 @@ namespace RemoteSigner {
 
             if (!InKubernetes) return;
 
+            Logger.Log(KubernetesLog, "In Kubernetes!");
             jsonSettings = new JsonSerializerSettings {
                 MissingMemberHandling = MissingMemberHandling.Ignore,
             };
@@ -68,16 +69,20 @@ namespace RemoteSigner {
 
         // Only for Kubernetes
         static bool KubernetesSslCheck(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors policyErrors) {
-            // Check if the only error of the chain is the missing root CA,
-            // otherwise reject the given certificate.
-            if (chain.ChainStatus.Any(statusFlags => statusFlags.Status != X509ChainStatusFlags.UntrustedRoot))
-                return false;
+            if (Configuration.IgnoreKubernetesCA) {
+                return true;
+            }
+            Logger.Debug(KubernetesLog, "Validating Custom CA");
+            foreach (var element in chain.ChainElements) {
+                Logger.Debug(KubernetesLog, $"{element.Certificate.GetCertHashString()} == {KubeCAX509.GetCertHashString()}");
+                if (element.Certificate.GetCertHashString().Equals(KubeCAX509.GetCertHashString())) {
+                    return true;
+                }
+            }
+
+            Logger.Debug(KubernetesLog, "Could not find any valid trusted certs");
             
-            return chain.ChainElements
-                .Cast<X509ChainElement>()
-                .Select(element => element.Certificate)
-                .Where(chainCertificate => chainCertificate.Subject == Kubernetes.KubeCAX509.Subject)
-                .Any(chainCertificate => chainCertificate.GetRawCertData().SequenceEqual(Kubernetes.KubeCAX509.GetRawCertData()));
+            return false;
         }
         
         private static void LoadKubeCA() {

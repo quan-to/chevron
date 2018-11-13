@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using Org.BouncyCastle.Bcpg;
 using Org.BouncyCastle.Bcpg.OpenPgp;
 using RemoteSigner.Database.Models;
+using RemoteSigner.Log;
 
 namespace RemoteSigner {
     public static class Tools {
@@ -40,9 +41,11 @@ namespace RemoteSigner {
         
         public static async Task<string> Get(string url, string authorization) {
             var authClient = new HttpClient();
-            authClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer ${authorization}");
+            authClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authorization);
             var response = await authClient.GetAsync(url);
-            if (response.StatusCode != System.Net.HttpStatusCode.OK) {
+            if (response.StatusCode != HttpStatusCode.OK) {
+                var data = await response.Content.ReadAsStringAsync();
+                Logger.Debug("HttpClient", data);
                 throw new Exception("Status Code != 200");
             }
             return await response.Content.ReadAsStringAsync();
