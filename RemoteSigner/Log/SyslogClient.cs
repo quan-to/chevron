@@ -22,9 +22,15 @@ namespace RemoteSigner.Log {
                 Console.WriteLine("Syslog only works on Linux");
                 return;
             }
-
-            ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-            ipAddress = ipHostInfo.AddressList[0];
+            try {
+                ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
+                ipAddress = ipHostInfo.AddressList[0];
+            } catch (Exception e) {
+                Console.WriteLine($"Error resolving Hostname: {e}");
+                Console.WriteLine($"Falling back to localhost");
+                ipHostInfo = new IPHostEntry();
+                ipAddress = IPAddress.Loopback;
+            }
             ipLocalEndPoint = new IPEndPoint(ipAddress, 0);
             udpClient = new UdpClient(ipLocalEndPoint);
             Port = 514;
