@@ -1,5 +1,7 @@
 package SLog
 
+// TODO: Syslog Output
+
 // region Global
 var debugEnabled = true
 var warnEnabled = true

@@ -8,7 +8,6 @@ import (
 )
 
 const maxRetryCount = 5
-const timeout = 60
 
 type rethinkDbState struct {
 	connection  *r.Session
