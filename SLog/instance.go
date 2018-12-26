@@ -49,5 +49,7 @@ func (i *Instance) Error(str interface{}, v ...interface{}) *Instance {
 }
 
 func (i *Instance) Fatal(str interface{}, v ...interface{}) {
-	log.Fatalf(asString(str), v...)
+	var msg = fmt.Sprintf(asString(str), v...)
+	i.Error(msg)
+	panic(msg)
 }
