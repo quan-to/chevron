@@ -29,6 +29,7 @@ var pgpLog = SLog.Scope("PGPManager")
 type PGPManager struct {
 	sync.Mutex
 	keyFolder            string
+	keysBase64Encoded    bool
 	keyIdentity          map[string][]*openpgp.Identity
 	decryptedPrivateKeys map[string]*packet.PrivateKey
 	entities             map[string]*openpgp.Entity
@@ -40,6 +41,7 @@ type PGPManager struct {
 func MakePGPManager() *PGPManager {
 	return &PGPManager{
 		keyFolder:            PrivateKeyFolder,
+		keysBase64Encoded:    KeysBase64Encoded,
 		keyIdentity:          make(map[string][]*openpgp.Identity),
 		decryptedPrivateKeys: make(map[string]*packet.PrivateKey),
 		entities:             make(map[string]*openpgp.Entity),
@@ -51,6 +53,7 @@ func MakePGPManager() *PGPManager {
 func MakePGPManagerWithKRM(krm *KeyRingManager) *PGPManager {
 	return &PGPManager{
 		keyFolder:            PrivateKeyFolder,
+		keysBase64Encoded:    KeysBase64Encoded,
 		keyIdentity:          make(map[string][]*openpgp.Identity),
 		decryptedPrivateKeys: make(map[string]*packet.PrivateKey),
 		entities:             make(map[string]*openpgp.Entity),
@@ -86,7 +89,7 @@ func (pm *PGPManager) LoadKeys() {
 
 			keyData := string(data)
 
-			if KeysBase64Encoded {
+			if pm.keysBase64Encoded {
 				b, err := base64.StdEncoding.DecodeString(keyData)
 				if err != nil {
 					pgpLog.Error("Error base64 decoding %s: %s", fileName, err)
@@ -232,7 +235,7 @@ func (pm *PGPManager) GetLoadedPrivateKeys() []models.KeyInfo {
 
 func (pm *PGPManager) SavePrivateKey(fingerPrint, armoredData string) error {
 	filename := fmt.Sprintf("%s.key", fingerPrint)
-	if KeysBase64Encoded {
+	if pm.keysBase64Encoded {
 		filename = fmt.Sprintf("%s.b64", fingerPrint)
 	}
 
@@ -242,7 +245,7 @@ func (pm *PGPManager) SavePrivateKey(fingerPrint, armoredData string) error {
 
 	data := []byte(armoredData)
 
-	if KeysBase64Encoded {
+	if pm.keysBase64Encoded {
 		pgpLog.Debug("Base64 Encoding enabled. Encoding private key.")
 		data = []byte(base64.StdEncoding.EncodeToString(data))
 	}
