@@ -1,9 +1,13 @@
 package remote_signer
 
 import (
+	"crypto"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"github.com/quan-to/remote-signer/models"
+	"golang.org/x/crypto/openpgp"
+	"golang.org/x/crypto/openpgp/packet"
 	"regexp"
 	"strings"
 )
@@ -94,4 +98,79 @@ func signatureFix(sig string) string {
 	}
 
 	return sig
+}
+
+func GetFingerPrintFromKey(armored string) string {
+	kr := strings.NewReader(armored)
+	keys, err := openpgp.ReadArmoredKeyRing(kr)
+	if err != nil {
+		panic(err)
+	}
+
+	for _, key := range keys {
+		if key.PrivateKey != nil {
+			fp := ByteFingerPrint2FP16(key.PrimaryKey.Fingerprint[:])
+
+			return fp
+		}
+	}
+
+	return ""
+}
+
+func CreateEntityFromKeys(name, comment, email string, lifeTimeInSecs uint32, pubKey *packet.PublicKey, privKey *packet.PrivateKey) *openpgp.Entity {
+	bitLen, _ := privKey.BitLength()
+	config := packet.Config{
+		DefaultHash:            crypto.SHA512,
+		DefaultCipher:          packet.CipherAES256,
+		DefaultCompressionAlgo: packet.CompressionZLIB,
+		CompressionConfig: &packet.CompressionConfig{
+			Level: 9,
+		},
+		RSABits: int(bitLen),
+	}
+	currentTime := config.Now()
+	uid := packet.NewUserId(name, comment, email)
+
+	e := openpgp.Entity{
+		PrimaryKey: pubKey,
+		PrivateKey: privKey,
+		Identities: make(map[string]*openpgp.Identity),
+	}
+	isPrimaryId := false
+
+	e.Identities[uid.Id] = &openpgp.Identity{
+		Name:   uid.Name,
+		UserId: uid,
+		SelfSignature: &packet.Signature{
+			CreationTime: currentTime,
+			SigType:      packet.SigTypePositiveCert,
+			PubKeyAlgo:   packet.PubKeyAlgoRSA,
+			Hash:         config.Hash(),
+			IsPrimaryId:  &isPrimaryId,
+			FlagsValid:   true,
+			FlagSign:     true,
+			FlagCertify:  true,
+			IssuerKeyId:  &e.PrimaryKey.KeyId,
+		},
+	}
+
+	e.Subkeys = make([]openpgp.Subkey, 1)
+	e.Subkeys[0] = openpgp.Subkey{
+		PublicKey:  pubKey,
+		PrivateKey: privKey,
+		Sig: &packet.Signature{
+			CreationTime:              currentTime,
+			SigType:                   packet.SigTypeSubkeyBinding,
+			PubKeyAlgo:                packet.PubKeyAlgoRSA,
+			Hash:                      config.Hash(),
+			PreferredHash:             []uint8{models.GPG_SHA512},
+			FlagsValid:                true,
+			FlagEncryptStorage:        true,
+			FlagEncryptCommunications: true,
+			IssuerKeyId:               &e.PrimaryKey.KeyId,
+			KeyLifetimeSecs:           &lifeTimeInSecs,
+		},
+	}
+	return &e
 }

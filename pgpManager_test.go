@@ -47,8 +47,14 @@ func init() {
 	}
 }
 
+// region Tests
 func TestVerifySign(t *testing.T) {
 	valid, err := pgpMan.VerifySignature(testData, testSignatureSignature)
+	if err != nil || !valid {
+		t.Errorf("Signature not valid or error found: %s", err)
+	}
+
+	valid, err = pgpMan.VerifySignatureStringData(testSignatureData, testSignatureSignature)
 	if err != nil || !valid {
 		t.Errorf("Signature not valid or error found: %s", err)
 	}
@@ -69,6 +75,46 @@ func TestSign(t *testing.T) {
 	}
 }
 
+func TestGenerateKey(t *testing.T) {
+	key, err := pgpMan.GeneratePGPKey("HUE", testKeyPassword, minKeyBits)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Load key
+	err, _ = pgpMan.LoadKey(key)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fp := GetFingerPrintFromKey(key)
+
+	t.Logf("Key Fingerprint: %s", fp)
+
+	// Unlock Key
+	err = pgpMan.UnlockKey(fp, testKeyPassword)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Try sign
+	signature, err := pgpMan.SignData(fp, testData, crypto.SHA512)
+	if err != nil {
+		t.Error(err)
+	}
+	// Try verify
+	valid, err := pgpMan.VerifySignature(testData, signature)
+	if err != nil {
+		t.Error(err)
+	}
+	if !valid {
+		t.Error("Generated signature is not valid!")
+	}
+}
+
+// endregion
+// region Benchmarks
 func BenchmarkSign(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_, err := pgpMan.SignData(testKeyFingerprint, testData, crypto.SHA512)
@@ -86,3 +132,41 @@ func BenchmarkVerifySignature(b *testing.B) {
 		}
 	}
 }
+
+func BenchmarkVerifySignatureStringData(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_, err := pgpMan.VerifySignatureStringData(testSignatureData, testSignatureSignature)
+		if err != nil {
+			b.Error(err)
+		}
+	}
+}
+
+func BenchmarkKeyGenerate2048(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_, err := pgpMan.GeneratePGPKey("", "123456789", 2048)
+		if err != nil {
+			b.Error(err)
+		}
+	}
+}
+
+func BenchmarkKeyGenerate3072(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_, err := pgpMan.GeneratePGPKey("", "123456789", 3072)
+		if err != nil {
+			b.Error(err)
+		}
+	}
+}
+
+func BenchmarkKeyGenerate4096(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_, err := pgpMan.GeneratePGPKey("", "123456789", 4096)
+		if err != nil {
+			b.Error(err)
+		}
+	}
+}
+
+// endregion

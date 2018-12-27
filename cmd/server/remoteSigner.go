@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto"
 	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/SLog"
 	"log"
@@ -34,23 +33,11 @@ func main() {
 		slog.Info("		Key: %s - Private Key Decrypted: %t", v.Identifier, v.PrivateKeyIsDecrypted)
 	}
 
-	data := []byte("huebr for the win!")
-	data2 := []byte("huebr for the win")
-
-	signature, err := k.SignData("0016A9CA870AFA59", data, crypto.SHA512)
+	key, err := k.GeneratePGPKey("TEST", "12345", 16384)
 
 	if err != nil {
 		slog.Error(err)
-		return
 	}
 
-	slog.Info("Signature: \n%s", signature)
-	valid, err := k.VerifySignature(data2, signature)
-	if err != nil {
-		slog.Error(err)
-	}
-
-	if valid {
-		log.Println("Signature is valid")
-	}
+	log.Println(key)
 }
