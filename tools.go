@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"github.com/pkg/errors"
 	"github.com/quan-to/remote-signer/models"
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
@@ -179,6 +180,24 @@ func GetFingerPrintsFromEncryptedMessage(armored string) ([]string, error) {
 	return fps, nil
 }
 
+func CreateEntityForSubKey(masterFingerPrint string, pubKey *packet.PublicKey, privKey *packet.PrivateKey) *openpgp.Entity {
+	uid := packet.NewUserId(fmt.Sprintf("Subkey for %s", masterFingerPrint), "", "")
+
+	e := openpgp.Entity{
+		PrimaryKey: pubKey,
+		PrivateKey: privKey,
+		Identities: make(map[string]*openpgp.Identity),
+	}
+
+	e.Identities[uid.Id] = &openpgp.Identity{
+		Name:   uid.Name,
+		UserId: uid,
+	}
+
+	e.Subkeys = make([]openpgp.Subkey, 0)
+	return &e
+}
+
 func CreateEntityFromKeys(name, comment, email string, lifeTimeInSecs uint32, pubKey *packet.PublicKey, privKey *packet.PrivateKey) *openpgp.Entity {
 	bitLen, _ := privKey.BitLength()
 	config := packet.Config{
@@ -234,4 +253,39 @@ func CreateEntityFromKeys(name, comment, email string, lifeTimeInSecs uint32, pu
 		},
 	}
 	return &e
+}
+
+func IdentityMapToArray(m map[string]*openpgp.Identity) []*openpgp.Identity {
+	arr := make([]*openpgp.Identity, 0)
+
+	for _, v := range m {
+		arr = append(arr, v)
+	}
+
+	return arr
+}
+
+func SimpleIdentitiesToString(ids []*openpgp.Identity) string {
+	identifier := ""
+	for _, k := range ids {
+		identifier = k.Name
+		break
+	}
+
+	return identifier
+}
+
+func ReadKeyToEntity(asciiArmored string) (*openpgp.Entity, error) {
+	r := strings.NewReader(asciiArmored)
+	e, err := openpgp.ReadArmoredKeyRing(r)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(e) > 0 {
+		return e[0], nil
+	}
+
+	return nil, errors.New("no keys found")
 }

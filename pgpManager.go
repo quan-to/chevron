@@ -29,21 +29,34 @@ var pgpLog = SLog.Scope("PGPManager")
 type PGPManager struct {
 	sync.Mutex
 	keyFolder            string
-	keyIdentity          map[string][]openpgp.Identity
+	keyIdentity          map[string][]*openpgp.Identity
 	decryptedPrivateKeys map[string]*packet.PrivateKey
 	entities             map[string]*openpgp.Entity
 	fp8to16              map[string]string
-	subKeyToKey			 map[string]string
+	subKeyToKey          map[string]string
+	krm                  *KeyRingManager
 }
 
 func MakePGPManager() *PGPManager {
 	return &PGPManager{
 		keyFolder:            PrivateKeyFolder,
-		keyIdentity:          make(map[string][]openpgp.Identity),
+		keyIdentity:          make(map[string][]*openpgp.Identity),
 		decryptedPrivateKeys: make(map[string]*packet.PrivateKey),
 		entities:             make(map[string]*openpgp.Entity),
 		fp8to16:              make(map[string]string),
 		subKeyToKey:          make(map[string]string),
+		krm:                  MakeKeyRingManager(),
+	}
+}
+func MakePGPManagerWithKRM(krm *KeyRingManager) *PGPManager {
+	return &PGPManager{
+		keyFolder:            PrivateKeyFolder,
+		keyIdentity:          make(map[string][]*openpgp.Identity),
+		decryptedPrivateKeys: make(map[string]*packet.PrivateKey),
+		entities:             make(map[string]*openpgp.Entity),
+		fp8to16:              make(map[string]string),
+		subKeyToKey:          make(map[string]string),
+		krm:                  krm,
 	}
 }
 
@@ -106,10 +119,11 @@ func (pm *PGPManager) LoadKey(armoredKey string) (error, int) {
 	for _, key := range keys {
 		if key.PrivateKey != nil {
 			fp := ByteFingerPrint2FP16(key.PrimaryKey.Fingerprint[:])
-			ids := make([]openpgp.Identity, 0)
+			ids := make([]*openpgp.Identity, 0)
 			for _, v := range key.Identities {
 				// Get only first
-				ids = append(ids, *v)
+				c := *v // copy
+				ids = append(ids, &c)
 			}
 			pm.keyIdentity[fp] = ids
 			pm.fp8to16[fp[8:]] = fp
@@ -121,6 +135,8 @@ func (pm *PGPManager) LoadKey(armoredKey string) (error, int) {
 				pgpLog.Info("	Loaded subkey %s for %s", subKeyFp, fp)
 				pm.subKeyToKey[subKeyFp] = fp
 			}
+
+			pm.krm.AddKey(key, true) // Add sticky public keys
 
 			keysLoaded++
 		}
@@ -201,14 +217,9 @@ func (pm *PGPManager) GetLoadedPrivateKeys() []models.KeyInfo {
 	for k, e := range pm.entities {
 		v := e.PrivateKey
 		z, _ := v.BitLength()
-		identifier := ""
-		if len(pm.keyIdentity[k]) > 0 {
-			ki := pm.keyIdentity[k][0]
-			identifier = ki.Name
-		}
 		keyInfo := models.KeyInfo{
 			FingerPrint:           k,
-			Identifier:            identifier,
+			Identifier:            SimpleIdentitiesToString(pm.keyIdentity[k]),
 			Bits:                  int(z),
 			ContainsPrivateKey:    true,
 			PrivateKeyIsDecrypted: pm.decryptedPrivateKeys[k] != nil,
@@ -290,7 +301,8 @@ func (pm *PGPManager) GetPublicKey(fingerPrint string) *packet.PublicKey {
 			ent = pm.entities[subMaster]
 			pubKey = ent.PrimaryKey
 		} else {
-			// Try fetch SKS
+			// Try PKS
+			ent = pm.krm.GetKey(fingerPrint)
 		}
 	} else {
 		pubKey = ent.PrimaryKey
@@ -435,12 +447,12 @@ func (pm *PGPManager) Encrypt(filename, fingerPrint string, data []byte, dataOnl
 	hints := &openpgp.FileHints{
 		FileName: filename,
 		IsBinary: true,
-		ModTime: time.Now(),
+		ModTime:  time.Now(),
 	}
 
 	config := &packet.Config{
-		DefaultHash: crypto.SHA512,
-		DefaultCipher: packet.CipherAES256,
+		DefaultHash:            crypto.SHA512,
+		DefaultCipher:          packet.CipherAES256,
 		DefaultCompressionAlgo: packet.CompressionZLIB,
 		CompressionConfig: &packet.CompressionConfig{
 			Level: 9,
@@ -542,7 +554,6 @@ func (pm *PGPManager) Decrypt(data string, dataOnly bool) (*models.GPGDecryptedD
 	if decv == nil {
 		return nil, fmt.Errorf("no unlocked key for decrypting packet")
 	}
-
 
 	keyRing := make(openpgp.EntityList, 1)
 	ent.PrivateKey = decv

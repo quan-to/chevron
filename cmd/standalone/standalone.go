@@ -50,8 +50,7 @@ func BenchmarkGeneration(runs, bits int) {
 		_, _ = pgpMan.GeneratePGPKey("", "", bits)
 	}
 	delta := time.Since(startTime)
-	keyTime := delta.Seconds()  / float64(runs)
-
+	keyTime := delta.Seconds() / float64(runs)
 
 	fmt.Printf("Took average of %f seconds to generate a %d bits key.\n", keyTime, bits)
 }
@@ -68,12 +67,23 @@ func main() {
 	// region Benchmark Generate
 
 	// endregion
+	// region Benchmark Generate
 	benchGen := kingpin.Command("benchgen", "Benchmark Key Generation")
 	benchGenBits := benchGen.Flag("bits", "Number of bits").Default("2048").Uint16()
 	benchGenRuns := benchGen.Flag("runs", "Number of runs").Default("20").Int()
+	// endregion
+
+	// region Encrypt
+	//encrypt := kingpin.Command("encrypt", "Encrypt Data")
+	//encryptRecipient := encrypt.Arg("recipient", "Fingerprint of who to encrypt for")
+	//encryptInput := encrypt.Arg("input", "Filename of the input")
+	//encryptOutput := encrypt.Arg("output", "Filename of the output (use - to stdout)")
+	// endregion
 
 	switch kingpin.Parse() {
-	case "gen": GenerateFlow(*genPassword, *genOutput, *genIdentifier, int(*genBits))
-	case "benchgen": BenchmarkGeneration(*benchGenRuns, int(*benchGenBits))
+	case "gen":
+		GenerateFlow(*genPassword, *genOutput, *genIdentifier, int(*genBits))
+	case "benchgen":
+		BenchmarkGeneration(*benchGenRuns, int(*benchGenBits))
 	}
 }
