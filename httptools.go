@@ -8,6 +8,7 @@ import (
 	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/models"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"strconv"
 	"time"
@@ -103,10 +104,14 @@ func LogExit(slog *SLog.Instance, r *http.Request, statusCode int, bodyLength in
 		statusCodeStr = aurora.Gray(statusCodeStr).Bold()
 	}
 
+	host, _, _ := net.SplitHostPort(r.RemoteAddr)
+
+	remote := aurora.Gray(host)
+
 	if ts != 0 {
-		slog.LogNoFormat("%-4s | %s (%8.2f ms) {%8d bytes} %s ", method, statusCodeStr, ts, bodyLength, aurora.Gray(r.URL.Path))
+		slog.LogNoFormat("%s (%8.2f ms) {%8d bytes} %-4s %s from %s", statusCodeStr, ts, bodyLength, method, aurora.Gray(r.URL.Path), remote)
 	} else {
-		slog.LogNoFormat("%-4s | %s {%8d bytes}          %s", method, statusCodeStr, bodyLength, aurora.Gray(r.URL.Path))
+		slog.LogNoFormat("%s {%8d bytes}          %-4s %s from %s", statusCodeStr, bodyLength, method, aurora.Gray(r.URL.Path), remote)
 	}
 }
 
