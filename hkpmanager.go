@@ -13,7 +13,7 @@ import (
 var hkpLog = SLog.Scope("HKP")
 
 func operationGet(options, searchData string, machineReadable, noModification bool) (error, string) {
-	hkpLog.Info("GET(%s, %s, %v, %v)", options, searchData, machineReadable, noModification)
+	//hkpLog.Info("GET(%s, %s, %v, %v)", options, searchData, machineReadable, noModification)
 	if searchData[:2] == "0x" {
 		var k = PKSGetKey(searchData[2:])
 		if k == "" {
@@ -32,16 +32,17 @@ func operationGet(options, searchData string, machineReadable, noModification bo
 }
 
 func operationIndex(options, searchData string, machineReadable, noModification, showFingerPrint, exactMatch bool) (error, string) {
-	hkpLog.Warn("Index(%s, %s, %v, %v, %v, %v) ==> Not Implemented", options, searchData, machineReadable, noModification, showFingerPrint, exactMatch)
+	//hkpLog.Warn("Index(%s, %s, %v, %v, %v, %v) ==> Not Implemented", options, searchData, machineReadable, noModification, showFingerPrint, exactMatch)
 	return errors.New("not implemented"), ""
 }
 
 func operationVIndex(options, searchData string, machineReadable, noModification, showFingerPrint, exactMatch bool) (error, string) {
-	hkpLog.Warn("VIndex(%s, %s, %v, %v, %v, %v) ==> Not Implemented", options, searchData, machineReadable, noModification, showFingerPrint, exactMatch)
+	//hkpLog.Warn("VIndex(%s, %s, %v, %v, %v, %v) ==> Not Implemented", options, searchData, machineReadable, noModification, showFingerPrint, exactMatch)
 	return errors.New("not implemented"), ""
 }
 
 func hkpLookup(w http.ResponseWriter, r *http.Request) {
+	InitHTTPTimer(r)
 	q := r.URL.Query()
 	op := q.Get("op")
 	options := q.Get("options")
@@ -65,14 +66,16 @@ func hkpLookup(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		if err.Error() == "not found" {
-			w.WriteHeader(http.StatusNotFound)
-			_, _ = w.Write([]byte(err.Error()))
+			CatchAllRouter(w, r, hkpLog)
 			return
 		}
 
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = w.Write([]byte("Internal Server Error"))
+		if err.Error() == "not implemented" {
+			NotImplemented(w, r, hkpLog)
+			return
+		}
 
+		InternalServerError("Internal Server Error", err, w, r, hkpLog)
 		return
 	}
 
@@ -82,6 +85,7 @@ func hkpLookup(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte(result))
+	LogExit(hkpLog, r, http.StatusOK, len(result))
 }
 
 func hkpAdd(w http.ResponseWriter, r *http.Request) {
@@ -89,6 +93,6 @@ func hkpAdd(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddHKPEndpoints(r *mux.Router) {
-	r.HandleFunc("/pks/lookup", hkpLookup).Methods("GET")
-	r.HandleFunc("/pks/add", hkpAdd).Methods("POST")
+	r.HandleFunc("/lookup", hkpLookup).Methods("GET")
+	r.HandleFunc("/add", hkpAdd).Methods("POST")
 }

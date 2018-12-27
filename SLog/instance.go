@@ -12,6 +12,14 @@ type Instance struct {
 	scope string
 }
 
+func (i *Instance) LogNoFormat(str interface{}, v ...interface{}) *Instance {
+	if infoEnabled {
+		var c = aurora.Cyan
+		log.Printf(logBaseFormat, c(aurora.Bold(i.scope)).String(), fmt.Sprintf(asString(str), v...))
+	}
+	return i
+}
+
 func (i *Instance) Log(str interface{}, v ...interface{}) *Instance {
 	if infoEnabled {
 		var c = aurora.Cyan
