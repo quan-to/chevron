@@ -1,12 +1,14 @@
 package remote_signer
 
 import (
+	"bytes"
 	"crypto"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"github.com/quan-to/remote-signer/models"
 	"golang.org/x/crypto/openpgp"
+	"golang.org/x/crypto/openpgp/armor"
 	"golang.org/x/crypto/openpgp/packet"
 	"regexp"
 	"strings"
@@ -116,6 +118,65 @@ func GetFingerPrintFromKey(armored string) string {
 	}
 
 	return ""
+}
+
+func GetFingerPrintsFromEncryptedMessageRaw(rawB64Data string) ([]string, error) {
+	var fps = make([]string, 0)
+	data, err := base64.StdEncoding.DecodeString(rawB64Data)
+
+	if err != nil {
+		return nil, err
+	}
+
+	r := bytes.NewReader(data)
+
+	reader := packet.NewReader(r)
+
+	for {
+		p, err := reader.Next()
+
+		if err != nil {
+			break
+		}
+
+		switch v := p.(type) {
+		case *packet.EncryptedKey:
+			fps = append(fps, IssuerKeyIdToFP16(v.KeyId))
+		}
+	}
+
+	return fps, nil
+}
+
+func GetFingerPrintsFromEncryptedMessage(armored string) ([]string, error) {
+	var fps = make([]string, 0)
+	aem := strings.NewReader(armored)
+	block, err := armor.Decode(aem)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if block.Type != "PGP MESSAGE" {
+		return nil, fmt.Errorf("expected pgp message but got: %s", block.Type)
+	}
+
+	reader := packet.NewReader(block.Body)
+
+	for {
+		p, err := reader.Next()
+
+		if err != nil {
+			break
+		}
+
+		switch v := p.(type) {
+		case *packet.EncryptedKey:
+			fps = append(fps, IssuerKeyIdToFP16(v.KeyId))
+		}
+	}
+
+	return fps, nil
 }
 
 func CreateEntityFromKeys(name, comment, email string, lifeTimeInSecs uint32, pubKey *packet.PublicKey, privKey *packet.PrivateKey) *openpgp.Entity {

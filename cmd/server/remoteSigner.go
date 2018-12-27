@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/SLog"
-	"log"
 )
 
 var slog = SLog.Scope("RemoteSigner")
@@ -32,12 +31,4 @@ func main() {
 	for _, v := range k.GetLoadedPrivateKeys() {
 		slog.Info("		Key: %s - Private Key Decrypted: %t", v.Identifier, v.PrivateKeyIsDecrypted)
 	}
-
-	key, err := k.GeneratePGPKey("TEST", "12345", 16384)
-
-	if err != nil {
-		slog.Error(err)
-	}
-
-	log.Println(key)
 }
