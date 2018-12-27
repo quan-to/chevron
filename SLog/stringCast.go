@@ -17,6 +17,8 @@ func asString(str interface{}) string {
 		return "" // Linter bug fix
 	case StringCast:
 		return v.String()
+	case error:
+		return v.Error()
 	case string:
 		return v
 	}

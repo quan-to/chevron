@@ -53,4 +53,11 @@ func SetError(enabled bool) {
 	errorEnabled = enabled
 }
 
+func SetTestMode() {
+	SetDebug(false)
+	SetWarning(false)
+	SetInfo(false)
+	SetError(false)
+}
+
 // endregion

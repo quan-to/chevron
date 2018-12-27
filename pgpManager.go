@@ -1,12 +1,16 @@
 package remote_signer
 
 import (
+	"bufio"
+	"bytes"
+	"crypto"
 	"encoding/base64"
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/models"
 	"golang.org/x/crypto/openpgp"
+	"golang.org/x/crypto/openpgp/armor"
 	"golang.org/x/crypto/openpgp/packet"
 	"io/ioutil"
 	"path"
@@ -19,20 +23,18 @@ var pgpLog = SLog.Scope("PGPManager")
 type PGPManager struct {
 	sync.Mutex
 	keyFolder            string
-	keyIdentity			 map[string][]openpgp.Identity
-	publicKeys           map[string]*packet.PublicKey
-	privateKeys          map[string]*packet.PrivateKey
+	keyIdentity          map[string][]openpgp.Identity
 	decryptedPrivateKeys map[string]*packet.PrivateKey
+	entities             map[string]*openpgp.Entity
 	fp8to16              map[string]string
 }
 
 func MakePGPManager() *PGPManager {
 	return &PGPManager{
 		keyFolder:            PrivateKeyFolder,
-		keyIdentity:		  make(map[string][]openpgp.Identity),
-		publicKeys:           make(map[string]*packet.PublicKey),
-		privateKeys:          make(map[string]*packet.PrivateKey),
+		keyIdentity:          make(map[string][]openpgp.Identity),
 		decryptedPrivateKeys: make(map[string]*packet.PrivateKey),
+		entities:             make(map[string]*openpgp.Entity),
 		fp8to16:              make(map[string]string),
 	}
 }
@@ -40,16 +42,20 @@ func MakePGPManager() *PGPManager {
 func (pm *PGPManager) LoadKeys() {
 	pm.Lock()
 	defer pm.Unlock()
+
 	pgpLog.Info("Loading keys from %s", pm.keyFolder)
+
 	files, err := ioutil.ReadDir(pm.keyFolder)
 	if err != nil {
 		pgpLog.Fatal("Error listing keys: %s", err)
 	}
+
 	keysLoaded := 0
+
 	for _, file := range files {
 		fileName := file.Name()
 		filePath := path.Join(pm.keyFolder, fileName)
-		if !file.IsDir() && fileName[:len(KeyPrefix)] == KeyPrefix {
+		if !file.IsDir() && len(fileName) > len(KeyPrefix) && fileName[:len(KeyPrefix)] == KeyPrefix {
 			pgpLog.Info("Loading key %s", fileName)
 			data, err := ioutil.ReadFile(filePath)
 			if err != nil {
@@ -85,9 +91,8 @@ func (pm *PGPManager) LoadKeys() {
 						ids = append(ids, *v)
 					}
 					pm.keyIdentity[fp] = ids
-					pm.privateKeys[fp] = key.PrivateKey
-					pm.publicKeys[fp] = key.PrimaryKey
 					pm.fp8to16[fp[8:]] = fp
+					pm.entities[fp] = key
 					pgpLog.Info("Loaded private key %s", fp)
 					keysLoaded++
 				}
@@ -131,7 +136,7 @@ func (pm *PGPManager) UnlockKey(fp, password string) error {
 		return nil
 	}
 
-	pk := pm.privateKeys[fp]
+	pk := pm.entities[fp].PrivateKey
 
 	if pk == nil {
 		return errors.New(fmt.Sprintf("private key %s not found", fp))
@@ -150,11 +155,11 @@ func (pm *PGPManager) UnlockKey(fp, password string) error {
 	return nil
 }
 
-
 func (pm *PGPManager) GetLoadedPrivateKeys() []models.KeyInfo {
 	keyInfos := make([]models.KeyInfo, 0)
 
-	for k, v := range pm.privateKeys {
+	for k, e := range pm.entities {
+		v := e.PrivateKey
 		z, _ := v.BitLength()
 		identifier := ""
 		if len(pm.keyIdentity[k]) > 0 {
@@ -162,10 +167,10 @@ func (pm *PGPManager) GetLoadedPrivateKeys() []models.KeyInfo {
 			identifier = ki.Name
 		}
 		keyInfo := models.KeyInfo{
-			FingerPrint: k,
-			Identifier: identifier,
-			Bits: int(z),
-			ContainsPrivateKey: true,
+			FingerPrint:           k,
+			Identifier:            identifier,
+			Bits:                  int(z),
+			ContainsPrivateKey:    true,
 			PrivateKeyIsDecrypted: pm.decryptedPrivateKeys[k] != nil,
 		}
 		keyInfos = append(keyInfos, keyInfo)
@@ -192,4 +197,124 @@ func (pm *PGPManager) SavePrivateKey(fingerPrint, armoredData string) error {
 	}
 
 	return ioutil.WriteFile(filePath, data, 0660)
+}
+
+func (pm *PGPManager) SignData(fingerPrint string, data []byte, hashAlgorithm crypto.Hash) (string, error) {
+	fingerPrint = pm.sanitizeFingerprint(fingerPrint)
+	pm.Lock()
+	pk := pm.decryptedPrivateKeys[fingerPrint]
+
+	if pk == nil {
+		pm.Unlock()
+		return "", errors.New(fmt.Sprintf("key %s is not decrypt or not loaded", fingerPrint))
+	}
+
+	vpk := *pk
+	ent := *pm.entities[fingerPrint]
+	ent.PrivateKey = &vpk
+	pm.Unlock()
+
+	d := bytes.NewReader(data)
+
+	var b bytes.Buffer
+	bw := bufio.NewWriter(&b)
+
+	config := &packet.Config{
+		DefaultHash: hashAlgorithm,
+	}
+
+	err := openpgp.ArmoredDetachSign(bw, &ent, d, config)
+	if err != nil {
+		return "", err
+	}
+	err = bw.Flush()
+	if err != nil {
+		return "", err
+	}
+
+	return string(b.Bytes()), nil
+}
+
+func (pm *PGPManager) GetPublicKey(fingerPrint string) *packet.PublicKey {
+	var pubKey *packet.PublicKey
+	pm.Lock()
+	defer pm.Unlock()
+	fingerPrint = pm.sanitizeFingerprint(fingerPrint)
+
+	ent := pm.entities[fingerPrint]
+
+	if ent == nil {
+		// Try fetch SKS
+		// TODO
+	} else {
+		pubKey = ent.PrimaryKey
+	}
+
+	return pubKey
+}
+
+func (pm *PGPManager) VerifySignature(data []byte, signature string) (bool, error) {
+	var issuerKeyId uint64
+	var publicKey *packet.PublicKey
+	var fingerPrint string
+
+	signature = signatureFix(signature)
+	b := bytes.NewReader([]byte(signature))
+	block, err := armor.Decode(b)
+	if err != nil {
+		return false, err
+	}
+
+	if block.Type != openpgp.SignatureType {
+		return false, errors.New("openpgp packet is not signature")
+	}
+
+	reader := packet.NewReader(block.Body)
+	for {
+		pkt, err := reader.Next()
+
+		if err != nil {
+			return false, err
+		}
+
+		switch sig := pkt.(type) {
+		case *packet.Signature:
+			if sig.IssuerKeyId == nil {
+				return false, errors.New("signature doesn't have an issuer")
+			}
+			issuerKeyId = *sig.IssuerKeyId
+			fingerPrint = IssuerKeyIdToFP16(issuerKeyId)
+		case *packet.SignatureV3:
+			issuerKeyId = sig.IssuerKeyId
+			fingerPrint = IssuerKeyIdToFP16(issuerKeyId)
+		default:
+			return false, errors.New("non signature packet found")
+		}
+
+		if len(fingerPrint) == 16 {
+			publicKey = pm.GetPublicKey(fingerPrint)
+			if publicKey != nil {
+				break
+			}
+		}
+	}
+
+	if publicKey == nil {
+		return false, errors.New("cannot find public key to verify signature")
+	}
+
+	keyRing := make(openpgp.EntityList, 1)
+	keyRing[0] = pm.entities[fingerPrint]
+
+	dr := bytes.NewReader(data)
+	sr := strings.NewReader(signature)
+
+	_, err = openpgp.CheckArmoredDetachedSignature(keyRing, dr, sr)
+
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+
 }
