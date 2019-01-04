@@ -188,6 +188,7 @@ func SearchGPGKeyByName(conn *r.Session, name string, pageStart, pageEnd int) []
 }
 
 func AsciiArmored2GPGKey(asciiArmored string) GPGKey {
+	var key GPGKey
 	reader := bytes.NewBuffer([]byte(asciiArmored))
 	z, err := openpgp.ReadArmoredKeyRing(reader)
 
@@ -195,10 +196,11 @@ func AsciiArmored2GPGKey(asciiArmored string) GPGKey {
 		panic(err)
 	}
 
-	for _, entity := range z {
+	if len(z) > 0 {
+		entity := z[0]
 		pubKey := entity.PrimaryKey
 		keyBits, _ := pubKey.BitLength()
-		key := GPGKey{
+		key = GPGKey{
 			FullFingerPrint:       strings.ToUpper(hex.EncodeToString(pubKey.Fingerprint[:])),
 			AsciiArmoredPublicKey: asciiArmored,
 			Emails:                make([]string, 0),

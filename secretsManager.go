@@ -55,7 +55,7 @@ func MakeSecretsManager() *SecretsManager {
 	sm.gpg.LoadKeys()
 
 	if MasterGPGKeyBase64Encoded {
-		masterKeyBytes, err = base64.StdEncoding.DecodeString(string(masterKeyBytes))
+		_, err = base64.StdEncoding.DecodeString(string(masterKeyBytes))
 		if err != nil {
 			smLog.Fatal("Error decoding master key from base64: %s\nIs Master Key really base64 encoded?", err)
 		}

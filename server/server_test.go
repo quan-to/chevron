@@ -83,6 +83,7 @@ func executeRequest(req *http.Request) *httptest.ResponseRecorder {
 
 func TestMain(m *testing.M) {
 	QuantoError.EnableStackTrace()
+	SLog.SetTestMode()
 
 	remote_signer.PrivateKeyFolder = ".."
 	remote_signer.KeyPrefix = "testkey_"
@@ -109,6 +110,8 @@ func TestMain(m *testing.M) {
 
 	os.Exit(code)
 }
+
+// region GPG Endpoint Tests
 func TestGenerateKey(t *testing.T) {
 	genKeyBody := models.GPGGenerateKeyData{
 		Identifier: "Test",
@@ -184,6 +187,8 @@ func TestDecryptDataOnly(t *testing.T) {
 
 	decryptedBytes, err := base64.StdEncoding.DecodeString(decryptedData.Base64Data)
 
+	errorDie(err, t)
+
 	if string(decryptedBytes) != testSignatureData {
 		t.Errorf("Expected \"%s\" got \"%s\"", testSignatureData, string(decryptedBytes))
 	}
@@ -224,6 +229,8 @@ func TestDecrypt(t *testing.T) {
 	errorDie(err, t)
 
 	decryptedBytes, err := base64.StdEncoding.DecodeString(decryptedData.Base64Data)
+
+	errorDie(err, t)
 
 	if string(decryptedBytes) != testSignatureData {
 		t.Errorf("Expected \"%s\" got \"%s\"", testSignatureData, string(decryptedBytes))
@@ -430,3 +437,5 @@ func TestSignQuanto(t *testing.T) {
 	}
 	// endregion
 }
+
+// endregion

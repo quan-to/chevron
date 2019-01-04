@@ -286,7 +286,7 @@ func (pm *PGPManager) SignData(fingerPrint string, data []byte, hashAlgorithm cr
 		return "", err
 	}
 
-	return string(b.Bytes()), nil
+	return b.String(), nil
 }
 
 func (pm *PGPManager) GetPublicKey(fingerPrint string) *packet.PublicKey {
@@ -307,7 +307,9 @@ func (pm *PGPManager) GetPublicKey(fingerPrint string) *packet.PublicKey {
 			// Try PKS
 			ent = pm.krm.GetKey(fingerPrint)
 		}
-	} else {
+	}
+
+	if ent != nil {
 		pubKey = ent.PrimaryKey
 	}
 
@@ -509,9 +511,8 @@ func (pm *PGPManager) Encrypt(filename, fingerPrint string, data []byte, dataOnl
 
 func (pm *PGPManager) Decrypt(data string, dataOnly bool) (*models.GPGDecryptedData, error) {
 	var err error
+	var fps []string
 	ret := &models.GPGDecryptedData{}
-
-	fps := make([]string, 0)
 
 	if dataOnly {
 		fps, err = GetFingerPrintsFromEncryptedMessageRaw(data)

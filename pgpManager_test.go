@@ -189,8 +189,6 @@ func TestGenerateKey(t *testing.T) {
 
 	fp, _ := GetFingerPrintFromKey(key)
 
-	t.Logf("Key Fingerprint: %s", fp)
-
 	// Unlock Key
 	err = pgpMan.UnlockKey(fp, testKeyPassword)
 	if err != nil {

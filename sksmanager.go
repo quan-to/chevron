@@ -14,8 +14,11 @@ func GetSKSKey(fingerPrint string) string {
 		panic(err)
 	}
 
-	defer response.Body.Close()
 	contents, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		panic(err)
+	}
+	_ = response.Body.Close()
 
 	return string(contents)
 }

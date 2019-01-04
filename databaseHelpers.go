@@ -15,6 +15,10 @@ func getTableIndexes(tableName string) []string {
 
 	z, err := c.Interface()
 
+	if err != nil {
+		panic(err)
+	}
+
 	var idxI = z.([]interface{})
 	var idx = make([]string, len(idxI))
 
@@ -36,6 +40,10 @@ func getDatabases() []string {
 
 	z, err := c.Interface()
 
+	if err != nil {
+		panic(err)
+	}
+
 	var dbsI = z.([]interface{})
 	var dbs = make([]string, len(dbsI))
 
@@ -56,6 +64,10 @@ func getTables() []string {
 	}
 
 	z, err := c.Interface()
+
+	if err != nil {
+		panic(err)
+	}
 
 	var tbsI = z.([]interface{})
 	var tbs = make([]string, len(tbsI))
