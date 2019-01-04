@@ -35,7 +35,15 @@ func MakeSecretsManager() *SecretsManager {
 		return sm
 	}
 
-	masterKeyFp := GetFingerPrintFromKey(string(masterKeyBytes))
+	masterKeyFp, err := GetFingerPrintFromKey(string(masterKeyBytes))
+
+	if err != nil {
+		smLog.Error("Error loading master key from %s: %s", MasterGPGKeyPath, err)
+		smLog.Error("I'm useless :(")
+		sm.amIUseless = true
+		return sm
+	}
+
 	smLog.Info("Master Key FingerPrint: %s", masterKeyFp)
 
 	sm.masterKeyFingerPrint = masterKeyFp

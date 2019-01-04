@@ -1,13 +1,13 @@
 package main
 
 import (
-	"fmt"
-	"github.com/gorilla/mux"
 	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/QuantoError"
 	"github.com/quan-to/remote-signer/SLog"
-	"log"
-	"net/http"
+	"github.com/quan-to/remote-signer/server"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 var slog = SLog.Scope("RemoteSigner")
@@ -19,29 +19,19 @@ func main() {
 
 	gpg.LoadKeys()
 
-	ge := remote_signer.MakeGPGEndpoint(sm, gpg)
+	stop := server.RunRemoteSignerServer(slog, sm, gpg)
+	localStop := make(chan bool)
 
-	// UnlockKey("0016A9CA870AFA59", "I think you will never guess")
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 
-	r := mux.NewRouter()
-	remote_signer.AddHKPEndpoints(r.PathPrefix("/pks").Subrouter())
-	ge.AttachHandlers(r.PathPrefix("/gpg").Subrouter())
+	go func() {
+		<-c               // Wait for SIGTERM (Ctrl + C)
+		stop <- true      // Send stop signal to HTTP
+		<-stop            // Wait HTTP to Cleanup
+		localStop <- true // Send Local stop
+	}()
 
-	r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		remote_signer.InitHTTPTimer(r)
-		remote_signer.CatchAllRouter(w, r, slog)
-	})
-
-	listenAddr := fmt.Sprintf("0.0.0.0:%d", remote_signer.HttpPort)
-
-	srv := &http.Server{
-		Addr:    listenAddr,
-		Handler: r, // Pass our instance of gorilla/mux in.
-	}
-
-	slog.Info("Remote Signer is now listening at %s", listenAddr)
-
-	if err := srv.ListenAndServe(); err != nil {
-		log.Println(err)
-	}
+	<-localStop
+	slog.Info("Closing Main Routine")
 }

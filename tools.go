@@ -41,6 +41,19 @@ func IssuerKeyIdToFP16(issuerKeyId uint64) string {
 	}
 }
 
+func GPG2Quanto(signature, fingerPrint, hash string) string {
+	hashName := strings.ToUpper(hash)
+	cutSig := ""
+
+	s := strings.Split(strings.Trim(signature, " \r"), "\n")
+
+	for i := 2; i < len(s)-1; i++ {
+		cutSig += s[i]
+	}
+
+	return fmt.Sprintf("%s_%s_%s", fingerPrint, hashName, cutSig)
+}
+
 // region CRC24 from https://github.com/golang/crypto/blob/master/openpgp/armor/armor.go
 const crc24Init = 0xb704ce
 const crc24Poly = 0x1864cfb
@@ -103,22 +116,22 @@ func signatureFix(sig string) string {
 	return sig
 }
 
-func GetFingerPrintFromKey(armored string) string {
+func GetFingerPrintFromKey(armored string) (string, error) {
 	kr := strings.NewReader(armored)
 	keys, err := openpgp.ReadArmoredKeyRing(kr)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	for _, key := range keys {
 		if key.PrivateKey != nil {
 			fp := ByteFingerPrint2FP16(key.PrimaryKey.Fingerprint[:])
 
-			return fp
+			return fp, nil
 		}
 	}
 
-	return ""
+	return "", fmt.Errorf("cannot read key")
 }
 
 func GetFingerPrintsFromEncryptedMessageRaw(rawB64Data string) ([]string, error) {

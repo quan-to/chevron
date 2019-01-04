@@ -22,7 +22,7 @@ import (
 	"time"
 )
 
-const minKeyBits = 2048 // Should be safe until we have decent Quantum Computers
+const MinKeyBits = 2048 // Should be safe until we have decent Quantum Computers
 
 var pgpLog = SLog.Scope("PGPManager")
 
@@ -384,8 +384,8 @@ func (pm *PGPManager) VerifySignature(data []byte, signature string) (bool, erro
 }
 
 func (pm *PGPManager) GeneratePGPKey(identifier, password string, numBits int) (string, error) {
-	if numBits < minKeyBits {
-		return "", errors.New(fmt.Sprintf("dont generate RSA keys with less than %d, its not safe. try use 3072 or higher", minKeyBits))
+	if numBits < MinKeyBits {
+		return "", errors.New(fmt.Sprintf("dont generate RSA keys with less than %d, its not safe. try use 3072 or higher", MinKeyBits))
 	}
 
 	privateKey, err := rsa.GenerateKey(rand.Reader, numBits)

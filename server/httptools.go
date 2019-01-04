@@ -1,4 +1,4 @@
-package remote_signer
+package server
 
 import (
 	"encoding/json"
@@ -62,10 +62,10 @@ func UnmarshalBodyOrDie(outData interface{}, w http.ResponseWriter, r *http.Requ
 }
 
 func InvalidFieldData(field string, message string, w http.ResponseWriter, r *http.Request, logI *SLog.Instance) {
-	WriteJSON(QuantoError.New(QuantoError.InvalidFieldData, field, message, nil), 200, w, r, logI)
+	WriteJSON(QuantoError.New(QuantoError.InvalidFieldData, field, message, nil), 400, w, r, logI)
 }
 func NotImplemented(w http.ResponseWriter, r *http.Request, logI *SLog.Instance) {
-	WriteJSON(QuantoError.New(QuantoError.NotImplemented, "server", "This call is not implemented", nil), 200, w, r, logI)
+	WriteJSON(QuantoError.New(QuantoError.NotImplemented, "server", "This call is not implemented", nil), 400, w, r, logI)
 }
 
 func CatchAllError(data interface{}, w http.ResponseWriter, r *http.Request, logI *SLog.Instance) {
@@ -94,6 +94,8 @@ func LogExit(slog *SLog.Instance, r *http.Request, statusCode int, bodyLength in
 
 	statusCodeStr := aurora.Black(fmt.Sprintf("[%d]", statusCode))
 	switch statusCode {
+	case 400:
+		statusCodeStr = aurora.Red(statusCodeStr).Inverse().Bold()
 	case 404:
 		statusCodeStr = aurora.Red(statusCodeStr).Inverse().Bold()
 	case 500:

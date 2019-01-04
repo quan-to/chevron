@@ -175,7 +175,7 @@ func TestEncrypt(t *testing.T) {
 }
 
 func TestGenerateKey(t *testing.T) {
-	key, err := pgpMan.GeneratePGPKey("HUE", testKeyPassword, minKeyBits)
+	key, err := pgpMan.GeneratePGPKey("HUE", testKeyPassword, MinKeyBits)
 
 	if err != nil {
 		t.Error(err)
@@ -187,7 +187,7 @@ func TestGenerateKey(t *testing.T) {
 		t.Error(err)
 	}
 
-	fp := GetFingerPrintFromKey(key)
+	fp, _ := GetFingerPrintFromKey(key)
 
 	t.Logf("Key Fingerprint: %s", fp)
 
