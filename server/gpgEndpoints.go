@@ -3,6 +3,7 @@ package server
 import (
 	"crypto"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/quan-to/remote-signer"
@@ -32,6 +33,73 @@ func (ge *GPGEndpoint) AttachHandlers(r *mux.Router) {
 	r.HandleFunc("/signQuanto", ge.signQuanto).Methods("POST")
 	r.HandleFunc("/verifySignature", ge.verifySignature).Methods("POST")
 	r.HandleFunc("/verifySignatureQuanto", ge.verifySignatureQuanto).Methods("POST")
+	r.HandleFunc("/encrypt", ge.encrypt).Methods("POST")
+	r.HandleFunc("/decrypt", ge.decrypt).Methods("POST")
+}
+
+func (ge *GPGEndpoint) decrypt(w http.ResponseWriter, r *http.Request) {
+	var data models.GPGDecryptData
+	if !UnmarshalBodyOrDie(&data, w, r, geLog) {
+		return
+	}
+
+	defer func() {
+		if rec := recover(); rec != nil {
+			CatchAllError(rec, w, r, geLog)
+		}
+	}()
+
+	decrypted, err := ge.gpg.Decrypt(data.AsciiArmoredData, data.DataOnly)
+
+	if err != nil {
+		InvalidFieldData("Decryption", fmt.Sprintf("Error decrypting data: %s", err.Error()), w, r, geLog)
+		return
+	}
+
+	d, err := json.Marshal(*decrypted)
+
+	if err != nil {
+		InternalServerError("There was an error processing your request. Please try again.", nil, w, r, geLog)
+		return
+	}
+
+	w.Header().Set("Content-Type", models.MimeJSON)
+	w.WriteHeader(200)
+	n, _ := w.Write([]byte(d))
+	LogExit(geLog, r, 200, n)
+}
+
+func (ge *GPGEndpoint) encrypt(w http.ResponseWriter, r *http.Request) {
+	var data models.GPGEncryptData
+
+	if !UnmarshalBodyOrDie(&data, w, r, geLog) {
+		return
+	}
+
+	defer func() {
+		if rec := recover(); rec != nil {
+			CatchAllError(rec, w, r, geLog)
+		}
+	}()
+
+	bytes, err := base64.StdEncoding.DecodeString(data.Base64Data)
+
+	if err != nil {
+		InvalidFieldData("Base64Data", err.Error(), w, r, geLog)
+		return
+	}
+
+	encrypted, err := ge.gpg.Encrypt(data.Filename, data.FingerPrint, bytes, data.DataOnly)
+
+	if err != nil {
+		InvalidFieldData("Encryption", fmt.Sprintf("Error encrypting data: %s", err.Error()), w, r, geLog)
+		return
+	}
+
+	w.Header().Set("Content-Type", models.MimeText)
+	w.WriteHeader(200)
+	n, _ := w.Write([]byte(encrypted))
+	LogExit(geLog, r, 200, n)
 }
 
 func (ge *GPGEndpoint) verifySignature(w http.ResponseWriter, r *http.Request) {

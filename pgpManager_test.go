@@ -222,7 +222,6 @@ func BenchmarkSign(b *testing.B) {
 		}
 	}
 }
-
 func BenchmarkVerifySignature(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_, err := pgpMan.VerifySignature(testData, testSignatureSignature)
@@ -231,7 +230,6 @@ func BenchmarkVerifySignature(b *testing.B) {
 		}
 	}
 }
-
 func BenchmarkVerifySignatureStringData(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_, err := pgpMan.VerifySignatureStringData(testSignatureData, testSignatureSignature)
@@ -240,7 +238,6 @@ func BenchmarkVerifySignatureStringData(b *testing.B) {
 		}
 	}
 }
-
 func BenchmarkEncryptASCII(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_, err := pgpMan.Encrypt("", testKeyFingerprint, testData, false)
@@ -257,7 +254,6 @@ func BenchmarkEncryptDataOnly(b *testing.B) {
 		}
 	}
 }
-
 func BenchmarkKeyGenerate2048(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_, err := pgpMan.GeneratePGPKey("", "123456789", 2048)
@@ -266,7 +262,6 @@ func BenchmarkKeyGenerate2048(b *testing.B) {
 		}
 	}
 }
-
 func BenchmarkKeyGenerate3072(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_, err := pgpMan.GeneratePGPKey("", "123456789", 3072)
@@ -275,7 +270,6 @@ func BenchmarkKeyGenerate3072(b *testing.B) {
 		}
 	}
 }
-
 func BenchmarkKeyGenerate4096(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_, err := pgpMan.GeneratePGPKey("", "123456789", 4096)

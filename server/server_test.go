@@ -109,7 +109,6 @@ func TestMain(m *testing.M) {
 
 	os.Exit(code)
 }
-
 func TestGenerateKey(t *testing.T) {
 	genKeyBody := models.GPGGenerateKeyData{
 		Identifier: "Test",
@@ -147,7 +146,89 @@ func TestGenerateKey(t *testing.T) {
 
 	errorDie(err, t)
 }
+func TestDecryptDataOnly(t *testing.T) {
 
+	decryptBody := models.GPGDecryptData{
+		DataOnly:         true,
+		AsciiArmoredData: testDecryptDataOnly,
+	}
+
+	body, err := json.Marshal(decryptBody)
+
+	errorDie(err, t)
+
+	r := bytes.NewReader(body)
+
+	req, err := http.NewRequest("POST", "/gpg/decrypt", r)
+
+	errorDie(err, t)
+
+	res := executeRequest(req)
+
+	d, err := ioutil.ReadAll(res.Body)
+
+	if res.Code != 200 {
+		var errObj QuantoError.ErrorObject
+		err := json.Unmarshal(d, &errObj)
+		errorDie(err, t)
+		errorDie(fmt.Errorf(errObj.Message), t)
+	}
+
+	errorDie(err, t)
+
+	var decryptedData models.GPGDecryptedData
+
+	err = json.Unmarshal(d, &decryptedData)
+
+	errorDie(err, t)
+
+	decryptedBytes, err := base64.StdEncoding.DecodeString(decryptedData.Base64Data)
+
+	if string(decryptedBytes) != testSignatureData {
+		t.Errorf("Expected \"%s\" got \"%s\"", testSignatureData, string(decryptedBytes))
+	}
+}
+func TestDecrypt(t *testing.T) {
+	decryptBody := models.GPGDecryptData{
+		DataOnly:         false,
+		AsciiArmoredData: testDecryptDataAscii,
+	}
+
+	body, err := json.Marshal(decryptBody)
+
+	errorDie(err, t)
+
+	r := bytes.NewReader(body)
+
+	req, err := http.NewRequest("POST", "/gpg/decrypt", r)
+
+	errorDie(err, t)
+
+	res := executeRequest(req)
+
+	d, err := ioutil.ReadAll(res.Body)
+
+	if res.Code != 200 {
+		var errObj QuantoError.ErrorObject
+		err := json.Unmarshal(d, &errObj)
+		errorDie(err, t)
+		errorDie(fmt.Errorf(errObj.Message), t)
+	}
+
+	errorDie(err, t)
+
+	var decryptedData models.GPGDecryptedData
+
+	err = json.Unmarshal(d, &decryptedData)
+
+	errorDie(err, t)
+
+	decryptedBytes, err := base64.StdEncoding.DecodeString(decryptedData.Base64Data)
+
+	if string(decryptedBytes) != testSignatureData {
+		t.Errorf("Expected \"%s\" got \"%s\"", testSignatureData, string(decryptedBytes))
+	}
+}
 func TestVerifySignature(t *testing.T) {
 	verifyBody := models.GPGVerifySignatureData{
 		Base64Data: base64.StdEncoding.EncodeToString([]byte(testSignatureData)),
@@ -181,7 +262,6 @@ func TestVerifySignature(t *testing.T) {
 		t.Errorf("Expected OK got %s", string(d))
 	}
 }
-
 func TestVerifySignatureQuanto(t *testing.T) {
 	quantoSignature := remote_signer.GPG2Quanto(testSignatureSignature, testKeyFingerprint, "SHA512")
 
@@ -218,7 +298,6 @@ func TestVerifySignatureQuanto(t *testing.T) {
 		t.Errorf("Expected OK got %s", string(d))
 	}
 }
-
 func TestSign(t *testing.T) {
 	// region Generate Signature
 	signBody := models.GPGSignData{
@@ -285,7 +364,6 @@ func TestSign(t *testing.T) {
 	}
 	// endregion
 }
-
 func TestSignQuanto(t *testing.T) {
 	// region Generate Signature
 	signBody := models.GPGSignData{
