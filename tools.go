@@ -41,6 +41,31 @@ func IssuerKeyIdToFP16(issuerKeyId uint64) string {
 	}
 }
 
+func Quanto2GPG(signature string) string {
+	sig := "-----BEGIN PGP SIGNATURE-----\nVersion: Quanto\n"
+
+	s := strings.Split(signature, "$")
+	if len(s) != 3 {
+		s = strings.Split(signature, "_")
+	}
+
+	if len(s) != 3 {
+		return ""
+	}
+
+	gpgSig := s[2]
+	checkSum := gpgSig[len(gpgSig)-5:]
+	for i := 0; i < len(gpgSig)-5; i++ {
+		if i%64 == 0 {
+			sig += "\n"
+		}
+
+		sig += string(gpgSig[i])
+	}
+
+	return sig + "\n" + checkSum + "\n-----END PGP SIGNATURE-----"
+}
+
 func GPG2Quanto(signature, fingerPrint, hash string) string {
 	hashName := strings.ToUpper(hash)
 	cutSig := ""
@@ -53,27 +78,6 @@ func GPG2Quanto(signature, fingerPrint, hash string) string {
 
 	return fmt.Sprintf("%s_%s_%s", fingerPrint, hashName, cutSig)
 }
-
-// region CRC24 from https://github.com/golang/crypto/blob/master/openpgp/armor/armor.go
-const crc24Init = 0xb704ce
-const crc24Poly = 0x1864cfb
-
-// crc24 calculates the OpenPGP checksum as specified in RFC 4880, section 6.1
-func crc24(d []byte) uint32 {
-	crc := uint32(crc24Init)
-	for _, b := range d {
-		crc ^= uint32(b) << 16
-		for i := 0; i < 8; i++ {
-			crc <<= 1
-			if crc&0x1000000 != 0 {
-				crc ^= crc24Poly
-			}
-		}
-	}
-	return crc
-}
-
-// endregion
 
 func signatureFix(sig string) string {
 	if pgpsig.MatchString(sig) {
@@ -302,3 +306,24 @@ func ReadKeyToEntity(asciiArmored string) (*openpgp.Entity, error) {
 
 	return nil, errors.New("no keys found")
 }
+
+// region CRC24 from https://github.com/golang/crypto/blob/master/openpgp/armor/armor.go
+const crc24Init = 0xb704ce
+const crc24Poly = 0x1864cfb
+
+// crc24 calculates the OpenPGP checksum as specified in RFC 4880, section 6.1
+func crc24(d []byte) uint32 {
+	crc := uint32(crc24Init)
+	for _, b := range d {
+		crc ^= uint32(b) << 16
+		for i := 0; i < 8; i++ {
+			crc <<= 1
+			if crc&0x1000000 != 0 {
+				crc ^= crc24Poly
+			}
+		}
+	}
+	return crc
+}
+
+// endregion

@@ -30,6 +30,87 @@ func (ge *GPGEndpoint) AttachHandlers(r *mux.Router) {
 	r.HandleFunc("/unlockKey", ge.unlockKey).Methods("POST")
 	r.HandleFunc("/sign", ge.sign).Methods("POST")
 	r.HandleFunc("/signQuanto", ge.signQuanto).Methods("POST")
+	r.HandleFunc("/verifySignature", ge.verifySignature).Methods("POST")
+	r.HandleFunc("/verifySignatureQuanto", ge.verifySignatureQuanto).Methods("POST")
+}
+
+func (ge *GPGEndpoint) verifySignature(w http.ResponseWriter, r *http.Request) {
+	InitHTTPTimer(r)
+	var data models.GPGVerifySignatureData
+
+	if !UnmarshalBodyOrDie(&data, w, r, geLog) {
+		return
+	}
+
+	defer func() {
+		if rec := recover(); rec != nil {
+			CatchAllError(rec, w, r, geLog)
+		}
+	}()
+
+	bytes, err := base64.StdEncoding.DecodeString(data.Base64Data)
+
+	if err != nil {
+		InvalidFieldData("Base64Data", err.Error(), w, r, geLog)
+		return
+	}
+
+	valid, err := ge.gpg.VerifySignature(bytes, data.Signature)
+
+	if err != nil {
+		InvalidFieldData("Signature", err.Error(), w, r, geLog)
+		return
+	}
+
+	if !valid {
+		InvalidFieldData("Signature", "The provided signature is invalid", w, r, geLog)
+		return
+	}
+
+	w.Header().Set("Content-Type", models.MimeText)
+	w.WriteHeader(200)
+	n, _ := w.Write([]byte("OK"))
+	LogExit(geLog, r, 200, n)
+}
+
+func (ge *GPGEndpoint) verifySignatureQuanto(w http.ResponseWriter, r *http.Request) {
+	InitHTTPTimer(r)
+	var data models.GPGVerifySignatureData
+
+	if !UnmarshalBodyOrDie(&data, w, r, geLog) {
+		return
+	}
+
+	defer func() {
+		if rec := recover(); rec != nil {
+			CatchAllError(rec, w, r, geLog)
+		}
+	}()
+
+	bytes, err := base64.StdEncoding.DecodeString(data.Base64Data)
+
+	if err != nil {
+		InvalidFieldData("Base64Data", err.Error(), w, r, geLog)
+		return
+	}
+
+	signature := remote_signer.Quanto2GPG(data.Signature)
+	valid, err := ge.gpg.VerifySignature(bytes, signature)
+
+	if err != nil {
+		InvalidFieldData("Signature", err.Error(), w, r, geLog)
+		return
+	}
+
+	if !valid {
+		InvalidFieldData("Signature", "The provided signature is invalid", w, r, geLog)
+		return
+	}
+
+	w.Header().Set("Content-Type", models.MimeText)
+	w.WriteHeader(200)
+	n, _ := w.Write([]byte("OK"))
+	LogExit(geLog, r, 200, n)
 }
 
 func (ge *GPGEndpoint) sign(w http.ResponseWriter, r *http.Request) {

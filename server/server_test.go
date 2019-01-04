@@ -148,7 +148,79 @@ func TestGenerateKey(t *testing.T) {
 	errorDie(err, t)
 }
 
+func TestVerifySignature(t *testing.T) {
+	verifyBody := models.GPGVerifySignatureData{
+		Base64Data: base64.StdEncoding.EncodeToString([]byte(testSignatureData)),
+		Signature:  testSignatureSignature,
+	}
+
+	body, err := json.Marshal(verifyBody)
+
+	errorDie(err, t)
+
+	r := bytes.NewReader(body)
+
+	req, err := http.NewRequest("POST", "/gpg/verifySignature", r)
+
+	errorDie(err, t)
+
+	res := executeRequest(req)
+
+	d, err := ioutil.ReadAll(res.Body)
+
+	if res.Code != 200 {
+		var errObj QuantoError.ErrorObject
+		err := json.Unmarshal(d, &errObj)
+		errorDie(err, t)
+		errorDie(fmt.Errorf(errObj.Message), t)
+	}
+
+	errorDie(err, t)
+
+	if string(d) != "OK" {
+		t.Errorf("Expected OK got %s", string(d))
+	}
+}
+
+func TestVerifySignatureQuanto(t *testing.T) {
+	quantoSignature := remote_signer.GPG2Quanto(testSignatureSignature, testKeyFingerprint, "SHA512")
+
+	verifyBody := models.GPGVerifySignatureData{
+		Base64Data: base64.StdEncoding.EncodeToString([]byte(testSignatureData)),
+		Signature:  quantoSignature,
+	}
+
+	body, err := json.Marshal(verifyBody)
+
+	errorDie(err, t)
+
+	r := bytes.NewReader(body)
+
+	req, err := http.NewRequest("POST", "/gpg/verifySignatureQuanto", r)
+
+	errorDie(err, t)
+
+	res := executeRequest(req)
+
+	d, err := ioutil.ReadAll(res.Body)
+
+	if res.Code != 200 {
+		var errObj QuantoError.ErrorObject
+		err := json.Unmarshal(d, &errObj)
+		errorDie(err, t)
+		slog.Debug(errObj.StackTrace)
+		errorDie(fmt.Errorf(errObj.Message), t)
+	}
+
+	errorDie(err, t)
+
+	if string(d) != "OK" {
+		t.Errorf("Expected OK got %s", string(d))
+	}
+}
+
 func TestSign(t *testing.T) {
+	// region Generate Signature
 	signBody := models.GPGSignData{
 		FingerPrint: testKeyFingerprint,
 		Base64Data:  base64.StdEncoding.EncodeToString([]byte(testSignatureData)),
@@ -178,11 +250,44 @@ func TestSign(t *testing.T) {
 	errorDie(err, t)
 
 	slog.Debug("Signature: %s", string(d))
+	// endregion
+	// region Verify Signature
+	verifyBody := models.GPGVerifySignatureData{
+		Base64Data: base64.StdEncoding.EncodeToString([]byte(testSignatureData)),
+		Signature:  string(d),
+	}
 
-	// TODO: Validate
+	body, err = json.Marshal(verifyBody)
+
+	errorDie(err, t)
+
+	r = bytes.NewReader(body)
+
+	req, err = http.NewRequest("POST", "/gpg/verifySignature", r)
+
+	errorDie(err, t)
+
+	res = executeRequest(req)
+
+	d, err = ioutil.ReadAll(res.Body)
+
+	if res.Code != 200 {
+		var errObj QuantoError.ErrorObject
+		err := json.Unmarshal(d, &errObj)
+		errorDie(err, t)
+		errorDie(fmt.Errorf(errObj.Message), t)
+	}
+
+	errorDie(err, t)
+
+	if string(d) != "OK" {
+		t.Errorf("Expected OK got %s", string(d))
+	}
+	// endregion
 }
 
 func TestSignQuanto(t *testing.T) {
+	// region Generate Signature
 	signBody := models.GPGSignData{
 		FingerPrint: testKeyFingerprint,
 		Base64Data:  base64.StdEncoding.EncodeToString([]byte(testSignatureData)),
@@ -212,6 +317,38 @@ func TestSignQuanto(t *testing.T) {
 	errorDie(err, t)
 
 	slog.Debug("Signature: %s", string(d))
+	// endregion
+	// region Verify Signature
+	verifyBody := models.GPGVerifySignatureData{
+		Base64Data: base64.StdEncoding.EncodeToString([]byte(testSignatureData)),
+		Signature:  string(d),
+	}
 
-	// TODO: Validate
+	body, err = json.Marshal(verifyBody)
+
+	errorDie(err, t)
+
+	r = bytes.NewReader(body)
+
+	req, err = http.NewRequest("POST", "/gpg/verifySignatureQuanto", r)
+
+	errorDie(err, t)
+
+	res = executeRequest(req)
+
+	d, err = ioutil.ReadAll(res.Body)
+
+	if res.Code != 200 {
+		var errObj QuantoError.ErrorObject
+		err := json.Unmarshal(d, &errObj)
+		errorDie(err, t)
+		errorDie(fmt.Errorf(errObj.Message), t)
+	}
+
+	errorDie(err, t)
+
+	if string(d) != "OK" {
+		t.Errorf("Expected OK got %s", string(d))
+	}
+	// endregion
 }
