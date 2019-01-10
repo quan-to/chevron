@@ -7,3 +7,4 @@ namespace RemoteSigner.Models.ArgumentModels {
         public Boolean DataOnly { get; set; }
     }
 }
+    

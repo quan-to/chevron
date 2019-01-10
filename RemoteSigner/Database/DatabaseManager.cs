@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using RemoteSigner.Database.Attributes;
+using RemoteSigner.Database.Models;
 using RemoteSigner.Log;
 using RethinkDb.Driver;
 using RethinkDb.Driver.Net;
@@ -61,21 +62,28 @@ namespace RemoteSigner.Database {
         }
 
         void InitData() {
-            var c = GetConnection();
-            if (!R.DbList().Contains(Configuration.DatabaseName).RunAtom<bool>(c)) {
-                Logger.Warn("DatabaseManager", $"Database {Configuration.DatabaseName} not found. Creating it...");
-                var x = R.DbCreate(Configuration.DatabaseName).Run(c);
-            }
-            UpdateConnectionsDatabase(Configuration.DatabaseName);
-
-            Logger.Log("DatabaseManager", "Searching for database table definitions");
-            Assembly a = Assembly.GetExecutingAssembly();
-            string[] namespaces = a.GetTypes().Select(x => x.Namespace).Distinct().ToArray();
-            foreach (string n in namespaces) {
-                if (n.StartsWith("RemoteSigner.Database", StringComparison.InvariantCultureIgnoreCase)) {
-                    Logger.Log("DatabaseManager", $"Loading DB Data for namespace {n}");
-                    InitTables(c, a, n);
+            try {
+                var c = GetConnection();
+                if (!R.DbList().Contains(Configuration.DatabaseName).RunAtom<bool>(c)) {
+                    Logger.Warn("DatabaseManager", $"Database {Configuration.DatabaseName} not found. Creating it...");
+                    var x = R.DbCreate(Configuration.DatabaseName).Run(c);
                 }
+
+                UpdateConnectionsDatabase(Configuration.DatabaseName);
+
+                Logger.Log("DatabaseManager", "Searching for database table definitions");
+                Assembly a = Assembly.GetExecutingAssembly();
+                string[] namespaces = a.GetTypes().Select(x => x.Namespace).Distinct().ToArray();
+                foreach (string n in namespaces) {
+                    if (n != null && n.StartsWith("RemoteSigner.Database", StringComparison.InvariantCultureIgnoreCase)) {
+                        Logger.Log("DatabaseManager", $"Loading DB Data for namespace {n}");
+                        InitTables(c, a, n);
+                    }
+                }
+
+                Migrations();
+            } catch (Exception e) {
+                Logger.Error("DatabaseManager", $"Error initializing Database: {e}");
             }
         }
 
@@ -126,6 +134,22 @@ namespace RemoteSigner.Database {
                 Logger.Log("DatabaseManager", $"Changing Database Name for active connections to {dbName}");
                 connectionPool.ForEach(c => c.Use(dbName));
             }
+        }
+
+        void Migrations() {
+            var c = GetConnection();
+            Logger.Log("DatabaseManager", "Migrating Keys without Subkey");
+            var v = GPGKey.FetchKeyWithoutSubkey(c);
+            if (v.Count > 0) {
+                Logger.Log("DatabaseManager", $"There are {v.Count} keys without subkeys indexed.");
+                foreach (var k in v) {
+                    k.Subkeys = PGPManager.GetSubKeysFromPublicKey(k.AsciiArmoredPublicKey);
+                    Logger.Log("DatabaseManager", $"Added {k.Subkeys.Count} subkeys to {k.FullFingerPrint}");
+                    k.Save(c);
+                }
+            }
+
+            Logger.Log("DatabaseManager", "Migrations Finished");
         }
 
         public Connection GetConnection() {

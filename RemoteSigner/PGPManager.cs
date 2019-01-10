@@ -16,7 +16,6 @@ using RemoteSigner.Models.ArgumentModels;
 
 namespace RemoteSigner {
     public class PGPManager {
-
         const string PGPManagerLog = "PGPManager";
 
         public String KeyFolder { private set; get; }
@@ -43,7 +42,8 @@ namespace RemoteSigner {
                 var files = Directory.GetFiles(KeyFolder).ToList();
                 files.ForEach((f) => {
                     string basename = Path.GetFileName(f);
-                    if ((Configuration.KeyPrefix.Length > 0 && basename.StartsWith(Configuration.KeyPrefix, StringComparison.InvariantCultureIgnoreCase)) || Configuration.KeyPrefix.Length == 0) {
+                    if ((Configuration.KeyPrefix.Length > 0 && basename.StartsWith(Configuration.KeyPrefix,
+                             StringComparison.InvariantCultureIgnoreCase)) || Configuration.KeyPrefix.Length == 0) {
                         try {
                             Logger.Log(PGPManagerLog, $"Loading key at {f}");
                             string filename = f;
@@ -54,6 +54,7 @@ namespace RemoteSigner {
                                 File.WriteAllBytes(fname, data);
                                 filename = fname;
                             }
+
                             LoadPrivateKeyFromFile(filename);
                         } catch (Exception e) {
                             Logger.Error(PGPManagerLog, $"Error loading key at {f}: {e}");
@@ -63,6 +64,7 @@ namespace RemoteSigner {
             } catch (Exception e) {
                 Logger.Error(PGPManagerLog, $"Error Loading keys from {KeyFolder}: {e}");
             }
+
             Logger.Log(PGPManagerLog, $"Done loading keys...");
         }
 
@@ -74,11 +76,13 @@ namespace RemoteSigner {
             if (fingerPrint.Length == 8 && FP8TO16.ContainsKey(fingerPrint)) {
                 fingerPrint = FP8TO16[fingerPrint];
             }
+
             if (privateKeys.ContainsKey(fingerPrint)) {
                 if (decryptedKeys.ContainsKey(fingerPrint)) {
                     Logger.Debug(PGPManagerLog, $"Key {fingerPrint} is already unlocked.");
                     return fingerPrint;
                 }
+
                 Logger.Debug(PGPManagerLog, $"Decrypting key {fingerPrint}");
                 var sec = privateKeys[fingerPrint];
                 try {
@@ -86,6 +90,7 @@ namespace RemoteSigner {
                     if (!TestPrivateKey(sec.PublicKey, dec)) {
                         throw new InvalidKeyPasswordException(fingerPrint);
                     }
+
                     decryptedKeys[fingerPrint] = dec;
                 } catch (Exception) {
                     throw new InvalidKeyPasswordException(fingerPrint);
@@ -94,6 +99,7 @@ namespace RemoteSigner {
                 Logger.Error(PGPManagerLog, $"Key {fingerPrint} is not loaded!");
                 throw new KeyNotLoadedException(fingerPrint);
             }
+
             return fingerPrint;
         }
 
@@ -141,6 +147,7 @@ namespace RemoteSigner {
             if (fingerPrint.Length == 8 && FP8TO16.ContainsKey(fingerPrint)) {
                 fingerPrint = FP8TO16[fingerPrint];
             }
+
             if (!decryptedKeys.ContainsKey(fingerPrint)) {
                 throw new KeyNotDecryptedException(fingerPrint);
             }
@@ -169,11 +176,12 @@ namespace RemoteSigner {
             if (dataOnly) {
                 str = Tools.Raw2AsciiArmored(Convert.FromBase64String(data));
             }
+
             using (var stream = PgpUtilities.GetDecoderStream(Tools.GenerateStreamFromString(str))) {
                 var pgpF = new PgpObjectFactory(stream);
                 var o = pgpF.NextPgpObject();
                 if (!(o is PgpEncryptedDataList enc)) {
-                    enc = (PgpEncryptedDataList)pgpF.NextPgpObject();
+                    enc = (PgpEncryptedDataList) pgpF.NextPgpObject();
                 }
 
                 PgpPublicKeyEncryptedData pbe = null;
@@ -181,7 +189,7 @@ namespace RemoteSigner {
                 PgpSecretKey pgpSec = null;
                 var lastFingerPrint = "None";
                 foreach (PgpPublicKeyEncryptedData pked in enc.GetEncryptedDataObjects()) {
-                    string keyId = pked.KeyId.ToString("X").ToUpper();
+                    string keyId = pked.KeyId.ToString("X16").ToUpper();
                     string fingerPrint = keyId.Length < 16 ? FP8TO16[Tools.H8FP(keyId)] : Tools.H16FP(keyId);
                     lastFingerPrint = fingerPrint;
                     if (!decryptedKeys.ContainsKey(fingerPrint)) {
@@ -218,6 +226,7 @@ namespace RemoteSigner {
                         while ((read = iss.Read(buffer, 0, buffer.Length)) > 0) {
                             ms.Write(buffer, 0, read);
                         }
+
                         outData.Base64Data = Convert.ToBase64String(ms.ToArray());
                     }
                 } else if (message is PgpOnePassSignatureList) {
@@ -255,11 +264,11 @@ namespace RemoteSigner {
                 var cos = comData.Open(bOut); // open it with the final destination
                 var lData = new PgpLiteralDataGenerator();
                 var pOut = lData.Open(
-                    cos,                    // the compressed output stream
+                    cos, // the compressed output stream
                     PgpLiteralData.Binary,
-                    filename,               // "filename" to store
-                    data.Length,            // length of clear data
-                    DateTime.UtcNow         // current time
+                    filename, // "filename" to store
+                    data.Length, // length of clear data
+                    DateTime.UtcNow // current time
                 );
                 pOut.Write(data, 0, data.Length);
                 lData.Close();
@@ -271,7 +280,7 @@ namespace RemoteSigner {
                 // Raw GPG Encoded
                 if (dataOnly) {
                     var cOut = cPk.Open(encOut, bytes.Length);
-                    cOut.Write(bytes, 0, bytes.Length);  // obtain the actual bytes from the compressed stream
+                    cOut.Write(bytes, 0, bytes.Length); // obtain the actual bytes from the compressed stream
                     cOut.Flush();
                     cOut.Close();
 //                    encOut.Close();
@@ -280,7 +289,7 @@ namespace RemoteSigner {
                 } else {
                     var s = new ArmoredOutputStream(encOut);
                     var cOut = cPk.Open(s, bytes.Length);
-                    cOut.Write(bytes, 0, bytes.Length);  // obtain the actual bytes from the compressed stream
+                    cOut.Write(bytes, 0, bytes.Length); // obtain the actual bytes from the compressed stream
                     cOut.Close();
                     s.Close();
                     encOut.Seek(0, SeekOrigin.Begin);
@@ -288,6 +297,20 @@ namespace RemoteSigner {
                     return reader.ReadToEnd();
                 }
             }
+        }
+
+        public static List<string> GetSubKeysFromPublicKey(string asciiArmoredKey) {
+            var subKeys = new List<string>();
+            using (var s = Tools.GenerateStreamFromString(asciiArmoredKey)) {
+                var pgpPubs = new PgpPublicKeyRingBundle(PgpUtilities.GetDecoderStream(s));
+                foreach (PgpPublicKeyRing keyRing in pgpPubs.GetKeyRings()) {
+                    subKeys.AddRange(from PgpPublicKey key in keyRing.GetPublicKeys()
+                        let keyId = key.KeyId.ToString("X16").ToUpper()
+                        select keyId.Length < 16 ? Tools.H8FP(keyId) : Tools.H16FP(key.KeyId.ToString("X16").ToUpper()));
+                }
+            }
+
+            return subKeys;
         }
 
         public bool VerifySignature(byte[] data, string signature, PgpPublicKey publicKey = null) {
@@ -298,21 +321,23 @@ namespace RemoteSigner {
                 var o = pgpFact.NextPgpObject();
                 if (o is PgpCompressedData c1) {
                     pgpFact = new PgpObjectFactory(c1.GetDataStream());
-                    p3 = (PgpSignatureList)pgpFact.NextPgpObject();
+                    p3 = (PgpSignatureList) pgpFact.NextPgpObject();
                 } else {
-                    p3 = (PgpSignatureList)o;
+                    p3 = (PgpSignatureList) o;
                 }
             }
 
             var sig = p3[0];
             if (publicKey == null) {
-                string keyId = sig.KeyId.ToString("X").ToUpper();
-                string fingerPrint = keyId.Length < 16 ? Tools.H8FP(keyId) : Tools.H16FP(sig.KeyId.ToString("X").ToUpper());
+                string keyId = sig.KeyId.ToString("X16").ToUpper();
+                string fingerPrint =
+                    keyId.Length < 16 ? Tools.H8FP(keyId) : Tools.H16FP(sig.KeyId.ToString("X16").ToUpper());
                 publicKey = krm[fingerPrint];
                 if (publicKey == null) {
                     throw new KeyNotLoadedException(fingerPrint);
                 }
             }
+
             sig.InitVerify(publicKey);
             sig.Update(data);
 
@@ -327,21 +352,23 @@ namespace RemoteSigner {
                 var o = pgpFact.NextPgpObject();
                 if (o is PgpCompressedData c1) {
                     pgpFact = new PgpObjectFactory(c1.GetDataStream());
-                    p3 = (PgpSignatureList)pgpFact.NextPgpObject();
+                    p3 = (PgpSignatureList) pgpFact.NextPgpObject();
                 } else {
-                    p3 = (PgpSignatureList)o;
+                    p3 = (PgpSignatureList) o;
                 }
             }
 
             var sig = p3[0];
             if (publicKey == null) {
-                string keyId = sig.KeyId.ToString("X").ToUpper();
-                string fingerPrint = keyId.Length < 16 ? Tools.H8FP(keyId) : Tools.H16FP(sig.KeyId.ToString("X").ToUpper());
+                string keyId = sig.KeyId.ToString("X16").ToUpper();
+                string fingerPrint =
+                    keyId.Length < 16 ? Tools.H8FP(keyId) : Tools.H16FP(sig.KeyId.ToString("X16").ToUpper());
                 publicKey = krm[fingerPrint];
                 if (publicKey == null) {
                     throw new KeyNotLoadedException(fingerPrint);
                 }
             }
+
             sig.InitVerify(publicKey);
             sig.Update(Encoding.UTF8.GetBytes(data));
 
@@ -351,7 +378,7 @@ namespace RemoteSigner {
         public Task<string> GenerateGPGKey(string identifier, string password, int bits = 3072) {
             return Task.Run(() => {
                 using (var ms = new MemoryStream()) {
-                var s = new ArmoredOutputStream(ms);
+                    var s = new ArmoredOutputStream(ms);
                     var kpg = GeneratorUtilities.GetKeyPairGenerator("RSA");
                     kpg.Init(new RsaKeyGenerationParameters(BigInteger.ValueOf(0x10001), new SecureRandom(), bits, 25));
                     var kp = kpg.GenerateKeyPair();
@@ -384,6 +411,7 @@ namespace RemoteSigner {
             if (publicKey == null) {
                 throw new KeyNotLoadedException(fingerPrint);
             }
+
             using (var ms = new MemoryStream()) {
                 var s = new ArmoredOutputStream(ms);
                 publicKey.Encode(s);
@@ -398,6 +426,7 @@ namespace RemoteSigner {
             if (fingerPrint.Length == 8 && FP8TO16.ContainsKey(fingerPrint)) {
                 fingerPrint = FP8TO16[fingerPrint];
             }
+
             return decryptedKeys.ContainsKey(fingerPrint) ? decryptedKeys[fingerPrint] : null;
         }
 
@@ -405,16 +434,16 @@ namespace RemoteSigner {
             if (fingerPrint.Length == 8 && FP8TO16.ContainsKey(fingerPrint)) {
                 fingerPrint = FP8TO16[fingerPrint];
             }
+
             return privateKeys.ContainsKey(fingerPrint) ? privateKeys[fingerPrint] : null;
         }
 
         public PgpSecretKey this[string key] {
-            get {
-                return GetKey(key);
-            }
+            get { return GetKey(key); }
         }
 
         #region Private Methods
+
         /**
          * A simple routine that opens a key ring file and loads the first available key
          * suitable for signature generation.
@@ -461,6 +490,7 @@ namespace RemoteSigner {
                 return false;
             }
         }
+
         #endregion
     }
 }

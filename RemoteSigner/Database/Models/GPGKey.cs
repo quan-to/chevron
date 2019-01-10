@@ -28,6 +28,9 @@ namespace RemoteSigner.Database.Models {
 
         [DBIndex]
         public List<string> Emails { get; set; }
+        
+        [DBIndex]
+        public List<string> Subkeys { get; set; }
 
         public List<GPGKeyUid> KeyUids { get; set; }
 
@@ -39,6 +42,13 @@ namespace RemoteSigner.Database.Models {
 
         public bool ShouldSerializeAsciiArmoredPrivateKey() {
             return false;
+        }
+
+        public void Save(Connection conn) {
+            R.Table("gpgKey")
+                .Get(Id)
+                .Update(this)
+                .RunNoReply(conn);
         }
 
         public static Result AddGPGKey(Connection conn, GPGKey data) {
@@ -94,6 +104,14 @@ namespace RemoteSigner.Database.Models {
                     .Slice(pageStart.GetValueOrDefault(DEFAULT_PAGE_START), pageEnd.GetValueOrDefault(DEFAULT_PAGE_END))
                     .CoerceTo("array")
                     .Run<List<GPGKey>>(conn);
+        }
+
+        internal static List<GPGKey> FetchKeyWithoutSubkey(Connection conn) {
+            return R.Table("gpgKey")
+                       .Filter(
+                           (r) => r.HasFields("Subkeys").Not().Or(r["Subkeys"].Count().Eq(0)))
+                       .CoerceTo("array")
+                       .Run<List<GPGKey>>(conn);
         }
     }
 }
