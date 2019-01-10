@@ -64,7 +64,9 @@ namespace RemoteSigner.Database.Models {
 
         public static GPGKey GetGPGKeyByFingerPrint(Connection conn, string fingerPrint) {
             List<GPGKey> s = R.Table("gpgKey")
-                              .Filter((r) => r["FullFingerPrint"].Match($"{fingerPrint}$"))
+                              .Filter(
+                                (r) => r["FullFingerPrint"].Match($"{fingerPrint}$")
+                                    .Or(r["Subkeys"].Filter(sk => sk.Match($"{fingerPrint}$")).Count().Gt(0)))
                               .Limit(1)
                               .CoerceTo("array")
                               .Run<List<GPGKey>>(conn);
