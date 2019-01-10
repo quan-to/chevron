@@ -11,6 +11,7 @@
     <Authors>Lucas Teske</Authors>
     <Description>GPG Remote Signer</Description>
     <CodePage>65001</CodePage>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
