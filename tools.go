@@ -123,7 +123,7 @@ func GetFingerPrintFromKey(armored string) (string, error) {
 	}
 
 	for _, key := range keys {
-		if key.PrivateKey != nil {
+		if key.PrimaryKey != nil {
 			fp := ByteFingerPrint2FP16(key.PrimaryKey.Fingerprint[:])
 
 			return fp, nil
