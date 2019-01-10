@@ -60,4 +60,11 @@ func SetTestMode() {
 	SetError(false)
 }
 
+func UnsetTestMode() {
+	SetDebug(true)
+	SetWarning(true)
+	SetInfo(true)
+	SetError(true)
+}
+
 // endregion

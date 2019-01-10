@@ -22,6 +22,11 @@ var tablesToInitialize = []models.TableInitStruct{
 }
 
 func init() {
+	dbSetup()
+	initTables()
+}
+
+func dbSetup() {
 	rthState = rethinkDbState{
 		currentConn: 0,
 	}
@@ -43,48 +48,48 @@ func init() {
 		}
 
 		rthState.connection = conn
-
-		initTables()
 	}
 }
 
 func initTables() {
-	var dbs = getDatabases()
-	var conn = GetConnection()
+	if EnableRethinkSKS {
+		var dbs = getDatabases()
+		var conn = GetConnection()
 
-	if stringIndexOf(DatabaseName, dbs) == -1 {
-		dbLog.Warn("Database %s does not exists. Creating it...", DatabaseName)
-		err := r.DBCreate(DatabaseName).Exec(conn)
-		if err != nil {
-			dbLog.Fatal(err)
-		}
-	} else {
-		dbLog.Debug("Database %s already exists. Skipping...", DatabaseName)
-	}
-
-	tables := getTables()
-
-	for _, v := range tablesToInitialize {
-		if stringIndexOf(v.TableName, tables) == -1 {
-			dbLog.Info("Table %s does not exists. Creating...", v.TableName)
-			err := r.TableCreate(v.TableName).Exec(conn)
+		if stringIndexOf(DatabaseName, dbs) == -1 {
+			dbLog.Warn("Database %s does not exists. Creating it...", DatabaseName)
+			err := r.DBCreate(DatabaseName).Exec(conn)
 			if err != nil {
 				dbLog.Fatal(err)
 			}
+		} else {
+			dbLog.Debug("Database %s already exists. Skipping...", DatabaseName)
 		}
 
-		dbLog.Info("Checking Indexes for table %s", v.TableName)
-		idxs := getTableIndexes(v.TableName)
+		tables := getTables()
 
-		for _, vidx := range v.TableIndexes {
-			if stringIndexOf(vidx, idxs) == -1 {
-				dbLog.Warn("Index %s not found at table %s. Creating it...", vidx, v.TableName)
-				err := r.Table(v.TableName).IndexCreate(vidx).Exec(conn)
+		for _, v := range tablesToInitialize {
+			if stringIndexOf(v.TableName, tables) == -1 {
+				dbLog.Info("Table %s does not exists. Creating...", v.TableName)
+				err := r.TableCreate(v.TableName).Exec(conn)
 				if err != nil {
 					dbLog.Fatal(err)
 				}
-			} else {
-				dbLog.Debug("Index %s already exists in table %s. Skipping it...", vidx, v.TableName)
+			}
+
+			dbLog.Info("Checking Indexes for table %s", v.TableName)
+			idxs := getTableIndexes(v.TableName)
+
+			for _, vidx := range v.TableIndexes {
+				if stringIndexOf(vidx, idxs) == -1 {
+					dbLog.Warn("Index %s not found at table %s. Creating it...", vidx, v.TableName)
+					err := r.Table(v.TableName).IndexCreate(vidx).Exec(conn)
+					if err != nil {
+						dbLog.Fatal(err)
+					}
+				} else {
+					dbLog.Debug("Index %s already exists in table %s. Skipping it...", vidx, v.TableName)
+				}
 			}
 		}
 	}

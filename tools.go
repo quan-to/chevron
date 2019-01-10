@@ -33,12 +33,7 @@ func ByteFingerPrint2FP16(raw []byte) string {
 }
 
 func IssuerKeyIdToFP16(issuerKeyId uint64) string {
-	fp := strings.ToUpper(fmt.Sprintf("%016x", issuerKeyId))
-	if len(fp) > 16 {
-		return fp[len(fp)-16:]
-	} else {
-		return fp
-	}
+	return strings.ToUpper(fmt.Sprintf("%016x", issuerKeyId))
 }
 
 func Quanto2GPG(signature string) string {
@@ -305,6 +300,22 @@ func ReadKeyToEntity(asciiArmored string) (*openpgp.Entity, error) {
 	}
 
 	return nil, errors.New("no keys found")
+}
+
+func CompareFingerPrint(fpA, fpB string) bool {
+	if fpA == "" || fpB == "" {
+		return false
+	}
+
+	if len(fpA) == len(fpB) {
+		return fpA == fpB
+	}
+
+	if len(fpA) > len(fpB) {
+		return fpA[len(fpA)-len(fpB):] == fpB
+	}
+
+	return fpB[len(fpB)-len(fpA):] == fpA
 }
 
 // region CRC24 from https://github.com/golang/crypto/blob/master/openpgp/armor/armor.go

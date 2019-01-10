@@ -1,6 +1,7 @@
 package remote_signer
 
 import (
+	"github.com/quan-to/remote-signer/SLog"
 	"os"
 	"strconv"
 	"strings"
@@ -26,7 +27,68 @@ var MasterGPGKeyBase64Encoded bool
 var KeysBase64Encoded bool
 var IgnoreKubernetesCA bool
 
-func init() {
+var varStack []map[string]interface{}
+
+func pushVariables() {
+	if varStack == nil {
+		varStack = make([]map[string]interface{}, 0)
+	}
+
+	insMap := map[string]interface{}{
+		"SyslogServer":              SyslogServer,
+		"SyslogFacility":            SyslogFacility,
+		"PrivateKeyFolder":          PrivateKeyFolder,
+		"KeyPrefix":                 KeyPrefix,
+		"SKSServer":                 SKSServer,
+		"HttpPort":                  HttpPort,
+		"MaxKeyRingCache":           MaxKeyRingCache,
+		"EnableRethinkSKS":          EnableRethinkSKS,
+		"RethinkDBHost":             RethinkDBHost,
+		"RethinkDBPort":             RethinkDBPort,
+		"RethinkDBUsername":         RethinkDBUsername,
+		"RethinkDBPassword":         RethinkDBPassword,
+		"RethinkDBPoolSize":         RethinkDBPoolSize,
+		"DatabaseName":              DatabaseName,
+		"MasterGPGKeyPath":          MasterGPGKeyPath,
+		"MasterGPGKeyPasswordPath":  MasterGPGKeyPasswordPath,
+		"MasterGPGKeyBase64Encoded": MasterGPGKeyBase64Encoded,
+		"KeysBase64Encoded":         KeysBase64Encoded,
+		"IgnoreKubernetesCA":        IgnoreKubernetesCA,
+	}
+
+	varStack = append(varStack, insMap)
+}
+
+func popVariables() {
+	if varStack == nil || len(varStack) == 0 {
+		return
+	}
+
+	insMap := varStack[len(varStack)-1]
+	varStack = varStack[:len(varStack)-1]
+
+	SyslogServer = insMap["SyslogServer"].(string)
+	SyslogFacility = insMap["SyslogFacility"].(string)
+	PrivateKeyFolder = insMap["PrivateKeyFolder"].(string)
+	KeyPrefix = insMap["KeyPrefix"].(string)
+	SKSServer = insMap["SKSServer"].(string)
+	HttpPort = insMap["HttpPort"].(int)
+	MaxKeyRingCache = insMap["MaxKeyRingCache"].(int)
+	EnableRethinkSKS = insMap["EnableRethinkSKS"].(bool)
+	RethinkDBHost = insMap["RethinkDBHost"].(string)
+	RethinkDBPort = insMap["RethinkDBPort"].(int)
+	RethinkDBUsername = insMap["RethinkDBUsername"].(string)
+	RethinkDBPassword = insMap["RethinkDBPassword"].(string)
+	RethinkDBPoolSize = insMap["RethinkDBPoolSize"].(int)
+	DatabaseName = insMap["DatabaseName"].(string)
+	MasterGPGKeyPath = insMap["MasterGPGKeyPath"].(string)
+	MasterGPGKeyPasswordPath = insMap["MasterGPGKeyPasswordPath"].(string)
+	MasterGPGKeyBase64Encoded = insMap["MasterGPGKeyBase64Encoded"].(bool)
+	KeysBase64Encoded = insMap["KeysBase64Encoded"].(bool)
+	IgnoreKubernetesCA = insMap["IgnoreKubernetesCA"].(bool)
+}
+
+func setup() {
 	// Pre init
 	MaxKeyRingCache = -1
 	HttpPort = -1
@@ -44,16 +106,20 @@ func init() {
 	if maxKeyRingCache != "" {
 		i, err := strconv.ParseInt(maxKeyRingCache, 10, 32)
 		if err != nil {
-			MaxKeyRingCache = int(i)
+			SLog.Error("Error parsing MAX_KEYRING_CACHE_SIZE: %s", err)
+			panic(err)
 		}
+		MaxKeyRingCache = int(i)
 	}
 
 	var hp = os.Getenv("HTTP_PORT")
 	if hp != "" {
 		i, err := strconv.ParseInt(hp, 10, 32)
 		if err != nil {
-			HttpPort = int(i)
+			SLog.Error("Error parsing HTTP_PORT: %s", err)
+			panic(err)
 		}
+		HttpPort = int(i)
 	}
 
 	EnableRethinkSKS = strings.ToLower(os.Getenv("ENABLE_RETHINK_SKS")) == "true"
@@ -66,16 +132,20 @@ func init() {
 	if rdbport != "" {
 		i, err := strconv.ParseInt(rdbport, 10, 32)
 		if err != nil {
-			RethinkDBPort = int(i)
+			SLog.Error("Error parsing RETHINKDB_PORT: %s", err)
+			panic(err)
 		}
+		RethinkDBPort = int(i)
 	}
 
 	var poolSize = os.Getenv("RETHINKDB_POOL_SIZE")
 	if poolSize != "" {
 		i, err := strconv.ParseInt(poolSize, 10, 32)
 		if err != nil {
-			RethinkDBPoolSize = int(i)
+			SLog.Error("Error parsing RETHINKDB_POOL_SIZE: %s", err)
+			panic(err)
 		}
+		RethinkDBPoolSize = int(i)
 	}
 
 	DatabaseName = os.Getenv("DATABASE_NAME")
@@ -129,4 +199,8 @@ func init() {
 
 	// Other stuff
 	_ = os.Mkdir(PrivateKeyFolder, 0770)
+}
+
+func init() {
+	setup()
 }

@@ -76,8 +76,8 @@ func (krm *KeyRingManager) AddKey(key *openpgp.Entity, nonErasable bool) {
 	}
 
 	if len(krm.fingerPrints) > MaxKeyRingCache {
-		lastFp := krm.fingerPrints[len(krm.fingerPrints)-1:][0]
-		krmLog.Debug("	There are more cached keys than allowed. Removing last key %s", lastFp)
+		lastFp := krm.fingerPrints[0]
+		krmLog.Debug("	There are more cached keys than allowed. Removing first key %s", lastFp)
 		krm.removeFp(lastFp)
 	}
 
