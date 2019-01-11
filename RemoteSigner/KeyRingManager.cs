@@ -29,8 +29,11 @@ namespace RemoteSigner {
         public void AddKey(string publicKey, bool nonErasable = false) {
             using (var s = Tools.GenerateStreamFromString(publicKey)) {
                 var pgpPub = new PgpPublicKeyRing(PgpUtilities.GetDecoderStream(s));
-                var pubKey = pgpPub.GetPublicKey();
-                AddKey(pubKey, nonErasable);
+                foreach (PgpPublicKey pubKey in pgpPub.GetPublicKeys()) {
+                    var fp = pubKey.KeyId.ToString("X16");
+                    Logger.Log("KeyRingManager", $"Adding key {fp}");
+                    AddKey(pubKey, nonErasable);
+                }
             }
         }
 
