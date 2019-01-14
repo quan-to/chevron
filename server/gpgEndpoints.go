@@ -38,6 +38,7 @@ func (ge *GPGEndpoint) AttachHandlers(r *mux.Router) {
 }
 
 func (ge *GPGEndpoint) decrypt(w http.ResponseWriter, r *http.Request) {
+	InitHTTPTimer(r)
 	var data models.GPGDecryptData
 	if !UnmarshalBodyOrDie(&data, w, r, geLog) {
 		return
@@ -70,6 +71,7 @@ func (ge *GPGEndpoint) decrypt(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ge *GPGEndpoint) encrypt(w http.ResponseWriter, r *http.Request) {
+	InitHTTPTimer(r)
 	var data models.GPGEncryptData
 
 	if !UnmarshalBodyOrDie(&data, w, r, geLog) {

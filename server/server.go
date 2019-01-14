@@ -10,10 +10,18 @@ import (
 
 func GenRemoteSignerServerMux(slog *SLog.Instance, sm *remote_signer.SecretsManager, gpg *remote_signer.PGPManager) *mux.Router {
 	ge := MakeGPGEndpoint(sm, gpg)
+	ie := MakeInternalEndpoint(sm, gpg)
+	te := MakeTestsEndpoint()
+	kre := MakeKeyRingEndpoint(sm, gpg)
+	sks := MakeSKSEndpoint(sm, gpg)
 
 	r := mux.NewRouter()
 	AddHKPEndpoints(r.PathPrefix("/pks").Subrouter())
 	ge.AttachHandlers(r.PathPrefix("/gpg").Subrouter())
+	ie.AttachHandlers(r.PathPrefix("/__internal").Subrouter())
+	te.AttachHandlers(r.PathPrefix("/tests").Subrouter())
+	kre.AttachHandlers(r.PathPrefix("/keyRing").Subrouter())
+	sks.AttachHandlers(r.PathPrefix("/sks").Subrouter())
 
 	r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		InitHTTPTimer(r)

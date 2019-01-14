@@ -56,7 +56,6 @@ func TestPKSGetKey(t *testing.T) {
 	if !CompareFingerPrint(externalKeyFingerprint, fp) {
 		t.Errorf("Expected %s got %s", externalKeyFingerprint, fp)
 	}
-
 }
 
 func TestPKSSearchByName(t *testing.T) {

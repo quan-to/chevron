@@ -64,6 +64,11 @@ func UnmarshalBodyOrDie(outData interface{}, w http.ResponseWriter, r *http.Requ
 func InvalidFieldData(field string, message string, w http.ResponseWriter, r *http.Request, logI *SLog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.InvalidFieldData, field, message, nil), 400, w, r, logI)
 }
+
+func NotFound(field string, message string, w http.ResponseWriter, r *http.Request, logI *SLog.Instance) {
+	WriteJSON(QuantoError.New(QuantoError.NotFound, field, message, nil), 400, w, r, logI)
+}
+
 func NotImplemented(w http.ResponseWriter, r *http.Request, logI *SLog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.NotImplemented, "server", "This call is not implemented", nil), 400, w, r, logI)
 }
