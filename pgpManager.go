@@ -162,6 +162,13 @@ func (pm *PGPManager) sanitizeFingerprint(fp string) string {
 	return fp
 }
 
+func (pm *PGPManager) FixFingerPrint(fp string) string {
+	pm.Lock()
+	defer pm.Unlock()
+
+	return pm.sanitizeFingerprint(fp)
+}
+
 func (pm *PGPManager) IsKeyLocked(fp string) bool {
 	pm.Lock()
 	defer pm.Unlock()

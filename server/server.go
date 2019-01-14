@@ -16,6 +16,7 @@ func GenRemoteSignerServerMux(slog *SLog.Instance, sm *remote_signer.SecretsMana
 	sks := MakeSKSEndpoint(sm, gpg)
 
 	r := mux.NewRouter()
+	// Add for /
 	AddHKPEndpoints(r.PathPrefix("/pks").Subrouter())
 	ge.AttachHandlers(r.PathPrefix("/gpg").Subrouter())
 	ie.AttachHandlers(r.PathPrefix("/__internal").Subrouter())
@@ -23,6 +24,15 @@ func GenRemoteSignerServerMux(slog *SLog.Instance, sm *remote_signer.SecretsMana
 	kre.AttachHandlers(r.PathPrefix("/keyRing").Subrouter())
 	sks.AttachHandlers(r.PathPrefix("/sks").Subrouter())
 
+	// Add for /remoteSigner
+	AddHKPEndpoints(r.PathPrefix("/remoteSigner/pks").Subrouter())
+	ge.AttachHandlers(r.PathPrefix("/remoteSigner/gpg").Subrouter())
+	ie.AttachHandlers(r.PathPrefix("/remoteSigner/__internal").Subrouter())
+	te.AttachHandlers(r.PathPrefix("/remoteSigner/tests").Subrouter())
+	kre.AttachHandlers(r.PathPrefix("/remoteSigner/keyRing").Subrouter())
+	sks.AttachHandlers(r.PathPrefix("/remoteSigner/sks").Subrouter())
+
+	// Catch All for unhandled endpoints
 	r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		InitHTTPTimer(r)
 		CatchAllRouter(w, r, slog)

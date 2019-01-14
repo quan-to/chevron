@@ -1,8 +1,7 @@
 package SLog
 
 import (
-	"github.com/logrusorgru/aurora"
-	"runtime/debug"
+	"fmt"
 )
 
 type StringCast interface {
@@ -12,9 +11,7 @@ type StringCast interface {
 func asString(str interface{}) string {
 	switch v := str.(type) {
 	default:
-		debug.PrintStack()
-		Fatal(aurora.Red("Unexpected type %T"), v)
-		return "" // Linter bug fix
+		return fmt.Sprint(str)
 	case StringCast:
 		return v.String()
 	case error:

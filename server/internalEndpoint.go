@@ -24,8 +24,8 @@ func MakeInternalEndpoint(sm *remote_signer.SecretsManager, gpg *remote_signer.P
 }
 
 func (ie *InternalEndpoint) AttachHandlers(r *mux.Router) {
-	r.HandleFunc("/__triggerKeyUnlock", ie.triggerKeyUnlock).Methods("POST")
-	r.HandleFunc("/__getUnlockPasswords", ie.getUnlockPasswords).Methods("POST")
+	r.HandleFunc("/__triggerKeyUnlock", ie.triggerKeyUnlock)
+	r.HandleFunc("/__getUnlockPasswords", ie.getUnlockPasswords).Methods("GET")
 	r.HandleFunc("/__postEncryptedPasswords", ie.postUnlockPasswords).Methods("POST")
 }
 
@@ -34,7 +34,7 @@ func (ie *InternalEndpoint) triggerKeyUnlock(w http.ResponseWriter, r *http.Requ
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, geLog)
+			CatchAllError(rec, w, r, intLog)
 		}
 	}()
 
@@ -75,13 +75,13 @@ func (ie *InternalEndpoint) postUnlockPasswords(w http.ResponseWriter, r *http.R
 
 	var passwords map[string]string
 
-	if !UnmarshalBodyOrDie(&passwords, w, r, geLog) {
+	if !UnmarshalBodyOrDie(&passwords, w, r, intLog) {
 		return
 	}
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, geLog)
+			CatchAllError(rec, w, r, intLog)
 		}
 	}()
 

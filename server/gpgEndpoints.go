@@ -274,6 +274,10 @@ func (ge *GPGEndpoint) unlockKey(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fp := ge.gpg.FixFingerPrint(data.FingerPrint)
+
+	ge.sm.PutKeyPassword(fp, data.Password)
+
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
 	n, _ := w.Write([]byte("OK"))

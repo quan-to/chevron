@@ -100,6 +100,7 @@ func TestMain(m *testing.M) {
 	err := gpg.UnlockKey(testKeyFingerprint, testKeyPassword)
 
 	if err != nil {
+		SLog.UnsetTestMode()
 		slog.Error(err)
 		os.Exit(1)
 	}

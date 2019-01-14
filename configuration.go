@@ -60,7 +60,7 @@ func pushVariables() {
 }
 
 func popVariables() {
-	if varStack == nil || len(varStack) == 0 {
+	if len(varStack) == 0 {
 		return
 	}
 
@@ -122,7 +122,7 @@ func setup() {
 		HttpPort = int(i)
 	}
 
-	EnableRethinkSKS = strings.ToLower(os.Getenv("ENABLE_RETHINK_SKS")) == "true"
+	EnableRethinkSKS = strings.ToLower(os.Getenv("ENABLE_RETHINKDB_SKS")) == "true"
 
 	RethinkDBHost = os.Getenv("RETHINKDB_HOST")
 	RethinkDBUsername = os.Getenv("RETHINKDB_USERNAME")

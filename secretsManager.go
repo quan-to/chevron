@@ -23,7 +23,8 @@ type SecretsManager struct {
 
 func MakeSecretsManager() *SecretsManager {
 	var sm = &SecretsManager{
-		amIUseless: false,
+		amIUseless:         false,
+		encryptedPasswords: map[string]string{},
 	}
 
 	masterKeyBytes, err := ioutil.ReadFile(MasterGPGKeyPath)
@@ -33,6 +34,16 @@ func MakeSecretsManager() *SecretsManager {
 		smLog.Error("I'm useless :(")
 		sm.amIUseless = true
 		return sm
+	}
+
+	if MasterGPGKeyBase64Encoded {
+		masterKeyBytes, err = base64.StdEncoding.DecodeString(string(masterKeyBytes))
+		if err != nil {
+			smLog.Error("Error loading master key from %s: %s", MasterGPGKeyPath, err)
+			smLog.Error("I'm useless :(")
+			sm.amIUseless = true
+			return sm
+		}
 	}
 
 	masterKeyFp, err := GetFingerPrintFromKey(string(masterKeyBytes))
@@ -54,13 +65,6 @@ func MakeSecretsManager() *SecretsManager {
 
 	sm.gpg.LoadKeys()
 
-	if MasterGPGKeyBase64Encoded {
-		_, err = base64.StdEncoding.DecodeString(string(masterKeyBytes))
-		if err != nil {
-			smLog.Fatal("Error decoding master key from base64: %s\nIs Master Key really base64 encoded?", err)
-		}
-	}
-
 	masterKeyPassBytes, err := ioutil.ReadFile(MasterGPGKeyPasswordPath)
 
 	if err != nil {
@@ -79,6 +83,7 @@ func MakeSecretsManager() *SecretsManager {
 func (sm *SecretsManager) PutKeyPassword(fingerPrint, password string) {
 	if sm.amIUseless {
 		smLog.Warn("Not saving password. Master Key not loaded")
+		return
 	}
 
 	sm.Lock()
