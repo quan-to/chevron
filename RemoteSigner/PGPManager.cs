@@ -329,9 +329,7 @@ namespace RemoteSigner {
 
             var sig = p3[0];
             if (publicKey == null) {
-                string keyId = sig.KeyId.ToString("X16").ToUpper();
-                string fingerPrint =
-                    keyId.Length < 16 ? Tools.H8FP(keyId) : Tools.H16FP(sig.KeyId.ToString("X16").ToUpper());
+                string fingerPrint = sig.KeyId.ToString("X16").ToUpper();
                 publicKey = krm[fingerPrint];
                 if (publicKey == null) {
                     throw new KeyNotLoadedException(fingerPrint);
