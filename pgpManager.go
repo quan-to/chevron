@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/models"
-	"golang.org/x/crypto/openpgp"
+	"github.com/quan-to/remote-signer/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
 	"golang.org/x/crypto/openpgp/packet"
 	"io"
@@ -324,6 +324,7 @@ func (pm *PGPManager) GetPublicKey(fingerPrint string) *packet.PublicKey {
 
 	if ent != nil {
 		pubKey = ent.PrimaryKey
+		pm.entities[fingerPrint] = ent
 	}
 
 	return pubKey

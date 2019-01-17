@@ -11,6 +11,7 @@ import (
 	"net"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -49,6 +50,8 @@ func UnmarshalBodyOrDie(outData interface{}, w http.ResponseWriter, r *http.Requ
 		WriteJSON(QuantoError.New(QuantoError.InternalServerError, "body", err.Error(), nil), 500, w, r, logI)
 		return false
 	}
+
+	body = []byte(strings.Replace(string(body), "\t", "", -1))
 
 	err = json.Unmarshal(body, outData)
 

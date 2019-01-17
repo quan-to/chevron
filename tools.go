@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/quan-to/remote-signer/models"
-	"golang.org/x/crypto/openpgp"
+	"github.com/quan-to/remote-signer/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
 	"golang.org/x/crypto/openpgp/packet"
 	"regexp"

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"golang.org/x/crypto/openpgp"
+	"github.com/quan-to/remote-signer/openpgp"
 	r "gopkg.in/rethinkdb/rethinkdb-go.v5"
 	"strings"
 )

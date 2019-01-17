@@ -3,7 +3,7 @@ package remote_signer
 import (
 	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/models"
-	"golang.org/x/crypto/openpgp"
+	"github.com/quan-to/remote-signer/openpgp"
 	"sync"
 )
 
