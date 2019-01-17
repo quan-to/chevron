@@ -39,7 +39,7 @@ namespace RemoteSigner {
 
 
         public void AddKey(PgpPublicKey publicKey, bool nonErasable = false) {
-            var fingerPrint = Tools.H16FP(publicKey.GetFingerprint().ToHexString());
+            var fingerPrint = Tools.H16FP(publicKey.KeyId.ToString("X16"));
             if (!publicKeys.ContainsKey(fingerPrint)) {
                 publicKeys[fingerPrint] = publicKey;
                 FP8TO16[Tools.H8FP(fingerPrint)] = fingerPrint;
@@ -78,6 +78,12 @@ namespace RemoteSigner {
                     return null;
                 }
                 AddKey(key);
+                using (var s = Tools.GenerateStreamFromString(key)) {
+                    var pgpPub = new PgpPublicKeyRing(PgpUtilities.GetDecoderStream(s));
+                    foreach (PgpPublicKey pubKey in pgpPub.GetPublicKeys()) {
+                        return pubKey;
+                    }
+                }
             }
 
             return fingerPrint.Length == 8 ? publicKeys[FP8TO16[fingerPrint]] : publicKeys[fingerPrint];
