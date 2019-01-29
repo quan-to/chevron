@@ -40,4 +40,10 @@ Thumbs.db
 *.dotCover
 *.idea
 .vs
+cmd/standalone/standalone
+coverage.html
+test.gpg
+c.out
+__master*
+cover.out
 tmp

@@ -1,9 +1,37 @@
-FROM mono:5.16
+FROM golang:alpine as build
+
+RUN apk update
+
+RUN apk add git ca-certificates
+
+ADD . /go/src/github.com/quan-to/remote-signer
+
+
+# Compile Server
+WORKDIR /go/src/github.com/quan-to/remote-signer/cmd/server
+RUN go get -v
+RUN CGO_ENABLED=0 GOOS=linux go build -o ../../remote-signer
+
+# Compile Standalone
+WORKDIR /go/src/github.com/quan-to/remote-signer/cmd/standalone
+RUN go get -v
+RUN CGO_ENABLED=0 GOOS=linux go build -o ../../standalone
+
+
+FROM alpine:latest
 
 MAINTAINER Lucas Teske <lucas@contaquanto.com.br>
 
-#ARG DEBIAN_FRONTEND=noninteractive
-#RUN apt-get update && apt-get install -y --no-install-recommends mono-complete && rm -rf /var/lib/apt/lists/*
+
+RUN apk --no-cache add ca-certificates
+
+RUN mkdir -p /opt/remote-signer/
+WORKDIR /opt/remote-signer
+
+COPY --from=build /go/src/github.com/quan-to/remote-signer/remote-signer .
+COPY --from=build /go/src/github.com/quan-to/remote-signer/standalone .
+
+RUN mkdir -p /keys
 
 VOLUME ["/keys"]
 
@@ -26,18 +54,10 @@ ENV MASTER_GPG_KEY_PATH ""
 ENV MASTER_GPG_KEY_PASSWORD_PATH ""
 ENV MASTER_GPG_KEY_BASE64_ENCODED "true"
 ENV KEYS_BASE64_ENCODED "true"
+ENV VAULT_ADDRESS ""
+ENV VAULT_ROOT_TOKEN ""
+ENV VAULT_PATH_PREFIX ""
+ENV VAULT_STORAGE "false"
 
-RUN mkdir -p /opt/remote-signer/
-RUN mkdir -p /tmp/remote-signer/
-RUN mkdir -p /keys
-RUN ln -s /lib/x86_64-linux-gnu/libc.so.6 /lib/x86_64-linux-gnu/libc.so
-
-COPY ./ /tmp/remote-signer
-WORKDIR /tmp/remote-signer
-RUN ./build-nix.sh
-RUN cp ./RemoteSigner/bin/Release/* /opt/remote-signer/
-WORKDIR /
-RUN rm -fr /tmp/remote-signer
-
-CMD /usr/bin/mono /opt/remote-signer/RemoteSigner.exe
+CMD /opt/remote-signer/remote-signer
 
