@@ -16,7 +16,8 @@ import (
 
 var testData = []byte(remote_signer.TestSignatureData)
 
-var pgpMan etc.PGPInterface
+var pgpMan *PGPManager
+var sm *SecretsManager
 
 func ResetDatabase() {
 	c := etc.GetConnection()
@@ -65,8 +66,10 @@ func TestMain(m *testing.M) {
 		kb = keyBackend.MakeSaveToDiskBackend(remote_signer.PrivateKeyFolder, remote_signer.KeyPrefix)
 	}
 
-	pgpMan = MakePGPManagerWithKRM(kb, MakeKeyRingManager())
+	pgpMan = MakePGPManagerWithKRM(kb, MakeKeyRingManager()).(*PGPManager)
 	pgpMan.LoadKeys()
+
+	sm = MakeSecretsManager()
 
 	err := pgpMan.UnlockKey(remote_signer.TestKeyFingerprint, remote_signer.TestKeyPassword)
 
