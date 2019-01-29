@@ -4,6 +4,8 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/quan-to/remote-signer/SLog"
+	"github.com/quan-to/remote-signer/keyBackend"
+	"github.com/quan-to/remote-signer/vaultManager"
 	"io/ioutil"
 	"path"
 	"sync"
@@ -59,8 +61,15 @@ func MakeSecretsManager() *SecretsManager {
 
 	sm.masterKeyFingerPrint = masterKeyFp
 
-	sm.gpg = MakePGPManager()
-	sm.gpg.keyFolder = path.Dir(MasterGPGKeyPath)
+	var kb keyBackend.Backend
+
+	if VaultStorage {
+		kb = vaultManager.MakeVaultManager("")
+	} else {
+		kb = keyBackend.MakeSaveToDiskBackend(path.Dir(MasterGPGKeyPath), "")
+	}
+
+	sm.gpg = MakePGPManager(kb)
 	sm.gpg.keysBase64Encoded = MasterGPGKeyBase64Encoded
 
 	sm.gpg.LoadKeys()
