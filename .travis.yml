@@ -23,7 +23,6 @@ script:
 - echo "RethinkDB PID `cat $HOME/rethinkdb.pid`"
 - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin v1.10.2
 - golangci-lint run       # run a bunch of code checkers/linters in parallel
-- go test -v -race ./...  # Run all the tests with the race detector enabled
-- go test -v ./... -coverprofile=qrs.coverprofile
+- go test -v -race ./... -coverprofile=qrs.coverprofile	# Run all the tests with the race detector enabled and coverage
 - goveralls -coverprofile=qrs.coverprofile -service travis-ci
 - sudo kill -9 `cat ~/rethinkdb.pid`
