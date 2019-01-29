@@ -117,18 +117,6 @@ func brokenMacOSXArrayFix(s []string, includeHead bool) []string {
 	return s
 }
 
-func cleanEmptyArrayItems(s []string) []string {
-	o := make([]string, 0)
-	for _, v := range s {
-		v2 := strings.Trim(v, "\n \r\t")
-		if len(v2) != 0 {
-			o = append(o, v2)
-		}
-	}
-
-	return o
-}
-
 // SignatureFix recalculates the CRC
 func SignatureFix(sig string) string {
 	if pgpsig.MatchString(sig) {
