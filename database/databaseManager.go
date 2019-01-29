@@ -32,6 +32,8 @@ func DbSetup() {
 	RthState = RethinkDbState{}
 
 	if remote_signer.EnableRethinkSKS {
+		initLock.Lock()
+		defer initLock.Unlock()
 		dbLog.Info("RethinkDB SKS Enabled. Starting %d connections to %s:%d", remote_signer.RethinkDBPoolSize, remote_signer.RethinkDBHost, remote_signer.RethinkDBPort)
 		conn, err := r.Connect(r.ConnectOpts{
 			Address:    fmt.Sprintf("%s:%d", remote_signer.RethinkDBHost, remote_signer.RethinkDBPort),
@@ -105,9 +107,5 @@ func InitTables() {
 }
 
 func GetConnection() *r.Session {
-	if RthState.connection == nil {
-		DbSetup()
-		InitTables()
-	}
 	return RthState.connection
 }

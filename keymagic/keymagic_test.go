@@ -10,7 +10,6 @@ import (
 	"github.com/quan-to/remote-signer/vaultManager"
 	"gopkg.in/rethinkdb/rethinkdb-go.v5"
 	"os"
-	"sync"
 	"testing"
 	"time"
 )
@@ -19,11 +18,7 @@ var testData = []byte(remote_signer.TestSignatureData)
 
 var pgpMan etc.PGPInterface
 
-var dbLock = sync.Mutex{}
-
 func ResetDatabase() {
-	dbLock.Lock()
-	defer dbLock.Unlock()
 	c := etc.GetConnection()
 	dbs := etc.GetDatabases()
 	if remote_signer.StringIndexOf(remote_signer.DatabaseName, dbs) > -1 {
@@ -52,9 +47,13 @@ func TestMain(m *testing.M) {
 	remote_signer.SKSServer = fmt.Sprintf("http://localhost:%d/sks/", remote_signer.HttpPort)
 	remote_signer.EnableRethinkSKS = true
 
-	ResetDatabase()
+	SLog.UnsetTestMode()
 	etc.DbSetup()
+	ResetDatabase()
 	etc.InitTables()
+	SLog.SetTestMode()
+
+	time.Sleep(5 * time.Second) // Wait rethinkdb to settle
 
 	var kb keyBackend.Backend
 
