@@ -19,3 +19,7 @@ run:
   - vendor
 
 
+
+linters:
+  disable:
+  - megacheck
