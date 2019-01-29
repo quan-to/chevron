@@ -1,10 +1,10 @@
-package remote_signer
+package database
 
 import (
 	r "gopkg.in/rethinkdb/rethinkdb-go.v5"
 )
 
-func getTableIndexes(tableName string) []string {
+func GetTableIndexes(tableName string) []string {
 	var conn = GetConnection()
 
 	c, err := r.Table(tableName).IndexList().CoerceTo("array").Run(conn)
@@ -29,7 +29,7 @@ func getTableIndexes(tableName string) []string {
 	return idx
 }
 
-func getDatabases() []string {
+func GetDatabases() []string {
 	var conn = GetConnection()
 
 	c, err := r.DBList().CoerceTo("array").Run(conn)
@@ -54,7 +54,7 @@ func getDatabases() []string {
 	return dbs
 }
 
-func getTables() []string {
+func GetTables() []string {
 	var conn = GetConnection()
 
 	c, err := r.TableList().CoerceTo("array").Run(conn)

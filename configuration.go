@@ -26,10 +26,14 @@ var MasterGPGKeyPasswordPath string
 var MasterGPGKeyBase64Encoded bool
 var KeysBase64Encoded bool
 var IgnoreKubernetesCA bool
+var VaultStorage bool
+var VaultAddress string
+var VaultRootToken string
+var VaultPathPrefix string
 
 var varStack []map[string]interface{}
 
-func pushVariables() {
+func PushVariables() {
 	if varStack == nil {
 		varStack = make([]map[string]interface{}, 0)
 	}
@@ -54,12 +58,16 @@ func pushVariables() {
 		"MasterGPGKeyBase64Encoded": MasterGPGKeyBase64Encoded,
 		"KeysBase64Encoded":         KeysBase64Encoded,
 		"IgnoreKubernetesCA":        IgnoreKubernetesCA,
+		"VaultAddress":              VaultAddress,
+		"VaultRootToken":            VaultRootToken,
+		"VaultStorage":              VaultStorage,
+		"VaultPathPrefix":           VaultPathPrefix,
 	}
 
 	varStack = append(varStack, insMap)
 }
 
-func popVariables() {
+func PopVariables() {
 	if len(varStack) == 0 {
 		return
 	}
@@ -86,9 +94,13 @@ func popVariables() {
 	MasterGPGKeyBase64Encoded = insMap["MasterGPGKeyBase64Encoded"].(bool)
 	KeysBase64Encoded = insMap["KeysBase64Encoded"].(bool)
 	IgnoreKubernetesCA = insMap["IgnoreKubernetesCA"].(bool)
+	VaultAddress = insMap["VaultAddress"].(string)
+	VaultRootToken = insMap["VaultRootToken"].(string)
+	VaultStorage = insMap["VaultStorage"].(bool)
+	VaultPathPrefix = insMap["VaultPathPrefix"].(string)
 }
 
-func setup() {
+func Setup() {
 	// Pre init
 	MaxKeyRingCache = -1
 	HttpPort = -1
@@ -156,6 +168,11 @@ func setup() {
 	KeysBase64Encoded = strings.ToLower(os.Getenv("KEYS_BASE64_ENCODED")) == "true"
 	IgnoreKubernetesCA = strings.ToLower(os.Getenv("IGNORE_KUBERNETES_CA")) == "true"
 
+	VaultStorage = strings.ToLower(os.Getenv("VAULT_STORAGE")) == "true"
+	VaultAddress = os.Getenv("VAULT_ADDRESS")
+	VaultRootToken = os.Getenv("VAULT_ROOT_TOKEN")
+	VaultPathPrefix = os.Getenv("VAULT_PATH_PREFIX")
+
 	// Set defaults if not defined
 	if SyslogServer == "" {
 		SyslogServer = "127.0.0.1"
@@ -197,10 +214,14 @@ func setup() {
 		DatabaseName = "remote_signer"
 	}
 
+	if VaultAddress == "" {
+		VaultAddress = "http://localhost:8200"
+	}
+
 	// Other stuff
 	_ = os.Mkdir(PrivateKeyFolder, 0770)
 }
 
 func init() {
-	setup()
+	Setup()
 }

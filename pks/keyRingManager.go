@@ -1,6 +1,7 @@
-package remote_signer
+package pks
 
 import (
+	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/models"
 	"github.com/quan-to/remote-signer/openpgp"
@@ -51,7 +52,7 @@ func (krm *KeyRingManager) addFp(fp string) {
 
 func (krm *KeyRingManager) AddKey(key *openpgp.Entity, nonErasable bool) {
 	krm.Lock()
-	fp := ByteFingerPrint2FP16(key.PrimaryKey.Fingerprint[:])
+	fp := remote_signer.ByteFingerPrint2FP16(key.PrimaryKey.Fingerprint[:])
 	if krm.containsFp(fp) {
 		krmLog.Debug("Key %s already in keyring", fp)
 		krm.Unlock()
@@ -69,13 +70,13 @@ func (krm *KeyRingManager) AddKey(key *openpgp.Entity, nonErasable bool) {
 
 	krm.keyInfo[fp] = models.KeyInfo{
 		FingerPrint:           fp,
-		Identifier:            SimpleIdentitiesToString(IdentityMapToArray(key.Identities)),
+		Identifier:            remote_signer.SimpleIdentitiesToString(remote_signer.IdentityMapToArray(key.Identities)),
 		Bits:                  int(keyBits),
 		ContainsPrivateKey:    false,
 		PrivateKeyIsDecrypted: false,
 	}
 
-	if len(krm.fingerPrints) > MaxKeyRingCache {
+	if len(krm.fingerPrints) > remote_signer.MaxKeyRingCache {
 		lastFp := krm.fingerPrints[0]
 		krmLog.Debug("	There are more cached keys than allowed. Removing first key %s", lastFp)
 		krm.removeFp(lastFp)
@@ -84,8 +85,8 @@ func (krm *KeyRingManager) AddKey(key *openpgp.Entity, nonErasable bool) {
 	krm.Unlock()
 
 	for _, sub := range key.Subkeys {
-		subfp := ByteFingerPrint2FP16(sub.PublicKey.Fingerprint[:])
-		subE := CreateEntityForSubKey(fp, sub.PublicKey, sub.PrivateKey)
+		subfp := remote_signer.ByteFingerPrint2FP16(sub.PublicKey.Fingerprint[:])
+		subE := remote_signer.CreateEntityForSubKey(fp, sub.PublicKey, sub.PrivateKey)
 		krmLog.Debug("	Adding also subkey %s", subfp)
 		krm.AddKey(subE, nonErasable)
 	}
@@ -125,7 +126,7 @@ func (krm *KeyRingManager) GetKey(fp string) *openpgp.Entity {
 	asciiArmored := PKSGetKey(fp)
 
 	if len(asciiArmored) > 0 {
-		k, err := ReadKeyToEntity(asciiArmored)
+		k, err := remote_signer.ReadKeyToEntity(asciiArmored)
 		if err != nil {
 			krmLog.Error("Invalid key received from PKS! Error: %s", err)
 			return nil
@@ -136,4 +137,8 @@ func (krm *KeyRingManager) GetKey(fp string) *openpgp.Entity {
 	}
 
 	return ent
+}
+
+func (krm *KeyRingManager) GetFingerPrints() []string {
+	return krm.fingerPrints
 }

@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/SLog"
+	"github.com/quan-to/remote-signer/etc"
 	"github.com/quan-to/remote-signer/models"
+	"github.com/quan-to/remote-signer/pks"
 	"net/http"
 	"strconv"
 )
@@ -14,11 +15,11 @@ import (
 var sksLog = SLog.Scope("SKS Endpoint")
 
 type SKSEndpoint struct {
-	sm  *remote_signer.SecretsManager
-	gpg *remote_signer.PGPManager
+	sm  etc.SMInterface
+	gpg etc.PGPInterface
 }
 
-func MakeSKSEndpoint(sm *remote_signer.SecretsManager, gpg *remote_signer.PGPManager) *SKSEndpoint {
+func MakeSKSEndpoint(sm etc.SMInterface, gpg etc.PGPInterface) *SKSEndpoint {
 	return &SKSEndpoint{
 		sm:  sm,
 		gpg: gpg,
@@ -89,7 +90,7 @@ func (sks *SKSEndpoint) searchByName(w http.ResponseWriter, r *http.Request) {
 		pageEnd = models.DefaultPageEnd
 	}
 
-	gpgKeys := remote_signer.PKSSearchByName(name, int(pageStart), int(pageEnd))
+	gpgKeys := pks.PKSSearchByName(name, int(pageStart), int(pageEnd))
 
 	bodyData, err := json.Marshal(gpgKeys)
 
@@ -133,7 +134,7 @@ func (sks *SKSEndpoint) searchByFingerPrint(w http.ResponseWriter, r *http.Reque
 		pageEnd = models.DefaultPageEnd
 	}
 
-	gpgKeys := remote_signer.PKSSearchByFingerPrint(fingerPrint, int(pageStart), int(pageEnd))
+	gpgKeys := pks.PKSSearchByFingerPrint(fingerPrint, int(pageStart), int(pageEnd))
 
 	bodyData, err := json.Marshal(gpgKeys)
 
@@ -177,7 +178,7 @@ func (sks *SKSEndpoint) searchByEmail(w http.ResponseWriter, r *http.Request) {
 		pageEnd = models.DefaultPageEnd
 	}
 
-	gpgKeys := remote_signer.PKSSearchByEmail(email, int(pageStart), int(pageEnd))
+	gpgKeys := pks.PKSSearchByEmail(email, int(pageStart), int(pageEnd))
 
 	bodyData, err := json.Marshal(gpgKeys)
 
@@ -221,7 +222,7 @@ func (sks *SKSEndpoint) search(w http.ResponseWriter, r *http.Request) {
 		pageEnd = models.DefaultPageEnd
 	}
 
-	gpgKeys := remote_signer.PKSSearch(valueData, int(pageStart), int(pageEnd))
+	gpgKeys := pks.PKSSearch(valueData, int(pageStart), int(pageEnd))
 
 	bodyData, err := json.Marshal(gpgKeys)
 
@@ -251,7 +252,7 @@ func (sks *SKSEndpoint) addKey(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	status := remote_signer.PKSAdd(data.PublicKey)
+	status := pks.PKSAdd(data.PublicKey)
 
 	if status != "OK" {
 		InvalidFieldData("PublicKey", "Invalid Public Key specified. Check if its in ASCII Armored Format", w, r, sksLog)

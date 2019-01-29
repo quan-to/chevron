@@ -9,7 +9,11 @@ import (
 	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/QuantoError"
 	"github.com/quan-to/remote-signer/SLog"
+	"github.com/quan-to/remote-signer/etc"
+	"github.com/quan-to/remote-signer/etc/pgpBuilder"
 	"github.com/quan-to/remote-signer/models"
+	"github.com/quan-to/remote-signer/secretsManager"
+	"github.com/quan-to/remote-signer/server"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -61,8 +65,8 @@ nT5O4fndAA==
 
 const testDecryptDataOnly = "wcFMA6uJF6HKi88OARAATyFPVauyY3PKircZ3AlTMd2Iy1/FNKVxSKg1jKBhGvPCUdRRMqaJXz4dsEWNZp//QQMN3cd3JqJhw/AEGJJUQglwnXO2bYCXj6/RzsgRKCbj9Ijo1Y33Rbu+3+huWluYEQnWBfkbhnjeIrNRXxGvqQKczXx1aA6D1CvFk8W5LUWmIngxKi+s2TxA/fqfMBETnKa6rVM625by/9Ebo7qKoeetksDYAMvEzaLwKFIQ6O+lQt1YcBnbZ3mkrtSosisRqfmndkffUGsEJJ/g16ZYhwlDUYUGj7O/mRb01edPFLQko0THpAUhT7GH4Cw939W4wqddHSxgz9pEJKt8TsOqry2oiRQ+Qus5ygyMrLp5jH6JrExgGf5dlNUOs6R1JXozWhLXSZo7+kBg4hTRkRmdSu2adNvsO8tF2qjCWd/M0p2HfLEKTdvYFh6+d93wOVDYMvXzUB7NDIGlhi6gXs/D8+Tw+ZkLpRm9iWdLO9YpFquI+964sxAz5E5iEOBipJGTVpyxsU959kQ6hJqT4EWiATYMnqpnG7hGkDfXlKcwCeDBDKsUi3KVLw4PbSnRZQh9JNFv2VhyF2zQKpXI4hyF0QZoef2OT4a7xTOdHkdkAes/fcDhr4dwvQfp0uPOH1C8LViO7bVKBFnj+zTVftI0pVJ8MV/BV0Y5ru1hcRXOp9vS4AHk3apKw1UvqtPqAcgnbNy1euHYYuBt4HXhvbrgWuO+bpowlkmIXeAx4CrgJOKtLADx4PPk454/jrek18yYVGg4AZvEDOBu4b0E4EzkNh+m6OARX0nP/ig4wqHxtuLvNoCX4WOWAA=="
 
-var sm *remote_signer.SecretsManager
-var gpg *remote_signer.PGPManager
+var sm *secretsManager.SecretsManager
+var gpg etc.PGPInterface
 var slog = SLog.Scope("TestRemoteSigner")
 
 var router *mux.Router
@@ -85,16 +89,18 @@ func TestMain(m *testing.M) {
 	QuantoError.EnableStackTrace()
 	SLog.SetTestMode()
 
+	remote_signer.DatabaseName = "qrs_test"
 	remote_signer.PrivateKeyFolder = ".."
 	remote_signer.KeyPrefix = "testkey_"
 	remote_signer.KeysBase64Encoded = false
+	remote_signer.EnableRethinkSKS = false
 
 	remote_signer.MasterGPGKeyBase64Encoded = false
 	remote_signer.MasterGPGKeyPath = "../testkey_privateTestKey.gpg"
 	remote_signer.MasterGPGKeyPasswordPath = "../testprivatekeyPassword.txt"
 
-	sm = remote_signer.MakeSecretsManager()
-	gpg = remote_signer.MakePGPManager()
+	sm = secretsManager.MakeSecretsManager()
+	gpg = pgpBuilder.MakePGP()
 	gpg.LoadKeys()
 
 	err := gpg.UnlockKey(testKeyFingerprint, testKeyPassword)
@@ -105,7 +111,7 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	router = GenRemoteSignerServerMux(slog, sm, gpg)
+	router = server.GenRemoteSignerServerMux(slog, sm, gpg)
 
 	code := m.Run()
 

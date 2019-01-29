@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/SLog"
+	"github.com/quan-to/remote-signer/etc"
 	"github.com/quan-to/remote-signer/models"
 	"net/http"
 )
@@ -13,11 +14,11 @@ import (
 var kreLog = SLog.Scope("KeyRing Endpoint")
 
 type KeyRingEndpoint struct {
-	sm  *remote_signer.SecretsManager
-	gpg *remote_signer.PGPManager
+	sm  etc.SMInterface
+	gpg etc.PGPInterface
 }
 
-func MakeKeyRingEndpoint(sm *remote_signer.SecretsManager, gpg *remote_signer.PGPManager) *KeyRingEndpoint {
+func MakeKeyRingEndpoint(sm etc.SMInterface, gpg etc.PGPInterface) *KeyRingEndpoint {
 	return &KeyRingEndpoint{
 		sm:  sm,
 		gpg: gpg,
@@ -119,6 +120,13 @@ func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	fp, err := remote_signer.GetFingerPrintFromKey(data.EncryptedPrivateKey)
+
+	if err != nil {
+		InvalidFieldData("EncryptedPrivateKey", "Invalid key provided. Check if its in ASCII Armored Format. Cannot read fingerprint", w, r, kreLog)
+		return
+	}
+
 	err, n := kre.gpg.LoadKey(data.EncryptedPrivateKey)
 
 	if err != nil {
@@ -133,8 +141,17 @@ func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request
 
 	fingerPrint, _ := remote_signer.GetFingerPrintFromKey(data.EncryptedPrivateKey)
 
+	if data.Password != nil {
+		pass := data.Password.(string)
+		err := kre.gpg.UnlockKey(fp, pass)
+		if err != nil {
+			InvalidFieldData("Password", "Invalid password for the key provided", w, r, kreLog)
+			return
+		}
+	}
+
 	if data.SaveToDisk {
-		err = kre.gpg.SavePrivateKey(fingerPrint, data.EncryptedPrivateKey)
+		err = kre.gpg.SavePrivateKey(fingerPrint, data.EncryptedPrivateKey, data.Password)
 		if err != nil {
 			InternalServerError("There was an error saving your key to disk.", data, w, r, kreLog)
 		}

@@ -1,20 +1,22 @@
-package remote_signer
+package database
 
 import (
 	"fmt"
+	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/models"
 	r "gopkg.in/rethinkdb/rethinkdb-go.v5"
+	"sync"
+	"time"
 )
 
 const maxRetryCount = 5
 
-type rethinkDbState struct {
-	connection  *r.Session
-	currentConn int
+type RethinkDbState struct {
+	connection *r.Session
 }
 
-var rthState rethinkDbState
+var RthState RethinkDbState
 var dbLog = SLog.Scope("DatabaseManager")
 
 var tablesToInitialize = []models.TableInitStruct{
@@ -22,54 +24,56 @@ var tablesToInitialize = []models.TableInitStruct{
 }
 
 func init() {
-	dbSetup()
-	initTables()
+	DbSetup()
+	InitTables()
 }
 
-func dbSetup() {
-	rthState = rethinkDbState{
-		currentConn: 0,
-	}
+func DbSetup() {
+	RthState = RethinkDbState{}
 
-	if EnableRethinkSKS {
-		dbLog.Info("RethinkDB SKS Enabled. Starting %d connections to %s:%d", RethinkDBPoolSize, RethinkDBHost, RethinkDBPort)
+	if remote_signer.EnableRethinkSKS {
+		dbLog.Info("RethinkDB SKS Enabled. Starting %d connections to %s:%d", remote_signer.RethinkDBPoolSize, remote_signer.RethinkDBHost, remote_signer.RethinkDBPort)
 		conn, err := r.Connect(r.ConnectOpts{
-			Address:    fmt.Sprintf("%s:%d", RethinkDBHost, RethinkDBPort),
-			Username:   RethinkDBUsername,
-			Password:   RethinkDBPassword,
+			Address:    fmt.Sprintf("%s:%d", remote_signer.RethinkDBHost, remote_signer.RethinkDBPort),
+			Username:   remote_signer.RethinkDBUsername,
+			Password:   remote_signer.RethinkDBPassword,
 			NumRetries: maxRetryCount,
-			MaxOpen:    RethinkDBPoolSize,
-			InitialCap: RethinkDBPoolSize,
-			Database:   DatabaseName,
+			MaxOpen:    remote_signer.RethinkDBPoolSize,
+			InitialCap: remote_signer.RethinkDBPoolSize,
+			Database:   remote_signer.DatabaseName,
 		})
 
 		if err != nil {
 			dbLog.Fatal(err)
 		}
 
-		rthState.connection = conn
+		RthState.connection = conn
 	}
 }
 
-func initTables() {
-	if EnableRethinkSKS {
-		var dbs = getDatabases()
+var initLock = sync.Mutex{}
+
+func InitTables() {
+	if remote_signer.EnableRethinkSKS {
+		initLock.Lock()
+		defer initLock.Unlock()
+		var dbs = GetDatabases()
 		var conn = GetConnection()
 
-		if stringIndexOf(DatabaseName, dbs) == -1 {
-			dbLog.Warn("Database %s does not exists. Creating it...", DatabaseName)
-			err := r.DBCreate(DatabaseName).Exec(conn)
+		if remote_signer.StringIndexOf(remote_signer.DatabaseName, dbs) == -1 {
+			dbLog.Warn("Database %s does not exists. Creating it...", remote_signer.DatabaseName)
+			err := r.DBCreate(remote_signer.DatabaseName).Exec(conn)
 			if err != nil {
 				dbLog.Fatal(err)
 			}
 		} else {
-			dbLog.Debug("Database %s already exists. Skipping...", DatabaseName)
+			dbLog.Debug("Database %s already exists. Skipping...", remote_signer.DatabaseName)
 		}
 
-		tables := getTables()
+		tables := GetTables()
 
 		for _, v := range tablesToInitialize {
-			if stringIndexOf(v.TableName, tables) == -1 {
+			if remote_signer.StringIndexOf(v.TableName, tables) == -1 {
 				dbLog.Info("Table %s does not exists. Creating...", v.TableName)
 				err := r.TableCreate(v.TableName).Exec(conn)
 				if err != nil {
@@ -78,10 +82,10 @@ func initTables() {
 			}
 
 			dbLog.Info("Checking Indexes for table %s", v.TableName)
-			idxs := getTableIndexes(v.TableName)
+			idxs := GetTableIndexes(v.TableName)
 
 			for _, vidx := range v.TableIndexes {
-				if stringIndexOf(vidx, idxs) == -1 {
+				if remote_signer.StringIndexOf(vidx, idxs) == -1 {
 					dbLog.Warn("Index %s not found at table %s. Creating it...", vidx, v.TableName)
 					err := r.Table(v.TableName).IndexCreate(vidx).Exec(conn)
 					if err != nil {
@@ -92,9 +96,14 @@ func initTables() {
 				}
 			}
 		}
+		time.Sleep(2 * time.Second) // Wait for indexes
 	}
 }
 
 func GetConnection() *r.Session {
-	return rthState.connection
+	if RthState.connection == nil {
+		DbSetup()
+		InitTables()
+	}
+	return RthState.connection
 }

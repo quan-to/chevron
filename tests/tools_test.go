@@ -1,6 +1,7 @@
-package remote_signer
+package tests
 
 import (
+	"github.com/quan-to/remote-signer"
 	"io/ioutil"
 	"testing"
 )
@@ -9,13 +10,13 @@ func TestStringIndexOf(t *testing.T) {
 	v := []string{"a", "v", "o"}
 
 	for i := range v {
-		idx := stringIndexOf(v[i], v)
+		idx := remote_signer.StringIndexOf(v[i], v)
 		if idx != i {
 			t.Errorf("Expected %d got %d", i, idx)
 		}
 	}
 
-	idx := stringIndexOf("huebrbrb", v)
+	idx := remote_signer.StringIndexOf("huebrbrb", v)
 	if idx != -1 {
 		t.Errorf("Expected %d got %d", -1, idx)
 	}
@@ -23,14 +24,14 @@ func TestStringIndexOf(t *testing.T) {
 
 func TestIssuerKeyIdToFP16(t *testing.T) {
 	v := uint64(0xFFFF0000FFFF0000)
-	o := IssuerKeyIdToFP16(v)
+	o := remote_signer.IssuerKeyIdToFP16(v)
 
 	if o != "FFFF0000FFFF0000" {
 		t.Errorf("Expected FFFF0000FFFF0000 got %s", o)
 	}
 
 	v = uint64(0xFFFF0000)
-	o = IssuerKeyIdToFP16(v)
+	o = remote_signer.IssuerKeyIdToFP16(v)
 
 	if o != "00000000FFFF0000" {
 		t.Errorf("Expected 00000000FFFF0000 got %s", o)
@@ -57,49 +58,49 @@ rGJSIfo/sifdCmZyXLG0VQHljkLcKhYsWgAn9br9YTWrpEQPIRs=
 -----END PGP SIGNATURE-----`
 
 func TestQuanto2GPG(t *testing.T) {
-	z := Quanto2GPG(sigConvertQuanto)
+	z := remote_signer.Quanto2GPG(sigConvertQuanto)
 	if z != sigConvertGPG {
 		t.Errorf("Expected %s got %s", sigConvertGPG, z)
 	}
 
-	z = Quanto2GPG("asdausigheioygase")
+	z = remote_signer.Quanto2GPG("asdausigheioygase")
 	if z != "" {
 		t.Errorf("Expected empty got %s", z)
 	}
 }
 
 func TestGPG2Quanto(t *testing.T) {
-	z := GPG2Quanto(sigConvertGPG, "0ADF79401F28C569", "SHA512")
+	z := remote_signer.GPG2Quanto(sigConvertGPG, "0ADF79401F28C569", "SHA512")
 	if z != sigConvertQuanto {
 		t.Errorf("Expected %s got %s", sigConvertQuanto, z)
 	}
 }
 
 func TestGetFingerPrintFromKey(t *testing.T) {
-	z, err := ioutil.ReadFile("testkey_privateTestKey.gpg")
+	z, err := ioutil.ReadFile("./testkey_privateTestKey.gpg")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
 
-	k, err := GetFingerPrintFromKey(string(z))
+	k, err := remote_signer.GetFingerPrintFromKey(string(z))
 
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
 
-	if k != testKeyFingerprint {
-		t.Errorf("Expected %s got %s", testKeyFingerprint, k)
+	if k != remote_signer.TestKeyFingerprint {
+		t.Errorf("Expected %s got %s", remote_signer.TestKeyFingerprint, k)
 	}
 
 	// Test Error Scenarios
-	_, err = GetFingerPrintFromKey("huebr")
+	_, err = remote_signer.GetFingerPrintFromKey("huebr")
 	if err == nil {
 		t.Errorf("Expected error, got nil")
 	}
 
-	_, err = GetFingerPrintFromKey(sigConvertGPG) // Test Non Key GPG
+	_, err = remote_signer.GetFingerPrintFromKey(sigConvertGPG) // Test Non Key GPG
 	if err == nil {
 		t.Errorf("Expected error, got nil")
 	}
@@ -110,24 +111,24 @@ func TestGetFingerPrintsFromEncryptedMessageRaw(t *testing.T) {
 }
 
 func TestReadKeyToEntity(t *testing.T) {
-	z, err := ioutil.ReadFile("testkey_privateTestKey.gpg")
+	z, err := ioutil.ReadFile("./testkey_privateTestKey.gpg")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
 
-	e, err := ReadKeyToEntity(string(z))
+	e, err := remote_signer.ReadKeyToEntity(string(z))
 
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
 
-	if IssuerKeyIdToFP16(e.PrimaryKey.KeyId) != testKeyFingerprint {
-		t.Errorf("Expected %s got %s", testKeyFingerprint, IssuerKeyIdToFP16(e.PrimaryKey.KeyId))
+	if remote_signer.IssuerKeyIdToFP16(e.PrimaryKey.KeyId) != remote_signer.TestKeyFingerprint {
+		t.Errorf("Expected %s got %s", remote_signer.TestKeyFingerprint, remote_signer.IssuerKeyIdToFP16(e.PrimaryKey.KeyId))
 	}
 
-	_, err = ReadKeyToEntity("hueheueheuehue")
+	_, err = remote_signer.ReadKeyToEntity("hueheueheuehue")
 	if err == nil {
 		t.Errorf("Expected error got nil")
 	}
@@ -136,42 +137,42 @@ func TestReadKeyToEntity(t *testing.T) {
 func TestCompareFingerPrint(t *testing.T) {
 
 	// fpA == ""
-	if CompareFingerPrint("", "auisiehuase") {
+	if remote_signer.CompareFingerPrint("", "auisiehuase") {
 		t.Error("Expected false got true")
 	}
 
 	// fpB == ""
-	if CompareFingerPrint("asuieha", "") {
+	if remote_signer.CompareFingerPrint("asuieha", "") {
 		t.Error("Expected false got true")
 	}
 
 	// fpA == "" && fpB == ""
-	if CompareFingerPrint("", "") {
+	if remote_signer.CompareFingerPrint("", "") {
 		t.Error("Expected false got true")
 	}
 
 	// fpA > fpB && true
-	if !CompareFingerPrint("1234567890", "4567890") {
+	if !remote_signer.CompareFingerPrint("1234567890", "4567890") {
 		t.Error("Expected true got false")
 	}
 	// fpA > fpB && false
-	if CompareFingerPrint("1234567890", "4569990") {
+	if remote_signer.CompareFingerPrint("1234567890", "4569990") {
 		t.Error("Expected false got true")
 	}
 
 	// fpB > fpA && true
-	if !CompareFingerPrint("4567890", "1234567890") {
+	if !remote_signer.CompareFingerPrint("4567890", "1234567890") {
 		t.Error("Expected true got false")
 	}
 	// fpB > fpA && false
-	if CompareFingerPrint("4569990", "1234567890") {
+	if remote_signer.CompareFingerPrint("4569990", "1234567890") {
 		t.Error("Expected false got true")
 	}
 }
 
 func TestCrc24(t *testing.T) {
 	z := []byte{1, 2, 3, 3, 41, 23, 12, 31, 23, 12, 31, 23, 12, 41, 24, 15, 12, 43, 12, 31, 23, 12, 31, 23, 123, 12, 4, 12, 31, 23, 12, 31, 23, 120}
-	o := crc24(z)
+	o := remote_signer.CRC24(z)
 	if o != 8124930 {
 		t.Errorf("Expected %d got %d", 8124930, o)
 	}

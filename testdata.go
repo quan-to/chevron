@@ -1,6 +1,6 @@
 package remote_signer
 
-
+const ExternalKeyFingerprint = "6C39C1C16A9DA7BE"
 const TestKeyFingerprint = "0016A9CA870AFA59"
 const TestKeyPassword = "I think you will never guess"
 

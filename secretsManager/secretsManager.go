@@ -1,9 +1,12 @@
-package remote_signer
+package secretsManager
 
 import (
 	"encoding/base64"
 	"fmt"
+	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/SLog"
+	"github.com/quan-to/remote-signer/etc"
+	"github.com/quan-to/remote-signer/etc/pgpBuilder"
 	"github.com/quan-to/remote-signer/keyBackend"
 	"github.com/quan-to/remote-signer/vaultManager"
 	"io/ioutil"
@@ -18,40 +21,49 @@ var smLog = SLog.Scope("SecretsManager")
 type SecretsManager struct {
 	sync.Mutex
 	encryptedPasswords   map[string]string
-	gpg                  *PGPManager
+	gpg                  etc.PGPInterface
 	masterKeyFingerPrint string
 	amIUseless           bool
 }
 
 func MakeSecretsManager() *SecretsManager {
+	var kb keyBackend.Backend
+
+	if remote_signer.VaultStorage {
+		kb = vaultManager.MakeVaultManager("__master__")
+	} else {
+		kb = keyBackend.MakeSaveToDiskBackend(path.Dir(remote_signer.MasterGPGKeyPath), "__master__")
+	}
+
 	var sm = &SecretsManager{
 		amIUseless:         false,
 		encryptedPasswords: map[string]string{},
 	}
+	masterKeyBytes, err := ioutil.ReadFile(remote_signer.MasterGPGKeyPath)
 
-	masterKeyBytes, err := ioutil.ReadFile(MasterGPGKeyPath)
+	originalKeyBytes := masterKeyBytes
 
 	if err != nil {
-		smLog.Error("Error loading master key from %s: %s", MasterGPGKeyPath, err)
+		smLog.Error("Error loading master key from %s: %s", remote_signer.MasterGPGKeyPath, err)
 		smLog.Error("I'm useless :(")
 		sm.amIUseless = true
 		return sm
 	}
 
-	if MasterGPGKeyBase64Encoded {
+	if remote_signer.MasterGPGKeyBase64Encoded {
 		masterKeyBytes, err = base64.StdEncoding.DecodeString(string(masterKeyBytes))
 		if err != nil {
-			smLog.Error("Error loading master key from %s: %s", MasterGPGKeyPath, err)
+			smLog.Error("Error loading master key from %s: %s", remote_signer.MasterGPGKeyPath, err)
 			smLog.Error("I'm useless :(")
 			sm.amIUseless = true
 			return sm
 		}
 	}
 
-	masterKeyFp, err := GetFingerPrintFromKey(string(masterKeyBytes))
+	masterKeyFp, err := remote_signer.GetFingerPrintFromKey(string(masterKeyBytes))
 
 	if err != nil {
-		smLog.Error("Error loading master key from %s: %s", MasterGPGKeyPath, err)
+		smLog.Error("Error loading master key from %s: %s", remote_signer.MasterGPGKeyPath, err)
 		smLog.Error("I'm useless :(")
 		sm.amIUseless = true
 		return sm
@@ -61,23 +73,21 @@ func MakeSecretsManager() *SecretsManager {
 
 	sm.masterKeyFingerPrint = masterKeyFp
 
-	var kb keyBackend.Backend
+	err = kb.Save(masterKeyFp, string(originalKeyBytes))
 
-	if VaultStorage {
-		kb = vaultManager.MakeVaultManager("")
-	} else {
-		kb = keyBackend.MakeSaveToDiskBackend(path.Dir(MasterGPGKeyPath), "")
+	if err != nil {
+		smLog.Fatal("Error saving master key to default backend: %s", err)
 	}
 
-	sm.gpg = MakePGPManager(kb)
-	sm.gpg.keysBase64Encoded = MasterGPGKeyBase64Encoded
+	sm.gpg = pgpBuilder.MakePGP()
+	sm.gpg.SetKeysBase64Encoded(remote_signer.MasterGPGKeyBase64Encoded)
 
 	sm.gpg.LoadKeys()
 
-	masterKeyPassBytes, err := ioutil.ReadFile(MasterGPGKeyPasswordPath)
+	masterKeyPassBytes, err := ioutil.ReadFile(remote_signer.MasterGPGKeyPasswordPath)
 
 	if err != nil {
-		smLog.Fatal("Error loading key password from %s: %s", MasterGPGKeyPasswordPath, err)
+		smLog.Fatal("Error loading key password from %s: %s", remote_signer.MasterGPGKeyPasswordPath, err)
 	}
 
 	err = sm.gpg.UnlockKey(masterKeyFp, string(masterKeyPassBytes))
@@ -133,7 +143,7 @@ func (sm *SecretsManager) GetPasswords() map[string]string {
 	return pss
 }
 
-func (sm *SecretsManager) UnlockLocalKeys(gpg *PGPManager) {
+func (sm *SecretsManager) UnlockLocalKeys(gpg etc.PGPInterface) {
 	if sm.amIUseless {
 		smLog.Warn("Not saving password. Master Key not loaded")
 	}

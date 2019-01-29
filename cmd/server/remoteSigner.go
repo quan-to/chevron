@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/QuantoError"
 	"github.com/quan-to/remote-signer/SLog"
+	"github.com/quan-to/remote-signer/etc/pgpBuilder"
+	"github.com/quan-to/remote-signer/etc/smBuilder"
 	"github.com/quan-to/remote-signer/kubernetes"
 	"github.com/quan-to/remote-signer/server"
 	"os"
@@ -15,8 +16,8 @@ var slog = SLog.Scope("RemoteSigner")
 
 func main() {
 	QuantoError.EnableStackTrace()
-	sm := remote_signer.MakeSecretsManager()
-	gpg := remote_signer.MakePGPManager()
+	sm := smBuilder.MakeSM()
+	gpg := pgpBuilder.MakePGP()
 
 	gpg.LoadKeys()
 

@@ -3,9 +3,9 @@ package server
 import (
 	"errors"
 	"github.com/gorilla/mux"
-	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/models/HKP"
+	"github.com/quan-to/remote-signer/pks"
 	"net/http"
 )
 
@@ -16,14 +16,14 @@ var hkpLog = SLog.Scope("HKP")
 func operationGet(options, searchData string, machineReadable, noModification bool) (error, string) {
 	//hkpLog.Info("GET(%s, %s, %v, %v)", options, searchData, machineReadable, noModification)
 	if searchData[:2] == "0x" {
-		var k = remote_signer.PKSGetKey(searchData[2:])
+		var k = pks.PKSGetKey(searchData[2:])
 		if k == "" {
 			return errors.New("not found"), ""
 		}
 		return nil, k
 	}
 
-	results := remote_signer.PKSSearch(searchData, 0, 1)
+	results := pks.PKSSearch(searchData, 0, 1)
 
 	if len(results) > 0 {
 		return nil, results[0].AsciiArmoredPublicKey

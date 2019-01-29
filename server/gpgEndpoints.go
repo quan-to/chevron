@@ -8,18 +8,20 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/SLog"
+	"github.com/quan-to/remote-signer/etc"
 	"github.com/quan-to/remote-signer/models"
+	"github.com/quan-to/remote-signer/pgp"
 	"net/http"
 )
 
 var geLog = SLog.Scope("GPG Endpoint")
 
 type GPGEndpoint struct {
-	sm  *remote_signer.SecretsManager
-	gpg *remote_signer.PGPManager
+	sm  etc.SMInterface
+	gpg etc.PGPInterface
 }
 
-func MakeGPGEndpoint(sm *remote_signer.SecretsManager, gpg *remote_signer.PGPManager) *GPGEndpoint {
+func MakeGPGEndpoint(sm etc.SMInterface, gpg etc.PGPInterface) *GPGEndpoint {
 	return &GPGEndpoint{
 		sm:  sm,
 		gpg: gpg,
@@ -298,8 +300,8 @@ func (ge *GPGEndpoint) generateKey(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	if data.Bits < remote_signer.MinKeyBits {
-		InvalidFieldData("Bits", fmt.Sprintf("The key should be at least %d bits length.", remote_signer.MinKeyBits), w, r, geLog)
+	if data.Bits < pgp.MinKeyBits {
+		InvalidFieldData("Bits", fmt.Sprintf("The key should be at least %d bits length.", pgp.MinKeyBits), w, r, geLog)
 		return
 	}
 

@@ -1,35 +1,58 @@
-package remote_signer
+package keyring
 
 import (
+	"github.com/quan-to/remote-signer"
+	"github.com/quan-to/remote-signer/QuantoError"
+	"github.com/quan-to/remote-signer/SLog"
+	"github.com/quan-to/remote-signer/database"
+	"github.com/quan-to/remote-signer/etc/krmBuilder"
+	"github.com/quan-to/remote-signer/etc/pgpBuilder"
 	"github.com/quan-to/remote-signer/models"
+	"github.com/quan-to/remote-signer/pgp"
 	"io/ioutil"
+	"os"
 	"testing"
 )
 
-const externalKeyFingerprint = "6C39C1C16A9DA7BE"
+func TestMain(m *testing.M) {
+	QuantoError.EnableStackTrace()
+	SLog.SetTestMode()
+
+	remote_signer.DatabaseName = "qrs_test"
+	remote_signer.EnableRethinkSKS = false
+	remote_signer.PrivateKeyFolder = ".."
+	remote_signer.KeyPrefix = "testkey_"
+	remote_signer.KeysBase64Encoded = false
+
+	database.DbSetup()
+	database.InitTables()
+
+	code := m.Run()
+	os.Exit(code)
+}
 
 func TestAddKey(t *testing.T) {
-	pushVariables()
-	defer popVariables()
-	MaxKeyRingCache = 10
-	krm := MakeKeyRingManager()
-	gpg := MakePGPManager()
+	remote_signer.PushVariables()
+	defer remote_signer.PopVariables()
+	remote_signer.MaxKeyRingCache = 10
+	krm := krmBuilder.MakeKRM()
+	gpg := pgpBuilder.MakePGP()
 
-	str, err := gpg.GeneratePGPKey("", "", MinKeyBits)
+	str, err := gpg.GeneratePGPKey("", "", pgp.MinKeyBits)
 
 	if err != nil {
 		t.Errorf("Cannot generate test key: %s", err)
 		t.FailNow()
 	}
 
-	e, err := ReadKeyToEntity(str)
+	e, err := remote_signer.ReadKeyToEntity(str)
 
 	if err != nil {
 		t.Errorf("Error loading test key: %s", err)
 		t.FailNow()
 	}
 
-	fp := IssuerKeyIdToFP16(e.PrimaryKey.KeyId)
+	fp := remote_signer.IssuerKeyIdToFP16(e.PrimaryKey.KeyId)
 
 	krm.AddKey(e, true)
 
@@ -41,7 +64,7 @@ func TestAddKey(t *testing.T) {
 		t.Error("Cannot find added key")
 	}
 
-	if stringIndexOf(fp, krm.fingerPrints) != -1 {
+	if remote_signer.StringIndexOf(fp, krm.GetFingerPrints()) != -1 {
 		t.Error("Non Erasable Key should be on the fingerPrint list")
 	}
 
@@ -50,14 +73,14 @@ func TestAddKey(t *testing.T) {
 	}
 
 	// Test Ring Cache
-	str, err = gpg.GeneratePGPKey("", "", MinKeyBits)
+	str, err = gpg.GeneratePGPKey("", "", pgp.MinKeyBits)
 
 	if err != nil {
 		t.Errorf("Cannot generate test key: %s", err)
 		t.FailNow()
 	}
 
-	erasableKeyTest, err := ReadKeyToEntity(str)
+	erasableKeyTest, err := remote_signer.ReadKeyToEntity(str)
 
 	if err != nil {
 		t.Errorf("Error loading test key: %s", err)
@@ -65,18 +88,18 @@ func TestAddKey(t *testing.T) {
 	}
 
 	krm.AddKey(erasableKeyTest, false) // Add to pool
-	fpErasable := IssuerKeyIdToFP16(erasableKeyTest.PrimaryKey.KeyId)
+	fpErasable := remote_signer.IssuerKeyIdToFP16(erasableKeyTest.PrimaryKey.KeyId)
 
 	// Rotate until MaxKeyRingCache -1, so erasableKeyTest should be still there
-	for i := 0; i < MaxKeyRingCache-1; i++ {
-		str, err := gpg.generateFastTestKey()
+	for i := 0; i < remote_signer.MaxKeyRingCache-1; i++ {
+		str, err := gpg.GenerateTestKey()
 
 		if err != nil {
 			t.Errorf("Cannot generate test key: %s", err)
 			t.FailNow()
 		}
 
-		e, err := ReadKeyToEntity(str)
+		e, err := remote_signer.ReadKeyToEntity(str)
 
 		if err != nil {
 			t.Errorf("Error loading test key: %s", err)
@@ -91,14 +114,14 @@ func TestAddKey(t *testing.T) {
 	}
 
 	// Generate one more, should be erased
-	str, err = gpg.GeneratePGPKey("", "", MinKeyBits)
+	str, err = gpg.GeneratePGPKey("", "", pgp.MinKeyBits)
 
 	if err != nil {
 		t.Errorf("Cannot generate test key: %s", err)
 		t.FailNow()
 	}
 
-	e, err = ReadKeyToEntity(str)
+	e, err = remote_signer.ReadKeyToEntity(str)
 
 	if err != nil {
 		t.Errorf("Error loading test key: %s", err)
@@ -115,30 +138,30 @@ func TestAddKey(t *testing.T) {
 }
 
 func TestGetKeyExternal(t *testing.T) {
-	pushVariables()
-	defer popVariables()
+	remote_signer.PushVariables()
+	defer remote_signer.PopVariables()
 	// Test External SKS Fetch
-	SKSServer = "https://keyserver.ubuntu.com/"
-	krm := MakeKeyRingManager()
-	EnableRethinkSKS = false
-	e := krm.GetKey(externalKeyFingerprint)
+	remote_signer.SKSServer = "https://keyserver.ubuntu.com/"
+	krm := krmBuilder.MakeKRM()
+	remote_signer.EnableRethinkSKS = false
+	e := krm.GetKey(remote_signer.ExternalKeyFingerprint)
 
 	if e == nil {
 		t.Error("Expected External key to be fetch")
 		t.FailNow()
 	}
 
-	fp := IssuerKeyIdToFP16(e.PrimaryKey.KeyId)
+	fp := remote_signer.IssuerKeyIdToFP16(e.PrimaryKey.KeyId)
 
-	if fp != externalKeyFingerprint {
-		t.Errorf("Expected key %s got %s", externalKeyFingerprint, fp)
+	if fp != remote_signer.ExternalKeyFingerprint {
+		t.Errorf("Expected key %s got %s", remote_signer.ExternalKeyFingerprint, fp)
 	}
 
 	// Test SKS Internal
-	EnableRethinkSKS = true
-	c := GetConnection()
+	remote_signer.EnableRethinkSKS = true
+	c := database.GetConnection()
 
-	z, err := ioutil.ReadFile("testkey_privateTestKey.gpg")
+	z, err := ioutil.ReadFile("../testkey_privateTestKey.gpg")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -159,9 +182,9 @@ func TestGetKeyExternal(t *testing.T) {
 		t.FailNow()
 	}
 
-	fp = IssuerKeyIdToFP16(e.PrimaryKey.KeyId)
+	fp = remote_signer.IssuerKeyIdToFP16(e.PrimaryKey.KeyId)
 
-	if !CompareFingerPrint(fp, gpgKey.FullFingerPrint) {
+	if !remote_signer.CompareFingerPrint(fp, gpgKey.FullFingerPrint) {
 		t.Errorf("Expected %s == %s", fp, gpgKey.FullFingerPrint)
 	}
 

@@ -3,8 +3,8 @@ package server
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/SLog"
+	"github.com/quan-to/remote-signer/etc"
 	"github.com/quan-to/remote-signer/models"
 	"net/http"
 )
@@ -12,11 +12,11 @@ import (
 var intLog = SLog.Scope("Internal Endpoint")
 
 type InternalEndpoint struct {
-	sm  *remote_signer.SecretsManager
-	gpg *remote_signer.PGPManager
+	sm  etc.SMInterface
+	gpg etc.PGPInterface
 }
 
-func MakeInternalEndpoint(sm *remote_signer.SecretsManager, gpg *remote_signer.PGPManager) *InternalEndpoint {
+func MakeInternalEndpoint(sm etc.SMInterface, gpg etc.PGPInterface) *InternalEndpoint {
 	return &InternalEndpoint{
 		sm:  sm,
 		gpg: gpg,

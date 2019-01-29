@@ -11,13 +11,16 @@ git:
 
 before_install:
  - go get github.com/mattn/goveralls
-
-
+ - echo "deb http://download.rethinkdb.com/apt xenial main" | sudo tee /etc/apt/sources.list.d/rethinkdb.list
+ - wget -qO- https://download.rethinkdb.com/apt/pubkey.gpg | sudo apt-key add -
+ - sudo apt-get -qq update && sudo apt-get install -y rethinkdb
+ - rethinkdb &
 
 # script always runs to completion (set +e). If we have linter issues AND a
 # failing test, we want to see both. Configure golangci-lint with a
 # .golangci.yml file at the top level of your repo.
 script:
+- sudo apt install 
 - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin v1.10.2
 - golangci-lint run       # run a bunch of code checkers/linters in parallel
 - go test -v -race ./...  # Run all the tests with the race detector enabled

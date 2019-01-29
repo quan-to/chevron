@@ -17,7 +17,7 @@ import (
 
 var pgpsig = regexp.MustCompile("-----BEGIN PGP SIGNATURE-----(.*)-----END PGP SIGNATURE-----")
 
-func stringIndexOf(v string, a []string) int {
+func StringIndexOf(v string, a []string) int {
 	for i, vo := range a {
 		if vo == v {
 			return i
@@ -74,7 +74,7 @@ func GPG2Quanto(signature, fingerPrint, hash string) string {
 	return fmt.Sprintf("%s_%s_%s", fingerPrint, hashName, cutSig)
 }
 
-func signatureFix(sig string) string {
+func SignatureFix(sig string) string {
 	if pgpsig.MatchString(sig) {
 		g := pgpsig.FindStringSubmatch(sig)
 		if len(g) > 1 {
@@ -102,7 +102,7 @@ func signatureFix(sig string) string {
 				panic(err)
 			}
 
-			crc := crc24(d)
+			crc := CRC24(d)
 			crcU := make([]byte, 3)
 			crcU[0] = byte((crc >> 16) & 0xFF)
 			crcU[1] = byte((crc >> 8) & 0xFF)
@@ -322,8 +322,8 @@ func CompareFingerPrint(fpA, fpB string) bool {
 const crc24Init = 0xb704ce
 const crc24Poly = 0x1864cfb
 
-// crc24 calculates the OpenPGP checksum as specified in RFC 4880, section 6.1
-func crc24(d []byte) uint32 {
+// CRC24 calculates the OpenPGP checksum as specified in RFC 4880, section 6.1
+func CRC24(d []byte) uint32 {
 	crc := uint32(crc24Init)
 	for _, b := range d {
 		crc ^= uint32(b) << 16

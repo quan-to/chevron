@@ -5,10 +5,11 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/SLog"
+	"github.com/quan-to/remote-signer/etc"
 	"net/http"
 )
 
-func GenRemoteSignerServerMux(slog *SLog.Instance, sm *remote_signer.SecretsManager, gpg *remote_signer.PGPManager) *mux.Router {
+func GenRemoteSignerServerMux(slog *SLog.Instance, sm etc.SMInterface, gpg etc.PGPInterface) *mux.Router {
 	ge := MakeGPGEndpoint(sm, gpg)
 	ie := MakeInternalEndpoint(sm, gpg)
 	te := MakeTestsEndpoint()
@@ -41,7 +42,7 @@ func GenRemoteSignerServerMux(slog *SLog.Instance, sm *remote_signer.SecretsMana
 	return r
 }
 
-func RunRemoteSignerServer(slog *SLog.Instance, sm *remote_signer.SecretsManager, gpg *remote_signer.PGPManager) chan bool {
+func RunRemoteSignerServer(slog *SLog.Instance, sm etc.SMInterface, gpg etc.PGPInterface) chan bool {
 
 	r := GenRemoteSignerServerMux(slog, sm, gpg)
 

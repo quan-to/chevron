@@ -8,7 +8,7 @@ var warnEnabled = true
 var errorEnabled = true
 var infoEnabled = true
 
-var glog = Instance{scope: "RadioServer"}
+var glog = Instance{scope: "RemoteSigner"}
 
 func Log(str interface{}, v ...interface{}) *Instance {
 	return glog.Log(str, v...)

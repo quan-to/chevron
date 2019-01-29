@@ -1,14 +1,15 @@
-package remote_signer
+package pks
 
 import (
 	"fmt"
+	"github.com/quan-to/remote-signer"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 )
 
 func GetSKSKey(fingerPrint string) string {
-	response, err := http.Get(fmt.Sprintf("%s/pks/lookup?op=get&options=mr&search=0x%s", SKSServer, fingerPrint))
+	response, err := http.Get(fmt.Sprintf("%s/pks/lookup?op=get&options=mr&search=0x%s", remote_signer.SKSServer, fingerPrint))
 
 	if err != nil {
 		panic(err)
@@ -24,7 +25,7 @@ func GetSKSKey(fingerPrint string) string {
 }
 
 func PutSKSKey(publicKey string) bool {
-	response, err := http.PostForm(SKSServer, url.Values{"keytext": {publicKey}})
+	response, err := http.PostForm(remote_signer.SKSServer, url.Values{"keytext": {publicKey}})
 
 	if err != nil {
 		panic(err)
