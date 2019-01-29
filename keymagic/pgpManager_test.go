@@ -4,13 +4,8 @@ import (
 	"crypto"
 	"encoding/base64"
 	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/etc"
 	"testing"
 )
-
-var testData = []byte(remote_signer.TestSignatureData)
-
-var pgpMan etc.PGPInterface
 
 // region Tests
 func TestVerifySign(t *testing.T) {

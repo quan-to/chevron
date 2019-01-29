@@ -71,11 +71,12 @@ func InitTables() {
 		}
 
 		tables := GetTables()
-
+		needWait := false
 		for _, v := range tablesToInitialize {
 			if remote_signer.StringIndexOf(v.TableName, tables) == -1 {
 				dbLog.Info("Table %s does not exists. Creating...", v.TableName)
 				err := r.TableCreate(v.TableName).Exec(conn)
+				needWait = true
 				if err != nil {
 					dbLog.Fatal(err)
 				}
@@ -88,6 +89,7 @@ func InitTables() {
 				if remote_signer.StringIndexOf(vidx, idxs) == -1 {
 					dbLog.Warn("Index %s not found at table %s. Creating it...", vidx, v.TableName)
 					err := r.Table(v.TableName).IndexCreate(vidx).Exec(conn)
+					needWait = true
 					if err != nil {
 						dbLog.Fatal(err)
 					}
@@ -96,7 +98,9 @@ func InitTables() {
 				}
 			}
 		}
-		time.Sleep(2 * time.Second) // Wait for indexes
+		if needWait {
+			time.Sleep(5 * time.Second) // Wait for indexes
+		}
 	}
 }
 
