@@ -52,6 +52,6 @@ func TestInitTable(t *testing.T) {
 	DbSetup()
 	ResetDatabase()
 	InitTables()
-	InitTables() // Test if already initialized
+	InitTables()                // Test if already initialized
 	time.Sleep(5 * time.Second) // Wait for settle
 }

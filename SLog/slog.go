@@ -10,6 +10,10 @@ var infoEnabled = true
 
 var glog = Instance{scope: "RemoteSigner"}
 
+func LogNoFormat(str interface{}, v ...interface{}) *Instance {
+	return glog.LogNoFormat(str, v...)
+}
+
 func Log(str interface{}, v ...interface{}) *Instance {
 	return glog.Log(str, v...)
 }
