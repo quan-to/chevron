@@ -1,4 +1,4 @@
-package pks
+package keymagic
 
 import (
 	"fmt"

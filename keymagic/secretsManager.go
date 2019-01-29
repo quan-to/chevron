@@ -1,4 +1,4 @@
-package secretsManager
+package keymagic
 
 import (
 	"encoding/base64"
@@ -6,7 +6,6 @@ import (
 	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/etc"
-	"github.com/quan-to/remote-signer/etc/pgpBuilder"
 	"github.com/quan-to/remote-signer/keyBackend"
 	"github.com/quan-to/remote-signer/vaultManager"
 	"io/ioutil"
@@ -79,7 +78,7 @@ func MakeSecretsManager() *SecretsManager {
 		smLog.Fatal("Error saving master key to default backend: %s", err)
 	}
 
-	sm.gpg = pgpBuilder.MakePGP()
+	sm.gpg = MakePGPManagerWithKRM(kb, MakeKeyRingManager())
 	sm.gpg.SetKeysBase64Encoded(remote_signer.MasterGPGKeyBase64Encoded)
 
 	sm.gpg.LoadKeys()

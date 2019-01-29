@@ -1,44 +1,31 @@
-package keyring
+package keymagic
 
 import (
 	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/QuantoError"
-	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/database"
-	"github.com/quan-to/remote-signer/etc/krmBuilder"
-	"github.com/quan-to/remote-signer/etc/pgpBuilder"
+	"github.com/quan-to/remote-signer/keyBackend"
 	"github.com/quan-to/remote-signer/models"
-	"github.com/quan-to/remote-signer/pgp"
+	"github.com/quan-to/remote-signer/vaultManager"
 	"io/ioutil"
-	"os"
 	"testing"
 )
-
-func TestMain(m *testing.M) {
-	QuantoError.EnableStackTrace()
-	SLog.SetTestMode()
-
-	remote_signer.DatabaseName = "qrs_test"
-	remote_signer.EnableRethinkSKS = false
-	remote_signer.PrivateKeyFolder = ".."
-	remote_signer.KeyPrefix = "testkey_"
-	remote_signer.KeysBase64Encoded = false
-
-	database.DbSetup()
-	database.InitTables()
-
-	code := m.Run()
-	os.Exit(code)
-}
 
 func TestAddKey(t *testing.T) {
 	remote_signer.PushVariables()
 	defer remote_signer.PopVariables()
 	remote_signer.MaxKeyRingCache = 10
-	krm := krmBuilder.MakeKRM()
-	gpg := pgpBuilder.MakePGP()
+	krm := MakeKeyRingManager()
+	var kb keyBackend.Backend
 
-	str, err := gpg.GeneratePGPKey("", "", pgp.MinKeyBits)
+	if remote_signer.VaultStorage {
+		kb = vaultManager.MakeVaultManager(remote_signer.KeyPrefix)
+	} else {
+		kb = keyBackend.MakeSaveToDiskBackend(remote_signer.PrivateKeyFolder, remote_signer.KeyPrefix)
+	}
+
+	gpg := MakePGPManagerWithKRM(kb, krm)
+
+	str, err := gpg.GeneratePGPKey("", "", gpg.MinKeyBits())
 
 	if err != nil {
 		t.Errorf("Cannot generate test key: %s", err)
@@ -73,7 +60,7 @@ func TestAddKey(t *testing.T) {
 	}
 
 	// Test Ring Cache
-	str, err = gpg.GeneratePGPKey("", "", pgp.MinKeyBits)
+	str, err = gpg.GeneratePGPKey("", "", gpg.MinKeyBits())
 
 	if err != nil {
 		t.Errorf("Cannot generate test key: %s", err)
@@ -114,7 +101,7 @@ func TestAddKey(t *testing.T) {
 	}
 
 	// Generate one more, should be erased
-	str, err = gpg.GeneratePGPKey("", "", pgp.MinKeyBits)
+	str, err = gpg.GeneratePGPKey("", "", gpg.MinKeyBits())
 
 	if err != nil {
 		t.Errorf("Cannot generate test key: %s", err)
@@ -142,7 +129,7 @@ func TestGetKeyExternal(t *testing.T) {
 	defer remote_signer.PopVariables()
 	// Test External SKS Fetch
 	remote_signer.SKSServer = "https://keyserver.ubuntu.com/"
-	krm := krmBuilder.MakeKRM()
+	krm := MakeKeyRingManager()
 	remote_signer.EnableRethinkSKS = false
 	e := krm.GetKey(remote_signer.ExternalKeyFingerprint)
 

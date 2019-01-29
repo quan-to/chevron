@@ -1,41 +1,16 @@
-package pgp
+package keymagic
 
 import (
 	"crypto"
 	"encoding/base64"
 	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/QuantoError"
-	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/etc"
-	"github.com/quan-to/remote-signer/etc/pgpBuilder"
-	"os"
 	"testing"
 )
 
 var testData = []byte(remote_signer.TestSignatureData)
 
 var pgpMan etc.PGPInterface
-
-func TestMain(m *testing.M) {
-	QuantoError.EnableStackTrace()
-	SLog.SetTestMode()
-
-	remote_signer.DatabaseName = "qrs_test"
-	remote_signer.EnableRethinkSKS = false
-	remote_signer.PrivateKeyFolder = ".."
-	remote_signer.KeyPrefix = "testkey_"
-	remote_signer.KeysBase64Encoded = false
-
-	pgpMan = pgpBuilder.MakePGP()
-	pgpMan.LoadKeys()
-
-	err := pgpMan.UnlockKey(remote_signer.TestKeyFingerprint, remote_signer.TestKeyPassword)
-	if err != nil {
-		panic(err)
-	}
-	code := m.Run()
-	os.Exit(code)
-}
 
 // region Tests
 func TestVerifySign(t *testing.T) {

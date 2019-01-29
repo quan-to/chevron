@@ -1,4 +1,4 @@
-package tests
+package remote_signer
 
 import "testing"
 

@@ -6,8 +6,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/etc"
+	"github.com/quan-to/remote-signer/keymagic"
 	"github.com/quan-to/remote-signer/models"
-	"github.com/quan-to/remote-signer/pks"
 	"net/http"
 	"strconv"
 )
@@ -90,7 +90,7 @@ func (sks *SKSEndpoint) searchByName(w http.ResponseWriter, r *http.Request) {
 		pageEnd = models.DefaultPageEnd
 	}
 
-	gpgKeys := pks.PKSSearchByName(name, int(pageStart), int(pageEnd))
+	gpgKeys := keymagic.PKSSearchByName(name, int(pageStart), int(pageEnd))
 
 	bodyData, err := json.Marshal(gpgKeys)
 
@@ -134,7 +134,7 @@ func (sks *SKSEndpoint) searchByFingerPrint(w http.ResponseWriter, r *http.Reque
 		pageEnd = models.DefaultPageEnd
 	}
 
-	gpgKeys := pks.PKSSearchByFingerPrint(fingerPrint, int(pageStart), int(pageEnd))
+	gpgKeys := keymagic.PKSSearchByFingerPrint(fingerPrint, int(pageStart), int(pageEnd))
 
 	bodyData, err := json.Marshal(gpgKeys)
 
@@ -178,7 +178,7 @@ func (sks *SKSEndpoint) searchByEmail(w http.ResponseWriter, r *http.Request) {
 		pageEnd = models.DefaultPageEnd
 	}
 
-	gpgKeys := pks.PKSSearchByEmail(email, int(pageStart), int(pageEnd))
+	gpgKeys := keymagic.PKSSearchByEmail(email, int(pageStart), int(pageEnd))
 
 	bodyData, err := json.Marshal(gpgKeys)
 
@@ -222,7 +222,7 @@ func (sks *SKSEndpoint) search(w http.ResponseWriter, r *http.Request) {
 		pageEnd = models.DefaultPageEnd
 	}
 
-	gpgKeys := pks.PKSSearch(valueData, int(pageStart), int(pageEnd))
+	gpgKeys := keymagic.PKSSearch(valueData, int(pageStart), int(pageEnd))
 
 	bodyData, err := json.Marshal(gpgKeys)
 
@@ -252,7 +252,7 @@ func (sks *SKSEndpoint) addKey(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	status := pks.PKSAdd(data.PublicKey)
+	status := keymagic.PKSAdd(data.PublicKey)
 
 	if status != "OK" {
 		InvalidFieldData("PublicKey", "Invalid Public Key specified. Check if its in ASCII Armored Format", w, r, sksLog)

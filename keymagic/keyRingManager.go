@@ -1,4 +1,4 @@
-package pks
+package keymagic
 
 import (
 	"github.com/quan-to/remote-signer"

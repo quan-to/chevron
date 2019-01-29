@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/quan-to/remote-signer/etc/pgpBuilder"
+	"github.com/quan-to/remote-signer/etc/magicBuilder"
 	"golang.org/x/crypto/ssh/terminal"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"io/ioutil"
@@ -13,7 +13,7 @@ import (
 )
 
 func GenerateFlow(password, output, identifier string, bits int) {
-	pgpMan := pgpBuilder.MakePGP()
+	pgpMan := magicBuilder.MakePGP()
 	if password == "" {
 		_, _ = fmt.Fprint(os.Stderr, "Please enter the password: ")
 		bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
@@ -40,7 +40,7 @@ func GenerateFlow(password, output, identifier string, bits int) {
 }
 
 func BenchmarkGeneration(runs, bits int) {
-	pgpMan := pgpBuilder.MakePGP()
+	pgpMan := magicBuilder.MakePGP()
 
 	fmt.Printf("Benchmarking GPG Key Generation with %d bits and %d runs.\n", bits, runs)
 	fmt.Printf("Running on %s-%s\n", runtime.GOOS, runtime.GOARCH)

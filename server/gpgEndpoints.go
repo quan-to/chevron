@@ -10,7 +10,6 @@ import (
 	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/etc"
 	"github.com/quan-to/remote-signer/models"
-	"github.com/quan-to/remote-signer/pgp"
 	"net/http"
 )
 
@@ -300,8 +299,8 @@ func (ge *GPGEndpoint) generateKey(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	if data.Bits < pgp.MinKeyBits {
-		InvalidFieldData("Bits", fmt.Sprintf("The key should be at least %d bits length.", pgp.MinKeyBits), w, r, geLog)
+	if data.Bits < ge.gpg.MinKeyBits() {
+		InvalidFieldData("Bits", fmt.Sprintf("The key should be at least %d bits length.", ge.gpg.MinKeyBits()), w, r, geLog)
 		return
 	}
 

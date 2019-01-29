@@ -1,4 +1,4 @@
-package pks
+package keymagic
 
 import (
 	"fmt"
@@ -7,14 +7,14 @@ import (
 	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/database"
 	"github.com/quan-to/remote-signer/etc"
-	"github.com/quan-to/remote-signer/etc/pgpBuilder"
-	"github.com/quan-to/remote-signer/etc/smBuilder"
+	"github.com/quan-to/remote-signer/keyBackend"
 	"github.com/quan-to/remote-signer/models"
-	"github.com/quan-to/remote-signer/pks"
+	"github.com/quan-to/remote-signer/vaultManager"
 	"gopkg.in/rethinkdb/rethinkdb-go.v5"
 	"io/ioutil"
 	"os"
 	"testing"
+	"time"
 )
 
 func ResetDatabase() {
@@ -26,6 +26,7 @@ func ResetDatabase() {
 			panic(err)
 		}
 	}
+	time.Sleep(time.Second)
 }
 
 func TestMain(m *testing.M) {
@@ -49,11 +50,20 @@ func TestMain(m *testing.M) {
 	etc.DbSetup()
 	etc.InitTables()
 
-	sm := smBuilder.MakeSM()
-	gpg := pgpBuilder.MakePGP()
-	gpg.LoadKeys()
+	sm := MakeSecretsManager()
 
-	err := gpg.UnlockKey(remote_signer.TestKeyFingerprint, remote_signer.TestKeyPassword)
+	var kb keyBackend.Backend
+
+	if remote_signer.VaultStorage {
+		kb = vaultManager.MakeVaultManager(remote_signer.KeyPrefix)
+	} else {
+		kb = keyBackend.MakeSaveToDiskBackend(remote_signer.PrivateKeyFolder, remote_signer.KeyPrefix)
+	}
+
+	pgpMan = MakePGPManagerWithKRM(kb, MakeKeyRingManager())
+	pgpMan.LoadKeys()
+
+	err := pgpMan.UnlockKey(remote_signer.TestKeyFingerprint, remote_signer.TestKeyPassword)
 
 	if err != nil {
 		SLog.SetError(true)
@@ -88,7 +98,7 @@ func TestPKSGetKey(t *testing.T) {
 		t.FailNow()
 	}
 
-	key := pks.PKSGetKey(gpgKey.FullFingerPrint)
+	key := PKSGetKey(gpgKey.FullFingerPrint)
 
 	fp, err := remote_signer.GetFingerPrintFromKey(key)
 
@@ -105,7 +115,7 @@ func TestPKSGetKey(t *testing.T) {
 	remote_signer.EnableRethinkSKS = false
 	remote_signer.SKSServer = "https://keyserver.ubuntu.com/"
 
-	key = pks.PKSGetKey(remote_signer.ExternalKeyFingerprint)
+	key = PKSGetKey(remote_signer.ExternalKeyFingerprint)
 
 	fp, err = remote_signer.GetFingerPrintFromKey(key)
 
@@ -126,7 +136,7 @@ func TestPKSSearchByName(t *testing.T) {
 	// Test Panics
 	remote_signer.EnableRethinkSKS = false
 	assertPanic(t, func() {
-		_ = pks.PKSSearchByName("", 0, 1)
+		_ = PKSSearchByName("", 0, 1)
 	}, "SearchByName without RethinkSKS Should panic!")
 }
 
@@ -137,7 +147,7 @@ func TestPKSSearchByFingerPrint(t *testing.T) {
 	// Test Panics
 	remote_signer.EnableRethinkSKS = false
 	assertPanic(t, func() {
-		_ = pks.PKSSearchByFingerPrint("", 0, 1)
+		_ = PKSSearchByFingerPrint("", 0, 1)
 	}, "SearchByFingerPrint without RethinkSKS Should panic!")
 }
 
@@ -148,7 +158,7 @@ func TestPKSSearchByEmail(t *testing.T) {
 	// Test Panics
 	remote_signer.EnableRethinkSKS = false
 	assertPanic(t, func() {
-		_ = pks.PKSSearchByEmail("", 0, 1)
+		_ = PKSSearchByEmail("", 0, 1)
 	}, "SearchByEmail without RethinkSKS Should panic!")
 }
 
@@ -157,7 +167,7 @@ func TestPKSSearch(t *testing.T) {
 	// For now, should always panic
 
 	assertPanic(t, func() {
-		_ = pks.PKSSearch("", 0, 1)
+		_ = PKSSearch("", 0, 1)
 	}, "Search should always panic (NOT IMPLEMENTED)")
 }
 
@@ -178,13 +188,13 @@ func TestPKSAdd(t *testing.T) {
 		t.FailNow()
 	}
 
-	o := pks.PKSAdd(string(z))
+	o := PKSAdd(string(z))
 
 	if o != "OK" {
 		t.Errorf("Expected %s got %s", "OK", o)
 	}
 
-	p := pks.PKSGetKey(fp)
+	p := PKSGetKey(fp)
 
 	if p == "" {
 		t.Errorf("Key was not found")

@@ -1,11 +1,10 @@
-package pgpBuilder
+package magicBuilder
 
 import (
 	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/etc"
-	"github.com/quan-to/remote-signer/etc/krmBuilder"
 	"github.com/quan-to/remote-signer/keyBackend"
-	"github.com/quan-to/remote-signer/pgp"
+	"github.com/quan-to/remote-signer/keymagic"
 	"github.com/quan-to/remote-signer/vaultManager"
 )
 
@@ -18,5 +17,5 @@ func MakePGP() etc.PGPInterface {
 		kb = keyBackend.MakeSaveToDiskBackend(remote_signer.PrivateKeyFolder, remote_signer.KeyPrefix)
 	}
 
-	return pgp.MakePGPManagerWithKRM(kb, krmBuilder.MakeKRM())
+	return keymagic.MakePGPManagerWithKRM(kb, keymagic.MakeKeyRingManager())
 }
