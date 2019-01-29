@@ -27,13 +27,14 @@ func ResetDatabase() {
 			panic(err)
 		}
 	}
-	time.Sleep(3 * time.Second)
+	time.Sleep(5 * time.Second)
 }
 
 func TestMain(m *testing.M) {
 	QuantoError.EnableStackTrace()
 	SLog.SetTestMode()
 
+	remote_signer.DatabaseName = "qrs_test"
 	remote_signer.PrivateKeyFolder = "../tests/"
 	remote_signer.KeyPrefix = "testkey_"
 	remote_signer.KeysBase64Encoded = false
@@ -42,18 +43,19 @@ func TestMain(m *testing.M) {
 	remote_signer.MasterGPGKeyPath = "../tests/testkey_privateTestKey.gpg"
 	remote_signer.MasterGPGKeyPasswordPath = "../tests/testprivatekeyPassword.txt"
 
-	remote_signer.DatabaseName = "qrs_test"
 	remote_signer.HttpPort = 40000
 	remote_signer.SKSServer = fmt.Sprintf("http://localhost:%d/sks/", remote_signer.HttpPort)
 	remote_signer.EnableRethinkSKS = true
+	remote_signer.PushVariables()
 
 	SLog.UnsetTestMode()
 	etc.DbSetup()
 	ResetDatabase()
+	time.Sleep(10 * time.Second)
 	etc.InitTables()
 	SLog.SetTestMode()
 
-	time.Sleep(5 * time.Second) // Wait rethinkdb to settle
+	time.Sleep(10 * time.Second) // Wait rethinkdb to settle
 
 	var kb keyBackend.Backend
 

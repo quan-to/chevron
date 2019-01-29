@@ -8,9 +8,11 @@ import (
 	"gopkg.in/rethinkdb/rethinkdb-go.v5"
 	"os"
 	"testing"
+	"time"
 )
 
 func ResetDatabase() {
+	dbLog.Info("Reseting Database")
 	c := GetConnection()
 	dbs := GetDatabases()
 	if remote_signer.StringIndexOf(remote_signer.DatabaseName, dbs) > -1 {
@@ -19,6 +21,9 @@ func ResetDatabase() {
 			panic(err)
 		}
 	}
+
+	time.Sleep(5 * time.Second)
+	dbLog.Info("Database reseted")
 }
 
 func TestMain(m *testing.M) {
@@ -38,9 +43,6 @@ func TestMain(m *testing.M) {
 	remote_signer.SKSServer = fmt.Sprintf("http://localhost:%d/sks/", remote_signer.HttpPort)
 	remote_signer.EnableRethinkSKS = true
 
-	DbSetup()
-	ResetDatabase()
-
 	code := m.Run()
 	ResetDatabase()
 	os.Exit(code)
@@ -48,7 +50,8 @@ func TestMain(m *testing.M) {
 
 func TestInitTable(t *testing.T) {
 	DbSetup()
+	ResetDatabase()
 	InitTables()
 	InitTables() // Test if already initialized
-	ResetDatabase()
+	time.Sleep(5 * time.Second) // Wait for settle
 }
