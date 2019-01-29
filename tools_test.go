@@ -1,8 +1,14 @@
 package remote_signer
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"encoding/base64"
+	"golang.org/x/crypto/openpgp/packet"
 	"io/ioutil"
+	"strings"
 	"testing"
+	"time"
 )
 
 func TestStringIndexOf(t *testing.T) {
@@ -105,8 +111,90 @@ func TestGetFingerPrintFromKey(t *testing.T) {
 	}
 }
 
+func TestGetFingerPrintsFromEncryptedMessage(t *testing.T) {
+	fps, err := GetFingerPrintsFromEncryptedMessage(TestDecryptDataAscii)
+
+	if err != nil {
+		t.Fatalf("Got error in test: %s", err)
+		t.FailNow()
+	}
+
+	if len(fps) != 1 {
+		t.Fatalf("Expected 1 fingerprint. Got %d", len(fps))
+		t.FailNow()
+	}
+
+	if fps[0] != "AB8917A1CA8BCF0E" {
+		t.Fatalf("Expected AB8917A1CA8BCF0E got %s", fps[0])
+	}
+
+	// Try invalid data
+
+	fps, err = GetFingerPrintsFromEncryptedMessage("huebrinvalidpayload")
+
+	if err == nil {
+		t.Fatalf("Expected error")
+		t.FailNow()
+	}
+
+	if fps != nil {
+		t.Fatalf("Expected fingerprints to be null")
+	}
+
+	// Test Non PGP Data
+	fps, err = GetFingerPrintsFromEncryptedMessage(strings.Replace(TestDecryptDataAscii, "PGP MESSAGE", "HUE MESSAGE", -1))
+
+	if err == nil {
+		t.Fatalf("Expected error")
+		t.FailNow()
+	}
+
+	if fps != nil {
+		t.Fatalf("Expected fingerprints to be null")
+	}
+
+}
+
 func TestGetFingerPrintsFromEncryptedMessageRaw(t *testing.T) {
-	// TODO
+	fps, err := GetFingerPrintsFromEncryptedMessageRaw(TestDecryptDataRawB64)
+
+	if err != nil {
+		t.Fatalf("Got error in test: %s", err)
+		t.FailNow()
+	}
+
+	if len(fps) != 1 {
+		t.Fatalf("Expected 1 fingerprint. Got %d", len(fps))
+		t.FailNow()
+	}
+
+	if fps[0] != "AB8917A1CA8BCF0E" {
+		t.Fatalf("Expected AB8917A1CA8BCF0E got %s", fps[0])
+	}
+
+	// Try invalid data
+
+	fps, err = GetFingerPrintsFromEncryptedMessageRaw("huebrinvalidpayload")
+
+	if err == nil {
+		t.Fatalf("Expected error")
+		t.FailNow()
+	}
+
+	if fps != nil {
+		t.Fatalf("Expected fingerprints to be null")
+	}
+
+	fps, err = GetFingerPrintsFromEncryptedMessageRaw(base64.StdEncoding.EncodeToString([]byte("huebrinvalidpayload")))
+
+	if err == nil {
+		t.Fatalf("Expected error")
+		t.FailNow()
+	}
+
+	if fps != nil {
+		t.Fatalf("Expected fingerprints to be null")
+	}
 }
 
 func TestReadKeyToEntity(t *testing.T) {
@@ -150,6 +238,10 @@ func TestCompareFingerPrint(t *testing.T) {
 		t.Error("Expected false got true")
 	}
 
+	if !CompareFingerPrint("ABCDEFHG", "ABCDEFHG") {
+		t.Error("Expected true got false")
+	}
+
 	// fpA > fpB && true
 	if !CompareFingerPrint("1234567890", "4567890") {
 		t.Error("Expected true got false")
@@ -174,5 +266,146 @@ func TestCrc24(t *testing.T) {
 	o := CRC24(z)
 	if o != 8124930 {
 		t.Errorf("Expected %d got %d", 8124930, o)
+	}
+}
+
+func TestCreateEntityForSubKey(t *testing.T) {
+	privateKey, err := rsa.GenerateKey(rand.Reader, 1024)
+
+	if err != nil {
+		t.Fatal(err)
+		t.FailNow()
+	}
+
+	var cTimestamp = time.Now()
+
+	pgpPubKey := packet.NewRSAPublicKey(cTimestamp, &privateKey.PublicKey)
+	pgpPrivKey := packet.NewRSAPrivateKey(cTimestamp, privateKey)
+
+	e := CreateEntityForSubKey(TestKeyFingerprint, pgpPubKey, pgpPrivKey)
+
+	if e.PrimaryKey != pgpPubKey {
+		t.Errorf("Expected Primary Key to be the Public key")
+	}
+
+	if e.PrivateKey != pgpPrivKey {
+		t.Errorf("Expected Private Key to be the Private Key")
+	}
+}
+
+func TestCreateEntityFromKeys(t *testing.T) {
+	privateKey, err := rsa.GenerateKey(rand.Reader, 1024)
+
+	if err != nil {
+		t.Fatal(err)
+		t.FailNow()
+	}
+
+	var cTimestamp = time.Now()
+
+	pgpPubKey := packet.NewRSAPublicKey(cTimestamp, &privateKey.PublicKey)
+	pgpPrivKey := packet.NewRSAPrivateKey(cTimestamp, privateKey)
+
+	e := CreateEntityFromKeys("huebr", "comment", "a@a.com", 0, pgpPubKey, pgpPrivKey)
+
+	if e.PrimaryKey != pgpPubKey {
+		t.Errorf("Expected Primary Key to be the Public key")
+	}
+
+	if e.PrivateKey != pgpPrivKey {
+		t.Errorf("Expected Private Key to be the Private Key")
+	}
+
+	if len(e.Identities) == 0 {
+		t.Errorf("Expected one identity")
+	}
+	fullName := "huebr (comment) <a@a.com>"
+	if e.Identities[fullName] != nil {
+		id := e.Identities[fullName]
+		if id.Name != "huebr" {
+			t.Errorf("Expected identity name to be huebr")
+		}
+		uid := id.UserId
+
+		if uid != nil {
+			if uid.Name != "huebr" {
+				t.Errorf("Expected UID.name to be huebr")
+			}
+			if uid.Email != "a@a.com" {
+				t.Errorf("Expected UID.Email to be a@a.com")
+			}
+			if uid.Comment != "comment" {
+				t.Errorf("Expected UID.Comment to be comment")
+			}
+		} else {
+			t.Errorf("Expected Identity to have UID")
+		}
+	} else {
+		t.Errorf("Expected identity called huebr")
+	}
+}
+
+func TestSignatureFix(t *testing.T) {
+	s := SignatureFix(TestSignatureSignature)
+
+	original := GPG2Quanto("", "", TestSignatureSignature)
+	fixed := GPG2Quanto("", "", s)
+
+	if original != fixed {
+		t.Errorf("Expected %s got %s", original, fixed)
+	}
+
+	s = SignatureFix(TestSignatureSignatureNoCRC)
+	fixed = GPG2Quanto("", "", s)
+
+	if original != fixed {
+		t.Errorf("Expected %s got %s", original, fixed)
+	}
+
+	s = SignatureFix(TestSignatureSignatureNoCRCSingleLine)
+	fixed = GPG2Quanto("", "", s)
+
+	if original != fixed {
+		t.Errorf("Expected %s got %s", original, fixed)
+	}
+
+	// Test invalid base64
+	assertPanic(t, func() {
+		SignatureFix(strings.Replace(TestSignatureSignatureNoCRC, "wsFcBAA", "iQ-----", -1))
+	}, "Expected panic on invalid base64")
+
+	//if s != TestSignatureSignature {
+	//	t.Fatalf("Expected signature to be unchanged (thats a correct one)")
+	//}
+
+	// TODO: Test the broken case
+}
+
+func TestSimpleIdentitiesToString(t *testing.T) {
+
+	privateKey, err := rsa.GenerateKey(rand.Reader, 1024)
+
+	if err != nil {
+		t.Fatal(err)
+		t.FailNow()
+	}
+
+	var cTimestamp = time.Now()
+
+	pgpPubKey := packet.NewRSAPublicKey(cTimestamp, &privateKey.PublicKey)
+	pgpPrivKey := packet.NewRSAPrivateKey(cTimestamp, privateKey)
+
+	e := CreateEntityFromKeys("huebr", "comment", "a@a.com", 0, pgpPubKey, pgpPrivKey)
+
+	ids := IdentityMapToArray(e.Identities)
+	if len(ids) != 1 {
+		t.Fatalf("Expected one ID got %d", len(ids))
+		t.FailNow()
+	}
+
+	idsString := SimpleIdentitiesToString(ids)
+
+	if idsString != "huebr" {
+		t.Fatalf("Expected idsString to be huebr got %s", idsString)
 	}
 }

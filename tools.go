@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-var pgpsig = regexp.MustCompile("-----BEGIN PGP SIGNATURE-----(.*)-----END PGP SIGNATURE-----")
+var pgpsig = regexp.MustCompile("(?s)-----BEGIN PGP SIGNATURE-----(.*)-----END PGP SIGNATURE-----")
 
 func StringIndexOf(v string, a []string) int {
 	for i, vo := range a {
@@ -74,12 +74,25 @@ func GPG2Quanto(signature, fingerPrint, hash string) string {
 	return fmt.Sprintf("%s_%s_%s", fingerPrint, hashName, cutSig)
 }
 
+func cleanEmptyArrayItems(s []string) []string {
+	o := make([]string, 0)
+	for _, v := range s {
+		v2 := strings.Trim(v, "\n \r\t")
+		if len(v2) != 0 {
+			o = append(o, v2)
+		}
+	}
+
+	return o
+}
+
+// SignatureFix recalculates the CRC
 func SignatureFix(sig string) string {
 	if pgpsig.MatchString(sig) {
 		g := pgpsig.FindStringSubmatch(sig)
 		if len(g) > 1 {
 			sig = ""
-			data := strings.Split(strings.Trim(g[0], " "), "\n")
+			data := cleanEmptyArrayItems(strings.Split(strings.Trim(g[1], " "), "\n"))
 			save := false
 			if len(data) == 1 {
 				sig = data[0]
@@ -93,6 +106,8 @@ func SignatureFix(sig string) string {
 						} else {
 							sig += v
 						}
+					} else if len(v) > 0 && string(v[0]) != "=" && len(v) != 4 && len(v) != 5 {
+						sig += v
 					}
 				}
 			}
@@ -108,7 +123,17 @@ func SignatureFix(sig string) string {
 			crcU[1] = byte((crc >> 8) & 0xFF)
 			crcU[2] = byte(crc & 0xFF)
 
-			sig = "-----BEGIN PGP SIGNATURE-----\n\n" + sig + "\n=" + base64.StdEncoding.EncodeToString(crcU) + "\n-----END PGP SIGNATURE-----"
+			b64data := sig
+			sig = "-----BEGIN PGP SIGNATURE-----\n"
+
+			for i := 0; i < len(b64data); i++ {
+				if i%64 == 0 {
+					sig += "\n"
+				}
+				sig += string(b64data[i])
+			}
+
+			sig += "\n=" + base64.StdEncoding.EncodeToString(crcU) + "\n-----END PGP SIGNATURE-----"
 		}
 	}
 
@@ -156,6 +181,10 @@ func GetFingerPrintsFromEncryptedMessageRaw(rawB64Data string) ([]string, error)
 		case *packet.EncryptedKey:
 			fps = append(fps, IssuerKeyIdToFP16(v.KeyId))
 		}
+	}
+
+	if len(fps) == 0 {
+		return nil, fmt.Errorf("no fingerprint found")
 	}
 
 	return fps, nil
