@@ -28,8 +28,8 @@ func (cth *canonicalTextHash) Write(buf []byte) (int, error) {
 			if c == '\r' {
 				cth.s = 1
 			} else if c == '\n' {
-				cth.h.Write(buf[start:i])
-				cth.h.Write(newline)
+				_, _ = cth.h.Write(buf[start:i])
+				_, _ = cth.h.Write(newline)
 				start = i + 1
 			}
 		case 1:
@@ -37,7 +37,7 @@ func (cth *canonicalTextHash) Write(buf []byte) (int, error) {
 		}
 	}
 
-	cth.h.Write(buf[start:])
+	_, _ = cth.h.Write(buf[start:])
 	return len(buf), nil
 }
 

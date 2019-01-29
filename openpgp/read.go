@@ -158,7 +158,7 @@ FindKey:
 			}
 			if !pk.key.PrivateKey.Encrypted {
 				if len(pk.encryptedKey.Key) == 0 {
-					pk.encryptedKey.Decrypt(pk.key.PrivateKey, config)
+					_ = pk.encryptedKey.Decrypt(pk.key.PrivateKey, config)
 				}
 				if len(pk.encryptedKey.Key) == 0 {
 					continue
@@ -326,7 +326,7 @@ type signatureCheckReader struct {
 
 func (scr *signatureCheckReader) Read(buf []byte) (n int, err error) {
 	n, err = scr.md.LiteralData.Body.Read(buf)
-	scr.wrappedHash.Write(buf[:n])
+	_, _ = scr.wrappedHash.Write(buf[:n])
 	if err == io.EOF {
 		var p packet.Packet
 		p, scr.md.SignatureError = scr.packets.Next()
