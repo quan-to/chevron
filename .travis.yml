@@ -24,5 +24,5 @@ script:
 - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin v1.10.2
 - golangci-lint run       # run a bunch of code checkers/linters in parallel
 - go test -v -race ./...  # Run all the tests with the race detector enabled
-- goveralls		          # Run coverage test
+- goveralls ./...		          # Run coverage test
 - sudo kill -9 `cat ~/rethinkdb.pid`
