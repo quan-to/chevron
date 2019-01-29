@@ -2,6 +2,7 @@ package remote_signer
 
 import (
 	"fmt"
+	"github.com/quan-to/remote-signer/SLog"
 	"math/rand"
 	"os"
 	"strconv"
@@ -15,6 +16,7 @@ func TestPushPopVars(t *testing.T) {
 }
 
 func testIntVar(v *int, envName string, localName string, t *testing.T) {
+	SLog.SetTestMode()
 	err := os.Setenv(envName, "huebr")
 	if err != nil {
 		t.Error(err)
@@ -29,15 +31,16 @@ func testIntVar(v *int, envName string, localName string, t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-
 	Setup()
 
 	if *v != val {
 		t.Errorf("%s variable does not come from %s. Expected %d got %d", localName, envName, *v, val)
 	}
+	SLog.UnsetTestMode()
 }
 
 func TestConfiguration(t *testing.T) {
+	SLog.SetTestMode()
 	PushVariables()
 
 	testIntVar(&MaxKeyRingCache, "MAX_KEYRING_CACHE_SIZE", "MaxKeyRingCache", t)
@@ -46,4 +49,5 @@ func TestConfiguration(t *testing.T) {
 	testIntVar(&RethinkDBPort, "RETHINKDB_PORT", "RethinkDBPort", t)
 
 	PopVariables()
+	SLog.UnsetTestMode()
 }

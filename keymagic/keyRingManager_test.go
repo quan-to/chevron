@@ -148,7 +148,7 @@ func TestGetKeyExternal(t *testing.T) {
 	remote_signer.EnableRethinkSKS = true
 	c := database.GetConnection()
 
-	z, err := ioutil.ReadFile("../testkey_privateTestKey.gpg")
+	z, err := ioutil.ReadFile("../tests/testkey_privateTestKey.gpg")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

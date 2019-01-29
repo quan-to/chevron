@@ -33,13 +33,13 @@ func TestMain(m *testing.M) {
 	QuantoError.EnableStackTrace()
 	SLog.SetTestMode()
 
-	remote_signer.PrivateKeyFolder = ".."
+	remote_signer.PrivateKeyFolder = "../tests/"
 	remote_signer.KeyPrefix = "testkey_"
 	remote_signer.KeysBase64Encoded = false
 
 	remote_signer.MasterGPGKeyBase64Encoded = false
-	remote_signer.MasterGPGKeyPath = "../testkey_privateTestKey.gpg"
-	remote_signer.MasterGPGKeyPasswordPath = "../testprivatekeyPassword.txt"
+	remote_signer.MasterGPGKeyPath = "../tests/testkey_privateTestKey.gpg"
+	remote_signer.MasterGPGKeyPasswordPath = "../tests/testprivatekeyPassword.txt"
 
 	remote_signer.DatabaseName = "qrs_test"
 	remote_signer.HttpPort = 40000
@@ -67,6 +67,7 @@ func TestMain(m *testing.M) {
 
 	if err != nil {
 		SLog.SetError(true)
+		SLog.Error(err)
 		os.Exit(1)
 	}
 
@@ -84,7 +85,7 @@ func TestPKSGetKey(t *testing.T) {
 	// Test Internal
 	c := database.GetConnection()
 
-	z, err := ioutil.ReadFile("../testkey_privateTestKey.gpg")
+	z, err := ioutil.ReadFile("../tests/testkey_privateTestKey.gpg")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -175,7 +176,7 @@ func TestPKSAdd(t *testing.T) {
 	remote_signer.PushVariables()
 	defer remote_signer.PopVariables()
 	// Test Internal
-	z, err := ioutil.ReadFile("../testkey_privateTestKey.gpg")
+	z, err := ioutil.ReadFile("../tests/testkey_privateTestKey.gpg")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
