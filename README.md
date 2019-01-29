@@ -302,3 +302,4 @@ If you're using `gpg` command line tools, you can export your key directly into 
 gpg --export-secret-keys -a <your fingerprint> > ./keys/the-name-you-want.key
 ```
 > note: the `.key` extension is not required although it's recommended for better understanding.
+
