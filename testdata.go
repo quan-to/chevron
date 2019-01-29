@@ -6,6 +6,7 @@ const TestKeyPassword = "I think you will never guess"
 
 const TestSignatureData = "huebr for the win!"
 const TestSignatureSignature = `-----BEGIN PGP SIGNATURE-----
+Version: Quanto
 
 wsFcBAABCgAQBQJcJMPWCRAAFqnKhwr6WQAA3kwQAB6pxQkN+5yMt0LSkpIcjeOS
 UPqcMabEQlkD2HQrzisXlUZgllqP4jYAjFLCeErt0uu598LXO6pNTw7MnFQSfgcJ
@@ -22,7 +23,24 @@ gYr2Yd/IYVsAoGH6AHrIyUykXgsK6RXiBy0Sa7LN14TMCnQYzG2AUvXCDf184YAQ
 =D//n
 -----END PGP SIGNATURE-----`
 
+const BrokenMacOSXSignature = `-----BEGIN PGP SIGNATURE-----
+wsFcBAABCgAQBQJcJMPWCRAAFqnKhwr6WQAA3kwQAB6pxQkN+5yMt0LSkpIcjeOS
+UPqcMabEQlkD2HQrzisXlUZgllqP4jYAjFLCeErt0uu598LXO6pNTw7MnFQSfgcJ
+dJF2S05GwI4k00mMNzCTn7PbJe3d96QwjbTeanoMAjHhypZKi/StbtkFpIa+t9WI
+zm+EE5trFdZoE1SMOr5j85afDecl0DsGHEkKdmJ2mLK4ja3uaxsijtLd8d7mdI+Y
+LbI8UnpGyWMLkK8FpjBm+BaVeNicUvqkt/LO3LwslbKAViKpdL6Gu5x7x6Q+tAyO
+PZ6P6DQKjuGJl8aSv0eoKQ1TQz6vasBZNsYlasU0fM6dXny9XIucUD5sTsUpbMhw
+uO/xap6i3mBtFpzSfQCo/23KHeQajXS23Al56iUr85jlSQ9+JvJhZFrU9NQa+ypq
+Xi/IxrqTTvttVurXAVME1m06JirpiuD8fDdQTTboekaqLg8rXQ5eKqW0pAMIqHvf
+aq97YCqxH4F3T2EE77v6D9iLnbx/+7EGHoCehTMUYiAIAhlo93Xf/hnj40Hl/N18
+gYr2Yd/IYVsAoGH6AHrIyUykXgsK6RXiBy0Sa7LN14TMCnQYzG2AUvXCDf184YAQ
+1obsUVANy+qxH4lwMbEoznEsAU0ppqLchX1Ixdru5/SEgSV13Qv34rMEHCdVy4Oe
+1Jcr1AyB3KmDhw76PaBh
+=D//n
+-----END PGP SIGNATURE-----`
+
 const TestSignatureSignatureNoCRC = `-----BEGIN PGP SIGNATURE-----
+Version: Quanto
 
 wsFcBAABCgAQBQJcJMPWCRAAFqnKhwr6WQAA3kwQAB6pxQkN+5yMt0LSkpIcjeOS
 UPqcMabEQlkD2HQrzisXlUZgllqP4jYAjFLCeErt0uu598LXO6pNTw7MnFQSfgcJ
@@ -39,6 +57,7 @@ gYr2Yd/IYVsAoGH6AHrIyUykXgsK6RXiBy0Sa7LN14TMCnQYzG2AUvXCDf184YAQ
 -----END PGP SIGNATURE-----`
 
 const TestSignatureSignatureNoCRCSingleLine = `-----BEGIN PGP SIGNATURE-----
+Version: Quanto
 
 wsFcBAABCgAQBQJcJMPWCRAAFqnKhwr6WQAA3kwQAB6pxQkN+5yMt0LSkpIcjeOSUPqcMabEQlkD2HQrzisXlUZgllqP4jYAjFLCeErt0uu598LXO6pNTw7MnFQSfgcJdJF2S05GwI4k00mMNzCTn7PbJe3d96QwjbTeanoMAjHhypZKi/StbtkFpIa+t9WIzm+EE5trFdZoE1SMOr5j85afDecl0DsGHEkKdmJ2mLK4ja3uaxsijtLd8d7mdI+YLbI8UnpGyWMLkK8FpjBm+BaVeNicUvqkt/LO3LwslbKAViKpdL6Gu5x7x6Q+tAyOPZ6P6DQKjuGJl8aSv0eoKQ1TQz6vasBZNsYlasU0fM6dXny9XIucUD5sTsUpbMhwuO/xap6i3mBtFpzSfQCo/23KHeQajXS23Al56iUr85jlSQ9+JvJhZFrU9NQa+ypqXi/IxrqTTvttVurXAVME1m06JirpiuD8fDdQTTboekaqLg8rXQ5eKqW0pAMIqHvfaq97YCqxH4F3T2EE77v6D9iLnbx/+7EGHoCehTMUYiAIAhlo93Xf/hnj40Hl/N18gYr2Yd/IYVsAoGH6AHrIyUykXgsK6RXiBy0Sa7LN14TMCnQYzG2AUvXCDf184YAQ1obsUVANy+qxH4lwMbEoznEsAU0ppqLchX1Ixdru5/SEgSV13Qv34rMEHCdVy4Oe1Jcr1AyB3KmDhw76PaBh
 -----END PGP SIGNATURE-----`

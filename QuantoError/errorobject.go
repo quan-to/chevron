@@ -1,6 +1,7 @@
 package QuantoError
 
 import (
+	"fmt"
 	"github.com/quan-to/graphql/gqlerrors"
 	"log"
 	"runtime/debug"
@@ -55,4 +56,13 @@ func (e *ErrorObject) ToFormattedError() gqlerrors.FormattedError {
 	baseErr.Extensions["errorData"] = e.ErrorData
 
 	return baseErr
+}
+
+func (e *ErrorObject) String() string {
+	o := fmt.Sprintf("Error: %s\n", e.Message)
+	o += fmt.Sprintf("  Error Code: %s\n", e.ErrorCode)
+	o += fmt.Sprintf("  Error Field: %s\n", e.ErrorField)
+	o += fmt.Sprintf("  Error Data: %v\n", e.ErrorData)
+	o += fmt.Sprintf("  Stack Trace %s\n", e.StackTrace)
+	return o
 }

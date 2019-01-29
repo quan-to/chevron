@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-var pgpsig = regexp.MustCompile("(?s)-----BEGIN PGP SIGNATURE-----(.*)-----END PGP SIGNATURE-----")
+var pgpsig = regexp.MustCompile("(?s)-----BEGIN PGP SIGNATURE-----\n(.*)-----END PGP SIGNATURE-----")
 
 func StringIndexOf(v string, a []string) int {
 	for i, vo := range a {
@@ -65,13 +65,56 @@ func GPG2Quanto(signature, fingerPrint, hash string) string {
 	hashName := strings.ToUpper(hash)
 	cutSig := ""
 
-	s := strings.Split(strings.Trim(signature, " \r"), "\n")
+	s := brokenMacOSXArrayFix(strings.Split(strings.Trim(signature, " \r"), "\n"), true)
 
-	for i := 2; i < len(s)-1; i++ {
-		cutSig += s[i]
+	save := false
+
+	for i := 1; i < len(s)-1; i++ {
+		if !save {
+			// Wait for first empty line
+			if len(s[i]) == 0 {
+				save = true
+			}
+		} else {
+			cutSig += s[i]
+		}
 	}
 
 	return fmt.Sprintf("%s_%s_%s", fingerPrint, hashName, cutSig)
+}
+
+func brokenMacOSXArrayFix(s []string, includeHead bool) []string {
+	brokenMacOSX := true
+
+	if includeHead {
+		for i := 1; i < len(s)-1; i++ { // For Broken MacOSX Signatures
+			// Search for empty lines, if there is none, its a Broken MacOSX Signature
+			if len(s[i]) == 0 {
+				brokenMacOSX = false
+				break
+			}
+		}
+
+		if brokenMacOSX {
+			// Add a empty line as second line, to mandate empty header
+			n := append([]string{s[0]}, "")
+			s = append(n, s[1:]...)
+		}
+	} else {
+		for i := 0; i < len(s)-1; i++ { // For Broken MacOSX Signatures, don't check last line, its not needed.
+			// Search for empty lines, if there is none, its a Broken MacOSX Signature
+			if len(s[i]) == 0 {
+				brokenMacOSX = false
+				break
+			}
+		}
+
+		if brokenMacOSX {
+			s = append([]string{""}, s...)
+		}
+	}
+
+	return s
 }
 
 func cleanEmptyArrayItems(s []string) []string {
@@ -92,19 +135,16 @@ func SignatureFix(sig string) string {
 		g := pgpsig.FindStringSubmatch(sig)
 		if len(g) > 1 {
 			sig = ""
-			data := cleanEmptyArrayItems(strings.Split(strings.Trim(g[1], " "), "\n"))
+			data := brokenMacOSXArrayFix(strings.Split(strings.Trim(g[1], " "), "\n"), false)
 			save := false
 			if len(data) == 1 {
 				sig = data[0]
 			} else {
+				// PGP Has metadata header, wait for a single empty line before getting base64
 				for _, v := range data {
 					if !save {
-						save = save || len(v) > 0
-						if len(v) > 2 && v[:2] == "iQ" { // Workarround for GPG Bug in Production
-							save = true
-							sig += v
-						} else {
-							sig += v
+						if len(v) == 0 {
+							save = true // Empty line
 						}
 					} else if len(v) > 0 && string(v[0]) != "=" && len(v) != 4 && len(v) != 5 {
 						sig += v
@@ -114,7 +154,7 @@ func SignatureFix(sig string) string {
 
 			d, err := base64.StdEncoding.DecodeString(sig)
 			if err != nil {
-				panic(err)
+				panic(fmt.Errorf("error decoding base64: %s", err))
 			}
 
 			crc := CRC24(d)

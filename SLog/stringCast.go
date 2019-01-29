@@ -10,13 +10,13 @@ type StringCast interface {
 
 func asString(str interface{}) string {
 	switch v := str.(type) {
-	default:
-		return fmt.Sprint(str)
 	case StringCast:
 		return v.String()
 	case error:
 		return v.Error()
 	case string:
 		return v
+	default:
+		return fmt.Sprint(str)
 	}
 }

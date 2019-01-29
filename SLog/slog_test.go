@@ -75,6 +75,9 @@ func TestFatal(t *testing.T) {
 	assertPanic(t, func() {
 		Fatal("Test Fatal")
 	}, "Fatal should panic")
+	assertPanic(t, func() {
+		Fatal("Test %s %d %f %v", "huebr", 1, 10.0, true)
+	}, "Fatal should panic")
 }
 
 func TestScope(t *testing.T) {

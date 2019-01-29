@@ -57,7 +57,18 @@ func (i *Instance) Error(str interface{}, v ...interface{}) *Instance {
 }
 
 func (i *Instance) Fatal(str interface{}, v ...interface{}) {
-	var msg = fmt.Sprintf(asString(str), v...)
+	varags := v
+	if len(varags) == 1 {
+		varags = v[0].([]interface{})
+	}
+
+	var msg string
+	if len(varags) == 0 {
+		msg = asString(str)
+	} else {
+		msg = fmt.Sprintf(asString(str), varags...)
+	}
+
 	i.Error(msg)
 	panic(msg)
 }

@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"runtime/debug"
 	"testing"
 )
 
@@ -71,6 +72,9 @@ var router *mux.Router
 
 func errorDie(err error, t *testing.T) {
 	if err != nil {
+		fmt.Println("----------------------------------------")
+		debug.PrintStack()
+		fmt.Println("----------------------------------------")
 		t.Error(err)
 		t.FailNow()
 	}
@@ -432,6 +436,7 @@ func TestSignQuanto(t *testing.T) {
 		var errObj QuantoError.ErrorObject
 		err := json.Unmarshal(d, &errObj)
 		errorDie(err, t)
+		t.Errorf("%s", errObj.String())
 		errorDie(fmt.Errorf(errObj.Message), t)
 	}
 

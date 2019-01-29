@@ -348,25 +348,25 @@ func TestCreateEntityFromKeys(t *testing.T) {
 func TestSignatureFix(t *testing.T) {
 	s := SignatureFix(TestSignatureSignature)
 
-	original := GPG2Quanto("", "", TestSignatureSignature)
-	fixed := GPG2Quanto("", "", s)
+	original := GPG2Quanto(TestSignatureSignature, "", "")
+	fixed := GPG2Quanto(s, "", "")
 
 	if original != fixed {
-		t.Errorf("Expected %s got %s", original, fixed)
+		t.Errorf("Expected: %s\nGot %s", original, fixed)
 	}
 
 	s = SignatureFix(TestSignatureSignatureNoCRC)
-	fixed = GPG2Quanto("", "", s)
+	fixed = GPG2Quanto(s, "", "")
 
 	if original != fixed {
-		t.Errorf("Expected %s got %s", original, fixed)
+		t.Errorf("Expected: %s\nGot %s", original, fixed)
 	}
 
 	s = SignatureFix(TestSignatureSignatureNoCRCSingleLine)
-	fixed = GPG2Quanto("", "", s)
+	fixed = GPG2Quanto(s, "", "")
 
 	if original != fixed {
-		t.Errorf("Expected %s got %s", original, fixed)
+		t.Errorf("Expected: %s\nGot %s", original, fixed)
 	}
 
 	// Test invalid base64
@@ -374,9 +374,12 @@ func TestSignatureFix(t *testing.T) {
 		SignatureFix(strings.Replace(TestSignatureSignatureNoCRC, "wsFcBAA", "iQ-----", -1))
 	}, "Expected panic on invalid base64")
 
-	//if s != TestSignatureSignature {
-	//	t.Fatalf("Expected signature to be unchanged (thats a correct one)")
-	//}
+	s = SignatureFix(BrokenMacOSXSignature)
+	fixed = GPG2Quanto(s, "", "")
+
+	if original != fixed {
+		t.Errorf("Expected: %s\nGot %s", original, fixed)
+	}
 
 	// TODO: Test the broken case
 }
