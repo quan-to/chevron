@@ -472,11 +472,13 @@ func CopyFiles(src, dst string) error {
 	}
 
 	for _, f := range files {
-		srcPath := path.Join(src, f.Name())
-		dstPath := path.Join(dst, f.Name())
-		err = CopyFile(srcPath, dstPath)
-		if err != nil {
-			toolsLog.Warn("Cannot copy %s to %s: %s", srcPath, dstPath, err)
+		if f.Name() != "." && f.Name() != ".." && !f.IsDir() {
+			srcPath := path.Join(src, f.Name())
+			dstPath := path.Join(dst, f.Name())
+			err = CopyFile(srcPath, dstPath)
+			if err != nil {
+				toolsLog.Warn("Cannot copy %s to %s: %s", srcPath, dstPath, err)
+			}
 		}
 	}
 
