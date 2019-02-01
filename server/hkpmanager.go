@@ -90,7 +90,18 @@ func hkpLookup(w http.ResponseWriter, r *http.Request) {
 }
 
 func hkpAdd(w http.ResponseWriter, r *http.Request) {
-	// TODO
+	InitHTTPTimer(r)
+	err := r.ParseForm()
+	if err != nil {
+		InvalidFieldData("request", "Invalid request to add key. Please check if its HKP standard", w, r, hkpLog)
+		return
+	}
+
+	key := r.Form.Get("keytext")
+	result := keymagic.PKSAdd(key)
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte(result))
+	LogExit(hkpLog, r, http.StatusOK, len(result))
 }
 
 func AddHKPEndpoints(r *mux.Router) {

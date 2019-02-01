@@ -2,9 +2,12 @@ package keymagic
 
 import (
 	"github.com/quan-to/remote-signer"
+	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/database"
 	"github.com/quan-to/remote-signer/models"
 )
+
+var pksLog = SLog.Scope("PKS")
 
 func PKSGetKey(fingerPrint string) string {
 	if !remote_signer.EnableRethinkSKS {
@@ -57,7 +60,9 @@ func PKSSearch(value string, pageStart, pageEnd int) []models.GPGKey {
 func PKSAdd(pubKey string) string {
 	if remote_signer.EnableRethinkSKS {
 		conn := database.GetConnection()
-		_, _, err := models.AddGPGKey(conn, models.AsciiArmored2GPGKey(pubKey))
+		key := models.AsciiArmored2GPGKey(pubKey)
+		pksLog.Info("Adding public key %s to PKS", key.GetShortFingerPrint())
+		_, _, err := models.AddGPGKey(conn, key)
 
 		if err != nil {
 			panic(err)

@@ -29,6 +29,10 @@ type GPGKey struct {
 	AsciiArmoredPrivateKey string
 }
 
+func (key *GPGKey) GetShortFingerPrint() string {
+	return key.FullFingerPrint[len(key.FullFingerPrint)-16:]
+}
+
 func AddGPGKey(conn *r.Session, data GPGKey) (string, bool, error) {
 	existing, err := r.
 		Table(GPGKeyTableInit.TableName).
