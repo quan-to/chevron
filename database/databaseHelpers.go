@@ -5,6 +5,7 @@ import (
 )
 
 func GetTableIndexes(tableName string) []string {
+	dbLog.Debug("Listing table indexes")
 	var conn = GetConnection()
 
 	c, err := r.Table(tableName).IndexList().CoerceTo("array").Run(conn)
@@ -30,6 +31,7 @@ func GetTableIndexes(tableName string) []string {
 }
 
 func GetDatabases() []string {
+	dbLog.Debug("Listing databases")
 	var conn = GetConnection()
 
 	c, err := r.DBList().CoerceTo("array").Run(conn)
@@ -55,6 +57,7 @@ func GetDatabases() []string {
 }
 
 func GetTables() []string {
+	dbLog.Debug("Listing tables")
 	var conn = GetConnection()
 
 	c, err := r.TableList().CoerceTo("array").Run(conn)

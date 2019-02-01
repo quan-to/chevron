@@ -48,7 +48,7 @@ func DbSetup() {
 		if err != nil {
 			dbLog.Fatal(err)
 		}
-
+		dbLog.Info("Connected!")
 		RthState.connection = conn
 	}
 }
@@ -59,6 +59,7 @@ func InitTables() {
 	if remote_signer.EnableRethinkSKS {
 		initLock.Lock()
 		defer initLock.Unlock()
+		dbLog.Info("Running InitTables")
 		var dbs = GetDatabases()
 		var conn = GetConnection()
 
@@ -101,11 +102,15 @@ func InitTables() {
 			}
 		}
 		if needWait {
+			dbLog.Info("Waiting 5 seconds to indexes to settle.")
 			time.Sleep(5 * time.Second) // Wait for indexes
 		}
 	}
 }
 
 func GetConnection() *r.Session {
+	if RthState.connection == nil {
+		DbSetup()
+	}
 	return RthState.connection
 }
