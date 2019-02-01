@@ -1,9 +1,12 @@
 package remote_signer
 
 import (
+	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
 	"encoding/base64"
+	"github.com/quan-to/remote-signer/openpgp"
+	"golang.org/x/crypto/openpgp/armor"
 	"golang.org/x/crypto/openpgp/packet"
 	"io/ioutil"
 	"strings"
@@ -381,7 +384,46 @@ func TestSignatureFix(t *testing.T) {
 		t.Errorf("Expected: %s\nGot %s", original, fixed)
 	}
 
-	// TODO: Test the broken case
+	// Test Embedded CRC Case
+	s = SignatureFix(TestEmbeddedCRCSignature)
+
+	//          Try get the fingerprint of signature
+	b := bytes.NewReader([]byte(s))
+	block, err := armor.Decode(b)
+	if err != nil {
+		t.Errorf("Failed to read Armored format from TestEmbeddedCRCSignature")
+		t.FailNow()
+	}
+
+	if block.Type != openpgp.SignatureType {
+		t.Errorf("TestEmbeddedCRCSignature does not have signature type")
+		t.FailNow()
+	}
+	fingerPrint := ""
+	reader := packet.NewReader(block.Body)
+	for {
+		pkt, err := reader.Next()
+
+		if err != nil {
+			break
+		}
+
+		switch sig := pkt.(type) {
+		case *packet.Signature:
+			fingerPrint = IssuerKeyIdToFP16(*sig.IssuerKeyId)
+		case *packet.SignatureV3:
+			fingerPrint = IssuerKeyIdToFP16(sig.IssuerKeyId)
+		}
+
+		if fingerPrint != "" {
+			break
+		}
+	}
+
+	if fingerPrint == "" {
+		t.Errorf("Failed to read Armored format from TestEmbeddedCRCSignature")
+		t.FailNow()
+	}
 }
 
 func TestSimpleIdentitiesToString(t *testing.T) {

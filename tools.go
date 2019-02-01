@@ -49,8 +49,26 @@ func Quanto2GPG(signature string) string {
 	}
 
 	gpgSig := s[2]
-	checkSum := gpgSig[len(gpgSig)-5:]
-	for i := 0; i < len(gpgSig)-5; i++ {
+	checkSum := ""
+
+	// check if Checksum is 4 or 5 bytes
+	_, err := base64.StdEncoding.DecodeString(gpgSig[:len(gpgSig)-5])
+
+	if err != nil {
+		// try 4
+		_, err := base64.StdEncoding.DecodeString(gpgSig[:len(gpgSig)-4])
+		if err != nil {
+			// Broken Base64
+			return ""
+		}
+		checkSum = gpgSig[len(gpgSig)-4:]
+		gpgSig = gpgSig[:len(gpgSig)-4]
+	} else {
+		checkSum = gpgSig[len(gpgSig)-5:]
+		gpgSig = gpgSig[:len(gpgSig)-5]
+	}
+
+	for i := 0; i < len(gpgSig); i++ {
 		if i%64 == 0 {
 			sig += "\n"
 		}
@@ -125,6 +143,7 @@ func SignatureFix(sig string) string {
 			sig = ""
 			data := brokenMacOSXArrayFix(strings.Split(strings.Trim(g[1], " "), "\n"), false)
 			save := false
+			embeddedCrc := false
 			if len(data) == 1 {
 				sig = data[0]
 			} else {
@@ -134,8 +153,11 @@ func SignatureFix(sig string) string {
 						if len(v) == 0 {
 							save = true // Empty line
 						}
-					} else if len(v) > 0 && string(v[0]) != "=" && len(v) != 4 && len(v) != 5 {
+					} else if len(v) > 0 && string(v[0]) != "=" && len(v) != 5 {
 						sig += v
+						if len(v) == 4 {
+							embeddedCrc = true
+						}
 					}
 				}
 			}
@@ -145,11 +167,14 @@ func SignatureFix(sig string) string {
 				panic(fmt.Errorf("error decoding base64: %s", err))
 			}
 
-			crc := CRC24(d)
 			crcU := make([]byte, 3)
-			crcU[0] = byte((crc >> 16) & 0xFF)
-			crcU[1] = byte((crc >> 8) & 0xFF)
-			crcU[2] = byte(crc & 0xFF)
+
+			if !embeddedCrc {
+				crc := CRC24(d)
+				crcU[0] = byte((crc >> 16) & 0xFF)
+				crcU[1] = byte((crc >> 8) & 0xFF)
+				crcU[2] = byte(crc & 0xFF)
+			}
 
 			b64data := sig
 			sig = "-----BEGIN PGP SIGNATURE-----\n"
@@ -161,7 +186,11 @@ func SignatureFix(sig string) string {
 				sig += string(b64data[i])
 			}
 
-			sig += "\n=" + base64.StdEncoding.EncodeToString(crcU) + "\n-----END PGP SIGNATURE-----"
+			sig += "\n"
+			if !embeddedCrc {
+				sig += "=" + base64.StdEncoding.EncodeToString(crcU)
+			}
+			sig += "\n-----END PGP SIGNATURE-----"
 		}
 	}
 

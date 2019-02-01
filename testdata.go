@@ -5,6 +5,20 @@ const TestKeyFingerprint = "0016A9CA870AFA59"
 const TestKeyPassword = "I think you will never guess"
 
 const TestSignatureData = "huebr for the win!"
+
+const TestEmbeddedCRCSignature = `-----BEGIN PGP SIGNATURE-----
+
+wsDcBAABCgAGBQJcU4QpAAoJEDmtYxYl1zA9Tz0L/RqmLStqWfZrcM+Yr20ehr/9
+mxMF0ZZ5aiLeBkCoxPwxEJ+wQNbHSALGcA4PZmw3+aPexOchADTTuOV0TbC003zp
+MaPBmpMkhdnpdcJYd30/vuYnyfBnw8F4Swxa835m+fcYiVdHWys4CHZbqKa8nCbJ
+QdeMANz+qYNnIn+mEsRcRZywGrZb/bMQAJuN4ijcWajKxscM9ZeMUYmfNK8/65mX
+S5GQWScmbnvynvaHc7/mtD0ECO2p8ijsQyMqznfKjac7emH2zm/PDOE7HMEC9dLA
+zCLtY/r1Erk5u6sBflkhtNzsI8MLviRizoRDZJA+zDTwpxm55r4SAUPlH2rP5TG9
+uc7Rdu4HQbQunqnfBEiZq1JH5OAgNhAssPrAA6+Hql/f2texn8GHV1RbXFoXisJG
+hcNzQEIJ7h3j5Kz0vZmVsnkIFvebtDygdV2AZrpxBTVOE6hxWDH5Mw/nZCwuo6CB
+tSRVB/Syny+OImXITJ4MD6aqdNAvBtntB1jGLUIy+w==
+-----END PGP SIGNATURE-----`
+
 const TestSignatureSignature = `-----BEGIN PGP SIGNATURE-----
 Version: Quanto
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/logrusorgru/aurora"
 	"log"
+	"reflect"
 )
 
 const logBaseFormat = "%40v | %s"
@@ -59,7 +60,11 @@ func (i *Instance) Error(str interface{}, v ...interface{}) *Instance {
 func (i *Instance) Fatal(str interface{}, v ...interface{}) {
 	varags := v
 	if len(varags) == 1 {
-		varags = v[0].([]interface{})
+		if reflect.TypeOf(v[0]) == reflect.TypeOf([]interface{}{}) {
+			varags = v[0].([]interface{})
+		} else {
+			varags = v
+		}
 	}
 
 	var msg string
