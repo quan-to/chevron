@@ -59,6 +59,7 @@ ENV VAULT_ROOT_TOKEN ""
 ENV VAULT_PATH_PREFIX ""
 ENV VAULT_STORAGE "false"
 ENV READONLY_KEYPATH "false"
+ENV VAULT_SKIP_VERIFY "false"
 
 CMD /opt/remote-signer/remote-signer
 

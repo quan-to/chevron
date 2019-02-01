@@ -1,10 +1,12 @@
 package vaultManager
 
 import (
+	"crypto/tls"
 	"fmt"
 	"github.com/hashicorp/vault/api"
 	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/SLog"
+	"net/http"
 )
 
 var slog = SLog.Scope("Vault")
@@ -19,8 +21,18 @@ type VaultManager struct {
 
 func MakeVaultManager(prefix string) *VaultManager {
 	slog.Info("Initialized Vault Backend at %s with prefix %s", remote_signer.VaultAddress, prefix)
+	var httpClient *http.Client
+	if remote_signer.VaultSkipVerify {
+		slog.Warn("WARNING: Vault Skip Verify is enable. We will not check for SSL Certs in Vault!")
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		httpClient = &http.Client{Transport: tr}
+	}
+
 	client, err := api.NewClient(&api.Config{
-		Address: remote_signer.VaultAddress,
+		Address:    remote_signer.VaultAddress,
+		HttpClient: httpClient,
 	})
 
 	if err != nil {

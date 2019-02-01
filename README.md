@@ -246,6 +246,7 @@ These are the Environment Variables that you can set to manage the webserver:
 *   `MASTER_GPG_KEY_PASSWORD_PATH` => Master GPG Key Password Path
 *   `MASTER_GPG_KEY_BASE64_ENCODED` => If the Master GPG Key is base64 encoded (default: true)
 *   `VAULT_ADDRESS` => Hashicorp Vault URL
+*   `VAULT_SKIP_VERIFY` => Hashicorp Vault Skip Verify SSL Certs on Connection
 *   `VAULT_ROOT_TOKEN` => Hashicorp Vault Root Token
 *   `VAULT_PATH_PREFIX` => Hashicorp Vault Path Prefix (prefixes for all stored keys)
 *   `VAULT_STORAGE` => If a Hashicorp Vault should be used to store private keys instead of the disk
