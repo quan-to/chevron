@@ -30,6 +30,7 @@ var VaultStorage bool
 var VaultAddress string
 var VaultRootToken string
 var VaultPathPrefix string
+var ReadonlyKeyPath bool
 
 var varStack []map[string]interface{}
 
@@ -62,6 +63,7 @@ func PushVariables() {
 		"VaultRootToken":            VaultRootToken,
 		"VaultStorage":              VaultStorage,
 		"VaultPathPrefix":           VaultPathPrefix,
+		"ReadonlyKeyPath":           ReadonlyKeyPath,
 	}
 
 	varStack = append(varStack, insMap)
@@ -98,6 +100,7 @@ func PopVariables() {
 	VaultRootToken = insMap["VaultRootToken"].(string)
 	VaultStorage = insMap["VaultStorage"].(bool)
 	VaultPathPrefix = insMap["VaultPathPrefix"].(string)
+	ReadonlyKeyPath = insMap["ReadonlyKeyPath"].(bool)
 }
 
 func Setup() {
@@ -172,6 +175,7 @@ func Setup() {
 	VaultAddress = os.Getenv("VAULT_ADDRESS")
 	VaultRootToken = os.Getenv("VAULT_ROOT_TOKEN")
 	VaultPathPrefix = os.Getenv("VAULT_PATH_PREFIX")
+	ReadonlyKeyPath = os.Getenv("READONLY_KEYPATH") == "true"
 
 	// Set defaults if not defined
 	if SyslogServer == "" {

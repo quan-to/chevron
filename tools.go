@@ -6,15 +6,22 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"github.com/mewkiz/pkg/osutil"
 	"github.com/pkg/errors"
+	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/models"
 	"github.com/quan-to/remote-signer/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
 	"golang.org/x/crypto/openpgp/packet"
+	"io"
+	"io/ioutil"
+	"os"
+	"path"
 	"regexp"
 	"strings"
 )
 
+var toolsLog = SLog.Scope("Tools")
 var pgpsig = regexp.MustCompile("(?s)-----BEGIN PGP SIGNATURE-----\n(.*)-----END PGP SIGNATURE-----")
 
 func StringIndexOf(v string, a []string) int {
@@ -424,3 +431,54 @@ func CRC24(d []byte) uint32 {
 }
 
 // endregion
+
+// CopyFile copies file src to dst
+func CopyFile(src, dst string) error {
+	sourceFileStat, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+
+	if !sourceFileStat.Mode().IsRegular() {
+		return fmt.Errorf("%s is not a regular file", src)
+	}
+
+	source, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer source.Close()
+
+	destination, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer destination.Close()
+	_, err = io.Copy(destination, source)
+	return err
+}
+
+func CopyFiles(src, dst string) error {
+	if !osutil.Exists(src) {
+		return fmt.Errorf("folder %s does not exists", src)
+	}
+	if !osutil.Exists(dst) {
+		return fmt.Errorf("folder %s does not exists", src)
+	}
+
+	files, err := ioutil.ReadDir(src)
+	if err != nil {
+		return err
+	}
+
+	for _, f := range files {
+		srcPath := path.Join(src, f.Name())
+		dstPath := path.Join(dst, f.Name())
+		err = CopyFile(srcPath, dstPath)
+		if err != nil {
+			toolsLog.Warn("Cannot copy %s to %s: %s", srcPath, dstPath, err)
+		}
+	}
+
+	return nil
+}
