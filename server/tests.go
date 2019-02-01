@@ -17,9 +17,8 @@ func (ge *TestsEndpoint) AttachHandlers(r *mux.Router) {
 }
 
 func (ge *TestsEndpoint) ping(w http.ResponseWriter, r *http.Request) {
-	InitHTTPTimer(r)
+	// Do not log here. This call will flood the log
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	n, _ := w.Write([]byte("OK"))
-	LogExit(geLog, r, 200, n)
+	_, _ = w.Write([]byte("OK"))
 }
