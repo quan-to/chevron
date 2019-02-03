@@ -29,12 +29,15 @@ script:
 - export VAULT_DEV_ROOT_TOKEN_ID="123456"
 - export VAULT_ROOT_TOKEN=$VAULT_DEV_ROOT_TOKEN_ID
 - export VAULT_ADDRESS="$VAULT_ADDR"
+- export VAULT_USE_USERPASS="true"
+- export VAULT_USERNAME="remotesigner"
+- export VAULT_PASSWORD="123456"
 - vault server -dev & echo $! > $HOME/vault.pid
 - echo "Waiting vault settle" & sleep 2
 - echo "Vault started with PID `cat $HOME/vault.pid`"
 - vault auth enable userpass
 - vault policy write test-policy ./test-policy.hcl
-- vault write auth/userpass/users/remotesigner password=123456 policies=test-policy
+- vault write auth/userpass/users/${VAULT_USERNAME} password=${VAULT_PASSWORD} policies=test-policy
 - export
 - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin v1.10.2
 - golangci-lint run
