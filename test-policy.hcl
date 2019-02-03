@@ -87,3 +87,5 @@ path "sys/control-group/request" {
 path "secret/*" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
 }
+
+

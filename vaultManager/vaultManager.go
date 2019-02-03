@@ -85,6 +85,10 @@ func (vm *VaultManager) getSecret(key string) (string, string, error) {
 		return "", "", err
 	}
 
+	if s == nil {
+		return "", "", fmt.Errorf("not found")
+	}
+
 	data := s.Data["data"].(map[string]interface{})
 
 	if data["data"] == nil {
