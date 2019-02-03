@@ -9,6 +9,7 @@ import (
 	"golang.org/x/crypto/openpgp/armor"
 	"golang.org/x/crypto/openpgp/packet"
 	"io/ioutil"
+	"path"
 	"strings"
 	"testing"
 	"time"
@@ -452,5 +453,63 @@ func TestSimpleIdentitiesToString(t *testing.T) {
 
 	if idsString != "huebr" {
 		t.Fatalf("Expected idsString to be huebr got %s", idsString)
+	}
+}
+
+func TestCopyFiles(t *testing.T) {
+	folderA, _ := ioutil.TempDir("/tmp", "")
+	folderB, _ := ioutil.TempDir("/tmp", "")
+	folderAFiles := make([]string, 0)
+
+	for i := 0; i < 4; i++ {
+		f, _ := ioutil.TempFile(folderA, "")
+		folderAFiles = append(folderAFiles, path.Base(f.Name()))
+		_, _ = f.WriteString("Test")
+		_ = f.Close()
+	}
+
+	err := CopyFiles(folderA, folderB)
+
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		t.FailNow()
+	}
+
+	files, err := ioutil.ReadDir(folderB)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		t.FailNow()
+	}
+
+	folderBFiles := make([]string, 0)
+
+	for _, f := range files {
+		if !f.IsDir() {
+			folderBFiles = append(folderBFiles, f.Name())
+			found := false
+			for _, f2 := range folderAFiles {
+				if f2 == f.Name() {
+					found = true
+					break
+				}
+			}
+
+			if !found {
+				t.Errorf("Cannot find %s in folderA", f.Name())
+			}
+		}
+	}
+
+	for _, v := range folderAFiles {
+		found := false
+		for _, v2 := range folderBFiles {
+			if v2 == v {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("Cannot find %s in folderB", v)
+		}
 	}
 }
