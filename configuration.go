@@ -32,6 +32,10 @@ var VaultRootToken string
 var VaultPathPrefix string
 var ReadonlyKeyPath bool
 var VaultSkipVerify bool
+var VaultUseUserpass bool
+var VaultUsername string
+var VaultPassword string
+var VaultNamespace string
 
 var varStack []map[string]interface{}
 
@@ -66,6 +70,10 @@ func PushVariables() {
 		"VaultPathPrefix":           VaultPathPrefix,
 		"ReadonlyKeyPath":           ReadonlyKeyPath,
 		"VaultSkipVerify":           VaultSkipVerify,
+		"VaultUseUserpass":          VaultUseUserpass,
+		"VaultUsername":             VaultUsername,
+		"VaultPassword":             VaultPassword,
+		"VaultNamespace":            VaultNamespace,
 	}
 
 	varStack = append(varStack, insMap)
@@ -104,6 +112,10 @@ func PopVariables() {
 	VaultPathPrefix = insMap["VaultPathPrefix"].(string)
 	ReadonlyKeyPath = insMap["ReadonlyKeyPath"].(bool)
 	VaultSkipVerify = insMap["VaultSkipVerify"].(bool)
+	VaultUseUserpass = insMap["VaultUseUserpass"].(bool)
+	VaultUsername = insMap["VaultUsername"].(string)
+	VaultPassword = insMap["VaultPassword"].(string)
+	VaultNamespace = insMap["VaultNamespace"].(string)
 }
 
 func Setup() {
@@ -180,6 +192,10 @@ func Setup() {
 	VaultPathPrefix = os.Getenv("VAULT_PATH_PREFIX")
 	ReadonlyKeyPath = os.Getenv("READONLY_KEYPATH") == "true"
 	VaultSkipVerify = os.Getenv("VAULT_SKIP_VERIFY") == "true"
+	VaultUseUserpass = os.Getenv("VAULT_USE_USERPASS") == "true"
+	VaultUsername = os.Getenv("VAULT_USERNAME")
+	VaultPassword = os.Getenv("VAULT_PASSWORD")
+	VaultNamespace = os.Getenv("VAULT_NAMESPACE")
 
 	// Set defaults if not defined
 	if SyslogServer == "" {
@@ -224,6 +240,10 @@ func Setup() {
 
 	if VaultAddress == "" {
 		VaultAddress = "http://localhost:8200"
+	}
+
+	if VaultNamespace == "" {
+		VaultNamespace = "secret"
 	}
 
 	// Other stuff

@@ -39,11 +39,25 @@ func MakeVaultManager(prefix string) *VaultManager {
 		slog.Error(err)
 		return nil
 	}
+	if !remote_signer.VaultUseUserpass {
+		slog.Info("Token Mode enabled.")
+		client.SetToken(remote_signer.VaultRootToken)
+	} else {
+		// to pass the password
+		options := map[string]interface{}{
+			"password": remote_signer.VaultPassword,
+		}
+		slog.Info("Userpass mode enabled. Logging with %s", remote_signer.VaultUsername)
+		// PUT call to get a token
+		secret, err := client.Logical().Write(fmt.Sprintf("auth/userpass/login/%s", remote_signer.VaultUsername), options)
 
-	client.SetToken(remote_signer.VaultRootToken)
+		if err != nil {
+			slog.Error(err)
+			return nil
+		}
 
-	if err != nil {
-		panic(err)
+		slog.Info("Logged in successfully.")
+		client.SetToken(secret.Auth.ClientToken)
 	}
 
 	return &VaultManager{
@@ -54,7 +68,7 @@ func MakeVaultManager(prefix string) *VaultManager {
 }
 
 func vaultPath(key string) string {
-	return fmt.Sprintf("secret/data/%s", getVaultFullPrefix(key))
+	return fmt.Sprintf("%s/data/%s", remote_signer.VaultNamespace, getVaultFullPrefix(key))
 }
 
 func (vm *VaultManager) putSecret(key string, data map[string]string) error {
@@ -117,7 +131,7 @@ func (vm *VaultManager) Read(key string) (data string, metadata string, err erro
 
 func (vm *VaultManager) List() ([]string, error) {
 	vm.log.Debug("Listing keys")
-	s, err := vm.client.Logical().List("secret/metadata")
+	s, err := vm.client.Logical().List(fmt.Sprintf("%s/metadata", remote_signer.VaultNamespace))
 	if err != nil {
 		return nil, err
 	}
