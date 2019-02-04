@@ -45,7 +45,7 @@ func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 
 	fingerPrint := q.Get("fingerPrint")
 
-	key := kre.gpg.GetPublicKeyAscii(fingerPrint)
+	key, _ := kre.gpg.GetPublicKeyAscii(fingerPrint)
 
 	if key == "" {
 		NotFound("fingerPrint", fmt.Sprintf("Key with fingerPrint %s was not found", fingerPrint), w, r, kreLog)

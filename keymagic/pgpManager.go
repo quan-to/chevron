@@ -191,7 +191,8 @@ func (pm *PGPManager) sanitizeFingerprint(fp string) string {
 		fp = pm.fp8to16[fp]
 	}
 	if len(fp) != 16 {
-		pgpLog.Fatal("Cannot find key or invalid fingerprint: %s", fp)
+		//pgpLog.Fatal("Cannot find key or invalid fingerprint: %s", fp)
+		return ""
 	}
 
 	return fp
@@ -402,7 +403,7 @@ func (pm *PGPManager) GetPublicKey(fingerPrint string) *packet.PublicKey {
 	return pubKey
 }
 
-func (pm *PGPManager) GetPublicKeyAscii(fingerPrint string) string {
+func (pm *PGPManager) GetPublicKeyAscii(fingerPrint string) (string, error) {
 	key := ""
 	pubKey := pm.GetPublicKey(fingerPrint)
 	ent := pm.GetPublicKeyEntity(fingerPrint)
@@ -412,7 +413,7 @@ func (pm *PGPManager) GetPublicKeyAscii(fingerPrint string) string {
 		err := ent.Serialize(serializedEntity)
 
 		if err != nil {
-			return ""
+			return "", err
 		}
 
 		buf := bytes.NewBuffer(nil)
@@ -423,15 +424,15 @@ func (pm *PGPManager) GetPublicKeyAscii(fingerPrint string) string {
 
 		w, err := armor.Encode(buf, openpgp.PublicKeyType, headers)
 		if err != nil {
-			return ""
+			return "", err
 		}
 		_, err = w.Write(serializedEntity.Bytes())
 		if err != nil {
-			return ""
+			return "", err
 		}
 		err = w.Close()
 		if err != nil {
-			return ""
+			return "", err
 		}
 
 		key = buf.String()
@@ -440,7 +441,7 @@ func (pm *PGPManager) GetPublicKeyAscii(fingerPrint string) string {
 		err := pubKey.Serialize(serializedEntity)
 
 		if err != nil {
-			return ""
+			return "", err
 		}
 
 		buf := bytes.NewBuffer(nil)
@@ -451,21 +452,21 @@ func (pm *PGPManager) GetPublicKeyAscii(fingerPrint string) string {
 
 		w, err := armor.Encode(buf, openpgp.PublicKeyType, headers)
 		if err != nil {
-			return ""
+			return "", err
 		}
 		_, err = w.Write(serializedEntity.Bytes())
 		if err != nil {
-			return ""
+			return "", err
 		}
 		err = w.Close()
 		if err != nil {
-			return ""
+			return "", err
 		}
 
 		key = buf.String()
 	}
 
-	return key
+	return key, nil
 }
 
 func (pm *PGPManager) VerifySignatureStringData(data string, signature string) (bool, error) {

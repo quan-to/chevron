@@ -29,7 +29,7 @@ func TestPKSGetKey(t *testing.T) {
 		t.FailNow()
 	}
 
-	key := PKSGetKey(gpgKey.FullFingerPrint)
+	key, _ := PKSGetKey(gpgKey.FullFingerPrint)
 
 	fp, err := remote_signer.GetFingerPrintFromKey(key)
 
@@ -46,7 +46,7 @@ func TestPKSGetKey(t *testing.T) {
 	remote_signer.EnableRethinkSKS = false
 	remote_signer.SKSServer = "https://keyserver.ubuntu.com/"
 
-	key = PKSGetKey(remote_signer.ExternalKeyFingerprint)
+	key, _ = PKSGetKey(remote_signer.ExternalKeyFingerprint)
 
 	fp, err = remote_signer.GetFingerPrintFromKey(key)
 
@@ -125,7 +125,7 @@ func TestPKSAdd(t *testing.T) {
 		t.Errorf("Expected %s got %s", "OK", o)
 	}
 
-	p := PKSGetKey(fp)
+	p, _ := PKSGetKey(fp)
 
 	if p == "" {
 		t.Errorf("Key was not found")

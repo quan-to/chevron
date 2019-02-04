@@ -8,8 +8,10 @@ import (
 	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/QuantoError"
 	"github.com/quan-to/remote-signer/SLog"
+	"github.com/quan-to/remote-signer/database"
 	"github.com/quan-to/remote-signer/etc"
 	"github.com/quan-to/remote-signer/etc/magicBuilder"
+	"github.com/quan-to/remote-signer/keymagic"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -20,7 +22,9 @@ import (
 )
 
 const testKeyFingerprint = "0016A9CA870AFA59"
+const testKeyName = "HUEBR"
 const testKeyPassword = "I think you will never guess"
+const testKeyEmail = "jon@huebr.com"
 
 const testSignatureData = "huebr for the win!"
 const testSignatureSignature = `-----BEGIN PGP SIGNATURE-----
@@ -88,12 +92,14 @@ func executeRequest(req *http.Request) *httptest.ResponseRecorder {
 
 func TestMain(m *testing.M) {
 	QuantoError.EnableStackTrace()
-	SLog.SetTestMode()
 
 	remote_signer.DatabaseName = "qrs_test"
 	remote_signer.PrivateKeyFolder = "../tests"
 	remote_signer.KeyPrefix = "testkey_"
 	remote_signer.KeysBase64Encoded = false
+	remote_signer.EnableRethinkSKS = true
+	database.DbSetup()
+	database.InitTables()
 	remote_signer.EnableRethinkSKS = false
 
 	remote_signer.MasterGPGKeyBase64Encoded = false
@@ -112,9 +118,17 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
+	remote_signer.EnableRethinkSKS = true
+	slog.Info("Adding key %s to SKS Database", testKeyFingerprint)
+	pubKey, _ := gpg.GetPublicKeyAscii(testKeyFingerprint)
+	slog.Info("Result: %s", keymagic.PKSAdd(pubKey))
+	remote_signer.EnableRethinkSKS = false
+
 	router = GenRemoteSignerServerMux(slog, sm, gpg)
 
+	SLog.SetTestMode()
 	code := m.Run()
+	SLog.UnsetTestMode()
 
 	os.Exit(code)
 }

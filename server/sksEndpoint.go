@@ -47,8 +47,7 @@ func (sks *SKSEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 
 	fingerPrint := q.Get("fingerPrint")
-
-	key := sks.gpg.GetPublicKeyAscii(fingerPrint)
+	key, _ := sks.gpg.GetPublicKeyAscii(fingerPrint)
 
 	if key == "" {
 		NotFound("fingerPrint", fmt.Sprintf("Key with fingerPrint %s was not found", fingerPrint), w, r, sksLog)
@@ -90,7 +89,12 @@ func (sks *SKSEndpoint) searchByName(w http.ResponseWriter, r *http.Request) {
 		pageEnd = models.DefaultPageEnd
 	}
 
-	gpgKeys := keymagic.PKSSearchByName(name, int(pageStart), int(pageEnd))
+	gpgKeys, err := keymagic.PKSSearchByName(name, int(pageStart), int(pageEnd))
+
+	if err != nil {
+		NotFound("name", err.Error(), w, r, sksLog)
+		return
+	}
 
 	bodyData, err := json.Marshal(gpgKeys)
 
@@ -134,7 +138,12 @@ func (sks *SKSEndpoint) searchByFingerPrint(w http.ResponseWriter, r *http.Reque
 		pageEnd = models.DefaultPageEnd
 	}
 
-	gpgKeys := keymagic.PKSSearchByFingerPrint(fingerPrint, int(pageStart), int(pageEnd))
+	gpgKeys, err := keymagic.PKSSearchByFingerPrint(fingerPrint, int(pageStart), int(pageEnd))
+
+	if err != nil {
+		NotFound("fingerPrint", err.Error(), w, r, sksLog)
+		return
+	}
 
 	bodyData, err := json.Marshal(gpgKeys)
 
@@ -178,7 +187,12 @@ func (sks *SKSEndpoint) searchByEmail(w http.ResponseWriter, r *http.Request) {
 		pageEnd = models.DefaultPageEnd
 	}
 
-	gpgKeys := keymagic.PKSSearchByEmail(email, int(pageStart), int(pageEnd))
+	gpgKeys, err := keymagic.PKSSearchByEmail(email, int(pageStart), int(pageEnd))
+
+	if err != nil {
+		NotFound("email", err.Error(), w, r, sksLog)
+		return
+	}
 
 	bodyData, err := json.Marshal(gpgKeys)
 
@@ -222,7 +236,12 @@ func (sks *SKSEndpoint) search(w http.ResponseWriter, r *http.Request) {
 		pageEnd = models.DefaultPageEnd
 	}
 
-	gpgKeys := keymagic.PKSSearch(valueData, int(pageStart), int(pageEnd))
+	gpgKeys, err := keymagic.PKSSearch(valueData, int(pageStart), int(pageEnd))
+
+	if err != nil {
+		NotFound("valueData", err.Error(), w, r, sksLog)
+		return
+	}
 
 	bodyData, err := json.Marshal(gpgKeys)
 

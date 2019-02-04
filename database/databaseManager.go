@@ -30,7 +30,6 @@ func init() {
 
 func DbSetup() {
 	RthState = RethinkDbState{}
-
 	if remote_signer.EnableRethinkSKS {
 		initLock.Lock()
 		defer initLock.Unlock()

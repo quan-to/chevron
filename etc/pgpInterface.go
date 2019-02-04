@@ -19,7 +19,7 @@ type PGPInterface interface {
 	SignData(fingerPrint string, data []byte, hashAlgorithm crypto.Hash) (string, error)
 	GetPublicKeyEntity(fingerPrint string) *openpgp.Entity
 	GetPublicKey(fingerPrint string) *packet.PublicKey
-	GetPublicKeyAscii(fingerPrint string) string
+	GetPublicKeyAscii(fingerPrint string) (string, error)
 	VerifySignatureStringData(data string, signature string) (bool, error)
 	VerifySignature(data []byte, signature string) (bool, error)
 	GeneratePGPKey(identifier, password string, numBits int) (string, error)

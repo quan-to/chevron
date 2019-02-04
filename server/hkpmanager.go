@@ -16,14 +16,18 @@ var hkpLog = SLog.Scope("HKP")
 func operationGet(options, searchData string, machineReadable, noModification bool) (error, string) {
 	//hkpLog.Info("GET(%s, %s, %v, %v)", options, searchData, machineReadable, noModification)
 	if searchData[:2] == "0x" {
-		var k = keymagic.PKSGetKey(searchData[2:])
+		k, _ := keymagic.PKSGetKey(searchData[2:])
 		if k == "" {
 			return errors.New("not found"), ""
 		}
 		return nil, k
 	}
 
-	results := keymagic.PKSSearch(searchData, 0, 1)
+	results, err := keymagic.PKSSearch(searchData, 0, 1)
+
+	if err != nil {
+		return err, ""
+	}
 
 	if len(results) > 0 {
 		return nil, results[0].AsciiArmoredPublicKey

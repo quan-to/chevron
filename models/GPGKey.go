@@ -71,7 +71,7 @@ func AddGPGKey(conn *r.Session, data GPGKey) (string, bool, error) {
 	}
 }
 
-func GetGPGKeyByFingerPrint(conn *r.Session, fingerPrint string) *GPGKey {
+func GetGPGKeyByFingerPrint(conn *r.Session, fingerPrint string) (*GPGKey, error) {
 	res, err := r.Table(GPGKeyTableInit.TableName).
 		Filter(r.Row.Field("FullFingerPrint").Match(fmt.Sprintf("%s$", fingerPrint))).
 		Limit(1).
@@ -79,19 +79,19 @@ func GetGPGKeyByFingerPrint(conn *r.Session, fingerPrint string) *GPGKey {
 		Run(conn)
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	var gpgKey GPGKey
 
 	if res.Next(&gpgKey) {
-		return &gpgKey
+		return &gpgKey, nil
 	}
 
-	return nil
+	return nil, fmt.Errorf("not found")
 }
 
-func SearchGPGKeyByEmail(conn *r.Session, email string, pageStart, pageEnd int) []GPGKey {
+func SearchGPGKeyByEmail(conn *r.Session, email string, pageStart, pageEnd int) ([]GPGKey, error) {
 	if pageStart < 0 {
 		pageStart = DefaultPageStart
 	}
@@ -115,7 +115,7 @@ func SearchGPGKeyByEmail(conn *r.Session, email string, pageStart, pageEnd int) 
 		Run(conn)
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	results := make([]GPGKey, 0)
 	var gpgKey GPGKey
@@ -124,10 +124,10 @@ func SearchGPGKeyByEmail(conn *r.Session, email string, pageStart, pageEnd int) 
 		results = append(results, gpgKey)
 	}
 
-	return results
+	return results, nil
 }
 
-func SearchGPGKeyByFingerPrint(conn *r.Session, fingerPrint string, pageStart, pageEnd int) []GPGKey {
+func SearchGPGKeyByFingerPrint(conn *r.Session, fingerPrint string, pageStart, pageEnd int) ([]GPGKey, error) {
 	if pageStart < 0 {
 		pageStart = DefaultPageStart
 	}
@@ -143,7 +143,7 @@ func SearchGPGKeyByFingerPrint(conn *r.Session, fingerPrint string, pageStart, p
 		Run(conn)
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	results := make([]GPGKey, 0)
 	var gpgKey GPGKey
@@ -152,10 +152,51 @@ func SearchGPGKeyByFingerPrint(conn *r.Session, fingerPrint string, pageStart, p
 		results = append(results, gpgKey)
 	}
 
-	return results
+	return results, nil
 }
 
-func SearchGPGKeyByName(conn *r.Session, name string, pageStart, pageEnd int) []GPGKey {
+func SearchGPGKeyByValue(conn *r.Session, value string, pageStart, pageEnd int) ([]GPGKey, error) {
+	if pageStart < 0 {
+		pageStart = DefaultPageStart
+	}
+
+	if pageEnd < 0 {
+		pageEnd = DefaultPageEnd
+	}
+	var filterEmailList = func(r r.Term) interface{} {
+		return r.Match(value)
+	}
+
+	var filterNames = func(r r.Term) interface{} {
+		return r.Match(value)
+	}
+
+	var filterSub = func(r r.Term) interface{} {
+		return r.Field("Emails").Filter(filterEmailList).Count().Gt(0).
+			Or(r.Field("Names").Filter(filterNames).Count().Gt(0)).
+			Or(r.Field("FullFingerPrint").Match(fmt.Sprintf("%s$", value)))
+	}
+
+	res, err := r.Table(GPGKeyTableInit.TableName).
+		Filter(filterSub).
+		Slice(pageStart, pageEnd).
+		CoerceTo("array").
+		Run(conn)
+
+	if err != nil {
+		return nil, err
+	}
+	results := make([]GPGKey, 0)
+	var gpgKey GPGKey
+
+	for res.Next(&gpgKey) {
+		results = append(results, gpgKey)
+	}
+
+	return results, nil
+}
+
+func SearchGPGKeyByName(conn *r.Session, name string, pageStart, pageEnd int) ([]GPGKey, error) {
 	if pageStart < 0 {
 		pageStart = DefaultPageStart
 	}
@@ -179,8 +220,9 @@ func SearchGPGKeyByName(conn *r.Session, name string, pageStart, pageEnd int) []
 		Run(conn)
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
+
 	results := make([]GPGKey, 0)
 	var gpgKey GPGKey
 
@@ -188,16 +230,16 @@ func SearchGPGKeyByName(conn *r.Session, name string, pageStart, pageEnd int) []
 		results = append(results, gpgKey)
 	}
 
-	return results
+	return results, nil
 }
 
-func AsciiArmored2GPGKey(asciiArmored string) GPGKey {
+func AsciiArmored2GPGKey(asciiArmored string) (GPGKey, error) {
 	var key GPGKey
 	reader := bytes.NewBuffer([]byte(asciiArmored))
 	z, err := openpgp.ReadArmoredKeyRing(reader)
 
 	if err != nil {
-		panic(err)
+		return key, err
 	}
 
 	if len(z) > 0 {
@@ -232,8 +274,8 @@ func AsciiArmored2GPGKey(asciiArmored string) GPGKey {
 			}
 		}
 
-		return key
+		return key, nil
 	}
 
-	panic("Cannot parse GPG Key")
+	return key, fmt.Errorf("cannot parse GPG Key")
 }

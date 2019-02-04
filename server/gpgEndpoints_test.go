@@ -472,8 +472,8 @@ func TestSign(t *testing.T) {
 
 	errorDie(err, t)
 
-	if errObj.ErrorCode != QuantoError.InternalServerError {
-		errorDie(fmt.Errorf("expected error code %s got %s", QuantoError.InternalServerError, errObj.ErrorCode), t)
+	if errObj.ErrorCode != QuantoError.InvalidFieldData {
+		errorDie(fmt.Errorf("expected error code %s got %s", QuantoError.InvalidFieldData, errObj.ErrorCode), t)
 	}
 	// endregion
 }
@@ -586,8 +586,8 @@ func TestSignQuanto(t *testing.T) {
 
 	errorDie(err, t)
 
-	if errObj.ErrorCode != QuantoError.InternalServerError {
-		errorDie(fmt.Errorf("expected error code %s got %s", QuantoError.InternalServerError, errObj.ErrorCode), t)
+	if errObj.ErrorCode != QuantoError.InvalidFieldData {
+		errorDie(fmt.Errorf("expected error code %s got %s", QuantoError.InvalidFieldData, errObj.ErrorCode), t)
 	}
 	// endregion
 }
