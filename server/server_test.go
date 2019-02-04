@@ -2,7 +2,6 @@ package server
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -11,7 +10,7 @@ import (
 	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/etc"
 	"github.com/quan-to/remote-signer/etc/magicBuilder"
-	"github.com/quan-to/remote-signer/models"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -120,332 +119,36 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-// region GPG Endpoint Tests
-func TestGenerateKey(t *testing.T) {
-	genKeyBody := models.GPGGenerateKeyData{
-		Identifier: "Test",
-		Password:   "123456",
-		Bits:       2048,
-	}
+func InvalidPayloadTest(endpoint string, t *testing.T) {
+	r := bytes.NewReader([]byte(""))
 
-	body, err := json.Marshal(genKeyBody)
-
-	errorDie(err, t)
-
-	r := bytes.NewReader(body)
-
-	req, err := http.NewRequest("POST", "/gpg/generateKey", r)
+	req, err := http.NewRequest("POST", endpoint, r)
 
 	errorDie(err, t)
 
 	res := executeRequest(req)
 
-	d, err := ioutil.ReadAll(res.Body)
-
-	errorDie(err, t)
-
-	key := string(d)
-
-	fingerPrint, err := remote_signer.GetFingerPrintFromKey(key)
-
-	errorDie(err, t)
-
-	err, _ = gpg.LoadKey(key)
-
-	errorDie(err, t)
-
-	err = gpg.UnlockKey(fingerPrint, genKeyBody.Password)
-
-	errorDie(err, t)
-}
-func TestDecryptDataOnly(t *testing.T) {
-
-	decryptBody := models.GPGDecryptData{
-		DataOnly:         true,
-		AsciiArmoredData: testDecryptDataOnly,
+	if res.Code != 500 {
+		errorDie(fmt.Errorf("expected error 500 for invalid payload"), t)
 	}
 
-	body, err := json.Marshal(decryptBody)
-
-	errorDie(err, t)
-
-	r := bytes.NewReader(body)
-
-	req, err := http.NewRequest("POST", "/gpg/decrypt", r)
-
-	errorDie(err, t)
-
-	res := executeRequest(req)
+	var errObj QuantoError.ErrorObject
 
 	d, err := ioutil.ReadAll(res.Body)
+	err = json.Unmarshal(d, &errObj)
 
-	if res.Code != 200 {
-		var errObj QuantoError.ErrorObject
-		err := json.Unmarshal(d, &errObj)
+	if err != nil {
 		errorDie(err, t)
-		errorDie(fmt.Errorf(errObj.Message), t)
 	}
 
-	errorDie(err, t)
-
-	var decryptedData models.GPGDecryptedData
-
-	err = json.Unmarshal(d, &decryptedData)
-
-	errorDie(err, t)
-
-	decryptedBytes, err := base64.StdEncoding.DecodeString(decryptedData.Base64Data)
-
-	errorDie(err, t)
-
-	if string(decryptedBytes) != testSignatureData {
-		t.Errorf("Expected \"%s\" got \"%s\"", testSignatureData, string(decryptedBytes))
+	if errObj.ErrorCode != QuantoError.InvalidFieldData {
+		errorDie(fmt.Errorf("expected %s in ErrorCode. Got %s", QuantoError.InvalidFieldData, errObj.ErrorCode), t)
 	}
 }
-func TestDecrypt(t *testing.T) {
-	decryptBody := models.GPGDecryptData{
-		DataOnly:         false,
-		AsciiArmoredData: testDecryptDataAscii,
-	}
 
-	body, err := json.Marshal(decryptBody)
-
-	errorDie(err, t)
-
-	r := bytes.NewReader(body)
-
-	req, err := http.NewRequest("POST", "/gpg/decrypt", r)
-
-	errorDie(err, t)
-
-	res := executeRequest(req)
-
-	d, err := ioutil.ReadAll(res.Body)
-
-	if res.Code != 200 {
-		var errObj QuantoError.ErrorObject
-		err := json.Unmarshal(d, &errObj)
-		errorDie(err, t)
-		errorDie(fmt.Errorf(errObj.Message), t)
-	}
-
-	errorDie(err, t)
-
-	var decryptedData models.GPGDecryptedData
-
-	err = json.Unmarshal(d, &decryptedData)
-
-	errorDie(err, t)
-
-	decryptedBytes, err := base64.StdEncoding.DecodeString(decryptedData.Base64Data)
-
-	errorDie(err, t)
-
-	if string(decryptedBytes) != testSignatureData {
-		t.Errorf("Expected \"%s\" got \"%s\"", testSignatureData, string(decryptedBytes))
-	}
+func ReadErrorObject(r io.Reader) (QuantoError.ErrorObject, error) {
+	var errObj QuantoError.ErrorObject
+	data, err := ioutil.ReadAll(r)
+	err = json.Unmarshal(data, &errObj)
+	return errObj, err
 }
-func TestVerifySignature(t *testing.T) {
-	verifyBody := models.GPGVerifySignatureData{
-		Base64Data: base64.StdEncoding.EncodeToString([]byte(testSignatureData)),
-		Signature:  testSignatureSignature,
-	}
-
-	body, err := json.Marshal(verifyBody)
-
-	errorDie(err, t)
-
-	r := bytes.NewReader(body)
-
-	req, err := http.NewRequest("POST", "/gpg/verifySignature", r)
-
-	errorDie(err, t)
-
-	res := executeRequest(req)
-
-	d, err := ioutil.ReadAll(res.Body)
-
-	if res.Code != 200 {
-		var errObj QuantoError.ErrorObject
-		err := json.Unmarshal(d, &errObj)
-		errorDie(err, t)
-		errorDie(fmt.Errorf(errObj.Message), t)
-	}
-
-	errorDie(err, t)
-
-	if string(d) != "OK" {
-		t.Errorf("Expected OK got %s", string(d))
-	}
-}
-func TestVerifySignatureQuanto(t *testing.T) {
-	quantoSignature := remote_signer.GPG2Quanto(testSignatureSignature, testKeyFingerprint, "SHA512")
-
-	verifyBody := models.GPGVerifySignatureData{
-		Base64Data: base64.StdEncoding.EncodeToString([]byte(testSignatureData)),
-		Signature:  quantoSignature,
-	}
-
-	body, err := json.Marshal(verifyBody)
-
-	errorDie(err, t)
-
-	r := bytes.NewReader(body)
-
-	req, err := http.NewRequest("POST", "/gpg/verifySignatureQuanto", r)
-
-	errorDie(err, t)
-
-	res := executeRequest(req)
-
-	d, err := ioutil.ReadAll(res.Body)
-
-	if res.Code != 200 {
-		var errObj QuantoError.ErrorObject
-		err := json.Unmarshal(d, &errObj)
-		errorDie(err, t)
-		slog.Debug(errObj.StackTrace)
-		errorDie(fmt.Errorf(errObj.Message), t)
-	}
-
-	errorDie(err, t)
-
-	if string(d) != "OK" {
-		t.Errorf("Expected OK got %s", string(d))
-	}
-}
-func TestSign(t *testing.T) {
-	// region Generate Signature
-	signBody := models.GPGSignData{
-		FingerPrint: testKeyFingerprint,
-		Base64Data:  base64.StdEncoding.EncodeToString([]byte(testSignatureData)),
-	}
-
-	body, err := json.Marshal(signBody)
-
-	errorDie(err, t)
-
-	r := bytes.NewReader(body)
-
-	req, err := http.NewRequest("POST", "/gpg/sign", r)
-
-	errorDie(err, t)
-
-	res := executeRequest(req)
-
-	d, err := ioutil.ReadAll(res.Body)
-
-	if res.Code != 200 {
-		var errObj QuantoError.ErrorObject
-		err := json.Unmarshal(d, &errObj)
-		errorDie(err, t)
-		errorDie(fmt.Errorf(errObj.Message), t)
-	}
-
-	errorDie(err, t)
-
-	slog.Debug("Signature: %s", string(d))
-	// endregion
-	// region Verify Signature
-	verifyBody := models.GPGVerifySignatureData{
-		Base64Data: base64.StdEncoding.EncodeToString([]byte(testSignatureData)),
-		Signature:  string(d),
-	}
-
-	body, err = json.Marshal(verifyBody)
-
-	errorDie(err, t)
-
-	r = bytes.NewReader(body)
-
-	req, err = http.NewRequest("POST", "/gpg/verifySignature", r)
-
-	errorDie(err, t)
-
-	res = executeRequest(req)
-
-	d, err = ioutil.ReadAll(res.Body)
-
-	if res.Code != 200 {
-		var errObj QuantoError.ErrorObject
-		err := json.Unmarshal(d, &errObj)
-		errorDie(err, t)
-		errorDie(fmt.Errorf(errObj.Message), t)
-	}
-
-	errorDie(err, t)
-
-	if string(d) != "OK" {
-		t.Errorf("Expected OK got %s", string(d))
-	}
-	// endregion
-}
-func TestSignQuanto(t *testing.T) {
-	// region Generate Signature
-	signBody := models.GPGSignData{
-		FingerPrint: testKeyFingerprint,
-		Base64Data:  base64.StdEncoding.EncodeToString([]byte(testSignatureData)),
-	}
-
-	body, err := json.Marshal(signBody)
-
-	errorDie(err, t)
-
-	r := bytes.NewReader(body)
-
-	req, err := http.NewRequest("POST", "/gpg/signQuanto", r)
-
-	errorDie(err, t)
-
-	res := executeRequest(req)
-
-	d, err := ioutil.ReadAll(res.Body)
-
-	if res.Code != 200 {
-		var errObj QuantoError.ErrorObject
-		err := json.Unmarshal(d, &errObj)
-		errorDie(err, t)
-		errorDie(fmt.Errorf(errObj.Message), t)
-	}
-
-	errorDie(err, t)
-
-	slog.Debug("Signature: %s", string(d))
-	// endregion
-	// region Verify Signature
-	verifyBody := models.GPGVerifySignatureData{
-		Base64Data: base64.StdEncoding.EncodeToString([]byte(testSignatureData)),
-		Signature:  string(d),
-	}
-
-	body, err = json.Marshal(verifyBody)
-
-	errorDie(err, t)
-
-	r = bytes.NewReader(body)
-
-	req, err = http.NewRequest("POST", "/gpg/verifySignatureQuanto", r)
-
-	errorDie(err, t)
-
-	res = executeRequest(req)
-
-	d, err = ioutil.ReadAll(res.Body)
-
-	if res.Code != 200 {
-		var errObj QuantoError.ErrorObject
-		err := json.Unmarshal(d, &errObj)
-		errorDie(err, t)
-		t.Errorf("%s", errObj.String())
-		errorDie(fmt.Errorf(errObj.Message), t)
-	}
-
-	errorDie(err, t)
-
-	if string(d) != "OK" {
-		t.Errorf("Expected OK got %s", string(d))
-	}
-	// endregion
-}
-
-// endregion

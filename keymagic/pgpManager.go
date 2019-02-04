@@ -215,11 +215,6 @@ func (pm *PGPManager) IsKeyLocked(fp string) bool {
 func (pm *PGPManager) unlockKey(fp, password string) error {
 
 	fp = pm.sanitizeFingerprint(fp)
-
-	if pm.decryptedPrivateKeys[fp] != nil {
-		pgpLog.Info("Key %s already unlocked.", fp)
-		return nil
-	}
 	ent := pm.entities[fp]
 
 	if ent == nil {
@@ -233,12 +228,17 @@ func (pm *PGPManager) unlockKey(fp, password string) error {
 		return errors.New(fmt.Sprintf("private key %s not found", fp))
 	}
 
-	vpk := *pk // Copy data, for safety (aka: not unlock key at encrypted keys list
+	vpk := *pk // Copy data, for safety (aka: not unlock key at encrypted keys list)
 
 	err := vpk.Decrypt([]byte(password))
 
 	if err != nil {
 		return err
+	}
+
+	if pm.decryptedPrivateKeys[fp] != nil {
+		pgpLog.Info("Key %s already unlocked.", fp)
+		return nil
 	}
 
 	z := pm.entities[fp]
@@ -794,6 +794,7 @@ func (pm *PGPManager) Decrypt(data string, dataOnly bool) (*models.GPGDecryptedD
 		return nil, err
 	}
 
+	ret.FingerPrint = remote_signer.IssuerKeyIdToFP16(ent.PrimaryKey.KeyId)
 	ret.Base64Data = base64.StdEncoding.EncodeToString(rawData)
 	ret.Filename = md.LiteralData.FileName
 

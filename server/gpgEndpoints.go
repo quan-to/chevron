@@ -58,12 +58,7 @@ func (ge *GPGEndpoint) decrypt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	d, err := json.Marshal(*decrypted)
-
-	if err != nil {
-		InternalServerError("There was an error processing your request. Please try again.", nil, w, r, geLog)
-		return
-	}
+	d, _ := json.Marshal(*decrypted)
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
