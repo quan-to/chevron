@@ -7,6 +7,7 @@ import (
 	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/etc"
+	"github.com/quan-to/remote-signer/keymagic"
 	"github.com/quan-to/remote-signer/models"
 	"net/http"
 )
@@ -144,6 +145,12 @@ func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request
 			return
 		}
 	}
+
+	pubKey, _ := kre.gpg.GetPublicKeyAscii(fp)
+
+	kreLog.Info("Adding public key for %s on PKS", fp)
+	res := keymagic.PKSAdd(pubKey)
+	kreLog.Info("PKS Add Key: %s", res)
 
 	if data.SaveToDisk {
 		err = kre.gpg.SavePrivateKey(fingerPrint, data.EncryptedPrivateKey, data.Password)
