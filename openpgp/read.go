@@ -12,9 +12,9 @@ import (
 	"io"
 	"strconv"
 
-	"golang.org/x/crypto/openpgp/armor"
-	"golang.org/x/crypto/openpgp/errors"
-	"golang.org/x/crypto/openpgp/packet"
+	"github.com/quan-to/remote-signer/openpgp/armor"
+	"github.com/quan-to/remote-signer/openpgp/errors"
+	"github.com/quan-to/remote-signer/openpgp/packet"
 )
 
 // SignatureType is the armor type for a PGP signature.
