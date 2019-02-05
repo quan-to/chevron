@@ -14,7 +14,6 @@ import (
 var hkpLog = SLog.Scope("HKP")
 
 func operationGet(options, searchData string, machineReadable, noModification bool) (error, string) {
-	//hkpLog.Info("GET(%s, %s, %v, %v)", options, searchData, machineReadable, noModification)
 	if searchData[:2] == "0x" {
 		k, _ := keymagic.PKSGetKey(searchData[2:])
 		if k == "" {

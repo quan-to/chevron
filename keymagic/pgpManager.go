@@ -273,6 +273,10 @@ func (pm *PGPManager) GetLoadedPrivateKeys() []models.KeyInfo {
 
 	for k, e := range pm.entities {
 		v := e.PrivateKey
+		if v == nil {
+			continue
+		}
+
 		z, _ := v.BitLength()
 		keyInfo := models.KeyInfo{
 			FingerPrint:           k,

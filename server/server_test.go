@@ -26,6 +26,25 @@ const testKeyName = "HUEBR"
 const testKeyPassword = "I think you will never guess"
 const testKeyEmail = "jon@huebr.com"
 
+const testPublicKey2 = `-----BEGIN PGP PUBLIC KEY BLOCK-----
+
+mQENBFxY/14BCACoBkihJXnPfYx+O8nYT8k+JKFi3gyrImdO+qiZTkhQuVxjbOsV
+539uKlXQBjmjbVWWRkITtLsn2+gHteDJ1uq6rhc2k5sSu8OZuvCDRY6Xi+h19gOo
+eZqjuCLBGDJR0ppYU09dQNODICVMbUE0xsn676V/Bl69LXvHkXVzKxGQCRBaMhZu
+I/4G/kR9dYBYFqB7iLzzN6/ygRppOAlqkXhSd+8x9zmHG4iQao+jC99b+UYp6f1A
++OXb0WJ3KxqRTCDRtIqBDxdK+IRMbk6YCW1MmQi38UuGLdcxzl+xiJmPwcnh5buH
+TvYkqFJUwNyWS/GOpfCu3nyn68fS6gw0ZN9LABEBAAG0BUhVRUJSiQEfBBMBCgAT
+BQJcWP9eCRCa9CQueyx7iwIbAwAApZoIAKYp3if7GOCK3ZQ44SU8VJ62/ZOhOEAD
+w7LicYYlQwlIvINti+pUQKsgNfqV++HujjVKShRD7IktRKRQB1yluV8yTLAjiN0a
+19UmNwQ+s7KahOicZ1GfH8VD4w2oogcmE7IMV5FEvxfzsAVPDHPb+mDZV8GA0Rf+
+EoW5kRjLeJjG0oC4oNiVynw+eHM8Z3aqx4wXEVGkxCIWdJKvYmQljiT4oHf4S3XX
+17Wbbc+KzJNW1/5VFeTSHHzLBGjLyWZYnKo2S8aiNdVS9rvPOIdFDcHhFylDe8zt
+Xl/5GnX68EOgGysccm/O+KI9r0c6AjXrWQ1d2KJaKXbiUE5WW8eiCw4=
+=xTxF
+-----END PGP PUBLIC KEY BLOCK-----`
+
+const testPublicKey2FingerPrint = "9AF4242E7B2C7B8B"
+
 const testSignatureData = "huebr for the win!"
 const testSignatureSignature = `-----BEGIN PGP SIGNATURE-----
 

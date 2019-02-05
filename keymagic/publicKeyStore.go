@@ -62,12 +62,14 @@ func PKSAdd(pubKey string) string {
 		conn := database.GetConnection()
 		key, err := models.AsciiArmored2GPGKey(pubKey)
 		if err != nil {
+			pksLog.Debug("PKSAdd Error: %s", err)
 			return "NOK"
 		}
 
 		keys, err := models.SearchGPGKeyByFingerPrint(conn, key.FullFingerPrint, 0, 1)
 
 		if err != nil {
+			pksLog.Debug("PKSAdd Error: %s", err)
 			return "NOK"
 		}
 
@@ -80,6 +82,7 @@ func PKSAdd(pubKey string) string {
 		_, _, err = models.AddGPGKey(conn, key)
 
 		if err != nil {
+			pksLog.Debug("PKSAdd Error: %s", err)
 			return "NOK"
 		}
 
