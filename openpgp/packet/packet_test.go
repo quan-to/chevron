@@ -196,7 +196,7 @@ func TestSerializeHeader(t *testing.T) {
 
 	for _, length := range lengths {
 		buf := bytes.NewBuffer(nil)
-		serializeHeader(buf, tag, length)
+		_ = serializeHeader(buf, tag, length)
 		tag2, length2, _, err := readHeader(buf)
 		if err != nil {
 			t.Errorf("length %d, err: %s", length, err)
@@ -232,7 +232,7 @@ func TestPartialLengths(t *testing.T) {
 			t.Errorf("error from write: %s", err)
 		}
 	}
-	w.Close()
+	_ = w.Close()
 
 	want := (maxChunkSize * (maxChunkSize + 1)) / 2
 	copyBuf := bytes.NewBuffer(nil)

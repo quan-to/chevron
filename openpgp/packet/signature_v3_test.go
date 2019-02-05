@@ -17,8 +17,8 @@ import (
 
 func TestSignatureV3Read(t *testing.T) {
 	r := v3KeyReader(t)
-	Read(r)                // Skip public key
-	Read(r)                // Skip uid
+	_, _ = Read(r)         // Skip public key
+	_, _ = Read(r)         // Skip uid
 	packet, err := Read(r) // Signature
 	if err != nil {
 		t.Error(err)
@@ -32,8 +32,8 @@ func TestSignatureV3Read(t *testing.T) {
 
 func TestSignatureV3Reserialize(t *testing.T) {
 	r := v3KeyReader(t)
-	Read(r) // Skip public key
-	Read(r) // Skip uid
+	_, _ = Read(r) // Skip public key
+	_, _ = Read(r) // Skip uid
 	packet, err := Read(r)
 	if err != nil {
 		t.Error(err)

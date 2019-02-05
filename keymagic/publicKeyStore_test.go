@@ -150,12 +150,3 @@ func TestPKSAdd(t *testing.T) {
 	remote_signer.EnableRethinkSKS = false
 	// TODO: How to be a good test without stuffying SKS?
 }
-
-func assertPanic(t *testing.T, f func(), message string) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf(message)
-		}
-	}()
-	f()
-}

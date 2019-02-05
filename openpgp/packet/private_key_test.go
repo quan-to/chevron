@@ -115,9 +115,9 @@ func TestSerializePGP(t *testing.T) {
 		}
 
 		buf := bytes.NewBuffer(nil)
-		err = privKey.Serialize(buf)
+		_ = privKey.Serialize(buf)
 
-		packet2, err := Read(buf)
+		packet2, _ := Read(buf)
 		privKey2 := packet2.(*PrivateKey)
 		if !privKey2.Encrypted {
 			t.Errorf("#%d: privKey2 should be encrypted", i)
@@ -135,9 +135,9 @@ func TestSerializePGP(t *testing.T) {
 		}
 
 		buf = bytes.NewBuffer(nil)
-		err = privKey2.Serialize(buf)
+		_ = privKey2.Serialize(buf)
 
-		packet3, err := Read(buf)
+		packet3, _ := Read(buf)
 		privKey3 := packet3.(*PrivateKey)
 		if privKey3.Encrypted {
 			t.Errorf("#%d: privKey3 should not be encrypted", i)

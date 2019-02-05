@@ -24,6 +24,8 @@ func TestKREGetKey(t *testing.T) {
 
 	d, err := ioutil.ReadAll(res.Body)
 
+	errorDie(err, t)
+
 	if res.Code != 200 {
 		var errObj QuantoError.ErrorObject
 		err := json.Unmarshal(d, &errObj)
@@ -63,6 +65,7 @@ func TestKREGetCachedKeys(t *testing.T) {
 	res := executeRequest(req)
 
 	d, err := ioutil.ReadAll(res.Body)
+	errorDie(err, t)
 
 	if res.Code != 200 {
 		var errObj QuantoError.ErrorObject
@@ -100,6 +103,7 @@ func TestKREGetLoadedPrivateKeys(t *testing.T) {
 	res := executeRequest(req)
 
 	d, err := ioutil.ReadAll(res.Body)
+	errorDie(err, t)
 
 	if res.Code != 200 {
 		var errObj QuantoError.ErrorObject
@@ -152,6 +156,7 @@ func TestKREAddPrivateKey(t *testing.T) {
 	res := executeRequest(req)
 
 	d, err := ioutil.ReadAll(res.Body)
+	errorDie(err, t)
 
 	if res.Code != 200 {
 		var errObj QuantoError.ErrorObject

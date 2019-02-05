@@ -24,6 +24,7 @@ func TestSKSGetKey(t *testing.T) {
 	res := executeRequest(req)
 
 	d, err := ioutil.ReadAll(res.Body)
+	errorDie(err, t)
 
 	if res.Code != 200 {
 		var errObj QuantoError.ErrorObject
@@ -72,6 +73,7 @@ func BaseTestSearch(name, value, endpoint string, t *testing.T) {
 	res := executeRequest(req)
 
 	d, err := ioutil.ReadAll(res.Body)
+	errorDie(err, t)
 
 	if res.Code != 200 {
 		var errObj QuantoError.ErrorObject
@@ -105,6 +107,7 @@ func BaseTestSearch(name, value, endpoint string, t *testing.T) {
 	res = executeRequest(req)
 
 	d, err = ioutil.ReadAll(res.Body)
+	errorDie(err, t)
 
 	if res.Code != 200 {
 		var errObj QuantoError.ErrorObject
@@ -206,6 +209,7 @@ func TestAddKey(t *testing.T) {
 	res = executeRequest(req)
 
 	errObj, err := ReadErrorObject(res.Body)
+	errorDie(err, t)
 
 	if errObj.ErrorCode != QuantoError.InvalidFieldData {
 		errorDie(fmt.Errorf("expected errorCode %s got %s", QuantoError.InvalidFieldData, errObj.ErrorCode), t)

@@ -166,9 +166,9 @@ func (pk *PrivateKey) SerializeEncrypted(w io.Writer) error {
 	encodedKey := encodedKeyBuf.Bytes()
 	privateKeyBytes := privateKeyBuf.Bytes()
 
-	w.Write(encodedKey)
-	w.Write(pk.iv)
-	w.Write(privateKeyBytes)
+	_, _ = w.Write(encodedKey)
+	_, _ = w.Write(pk.iv)
+	_, _ = w.Write(privateKeyBytes)
 
 	return nil
 }
@@ -191,7 +191,7 @@ func (pk *PrivateKey) SerializeUnEncrypted(w io.Writer) (err error) {
 	privateKeyBytes := buf.Bytes()
 	if pk.sha1Checksum {
 		h := sha1.New()
-		h.Write(privateKeyBytes)
+		_, _ = h.Write(privateKeyBytes)
 		sum := h.Sum(nil)
 		privateKeyBytes = append(privateKeyBytes, sum...)
 	} else {
@@ -201,7 +201,7 @@ func (pk *PrivateKey) SerializeUnEncrypted(w io.Writer) (err error) {
 		checksumBytes[1] = byte(checksum)
 		privateKeyBytes = append(privateKeyBytes, checksumBytes[:]...)
 	}
-	w.Write(privateKeyBytes)
+	_, _ = w.Write(privateKeyBytes)
 	return
 }
 
@@ -214,9 +214,9 @@ func (pk *PrivateKey) Serialize(w io.Writer) (err error) {
 
 	privateKeyBuf := bytes.NewBuffer(nil)
 	if pk.Encrypted {
-		pk.SerializeEncrypted(privateKeyBuf)
+		_ = pk.SerializeEncrypted(privateKeyBuf)
 	} else {
-		pk.SerializeUnEncrypted(privateKeyBuf)
+		_ = pk.SerializeUnEncrypted(privateKeyBuf)
 	}
 
 	ptype := packetTypePrivateKey
@@ -286,7 +286,7 @@ func (pk *PrivateKey) Encrypt(passphrase []byte) error {
 	privateKeyBytes := privateKeyBuf.Bytes()
 	key := make([]byte, pk.cipher.KeySize())
 	pk.salt = make([]byte, 8)
-	rand.Read(pk.salt)
+	_, _ = rand.Read(pk.salt)
 
 	pk.s2k = func(out, in []byte) {
 		s2k.Iterated(out, pk.s2kConfig.Hash.New(), in, pk.salt, pk.s2kConfig.S2KCount)
@@ -294,13 +294,13 @@ func (pk *PrivateKey) Encrypt(passphrase []byte) error {
 	pk.s2k(key, passphrase)
 	block := pk.cipher.new(key)
 	pk.iv = make([]byte, pk.cipher.blockSize())
-	rand.Read(pk.iv)
+	_, _ = rand.Read(pk.iv)
 	cfb := cipher.NewCFBEncrypter(block, pk.iv)
 
 	if pk.sha1Checksum {
 		pk.s2kType = S2KSHA1
 		h := sha1.New()
-		h.Write(privateKeyBytes)
+		_, _ = h.Write(privateKeyBytes)
 		sum := h.Sum(nil)
 		privateKeyBytes = append(privateKeyBytes, sum...)
 	} else {
@@ -339,38 +339,38 @@ func (pk *PrivateKey) SerializePrivateMPI(privateKeyBuf io.Writer) error {
 }
 
 func serializeRSAPrivateKeyMPI(w io.Writer, priv *rsa.PrivateKey) error {
-	binary.Write(w, binary.BigEndian, priv.D.BitLen())
+	_ = binary.Write(w, binary.BigEndian, priv.D.BitLen())
 	err := writeBig(w, priv.D)
 	if err != nil {
 		return err
 	}
-	binary.Write(w, binary.BigEndian, priv.Primes[0].BitLen())
+	_ = binary.Write(w, binary.BigEndian, priv.Primes[0].BitLen())
 	err = writeBig(w, priv.Primes[0])
 	if err != nil {
 		return err
 	}
-	binary.Write(w, binary.BigEndian, priv.Primes[1].BitLen())
+	_ = binary.Write(w, binary.BigEndian, priv.Primes[1].BitLen())
 	err = writeBig(w, priv.Primes[1])
 	if err != nil {
 		return err
 	}
 	u := new(big.Int).ModInverse(priv.Primes[0], priv.Primes[1])
-	binary.Write(w, binary.BigEndian, u.BitLen())
+	_ = binary.Write(w, binary.BigEndian, u.BitLen())
 	return writeBig(w, u)
 }
 
 func serializeDSAPrivateKeyMPI(w io.Writer, priv *dsa.PrivateKey) error {
-	binary.Write(w, binary.BigEndian, priv.X.BitLen())
+	_ = binary.Write(w, binary.BigEndian, priv.X.BitLen())
 	return writeBig(w, priv.X)
 }
 
 func serializeElGamalPrivateKeyMPI(w io.Writer, priv *elgamal.PrivateKey) error {
-	binary.Write(w, binary.BigEndian, priv.X.BitLen())
+	_ = binary.Write(w, binary.BigEndian, priv.X.BitLen())
 	return writeBig(w, priv.X)
 }
 
 func serializeECDSAPrivateKeyMPI(w io.Writer, priv *ecdsa.PrivateKey) error {
-	binary.Write(w, binary.BigEndian, priv.D.BitLen())
+	_ = binary.Write(w, binary.BigEndian, priv.D.BitLen())
 	return writeBig(w, priv.D)
 }
 
@@ -392,7 +392,7 @@ func (pk *PrivateKey) Decrypt(passphrase []byte) error {
 			return errors.StructuralError("truncated private key data")
 		}
 		h := sha1.New()
-		h.Write(data[:len(data)-sha1.Size])
+		_, _ = h.Write(data[:len(data)-sha1.Size])
 		sum := h.Sum(nil)
 		if !bytes.Equal(sum, data[len(data)-sha1.Size:]) {
 			return errors.StructuralError("private key checksum failure")

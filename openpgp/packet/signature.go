@@ -498,7 +498,7 @@ func (sig *Signature) signPrepareHash(h hash.Hash) (digest []byte, err error) {
 		return
 	}
 
-	h.Write(sig.HashSuffix)
+	_, _ = h.Write(sig.HashSuffix)
 	digest = h.Sum(nil)
 	copy(sig.HashTag[:], digest)
 	return

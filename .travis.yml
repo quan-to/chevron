@@ -32,6 +32,7 @@ script:
 - export VAULT_USE_USERPASS="true"
 - export VAULT_USERNAME="remotesigner"
 - export VAULT_PASSWORD="123456"
+- export DATABASE_NAME="qrs_test"
 - vault server -dev & echo $! > $HOME/vault.pid
 - echo "Waiting vault settle" & sleep 2
 - echo "Vault started with PID `cat $HOME/vault.pid`"

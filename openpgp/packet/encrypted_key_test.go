@@ -143,7 +143,7 @@ func TestSerializingEncryptedKey(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	ek.Serialize(&buf)
+	_ = ek.Serialize(&buf)
 
 	if bufHex := hex.EncodeToString(buf.Bytes()); bufHex != encryptedKeyHex {
 		t.Fatalf("serialization of encrypted key differed from original. Original was %s, but reserialized as %s", encryptedKeyHex, bufHex)

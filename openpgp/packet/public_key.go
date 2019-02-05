@@ -306,7 +306,7 @@ func (pk *PublicKey) setFingerPrintAndKeyId() {
 	// RFC 4880, section 12.2
 	fingerPrint := sha1.New()
 	pk.SerializeSignaturePrefix(fingerPrint)
-	pk.serializeWithoutHeaders(fingerPrint)
+	_ = pk.serializeWithoutHeaders(fingerPrint)
 	copy(pk.Fingerprint[:], fingerPrint.Sum(nil))
 	pk.KeyId = binary.BigEndian.Uint64(pk.Fingerprint[12:20])
 }
@@ -327,15 +327,15 @@ func (pk *PublicKey) parseRSA(r io.Reader) (err error) {
 		err = errors.UnsupportedError("large public exponent")
 		return
 	}
-	rsa := &rsa.PublicKey{
+	rsaKey := &rsa.PublicKey{
 		N: new(big.Int).SetBytes(pk.n.bytes),
 		E: 0,
 	}
 	for i := 0; i < len(pk.e.bytes); i++ {
-		rsa.E <<= 8
-		rsa.E |= int(pk.e.bytes[i])
+		rsaKey.E <<= 8
+		rsaKey.E |= int(pk.e.bytes[i])
 	}
-	pk.PublicKey = rsa
+	pk.PublicKey = rsaKey
 	return
 }
 
@@ -419,7 +419,7 @@ func (pk *PublicKey) SerializeSignaturePrefix(h io.Writer) {
 		panic("unknown public key algorithm")
 	}
 	pLength += 6
-	h.Write([]byte{0x99, byte(pLength >> 8), byte(pLength)})
+	_, _ = h.Write([]byte{0x99, byte(pLength >> 8), byte(pLength)})
 	return
 }
 
@@ -506,7 +506,7 @@ func (pk *PublicKey) VerifySignature(signed hash.Hash, sig *Signature) (err erro
 		return errors.InvalidArgumentError("public key cannot generate signatures")
 	}
 
-	signed.Write(sig.HashSuffix)
+	_, _ = signed.Write(sig.HashSuffix)
 	hashBytes := signed.Sum(nil)
 
 	if hashBytes[0] != sig.HashTag[0] || hashBytes[1] != sig.HashTag[1] {
@@ -557,7 +557,7 @@ func (pk *PublicKey) VerifySignatureV3(signed hash.Hash, sig *SignatureV3) (err 
 	suffix := make([]byte, 5)
 	suffix[0] = byte(sig.SigType)
 	binary.BigEndian.PutUint32(suffix[1:], uint32(sig.CreationTime.Unix()))
-	signed.Write(suffix)
+	_, _ = signed.Write(suffix)
 	hashBytes := signed.Sum(nil)
 
 	if hashBytes[0] != sig.HashTag[0] || hashBytes[1] != sig.HashTag[1] {
@@ -601,9 +601,9 @@ func keySignatureHash(pk, signed signingKey, hashFunc crypto.Hash) (h hash.Hash,
 
 	// RFC 4880, section 5.2.4
 	pk.SerializeSignaturePrefix(h)
-	pk.serializeWithoutHeaders(h)
+	_ = pk.serializeWithoutHeaders(h)
 	signed.SerializeSignaturePrefix(h)
-	signed.serializeWithoutHeaders(h)
+	_ = signed.serializeWithoutHeaders(h)
 	return
 }
 
@@ -646,7 +646,7 @@ func keyRevocationHash(pk signingKey, hashFunc crypto.Hash) (h hash.Hash, err er
 
 	// RFC 4880, section 5.2.4
 	pk.SerializeSignaturePrefix(h)
-	pk.serializeWithoutHeaders(h)
+	_ = pk.serializeWithoutHeaders(h)
 
 	return
 }
@@ -671,7 +671,7 @@ func userIdSignatureHash(id string, pk *PublicKey, hashFunc crypto.Hash) (h hash
 
 	// RFC 4880, section 5.2.4
 	pk.SerializeSignaturePrefix(h)
-	pk.serializeWithoutHeaders(h)
+	_ = pk.serializeWithoutHeaders(h)
 
 	var buf [5]byte
 	buf[0] = 0xb4
@@ -679,8 +679,8 @@ func userIdSignatureHash(id string, pk *PublicKey, hashFunc crypto.Hash) (h hash
 	buf[2] = byte(len(id) >> 16)
 	buf[3] = byte(len(id) >> 8)
 	buf[4] = byte(len(id))
-	h.Write(buf[:])
-	h.Write([]byte(id))
+	_, _ = h.Write(buf[:])
+	_, _ = h.Write([]byte(id))
 
 	return
 }

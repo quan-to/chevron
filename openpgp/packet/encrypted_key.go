@@ -115,17 +115,17 @@ func (e *EncryptedKey) Serialize(w io.Writer) error {
 		return errors.InvalidArgumentError("don't know how to serialize encrypted key type " + strconv.Itoa(int(e.Algo)))
 	}
 
-	serializeHeader(w, packetTypeEncryptedKey, 1 /* version */ +8 /* key id */ +1 /* algo */ +mpiLen)
+	_ = serializeHeader(w, packetTypeEncryptedKey, 1 /* version */ +8 /* key id */ +1 /* algo */ +mpiLen)
 
-	w.Write([]byte{encryptedKeyVersion})
-	binary.Write(w, binary.BigEndian, e.KeyId)
-	w.Write([]byte{byte(e.Algo)})
+	_, _ = w.Write([]byte{encryptedKeyVersion})
+	_ = binary.Write(w, binary.BigEndian, e.KeyId)
+	_, _ = w.Write([]byte{byte(e.Algo)})
 
 	switch e.Algo {
 	case PubKeyAlgoRSA, PubKeyAlgoRSAEncryptOnly:
-		writeMPIs(w, e.encryptedMPI1)
+		_ = writeMPIs(w, e.encryptedMPI1)
 	case PubKeyAlgoElGamal:
-		writeMPIs(w, e.encryptedMPI1, e.encryptedMPI2)
+		_ = writeMPIs(w, e.encryptedMPI1, e.encryptedMPI2)
 	default:
 		panic("internal error")
 	}

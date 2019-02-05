@@ -113,10 +113,10 @@ func Salted(out []byte, h hash.Hash, in []byte, salt []byte) {
 	for i := 0; done < len(out); i++ {
 		h.Reset()
 		for j := 0; j < i; j++ {
-			h.Write(zero[:])
+			_, _ = h.Write(zero[:])
 		}
-		h.Write(salt)
-		h.Write(in)
+		_, _ = h.Write(salt)
+		_, _ = h.Write(in)
 		digest = h.Sum(digest[:0])
 		n := copy(out[done:], digest)
 		done += n
@@ -140,16 +140,16 @@ func Iterated(out []byte, h hash.Hash, in []byte, salt []byte, count int) {
 	for i := 0; done < len(out); i++ {
 		h.Reset()
 		for j := 0; j < i; j++ {
-			h.Write(zero[:])
+			_, _ = h.Write(zero[:])
 		}
 		written := 0
 		for written < count {
 			if written+len(combined) > count {
 				todo := count - written
-				h.Write(combined[:todo])
+				_, _ = h.Write(combined[:todo])
 				written = count
 			} else {
-				h.Write(combined)
+				_, _ = h.Write(combined)
 				written += len(combined)
 			}
 		}

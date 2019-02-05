@@ -35,20 +35,21 @@ type PublicKeyV3 struct {
 	n, e parsedMPI
 }
 
-// newRSAPublicKeyV3 returns a PublicKey that wraps the given rsa.PublicKey.
-// Included here for testing purposes only. RFC 4880, section 5.5.2:
-// "an implementation MUST NOT generate a V3 key, but MAY accept it."
-func newRSAPublicKeyV3(creationTime time.Time, pub *rsa.PublicKey) *PublicKeyV3 {
-	pk := &PublicKeyV3{
-		CreationTime: creationTime,
-		PublicKey:    pub,
-		n:            fromBig(pub.N),
-		e:            fromBig(big.NewInt(int64(pub.E))),
-	}
-
-	pk.setFingerPrintAndKeyId()
-	return pk
-}
+// Commented out because not used internally
+//// newRSAPublicKeyV3 returns a PublicKey that wraps the given rsa.PublicKey.
+//// Included here for testing purposes only. RFC 4880, section 5.5.2:
+//// "an implementation MUST NOT generate a V3 key, but MAY accept it."
+//func newRSAPublicKeyV3(creationTime time.Time, pub *rsa.PublicKey) *PublicKeyV3 {
+//	pk := &PublicKeyV3{
+//		CreationTime: creationTime,
+//		PublicKey:    pub,
+//		n:            fromBig(pub.N),
+//		e:            fromBig(big.NewInt(int64(pub.E))),
+//	}
+//
+//	pk.setFingerPrintAndKeyId()
+//	return pk
+//}
 
 func (pk *PublicKeyV3) parse(r io.Reader) (err error) {
 	// RFC 4880, section 5.5.2
@@ -79,9 +80,9 @@ func (pk *PublicKeyV3) parse(r io.Reader) (err error) {
 func (pk *PublicKeyV3) setFingerPrintAndKeyId() {
 	// RFC 4880, section 12.2
 	fingerPrint := md5.New()
-	fingerPrint.Write(pk.n.bytes)
-	fingerPrint.Write(pk.e.bytes)
-	fingerPrint.Sum(pk.Fingerprint[:0])
+	_, _ = fingerPrint.Write(pk.n.bytes)
+	_, _ = fingerPrint.Write(pk.e.bytes)
+	_ = fingerPrint.Sum(pk.Fingerprint[:0])
 	pk.KeyId = binary.BigEndian.Uint64(pk.n.bytes[len(pk.n.bytes)-8:])
 }
 
@@ -104,12 +105,12 @@ func (pk *PublicKeyV3) parseRSA(r io.Reader) (err error) {
 		err = errors.UnsupportedError("large public exponent")
 		return
 	}
-	rsa := &rsa.PublicKey{N: new(big.Int).SetBytes(pk.n.bytes)}
+	rsaKey := &rsa.PublicKey{N: new(big.Int).SetBytes(pk.n.bytes)}
 	for i := 0; i < len(pk.e.bytes); i++ {
-		rsa.E <<= 8
-		rsa.E |= int(pk.e.bytes[i])
+		rsaKey.E <<= 8
+		rsaKey.E |= int(pk.e.bytes[i])
 	}
-	pk.PublicKey = rsa
+	pk.PublicKey = rsaKey
 	return
 }
 
@@ -126,7 +127,7 @@ func (pk *PublicKeyV3) SerializeSignaturePrefix(w io.Writer) {
 		panic("unknown public key algorithm")
 	}
 	pLength += 6
-	w.Write([]byte{0x99, byte(pLength >> 8), byte(pLength)})
+	_, _ = w.Write([]byte{0x99, byte(pLength >> 8), byte(pLength)})
 	return
 }
 
@@ -195,7 +196,7 @@ func (pk *PublicKeyV3) VerifySignatureV3(signed hash.Hash, sig *SignatureV3) (er
 	suffix := make([]byte, 5)
 	suffix[0] = byte(sig.SigType)
 	binary.BigEndian.PutUint32(suffix[1:], uint32(sig.CreationTime.Unix()))
-	signed.Write(suffix)
+	_, _ = signed.Write(suffix)
 	hashBytes := signed.Sum(nil)
 
 	if hashBytes[0] != sig.HashTag[0] || hashBytes[1] != sig.HashTag[1] {
@@ -248,9 +249,9 @@ func userIdSignatureV3Hash(id string, pk signingKey, hfn crypto.Hash) (h hash.Ha
 
 	// RFC 4880, section 5.2.4
 	pk.SerializeSignaturePrefix(h)
-	pk.serializeWithoutHeaders(h)
+	_ = pk.serializeWithoutHeaders(h)
 
-	h.Write([]byte(id))
+	_, _ = h.Write([]byte(id))
 
 	return
 }

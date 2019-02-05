@@ -69,7 +69,7 @@ func (uat *UserAttribute) parse(r io.Reader) (err error) {
 func (uat *UserAttribute) Serialize(w io.Writer) (err error) {
 	var buf bytes.Buffer
 	for _, sp := range uat.Contents {
-		sp.Serialize(&buf)
+		_ = sp.Serialize(&buf)
 	}
 	if err = serializeHeader(w, packetTypeUserAttribute, buf.Len()); err != nil {
 		return err

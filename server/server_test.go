@@ -168,6 +168,7 @@ func InvalidPayloadTest(endpoint string, t *testing.T) {
 	var errObj QuantoError.ErrorObject
 
 	d, err := ioutil.ReadAll(res.Body)
+	errorDie(err, t)
 	err = json.Unmarshal(d, &errObj)
 
 	if err != nil {
@@ -182,6 +183,9 @@ func InvalidPayloadTest(endpoint string, t *testing.T) {
 func ReadErrorObject(r io.Reader) (QuantoError.ErrorObject, error) {
 	var errObj QuantoError.ErrorObject
 	data, err := ioutil.ReadAll(r)
+	if err != nil {
+		return errObj, err
+	}
 	err = json.Unmarshal(data, &errObj)
 	return errObj, err
 }

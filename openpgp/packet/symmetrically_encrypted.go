@@ -79,7 +79,7 @@ func (se *SymmetricallyEncrypted) Decrypt(c CipherFunction, key []byte) (io.Read
 	if se.MDC {
 		// MDC packets have an embedded hash that we need to check.
 		h := sha1.New()
-		h.Write(se.prefix)
+		_, _ = h.Write(se.prefix)
 		return &seMDCReader{in: plaintext, h: h}, nil
 	}
 
@@ -154,7 +154,7 @@ func (ser *seMDCReader) Read(buf []byte) (n int, err error) {
 	if len(buf) <= mdcTrailerSize {
 		n, err = readFull(ser.in, ser.scratch[:len(buf)])
 		copy(buf, ser.trailer[:n])
-		ser.h.Write(buf[:n])
+		_, _ = ser.h.Write(buf[:n])
 		copy(ser.trailer[:], ser.trailer[n:])
 		copy(ser.trailer[mdcTrailerSize-n:], ser.scratch[:])
 		if n < len(buf) {
@@ -166,7 +166,7 @@ func (ser *seMDCReader) Read(buf []byte) (n int, err error) {
 
 	n, err = ser.in.Read(buf[mdcTrailerSize:])
 	copy(buf, ser.trailer[:])
-	ser.h.Write(buf[:n])
+	_, _ = ser.h.Write(buf[:n])
 	copy(ser.trailer[:], buf[n:])
 
 	if err == io.EOF {
@@ -198,7 +198,7 @@ func (ser *seMDCReader) Close() error {
 	if ser.trailer[0] != mdcPacketTagByte || ser.trailer[1] != sha1.Size {
 		return errors.SignatureError("MDC packet not found")
 	}
-	ser.h.Write(ser.trailer[:2])
+	_, _ = ser.h.Write(ser.trailer[:2])
 
 	final := ser.h.Sum(nil)
 	if subtle.ConstantTimeCompare(final, ser.trailer[2:]) != 1 {
@@ -216,7 +216,7 @@ type seMDCWriter struct {
 }
 
 func (w *seMDCWriter) Write(buf []byte) (n int, err error) {
-	w.h.Write(buf)
+	_, _ = w.h.Write(buf)
 	return w.w.Write(buf)
 }
 
@@ -225,7 +225,7 @@ func (w *seMDCWriter) Close() (err error) {
 
 	buf[0] = mdcPacketTagByte
 	buf[1] = sha1.Size
-	w.h.Write(buf[:2])
+	_, _ = w.h.Write(buf[:2])
 	digest := w.h.Sum(nil)
 	copy(buf[2:], digest)
 
@@ -283,8 +283,8 @@ func SerializeSymmetricallyEncrypted(w io.Writer, c CipherFunction, key []byte, 
 	plaintext := cipher.StreamWriter{S: s, W: ciphertext}
 
 	h := sha1.New()
-	h.Write(iv)
-	h.Write(iv[blockSize-2:])
+	_, _ = h.Write(iv)
+	_, _ = h.Write(iv[blockSize-2:])
 	contents = &seMDCWriter{w: plaintext, h: h}
 	return
 }

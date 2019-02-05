@@ -556,6 +556,10 @@ func (pm *PGPManager) GenerateTestKey() (string, error) {
 
 	err = pgpPrivKey.Encrypt([]byte("1234"))
 
+	if err != nil {
+		return "", err
+	}
+
 	e := remote_signer.CreateEntityFromKeys("", "", "", 0, pgpPubKey, pgpPrivKey)
 
 	serializedEntity := bytes.NewBuffer(nil)
