@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/quan-to/remote-signer/QuantoError"
@@ -131,4 +132,102 @@ func TestKREAddPrivateKey(t *testing.T) {
 	key, err := gpg.GenerateTestKey()
 	errorDie(err, t)
 
+	// Default Test Key Password is 1234
+
+	// region Test Add Private Key
+	payload := models.KeyRingAddPrivateKeyData{
+		EncryptedPrivateKey: key,
+		SaveToDisk:          true,
+		Password:            "1234",
+	}
+
+	body, _ := json.Marshal(payload)
+
+	r := bytes.NewReader(body)
+
+	req, err := http.NewRequest("POST", "/keyRing/addPrivateKey", r)
+
+	errorDie(err, t)
+
+	res := executeRequest(req)
+
+	d, err := ioutil.ReadAll(res.Body)
+
+	if res.Code != 200 {
+		var errObj QuantoError.ErrorObject
+		err := json.Unmarshal(d, &errObj)
+		fmt.Println(errObj)
+		errorDie(err, t)
+		errorDie(fmt.Errorf(errObj.Message), t)
+	}
+
+	if string(d) != "OK" {
+		errorDie(fmt.Errorf("expected OK got %s", string(d)), t)
+	}
+	// endregion
+	// region Test Add Private Key Invalid Password
+	payload.Password = "HUEBR"
+
+	body, _ = json.Marshal(payload)
+
+	r = bytes.NewReader(body)
+
+	req, err = http.NewRequest("POST", "/keyRing/addPrivateKey", r)
+
+	errorDie(err, t)
+
+	res = executeRequest(req)
+
+	errObj, err := ReadErrorObject(res.Body)
+
+	errorDie(err, t)
+
+	if errObj.ErrorCode != QuantoError.InvalidFieldData {
+		errorDie(fmt.Errorf("expected error code to be %s got %s", QuantoError.InvalidFieldData, errObj.ErrorCode), t)
+	}
+	// endregion
+	// region Test Add Public Key as private
+	payload.Password = ""
+	payload.EncryptedPrivateKey, _ = gpg.GetPublicKeyAscii(testKeyFingerprint)
+
+	body, _ = json.Marshal(payload)
+
+	r = bytes.NewReader(body)
+
+	req, err = http.NewRequest("POST", "/keyRing/addPrivateKey", r)
+
+	errorDie(err, t)
+
+	res = executeRequest(req)
+
+	errObj, err = ReadErrorObject(res.Body)
+
+	errorDie(err, t)
+
+	if errObj.ErrorCode != QuantoError.NotFound {
+		errorDie(fmt.Errorf("expected error code to be %s got %s", QuantoError.NotFound, errObj.ErrorCode), t)
+	}
+	// endregion
+	// region Test Add Invalid ASCII
+	payload.Password = ""
+	payload.EncryptedPrivateKey = "uaheirohaih41oi23uh  ,//;;1 ééé"
+
+	body, _ = json.Marshal(payload)
+
+	r = bytes.NewReader(body)
+
+	req, err = http.NewRequest("POST", "/keyRing/addPrivateKey", r)
+
+	errorDie(err, t)
+
+	res = executeRequest(req)
+
+	errObj, err = ReadErrorObject(res.Body)
+
+	errorDie(err, t)
+
+	if errObj.ErrorCode != QuantoError.InvalidFieldData {
+		errorDie(fmt.Errorf("expected error code to be %s got %s", QuantoError.InvalidFieldData, errObj.ErrorCode), t)
+	}
+	// endregion
 }

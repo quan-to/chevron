@@ -21,7 +21,7 @@ func TestPKSGetKey(t *testing.T) {
 		t.FailNow()
 	}
 
-	gpgKey := models.AsciiArmored2GPGKey(string(z))
+	gpgKey, _ := models.AsciiArmored2GPGKey(string(z))
 
 	_, _, err = models.AddGPGKey(c, gpgKey)
 	if err != nil {
@@ -66,9 +66,10 @@ func TestPKSSearchByName(t *testing.T) {
 
 	// Test Panics
 	remote_signer.EnableRethinkSKS = false
-	assertPanic(t, func() {
-		_ = PKSSearchByName("", 0, 1)
-	}, "SearchByName without RethinkSKS Should panic!")
+	_, err := PKSSearchByName("", 0, 1)
+	if err == nil {
+		t.Fatalf("Search should fail as not implemented for rethinkdb disabled!")
+	}
 }
 
 func TestPKSSearchByFingerPrint(t *testing.T) {
@@ -77,9 +78,10 @@ func TestPKSSearchByFingerPrint(t *testing.T) {
 
 	// Test Panics
 	remote_signer.EnableRethinkSKS = false
-	assertPanic(t, func() {
-		_ = PKSSearchByFingerPrint("", 0, 1)
-	}, "SearchByFingerPrint without RethinkSKS Should panic!")
+	_, err := PKSSearchByFingerPrint("", 0, 1)
+	if err == nil {
+		t.Fatalf("Search should fail as not implemented for rethinkdb disabled!")
+	}
 }
 
 func TestPKSSearchByEmail(t *testing.T) {
@@ -88,18 +90,19 @@ func TestPKSSearchByEmail(t *testing.T) {
 
 	// Test Panics
 	remote_signer.EnableRethinkSKS = false
-	assertPanic(t, func() {
-		_ = PKSSearchByEmail("", 0, 1)
-	}, "SearchByEmail without RethinkSKS Should panic!")
+	_, err := PKSSearchByEmail("", 0, 1)
+	if err == nil {
+		t.Fatalf("Search should fail as not implemented for rethinkdb disabled!")
+	}
 }
 
 func TestPKSSearch(t *testing.T) {
 	// TODO: Implement method and test
-	// For now, should always panic
-
-	assertPanic(t, func() {
-		_ = PKSSearch("", 0, 1)
-	}, "Search should always panic (NOT IMPLEMENTED)")
+	remote_signer.EnableRethinkSKS = false
+	_, err := PKSSearch("", 0, 1)
+	if err == nil {
+		t.Fatalf("Search should fail as not implemented for rethinkdb disabled!")
+	}
 }
 
 func TestPKSAdd(t *testing.T) {

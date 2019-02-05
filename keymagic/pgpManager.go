@@ -550,6 +550,8 @@ func (pm *PGPManager) GenerateTestKey() (string, error) {
 	pgpPubKey := packet.NewRSAPublicKey(cTimestamp, &privateKey.PublicKey)
 	pgpPrivKey := packet.NewRSAPrivateKey(cTimestamp, privateKey)
 
+	err = pgpPrivKey.Encrypt([]byte("1234"))
+
 	e := remote_signer.CreateEntityFromKeys("", "", "", 0, pgpPubKey, pgpPrivKey)
 
 	serializedEntity := bytes.NewBuffer(nil)

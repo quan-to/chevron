@@ -127,12 +127,7 @@ func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err, n := kre.gpg.LoadKey(data.EncryptedPrivateKey)
-
-	if err != nil {
-		InvalidFieldData("EncryptedPrivateKey", "Invalid key provided. Check if its in ASCII Armored Format", w, r, kreLog)
-		return
-	}
+	_, n := kre.gpg.LoadKey(data.EncryptedPrivateKey) // Error never happens here due GetFingerPrintFromKey
 
 	if n == 0 {
 		NotFound("EncryptedPrivateKey", "No private keys found at specified payload", w, r, kreLog)

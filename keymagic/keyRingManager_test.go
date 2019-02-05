@@ -154,7 +154,7 @@ func TestGetKeyExternal(t *testing.T) {
 		t.FailNow()
 	}
 
-	gpgKey := models.AsciiArmored2GPGKey(string(z))
+	gpgKey, _ := models.AsciiArmored2GPGKey(string(z))
 
 	_, _, err = models.AddGPGKey(c, gpgKey)
 	if err != nil {
