@@ -108,6 +108,7 @@ func TestPKSSearch(t *testing.T) {
 func TestPKSAdd(t *testing.T) {
 	remote_signer.PushVariables()
 	defer remote_signer.PopVariables()
+	remote_signer.EnableRethinkSKS = true
 	// Test Internal
 	z, err := ioutil.ReadFile("../tests/testkey_privateTestKey.gpg")
 	if err != nil {

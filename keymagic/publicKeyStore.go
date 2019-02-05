@@ -89,7 +89,11 @@ func PKSAdd(pubKey string) string {
 		return "OK"
 	}
 
-	res, _ := PutSKSKey(pubKey)
+	res, err := PutSKSKey(pubKey)
+
+	if err != nil {
+		pksLog.Debug("PKSAdd Error: %s", err)
+	}
 
 	if res {
 		return "OK"
