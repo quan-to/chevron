@@ -16,8 +16,8 @@ import (
 	"github.com/quan-to/remote-signer/keyBackend"
 	"github.com/quan-to/remote-signer/models"
 	"github.com/quan-to/remote-signer/openpgp"
-	"golang.org/x/crypto/openpgp/armor"
-	"golang.org/x/crypto/openpgp/packet"
+	"github.com/quan-to/remote-signer/openpgp/armor"
+	"github.com/quan-to/remote-signer/openpgp/packet"
 	"io"
 	"io/ioutil"
 	"path"
@@ -598,6 +598,12 @@ func (pm *PGPManager) GeneratePGPKey(identifier, password string, numBits int) (
 
 	pgpPubKey := packet.NewRSAPublicKey(cTimestamp, &privateKey.PublicKey)
 	pgpPrivKey := packet.NewRSAPrivateKey(cTimestamp, privateKey)
+
+	err = pgpPrivKey.Encrypt([]byte(password))
+
+	if err != nil {
+		return "", err
+	}
 
 	e := remote_signer.CreateEntityFromKeys(identifier, "", "", 0, pgpPubKey, pgpPrivKey)
 

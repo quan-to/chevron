@@ -4,7 +4,7 @@ import (
 	"crypto"
 	"github.com/quan-to/remote-signer/models"
 	"github.com/quan-to/remote-signer/openpgp"
-	"golang.org/x/crypto/openpgp/packet"
+	"github.com/quan-to/remote-signer/openpgp/packet"
 )
 
 type PGPInterface interface {
