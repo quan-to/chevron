@@ -36,6 +36,7 @@ var VaultUsername string
 var VaultPassword string
 var VaultNamespace string
 var VaultBackend string
+var VaultSkipDataType bool
 
 var varStack []map[string]interface{}
 
@@ -74,6 +75,7 @@ func PushVariables() {
 		"VaultPassword":             VaultPassword,
 		"VaultNamespace":            VaultNamespace,
 		"VaultBackend":              VaultBackend,
+		"VaultSkipDataType":         VaultSkipDataType,
 	}
 
 	varStack = append(varStack, insMap)
@@ -116,6 +118,7 @@ func PopVariables() {
 	VaultPassword = insMap["VaultPassword"].(string)
 	VaultNamespace = insMap["VaultNamespace"].(string)
 	VaultBackend = insMap["VaultBackend"].(string)
+	VaultSkipDataType = insMap["VaultSkipDataType"].(bool)
 }
 
 func Setup() {
@@ -196,6 +199,7 @@ func Setup() {
 	VaultPassword = os.Getenv("VAULT_PASSWORD")
 	VaultNamespace = os.Getenv("VAULT_NAMESPACE")
 	VaultBackend = os.Getenv("VAULT_BACKEND")
+	VaultSkipDataType = os.Getenv("VAULT_SKIP_DATA_TYPE") == "true"
 
 	// Set defaults if not defined
 	if SyslogServer == "" {

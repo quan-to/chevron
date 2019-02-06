@@ -75,6 +75,16 @@ func MakeSecretsManager() *SecretsManager {
 	sm.gpg = MakePGPManagerWithKRM(kb, MakeKeyRingManager())
 	sm.gpg.SetKeysBase64Encoded(remote_signer.MasterGPGKeyBase64Encoded)
 
+	err, n := sm.gpg.LoadKey(string(masterKeyBytes))
+
+	if err != nil {
+		smLog.Fatal("Error loading private master key: %s", err)
+	}
+
+	if n == 0 {
+		smLog.Fatal("The specified key doesnt have any private keys inside.")
+	}
+
 	sm.gpg.LoadKeys()
 
 	masterKeyPassBytes, err := ioutil.ReadFile(remote_signer.MasterGPGKeyPasswordPath)

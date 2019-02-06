@@ -69,6 +69,9 @@ func MakeVaultManager(prefix string) *VaultManager {
 }
 
 func baseVaultPath(dataType string) string {
+	if remote_signer.VaultSkipDataType {
+		return fmt.Sprintf("%s/%s", remote_signer.VaultBackend, remote_signer.VaultNamespace)
+	}
 	return fmt.Sprintf("%s/%s/%s", remote_signer.VaultBackend, dataType, remote_signer.VaultNamespace)
 }
 
