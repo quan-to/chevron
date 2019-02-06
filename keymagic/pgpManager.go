@@ -656,7 +656,9 @@ func (pm *PGPManager) GeneratePGPKey(identifier, password string, numBits int) (
 		return "", err
 	}
 
-	e := remote_signer.CreateEntityFromKeys(identifier, "", "", 0, pgpPubKey, pgpPrivKey)
+	identifier, comment, email := remote_signer.ExtractIdentifierFields(identifier)
+
+	e := remote_signer.CreateEntityFromKeys(identifier, comment, email, 0, pgpPubKey, pgpPrivKey)
 
 	serializedEntity := bytes.NewBuffer(nil)
 	err = e.SerializePrivate(serializedEntity, &packet.Config{

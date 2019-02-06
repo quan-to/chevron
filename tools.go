@@ -484,3 +484,22 @@ func CopyFiles(src, dst string) error {
 
 	return nil
 }
+
+var identifierRegex = regexp.MustCompile("(.*) <(.*)>")
+
+func ExtractIdentifierFields(identifier string) (name, email, comment string) {
+	// TODO: Find Comment
+
+	if identifierRegex.MatchString(identifier) {
+		res := identifierRegex.FindStringSubmatch(identifier)
+		if len(res) < 3 {
+			return identifier, "", ""
+		}
+		name = res[1]
+		email = res[2]
+
+		return name, email, ""
+	}
+
+	return identifier, "", ""
+}
