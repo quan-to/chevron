@@ -66,7 +66,7 @@ func (d *Disk) SaveWithMetadata(key, data, metadata string) error {
 		return err
 	}
 
-	return ioutil.WriteFile(path.Join(d.folder, d.prefix+key+"-metadata"), []byte(metadata), 0600)
+	return ioutil.WriteFile(path.Join(d.folder, "metadata-"+d.prefix+key), []byte(metadata), 0600)
 }
 
 func (d *Disk) Read(key string) (data string, metadata string, err error) {
@@ -76,7 +76,7 @@ func (d *Disk) Read(key string) (data string, metadata string, err error) {
 		return "", "", err
 	}
 
-	mdata, err := ioutil.ReadFile(path.Join(d.folder, d.prefix+key+"-metadata"))
+	mdata, err := ioutil.ReadFile(path.Join(d.folder, "metadata-"+d.prefix+key))
 	if err != nil {
 		return string(sdata), "", nil
 	}

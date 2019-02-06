@@ -60,14 +60,6 @@ func TestVaultManager_List(t *testing.T) {
 	if !found {
 		t.Errorf("Expected to find __list__ in entries.")
 	}
-	remote_signer.PushVariables()
-	// Test error cases
-	remote_signer.VaultNamespace = "huebr__123123123123"
-	_, err = vm.List()
-	if err == nil {
-		t.Errorf("Expected error with unknown namespace")
-	}
-	remote_signer.PopVariables()
 }
 
 func TestVaultManager_Read(t *testing.T) {
