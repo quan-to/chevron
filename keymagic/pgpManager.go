@@ -268,6 +268,29 @@ func (pm *PGPManager) UnlockKey(fp, password string) error {
 	return pm.unlockKey(fp, password)
 }
 
+func (pm *PGPManager) LoadKeyFromKB(fingerPrint string) error {
+	pgpLog.Info("Loading key %s", fingerPrint)
+	keyData, m, err := pm.kbkend.Read(fingerPrint)
+	if err != nil {
+		return err
+	}
+
+	if pm.KeysBase64Encoded {
+		b, err := base64.StdEncoding.DecodeString(keyData)
+		if err != nil {
+			return err
+		}
+		keyData = string(b)
+	}
+
+	err, _ = pm.LoadKeyWithMetadata(keyData, m)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (pm *PGPManager) GetLoadedPrivateKeys() []models.KeyInfo {
 	keyInfos := make([]models.KeyInfo, 0)
 
@@ -330,6 +353,16 @@ func (pm *PGPManager) SignData(fingerPrint string, data []byte, hashAlgorithm cr
 	fingerPrint = pm.sanitizeFingerprint(fingerPrint)
 	pm.Lock()
 	pk := pm.decryptedPrivateKeys[fingerPrint]
+
+	if pk == nil {
+		pgpLog.Warn("Key %s not loaded. Trying to load from keybackend", fingerPrint)
+		err := pm.LoadKeyFromKB(fingerPrint)
+		if err != nil {
+			return "", errors.New(fmt.Sprintf("key %s is not decrypt or not loaded", fingerPrint))
+		}
+
+		pk = pm.decryptedPrivateKeys[fingerPrint]
+	}
 
 	if pk == nil {
 		pm.Unlock()
@@ -753,6 +786,8 @@ func (pm *PGPManager) Decrypt(data string, dataOnly bool) (*models.GPGDecryptedD
 	var decv *packet.PrivateKey
 	var ent openpgp.Entity
 	var subent *openpgp.Entity
+
+	pm.LoadKeys()
 
 	pm.Lock()
 	for _, v := range fps {
