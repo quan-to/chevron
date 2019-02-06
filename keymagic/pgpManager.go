@@ -355,12 +355,13 @@ func (pm *PGPManager) SignData(fingerPrint string, data []byte, hashAlgorithm cr
 	pk := pm.decryptedPrivateKeys[fingerPrint]
 
 	if pk == nil {
+		pm.Unlock()
 		pgpLog.Warn("Key %s not loaded. Trying to load from keybackend", fingerPrint)
 		err := pm.LoadKeyFromKB(fingerPrint)
 		if err != nil {
 			return "", errors.New(fmt.Sprintf("key %s is not decrypt or not loaded", fingerPrint))
 		}
-
+		pm.Lock()
 		pk = pm.decryptedPrivateKeys[fingerPrint]
 	}
 

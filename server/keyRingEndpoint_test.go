@@ -166,9 +166,11 @@ func TestKREAddPrivateKey(t *testing.T) {
 		errorDie(fmt.Errorf(errObj.Message), t)
 	}
 
-	if string(d) != "OK" {
-		errorDie(fmt.Errorf("expected OK got %s", string(d)), t)
-	}
+	var retData models.GPGAddPrivateKeyReturn
+
+	err = json.Unmarshal(d, &retData)
+	errorDie(err, t)
+
 	// endregion
 	// region Test Add Private Key Invalid Password
 	payload.Password = "HUEBR"
