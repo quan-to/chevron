@@ -159,8 +159,14 @@ func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request
 		}
 	}
 
+	ret := models.GPGAddPrivateKeyReturn{
+		FingerPrint: fp,
+	}
+
+	d, _ := json.Marshal(ret)
+
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	n, _ = w.Write([]byte("OK"))
+	n, _ = w.Write(d)
 	LogExit(geLog, r, 200, n)
 }
