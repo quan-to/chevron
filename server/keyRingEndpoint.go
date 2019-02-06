@@ -161,6 +161,7 @@ func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request
 
 	ret := models.GPGAddPrivateKeyReturn{
 		FingerPrint: fp,
+		PublicKey:   pubKey,
 	}
 
 	d, _ := json.Marshal(ret)
