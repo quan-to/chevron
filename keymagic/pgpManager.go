@@ -658,6 +658,10 @@ func (pm *PGPManager) GeneratePGPKey(identifier, password string, numBits int) (
 
 	identifier, comment, email := remote_signer.ExtractIdentifierFields(identifier)
 
+	if packet.HasInvalidCharacters(identifier) || packet.HasInvalidCharacters(comment) || packet.HasInvalidCharacters(email) {
+		return "", fmt.Errorf("the identifier has invalid characters '(', ')', '<', '>'. If you're trying to use the full identifier format please check if its in the right format Name <email>")
+	}
+
 	e := remote_signer.CreateEntityFromKeys(identifier, comment, email, 0, pgpPubKey, pgpPrivKey)
 
 	serializedEntity := bytes.NewBuffer(nil)

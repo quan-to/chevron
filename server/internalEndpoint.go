@@ -60,7 +60,7 @@ func (ie *InternalEndpoint) getUnlockPasswords(w http.ResponseWriter, r *http.Re
 	bodyData, err := json.Marshal(passwords)
 
 	if err != nil {
-		InternalServerError("Error serializing data", err, w, r, intLog)
+		InternalServerError("Error serializing data", err.Error(), w, r, intLog)
 		return
 	}
 

@@ -307,7 +307,7 @@ func (ge *GPGEndpoint) generateKey(w http.ResponseWriter, r *http.Request) {
 	key, err := ge.gpg.GeneratePGPKey(data.Identifier, data.Password, data.Bits)
 
 	if err != nil {
-		InternalServerError("There was an error generating your key. Please try again.", err, w, r, geLog)
+		InternalServerError("There was an error generating your key. Please try again.", err.Error(), w, r, geLog)
 		return
 	}
 

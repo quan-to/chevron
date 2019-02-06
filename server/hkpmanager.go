@@ -79,7 +79,7 @@ func hkpLookup(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		InternalServerError("Internal Server Error", err, w, r, hkpLog)
+		InternalServerError("Internal Server Error", err.Error(), w, r, hkpLog)
 		return
 	}
 
