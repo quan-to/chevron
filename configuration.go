@@ -29,13 +29,13 @@ var IgnoreKubernetesCA bool
 var VaultStorage bool
 var VaultAddress string
 var VaultRootToken string
-var VaultPathPrefix string
 var ReadonlyKeyPath bool
 var VaultSkipVerify bool
 var VaultUseUserpass bool
 var VaultUsername string
 var VaultPassword string
 var VaultNamespace string
+var VaultBackend string
 
 var varStack []map[string]interface{}
 
@@ -67,13 +67,13 @@ func PushVariables() {
 		"VaultAddress":              VaultAddress,
 		"VaultRootToken":            VaultRootToken,
 		"VaultStorage":              VaultStorage,
-		"VaultPathPrefix":           VaultPathPrefix,
 		"ReadonlyKeyPath":           ReadonlyKeyPath,
 		"VaultSkipVerify":           VaultSkipVerify,
 		"VaultUseUserpass":          VaultUseUserpass,
 		"VaultUsername":             VaultUsername,
 		"VaultPassword":             VaultPassword,
 		"VaultNamespace":            VaultNamespace,
+		"VaultBackend":              VaultBackend,
 	}
 
 	varStack = append(varStack, insMap)
@@ -109,13 +109,13 @@ func PopVariables() {
 	VaultAddress = insMap["VaultAddress"].(string)
 	VaultRootToken = insMap["VaultRootToken"].(string)
 	VaultStorage = insMap["VaultStorage"].(bool)
-	VaultPathPrefix = insMap["VaultPathPrefix"].(string)
 	ReadonlyKeyPath = insMap["ReadonlyKeyPath"].(bool)
 	VaultSkipVerify = insMap["VaultSkipVerify"].(bool)
 	VaultUseUserpass = insMap["VaultUseUserpass"].(bool)
 	VaultUsername = insMap["VaultUsername"].(string)
 	VaultPassword = insMap["VaultPassword"].(string)
 	VaultNamespace = insMap["VaultNamespace"].(string)
+	VaultBackend = insMap["VaultBackend"].(string)
 }
 
 func Setup() {
@@ -189,13 +189,13 @@ func Setup() {
 	VaultStorage = strings.ToLower(os.Getenv("VAULT_STORAGE")) == "true"
 	VaultAddress = os.Getenv("VAULT_ADDRESS")
 	VaultRootToken = os.Getenv("VAULT_ROOT_TOKEN")
-	VaultPathPrefix = os.Getenv("VAULT_PATH_PREFIX")
 	ReadonlyKeyPath = os.Getenv("READONLY_KEYPATH") == "true"
 	VaultSkipVerify = os.Getenv("VAULT_SKIP_VERIFY") == "true"
 	VaultUseUserpass = os.Getenv("VAULT_USE_USERPASS") == "true"
 	VaultUsername = os.Getenv("VAULT_USERNAME")
 	VaultPassword = os.Getenv("VAULT_PASSWORD")
 	VaultNamespace = os.Getenv("VAULT_NAMESPACE")
+	VaultBackend = os.Getenv("VAULT_BACKEND")
 
 	// Set defaults if not defined
 	if SyslogServer == "" {
@@ -243,7 +243,11 @@ func Setup() {
 	}
 
 	if VaultNamespace == "" {
-		VaultNamespace = "secret"
+		VaultNamespace = "remote-signer"
+	}
+
+	if VaultBackend == "" {
+		VaultBackend = "secret"
 	}
 
 	// Other stuff

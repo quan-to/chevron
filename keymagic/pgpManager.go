@@ -315,7 +315,15 @@ func (pm *PGPManager) SavePrivateKey(fingerPrint, armoredData string, password i
 		metadataJson = string(mj)
 	}
 
-	return pm.kbkend.SaveWithMetadata(fingerPrint, string(data), metadataJson)
+	rd, rm, err := pm.kbkend.Read(fingerPrint)
+
+	if rd == "" || rm == "" || rm != metadataJson || string(data) != rd || err != nil {
+		return pm.kbkend.SaveWithMetadata(fingerPrint, string(data), metadataJson)
+	}
+
+	pgpLog.Warn("Key %s already in KeyBackend. Skipping add.", fingerPrint)
+
+	return nil
 }
 
 func (pm *PGPManager) SignData(fingerPrint string, data []byte, hashAlgorithm crypto.Hash) (string, error) {

@@ -248,8 +248,9 @@ These are the Environment Variables that you can set to manage the webserver:
 *   `VAULT_ADDRESS` => Hashicorp Vault URL
 *   `VAULT_SKIP_VERIFY` => Hashicorp Vault Skip Verify SSL Certs on Connection
 *   `VAULT_ROOT_TOKEN` => Hashicorp Vault Root Token
-*   `VAULT_PATH_PREFIX` => Hashicorp Vault Path Prefix (prefixes for all stored keys)
+*   `VAULT_BACKEND` => Hashicorp Vault Backend (for example `secret`)
 *   `VAULT_STORAGE` => If a Hashicorp Vault should be used to store private keys instead of the disk
+*   `VAULT_NAMESPACE` => if a Hashicorp Vault Namespace to use (appended to backend, for example if namespace is `remote-signer` the keys are stored under `secret/remote-signer`)
 *   `HTTP_PORT` => HTTP Port that Remote Signer will run
 *   `READONLY_KEYPATH` => If the keypath is readonly. If `true` then it will create a temporary folder in `/tmp` and copy all keys to there so it can work over it. 
 

@@ -9,9 +9,10 @@ import (
 	"net/http"
 )
 
-var slog = SLog.Scope("Vault")
+const VaultData = "data"
+const VaultMetadata = "metadata"
 
-const qrsVaultPrefix = "qrs"
+var slog = SLog.Scope("Vault")
 
 type VaultManager struct {
 	client *api.Client
@@ -67,12 +68,17 @@ func MakeVaultManager(prefix string) *VaultManager {
 	}
 }
 
-func vaultPath(key string) string {
-	return fmt.Sprintf("%s/data/%s", remote_signer.VaultNamespace, getVaultFullPrefix(key))
+func baseVaultPath(dataType string) string {
+	return fmt.Sprintf("%s/%s/%s", remote_signer.VaultBackend, dataType, remote_signer.VaultNamespace)
+}
+
+func (vm *VaultManager) vaultPath(dataType, key string) string {
+	return fmt.Sprintf("%s/%s", baseVaultPath(dataType), key)
 }
 
 func (vm *VaultManager) putSecret(key string, data map[string]string) error {
-	_, err := vm.client.Logical().Write(vaultPath(key), map[string]interface{}{
+	vm.log.Debug("Saving %s to %s", key, vm.vaultPath(VaultData, key))
+	_, err := vm.client.Logical().Write(vm.vaultPath(VaultData, key), map[string]interface{}{
 		"data": data,
 	})
 
@@ -80,7 +86,8 @@ func (vm *VaultManager) putSecret(key string, data map[string]string) error {
 }
 
 func (vm *VaultManager) getSecret(key string) (string, string, error) {
-	s, err := vm.client.Logical().Read(vaultPath(key))
+	//vm.log.Debug("getSecret(%s)", key)
+	s, err := vm.client.Logical().Read(vm.vaultPath(VaultData, key))
 	if err != nil {
 		return "", "", err
 	}
@@ -104,10 +111,6 @@ func (vm *VaultManager) getSecret(key string) (string, string, error) {
 	return d, m, nil
 }
 
-func getVaultFullPrefix(key string) string {
-	return remote_signer.VaultPathPrefix + qrsVaultPrefix + "_" + key
-}
-
 func (vm *VaultManager) Save(key, data string) error {
 	vm.log.Debug("Saving %s", key)
 	return vm.putSecret(vm.prefix+key, map[string]string{
@@ -116,7 +119,6 @@ func (vm *VaultManager) Save(key, data string) error {
 }
 
 func (vm *VaultManager) SaveWithMetadata(key, data, metadata string) error {
-	vm.log.Debug("Saving %s", key)
 	return vm.putSecret(vm.prefix+key, map[string]string{
 		"data":     data,
 		"metadata": metadata,
@@ -134,8 +136,8 @@ func (vm *VaultManager) Read(key string) (data string, metadata string, err erro
 }
 
 func (vm *VaultManager) List() ([]string, error) {
-	vm.log.Debug("Listing keys")
-	s, err := vm.client.Logical().List(fmt.Sprintf("%s/metadata", remote_signer.VaultNamespace))
+	vm.log.Debug("Listing keys on %s", baseVaultPath(VaultMetadata))
+	s, err := vm.client.Logical().List(baseVaultPath(VaultMetadata))
 	if err != nil {
 		return nil, err
 	}
@@ -146,14 +148,15 @@ func (vm *VaultManager) List() ([]string, error) {
 
 	keys := make([]string, 0)
 	data := s.Data["keys"].([]interface{})
-	basePrefix := getVaultFullPrefix(vm.prefix)
 
 	for _, v := range data {
 		v2 := v.(string)
-		if len(v2) > len(basePrefix) && v2[:len(basePrefix)] == basePrefix {
-			keys = append(keys, v2[len(basePrefix):])
+		if len(v2) > len(vm.prefix) && v2[:len(vm.prefix)] == vm.prefix {
+			keys = append(keys, v2[len(vm.prefix):])
 		}
 	}
+
+	vm.log.Debug("Found %d keys", len(keys))
 
 	return keys, nil
 }
@@ -163,5 +166,5 @@ func (vm *VaultManager) Name() string {
 }
 
 func (vm *VaultManager) Path() string {
-	return getVaultFullPrefix(vm.prefix + "*")
+	return vm.vaultPath(VaultData, vm.prefix+"*")
 }

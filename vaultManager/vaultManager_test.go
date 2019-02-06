@@ -94,8 +94,8 @@ func TestVaultManager_Read(t *testing.T) {
 }
 
 func TestVaultManager_Path(t *testing.T) {
-	if vm.Path() != getVaultFullPrefix(vm.prefix+"*") {
-		t.Errorf("Expected %s got %s", getVaultFullPrefix(vm.prefix+"*"), vm.Path())
+	if vm.Path() != vm.vaultPath(VaultData, vm.prefix+"*") {
+		t.Errorf("Expected %s got %s", vm.vaultPath(VaultData, vm.prefix+"*"), vm.Path())
 	}
 }
 

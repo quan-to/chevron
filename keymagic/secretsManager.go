@@ -72,12 +72,6 @@ func MakeSecretsManager() *SecretsManager {
 
 	sm.masterKeyFingerPrint = masterKeyFp
 
-	err = kb.Save(masterKeyFp, string(originalKeyBytes))
-
-	if err != nil {
-		smLog.Fatal("Error saving master key to default backend: %s", err)
-	}
-
 	sm.gpg = MakePGPManagerWithKRM(kb, MakeKeyRingManager())
 	sm.gpg.SetKeysBase64Encoded(remote_signer.MasterGPGKeyBase64Encoded)
 
@@ -93,6 +87,12 @@ func MakeSecretsManager() *SecretsManager {
 
 	if err != nil {
 		smLog.Fatal("Error unlocking master key: %s", err)
+	}
+
+	err = sm.gpg.SavePrivateKey(masterKeyFp, string(originalKeyBytes), string(masterKeyPassBytes))
+
+	if err != nil {
+		smLog.Fatal("Error saving master key to default backend: %s", err)
 	}
 
 	return sm
