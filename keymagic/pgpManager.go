@@ -237,6 +237,11 @@ func (pm *PGPManager) unlockKey(fp, password string) error {
 		return err
 	}
 
+	if remote_signer.AgentKeyFingerPrint == "" { // set default fingerprint
+		pgpLog.Warn("No Agent Key FingerPrint specified. Using %s", fp)
+		remote_signer.AgentKeyFingerPrint = fp
+	}
+
 	if pm.decryptedPrivateKeys[fp] != nil {
 		pgpLog.Info("Key %s already unlocked.", fp)
 		return nil

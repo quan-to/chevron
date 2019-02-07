@@ -15,6 +15,8 @@ func GenRemoteSignerServerMux(slog *SLog.Instance, sm etc.SMInterface, gpg etc.P
 	te := MakeTestsEndpoint()
 	kre := MakeKeyRingEndpoint(sm, gpg)
 	sks := MakeSKSEndpoint(sm, gpg)
+	tm := MakeMemoryTokenManager()
+	agent := MakeAgentProxy(gpg, tm)
 
 	r := mux.NewRouter()
 	// Add for /
@@ -32,6 +34,9 @@ func GenRemoteSignerServerMux(slog *SLog.Instance, sm etc.SMInterface, gpg etc.P
 	te.AttachHandlers(r.PathPrefix("/remoteSigner/tests").Subrouter())
 	kre.AttachHandlers(r.PathPrefix("/remoteSigner/keyRing").Subrouter())
 	sks.AttachHandlers(r.PathPrefix("/remoteSigner/sks").Subrouter())
+
+	// Agent
+	agent.AddHandlers(r.PathPrefix("/agent").Subrouter())
 
 	// Catch All for unhandled endpoints
 	r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

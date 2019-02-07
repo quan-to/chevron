@@ -37,6 +37,10 @@ var VaultPassword string
 var VaultNamespace string
 var VaultBackend string
 var VaultSkipDataType bool
+var AgentTargetURL string
+var AgentTokenExpiration int
+var AgentKeyFingerPrint string
+var AgentBypassLogin bool
 
 var varStack []map[string]interface{}
 
@@ -76,6 +80,10 @@ func PushVariables() {
 		"VaultNamespace":            VaultNamespace,
 		"VaultBackend":              VaultBackend,
 		"VaultSkipDataType":         VaultSkipDataType,
+		"AgentTargetURL":            AgentTargetURL,
+		"AgentTokenExpiration":      AgentTokenExpiration,
+		"AgentKeyFingerPrint":       AgentKeyFingerPrint,
+		"AgentBypassLogin":          AgentBypassLogin,
 	}
 
 	varStack = append(varStack, insMap)
@@ -119,6 +127,10 @@ func PopVariables() {
 	VaultNamespace = insMap["VaultNamespace"].(string)
 	VaultBackend = insMap["VaultBackend"].(string)
 	VaultSkipDataType = insMap["VaultSkipDataType"].(bool)
+	AgentTargetURL = insMap["AgentTargetURL"].(string)
+	AgentTokenExpiration = insMap["AgentTokenExpiration"].(int)
+	AgentKeyFingerPrint = insMap["AgentKeyFingerPrint"].(string)
+	AgentBypassLogin = insMap["AgentBypassLogin"].(bool)
 }
 
 func Setup() {
@@ -127,6 +139,7 @@ func Setup() {
 	HttpPort = -1
 	RethinkDBPort = -1
 	RethinkDBPoolSize = -1
+	AgentTokenExpiration = -1
 
 	// Load envvars
 	SyslogServer = os.Getenv("SYSLOG_IP")
@@ -200,6 +213,19 @@ func Setup() {
 	VaultNamespace = os.Getenv("VAULT_NAMESPACE")
 	VaultBackend = os.Getenv("VAULT_BACKEND")
 	VaultSkipDataType = os.Getenv("VAULT_SKIP_DATA_TYPE") == "true"
+	AgentTargetURL = os.Getenv("AGENT_TARGET_URL")
+	AgentKeyFingerPrint = os.Getenv("AGENT_KEY_FINGERPRINT")
+	AgentBypassLogin = os.Getenv("AGENT_BYPASS_LOGIN") == "true"
+
+	atke := os.Getenv("AGENT_TOKEN_EXPIRATION")
+
+	if atke != "" {
+		i, err := strconv.ParseInt(atke, 10, 32)
+		if err != nil {
+			SLog.Error("Error parsing AGENT_TOKEN_EXPIRATION: %s", err)
+		}
+		AgentTokenExpiration = int(i)
+	}
 
 	// Set defaults if not defined
 	if SyslogServer == "" {
@@ -252,6 +278,14 @@ func Setup() {
 
 	if VaultBackend == "" {
 		VaultBackend = "secret"
+	}
+
+	if AgentTargetURL == "" {
+		AgentTargetURL = "http://api.dev.contaquanto.net/all"
+	}
+
+	if AgentTokenExpiration == -1 {
+		AgentTokenExpiration = 3600
 	}
 
 	// Other stuff
