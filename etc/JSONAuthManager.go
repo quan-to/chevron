@@ -167,5 +167,7 @@ func (jam *JSONAuthManager) ChangePassword(username, password string) error {
 
 	jam.users[username] = user
 
+	jam.flushFile()
+
 	return nil
 }

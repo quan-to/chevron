@@ -47,8 +47,41 @@ func MakeAgentAdmin(tm etc.TokenManager, am etc.AuthManager) *AgentAdmin {
 	}
 }
 
+type graphIntercept struct {
+	originalHandler http.ResponseWriter
+	WrittenBytes    int
+	StatusCode      int
+}
+
+func (gi *graphIntercept) Header() http.Header {
+	return gi.originalHandler.Header()
+}
+
+func (gi *graphIntercept) Write(data []byte) (int, error) {
+	n, err := gi.originalHandler.Write(data)
+	gi.WrittenBytes += n
+	return n, err
+}
+
+func (gi *graphIntercept) WriteHeader(statusCode int) {
+	gi.StatusCode = statusCode
+	gi.originalHandler.WriteHeader(statusCode)
+}
+
 func (admin *AgentAdmin) handleGraphQL(w http.ResponseWriter, r *http.Request) {
-	admin.handler.ContextHandler(admin.ctx, w, r)
+	InitHTTPTimer(r)
+
+	defer func() {
+		if rec := recover(); rec != nil {
+			CatchAllError(rec, w, r, amLog)
+		}
+	}()
+
+	gi := graphIntercept{originalHandler: w, StatusCode: http.StatusOK}
+	ctx := context.WithValue(admin.ctx, agent.HTTPRequestKey, r)
+
+	admin.handler.ContextHandler(ctx, &gi, r)
+	LogExit(amLog, r, gi.StatusCode, gi.WrittenBytes)
 }
 
 func (admin *AgentAdmin) AddHandlers(r *mux.Router) {

@@ -6,11 +6,13 @@ import (
 	"github.com/quan-to/remote-signer/QuantoError"
 	"github.com/quan-to/remote-signer/etc"
 	mgql "github.com/quan-to/remote-signer/models/graphql"
+	"net/http"
 	"time"
 )
 
 const TokenManagerKey = "TokenManager"
 const AuthManagerKey = "AuthManager"
+const HTTPRequestKey = "HTTPRequest"
 
 var RootManagementQuery = graphql.NewObject(graphql.ObjectConfig{
 	Name: "ManagementQueries",
@@ -71,7 +73,7 @@ var RootManagementMutation = graphql.NewObject(graphql.ObjectConfig{
 			},
 		},
 		"ChangePassword": &graphql.Field{
-			Type: graphql.Boolean,
+			Type: graphql.String,
 			Args: graphql.FieldConfigArgument{
 				"password": &graphql.ArgumentConfig{
 					Type:        graphql.String,
@@ -79,8 +81,29 @@ var RootManagementMutation = graphql.NewObject(graphql.ObjectConfig{
 				},
 			},
 			Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
-				// TODO
-				return nil, nil
+				req := p.Context.Value(HTTPRequestKey).(*http.Request)
+				am := p.Context.Value(AuthManagerKey).(etc.AuthManager)
+				tm := p.Context.Value(TokenManagerKey).(etc.TokenManager)
+
+				token := req.Header.Get("proxyToken")
+
+				err := tm.Verify(token)
+				if err != nil {
+					e := QuantoError.New(QuantoError.InvalidFieldData, "proxyToken", "The specified proxyToken is either invalid or expired.", nil)
+					return "NOK", e.ToFormattedError()
+				}
+
+				password := p.Args["password"].(string)
+
+				user := tm.GetUserData(token)
+				err = am.ChangePassword(user.GetUsername(), password)
+
+				if err != nil {
+					e := QuantoError.New(QuantoError.InternalServerError, "server", "There was an error changing your password. Please try again.", nil)
+					return "NOK", e.ToFormattedError()
+				}
+
+				return "OK", nil
 			},
 		},
 	},
