@@ -105,7 +105,7 @@ func (ram *RethinkAuthManager) LoginAdd(username, password, fullname, fingerprin
 	encodedPassword := base64.StdEncoding.EncodeToString(pass)
 
 	_, err = models.AddUser(conn, &models.UserModel{
-		FingerPrint: fingerprint,
+		FingerPrint: fp,
 		Username:    username,
 		Password:    encodedPassword,
 		Fullname:    fullname,

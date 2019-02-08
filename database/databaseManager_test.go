@@ -8,6 +8,7 @@ import (
 	"gopkg.in/rethinkdb/rethinkdb-go.v5"
 	"os"
 	"testing"
+	"time"
 )
 
 func ResetDatabase() {
@@ -20,6 +21,7 @@ func ResetDatabase() {
 		_, _ = rethinkdb.DBDrop(remote_signer.DatabaseName).RunWrite(c)
 	}
 	WaitDatabaseDrop(remote_signer.DatabaseName)
+	time.Sleep(5 * time.Second)
 	dbLog.Info("Database reseted")
 }
 
@@ -50,6 +52,5 @@ func TestInitTable(t *testing.T) {
 	SLog.UnsetTestMode()
 	DbSetup()
 	ResetDatabase()
-	InitTables()
 	InitTables()
 }

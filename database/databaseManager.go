@@ -71,6 +71,7 @@ func InitTables() {
 			if err != nil {
 				dbLog.Fatal(err)
 			}
+			time.Sleep(5 * time.Second)
 		} else {
 			dbLog.Debug("Database %s already exists. Skipping...", remote_signer.DatabaseName)
 		}
@@ -102,6 +103,7 @@ func InitTables() {
 				_, _ = r.Table(v.TableName).Wait(r.WaitOpts{
 					Timeout: 0,
 				}).Run(conn)
+				time.Sleep(time.Millisecond * 500)
 			}
 
 			dbLog.Info("Checking Indexes for table %s", v.TableName)
@@ -123,12 +125,13 @@ func InitTables() {
 		}
 	}
 
-	time.Sleep(2 * time.Second)
+	time.Sleep(10 * time.Second)
 }
 
 func GetConnection() *r.Session {
 	if RthState.connection == nil {
 		DbSetup()
 	}
+	_ = RthState.connection.Reconnect()
 	return RthState.connection
 }
