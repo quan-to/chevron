@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/quan-to/remote-signer"
+	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/etc"
 	"sync"
 	"time"
 )
+
+var mtmLog = SLog.Scope("Memory-TM")
 
 type MemoryUser struct {
 	username    string
@@ -52,6 +55,7 @@ type MemoryTokenManager struct {
 }
 
 func MakeMemoryTokenManager() *MemoryTokenManager {
+	mtmLog.Info("Creating Memory Token Manager")
 	return &MemoryTokenManager{
 		lock:         sync.Mutex{},
 		storedTokens: map[string]*MemoryUser{},

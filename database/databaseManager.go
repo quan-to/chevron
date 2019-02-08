@@ -21,6 +21,8 @@ var dbLog = SLog.Scope("DatabaseManager")
 
 var tablesToInitialize = []models.TableInitStruct{
 	models.GPGKeyTableInit,
+	models.UserModelTableInit,
+	models.UserTokenTableInit,
 }
 
 func init() {

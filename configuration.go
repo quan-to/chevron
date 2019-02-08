@@ -42,6 +42,9 @@ var AgentTokenExpiration int
 var AgentKeyFingerPrint string
 var AgentBypassLogin bool
 
+var RethinkTokenManager bool
+var RethinkAuthManager bool
+
 var varStack []map[string]interface{}
 
 func PushVariables() {
@@ -84,6 +87,8 @@ func PushVariables() {
 		"AgentTokenExpiration":      AgentTokenExpiration,
 		"AgentKeyFingerPrint":       AgentKeyFingerPrint,
 		"AgentBypassLogin":          AgentBypassLogin,
+		"RethinkTokenManager":       RethinkTokenManager,
+		"RethinkAuthManager":        RethinkAuthManager,
 	}
 
 	varStack = append(varStack, insMap)
@@ -131,6 +136,8 @@ func PopVariables() {
 	AgentTokenExpiration = insMap["AgentTokenExpiration"].(int)
 	AgentKeyFingerPrint = insMap["AgentKeyFingerPrint"].(string)
 	AgentBypassLogin = insMap["AgentBypassLogin"].(bool)
+	RethinkTokenManager = insMap["RethinkTokenManager"].(bool)
+	RethinkAuthManager = insMap["RethinkAuthManager"].(bool)
 }
 
 func Setup() {
@@ -216,6 +223,12 @@ func Setup() {
 	AgentTargetURL = os.Getenv("AGENT_TARGET_URL")
 	AgentKeyFingerPrint = os.Getenv("AGENT_KEY_FINGERPRINT")
 	AgentBypassLogin = os.Getenv("AGENT_BYPASS_LOGIN") == "true"
+	RethinkTokenManager = os.Getenv("RETHINK_TOKEN_MANAGER") == "true"
+	RethinkAuthManager = os.Getenv("RETHINK_AUTH_MANAGER") == "true"
+
+	if (RethinkAuthManager || RethinkTokenManager) && !EnableRethinkSKS {
+		SLog.Fatal("Rethink Auth / Token Manager requires Rethink SKS")
+	}
 
 	atke := os.Getenv("AGENT_TOKEN_EXPIRATION")
 

@@ -30,6 +30,7 @@ type JSONAuthManager struct {
 }
 
 func MakeJSONAuthManager() *JSONAuthManager {
+	ramLog.Info("Creating JSON Auth Manager")
 	jam := JSONAuthManager{}
 	jam.loadFile()
 	return &jam

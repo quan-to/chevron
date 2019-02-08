@@ -16,8 +16,8 @@ func GenRemoteSignerServerMux(slog *SLog.Instance, sm etc.SMInterface, gpg etc.P
 	te := MakeTestsEndpoint()
 	kre := MakeKeyRingEndpoint(sm, gpg)
 	sks := MakeSKSEndpoint(sm, gpg)
-	tm := agent.MakeMemoryTokenManager()
-	am := agent.MakeJSONAuthManager()
+	tm := agent.MakeTokenManager()
+	am := agent.MakeAuthManager()
 	ap := MakeAgentProxy(gpg, tm)
 	agentAdmin := MakeAgentAdmin(tm, am)
 
