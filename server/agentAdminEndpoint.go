@@ -80,6 +80,19 @@ func (admin *AgentAdmin) handleGraphQL(w http.ResponseWriter, r *http.Request) {
 	gi := graphIntercept{originalHandler: w, StatusCode: http.StatusOK}
 	ctx := context.WithValue(admin.ctx, agent.HTTPRequestKey, r)
 
+	token := r.Header.Get("proxyToken")
+
+	if token != "" {
+		err := admin.tm.Verify(token)
+		if err != nil {
+			InvalidFieldData("proxyToken", "The specified proxyToken is either invalid or expired.", w, r, amLog)
+			return
+		}
+
+		user := admin.tm.GetUserData(token)
+		ctx = context.WithValue(ctx, agent.LoggedUserKey, user)
+	}
+
 	admin.handler.ContextHandler(ctx, &gi, r)
 	LogExit(amLog, r, gi.StatusCode, gi.WrittenBytes)
 }

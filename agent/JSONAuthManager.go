@@ -1,4 +1,4 @@
-package etc
+package agent
 
 import (
 	"encoding/base64"

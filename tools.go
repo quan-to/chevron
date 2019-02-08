@@ -16,6 +16,7 @@ import (
 	"github.com/quan-to/remote-signer/openpgp/packet"
 	"io"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"path"
 	"regexp"
@@ -511,4 +512,15 @@ func ContextWithValues(parent context.Context, values map[string]interface{}) co
 	}
 
 	return parent
+}
+
+const passwordBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+const defaultPasswordLength = 14
+
+func GeneratePassword() string {
+	b := make([]byte, defaultPasswordLength)
+	for i := range b {
+		b[i] = passwordBytes[rand.Int63()%int64(len(passwordBytes))]
+	}
+	return string(b)
 }

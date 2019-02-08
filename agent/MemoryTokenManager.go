@@ -1,4 +1,4 @@
-package server
+package agent
 
 import (
 	"fmt"
@@ -15,6 +15,7 @@ type MemoryUser struct {
 	token       string
 	createdAt   time.Time
 	fingerPrint string
+	expiration  time.Time
 }
 
 func (mu *MemoryUser) GetUsername() string {
@@ -41,16 +42,39 @@ func (mu *MemoryUser) GetFingerPrint() string {
 	return mu.fingerPrint
 }
 
+func (mu *MemoryUser) GetExpiration() time.Time {
+	return mu.expiration
+}
+
 type MemoryTokenManager struct {
-	storedTokens map[string]etc.UserData
+	storedTokens map[string]*MemoryUser
 	lock         sync.Mutex
 }
 
 func MakeMemoryTokenManager() *MemoryTokenManager {
 	return &MemoryTokenManager{
 		lock:         sync.Mutex{},
-		storedTokens: map[string]etc.UserData{},
+		storedTokens: map[string]*MemoryUser{},
 	}
+}
+
+func (mtm *MemoryTokenManager) AddUserWithExpiration(user etc.UserData, expiration int) string {
+	mtm.lock.Lock()
+	defer mtm.lock.Unlock()
+
+	tokenUuid, _ := uuid.NewRandom()
+	token := tokenUuid.String()
+
+	mtm.storedTokens[token] = &MemoryUser{
+		username:    user.GetUsername(),
+		token:       token,
+		createdAt:   user.GetCreatedAt(),
+		fingerPrint: user.GetFingerPrint(),
+		fullname:    user.GetFullName(),
+		expiration:  user.GetCreatedAt().Add(time.Duration(expiration) * time.Second),
+	}
+
+	return token
 }
 
 func (mtm *MemoryTokenManager) AddUser(user etc.UserData) string {
@@ -66,6 +90,7 @@ func (mtm *MemoryTokenManager) AddUser(user etc.UserData) string {
 		createdAt:   user.GetCreatedAt(),
 		fingerPrint: user.GetFingerPrint(),
 		fullname:    user.GetFullName(),
+		expiration:  user.GetCreatedAt().Add(time.Duration(remote_signer.AgentTokenExpiration) * time.Second),
 	}
 
 	return token
@@ -80,7 +105,7 @@ func (mtm *MemoryTokenManager) Verify(token string) error {
 		return fmt.Errorf("not found")
 	}
 
-	if time.Since(user.GetCreatedAt()) > time.Duration(remote_signer.AgentTokenExpiration)*time.Second {
+	if time.Now().After(user.GetExpiration()) {
 		delete(mtm.storedTokens, token)
 		return fmt.Errorf("expired")
 	}

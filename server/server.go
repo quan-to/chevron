@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/SLog"
+	"github.com/quan-to/remote-signer/agent"
 	"github.com/quan-to/remote-signer/etc"
 	"net/http"
 )
@@ -15,9 +16,9 @@ func GenRemoteSignerServerMux(slog *SLog.Instance, sm etc.SMInterface, gpg etc.P
 	te := MakeTestsEndpoint()
 	kre := MakeKeyRingEndpoint(sm, gpg)
 	sks := MakeSKSEndpoint(sm, gpg)
-	tm := MakeMemoryTokenManager()
-	am := etc.MakeJSONAuthManager()
-	agent := MakeAgentProxy(gpg, tm)
+	tm := agent.MakeMemoryTokenManager()
+	am := agent.MakeJSONAuthManager()
+	ap := MakeAgentProxy(gpg, tm)
 	agentAdmin := MakeAgentAdmin(tm, am)
 
 	r := mux.NewRouter()
@@ -38,7 +39,7 @@ func GenRemoteSignerServerMux(slog *SLog.Instance, sm etc.SMInterface, gpg etc.P
 	sks.AttachHandlers(r.PathPrefix("/remoteSigner/sks").Subrouter())
 
 	// Agent
-	agent.AddHandlers(r.PathPrefix("/agent").Subrouter())
+	ap.AddHandlers(r.PathPrefix("/agent").Subrouter())
 
 	// Agent Admin
 	agentAdmin.AddHandlers(r.PathPrefix("/agentAdmin").Subrouter())
