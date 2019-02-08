@@ -52,11 +52,8 @@ func TestMain(m *testing.M) {
 	SLog.UnsetTestMode()
 	etc.DbSetup()
 	ResetDatabase()
-	time.Sleep(10 * time.Second)
 	etc.InitTables()
 	SLog.SetTestMode()
-
-	time.Sleep(10 * time.Second) // Wait rethinkdb to settle
 
 	var kb keyBackend.Backend
 

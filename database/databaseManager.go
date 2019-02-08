@@ -58,6 +58,7 @@ var initLock = sync.Mutex{}
 
 func InitTables() {
 	if remote_signer.EnableRethinkSKS {
+		SLog.UnsetTestMode()
 		initLock.Lock()
 		defer initLock.Unlock()
 		dbLog.Info("Running InitTables")
@@ -74,39 +75,55 @@ func InitTables() {
 			dbLog.Debug("Database %s already exists. Skipping...", remote_signer.DatabaseName)
 		}
 
+		WaitDatabaseCreate(remote_signer.DatabaseName)
+
+		dbLog.Warn("Waiting for database %s to be ready", remote_signer.DatabaseName)
+		_ = r.DB(remote_signer.DatabaseName).Wait(r.WaitOpts{
+			Timeout: 0,
+		}).Exec(conn)
+
+		dbLog.Info("Database %s is ready", remote_signer.DatabaseName)
+
+		conn.Use(remote_signer.DatabaseName)
+
 		tables := GetTables()
-		needWait := false
+		numNodes := NumNodes()
+
 		for _, v := range tablesToInitialize {
 			if remote_signer.StringIndexOf(v.TableName, tables) == -1 {
 				dbLog.Info("Table %s does not exists. Creating...", v.TableName)
-				err := r.TableCreate(v.TableName).Exec(conn)
-				needWait = true
+				err := r.TableCreate(v.TableName, r.TableCreateOpts{
+					Durability: "hard",
+					Replicas:   numNodes,
+				}).Exec(conn)
 				if err != nil {
 					dbLog.Fatal(err)
 				}
+				_, _ = r.Table(v.TableName).Wait(r.WaitOpts{
+					Timeout: 0,
+				}).Run(conn)
 			}
 
 			dbLog.Info("Checking Indexes for table %s", v.TableName)
 			idxs := GetTableIndexes(v.TableName)
 
 			for _, vidx := range v.TableIndexes {
+				dbLog.Debug("Checking index %s in %s", v.TableName, vidx)
 				if remote_signer.StringIndexOf(vidx, idxs) == -1 {
 					dbLog.Warn("Index %s not found at table %s. Creating it...", vidx, v.TableName)
 					err := r.Table(v.TableName).IndexCreate(vidx).Exec(conn)
-					needWait = true
 					if err != nil {
 						dbLog.Fatal(err)
 					}
+					_ = r.Table(v.TableName).IndexWait().Exec(conn)
 				} else {
 					dbLog.Debug("Index %s already exists in table %s. Skipping it...", vidx, v.TableName)
 				}
 			}
 		}
-		if needWait {
-			dbLog.Info("Waiting 5 seconds to indexes to settle.")
-			time.Sleep(5 * time.Second) // Wait for indexes
-		}
 	}
+
+	time.Sleep(2 * time.Second)
 }
 
 func GetConnection() *r.Session {

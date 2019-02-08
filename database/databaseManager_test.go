@@ -8,21 +8,18 @@ import (
 	"gopkg.in/rethinkdb/rethinkdb-go.v5"
 	"os"
 	"testing"
-	"time"
 )
 
 func ResetDatabase() {
 	dbLog.Info("Reseting Database")
 	c := GetConnection()
 	dbs := GetDatabases()
+	dbLog.Info("Dropping test database %s", remote_signer.DatabaseName)
 	if remote_signer.StringIndexOf(remote_signer.DatabaseName, dbs) > -1 {
-		_, err := rethinkdb.DBDrop(remote_signer.DatabaseName).Run(c)
-		if err != nil {
-			panic(err)
-		}
+		dbLog.Info("Test Database already exists, dropping.")
+		_, _ = rethinkdb.DBDrop(remote_signer.DatabaseName).RunWrite(c)
 	}
-
-	time.Sleep(5 * time.Second)
+	WaitDatabaseDrop(remote_signer.DatabaseName)
 	dbLog.Info("Database reseted")
 }
 
@@ -33,6 +30,7 @@ func TestMain(m *testing.M) {
 	remote_signer.PrivateKeyFolder = ".."
 	remote_signer.KeyPrefix = "testkey_"
 	remote_signer.KeysBase64Encoded = false
+	remote_signer.RethinkDBPoolSize = 1
 
 	remote_signer.MasterGPGKeyBase64Encoded = false
 	remote_signer.MasterGPGKeyPath = "../testkey_privateTestKey.gpg"
@@ -49,9 +47,9 @@ func TestMain(m *testing.M) {
 }
 
 func TestInitTable(t *testing.T) {
+	SLog.UnsetTestMode()
 	DbSetup()
 	ResetDatabase()
 	InitTables()
-	InitTables()                // Test if already initialized
-	time.Sleep(5 * time.Second) // Wait for settle
+	InitTables()
 }
