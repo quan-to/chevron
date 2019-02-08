@@ -11,6 +11,7 @@ import (
 
 type MemoryUser struct {
 	username    string
+	fullname    string
 	token       string
 	createdAt   time.Time
 	fingerPrint string
@@ -22,6 +23,10 @@ func (mu *MemoryUser) GetUsername() string {
 
 func (mu *MemoryUser) GetToken() string {
 	return mu.token
+}
+
+func (mu *MemoryUser) GetFullName() string {
+	return mu.fullname
 }
 
 func (mu *MemoryUser) GetUserdata() interface{} {
@@ -60,6 +65,7 @@ func (mtm *MemoryTokenManager) AddUser(user etc.UserData) string {
 		token:       token,
 		createdAt:   user.GetCreatedAt(),
 		fingerPrint: user.GetFingerPrint(),
+		fullname:    user.GetFullName(),
 	}
 
 	return token

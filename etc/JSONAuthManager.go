@@ -89,28 +89,28 @@ func (jam *JSONAuthManager) UserExists(username string) bool {
 	return exists
 }
 
-func (jam *JSONAuthManager) LoginAuth(username, password string) (fingerPrint string, err error) {
+func (jam *JSONAuthManager) LoginAuth(username, password string) (fingerPrint, fullname string, err error) {
 	jam.Lock()
 	defer jam.Unlock()
 
 	user, exists := jam.users[username]
 
 	if !exists {
-		return "", fmt.Errorf("invalid username or password")
+		return "", "", fmt.Errorf("invalid username or password")
 	}
 
 	hash, err := base64.StdEncoding.DecodeString(user.Password)
 	if err != nil {
 		jamLog.Error("Error decoding hash: %v", err)
-		return "", fmt.Errorf("invalid username or password")
+		return "", "", fmt.Errorf("invalid username or password")
 	}
 
 	err = bcrypt.CompareHashAndPassword(hash, []byte(password))
 	if err != nil {
-		return "", fmt.Errorf("invalid username or password")
+		return "", "", fmt.Errorf("invalid username or password")
 	}
 
-	return user.FingerPrint, nil
+	return user.FingerPrint, user.FullName, nil
 }
 
 func (jam *JSONAuthManager) LoginAdd(username, password, fullname, fingerprint string) error {

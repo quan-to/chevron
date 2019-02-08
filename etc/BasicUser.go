@@ -5,7 +5,12 @@ import "time"
 type BasicUser struct {
 	FingerPrint string
 	Username    string
+	FullName    string
 	CreatedAt   time.Time
+}
+
+func (bu *BasicUser) GetFullName() string {
+	return bu.FullName
 }
 
 func (bu *BasicUser) GetUsername() string {

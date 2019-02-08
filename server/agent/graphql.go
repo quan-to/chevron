@@ -17,10 +17,23 @@ const HTTPRequestKey = "HTTPRequest"
 var RootManagementQuery = graphql.NewObject(graphql.ObjectConfig{
 	Name: "ManagementQueries",
 	Fields: graphql.Fields{
-		"test": &graphql.Field{
+		"WhoAmI": &graphql.Field{
 			Type: graphql.String,
 			Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
-				return "OK", nil
+				req := p.Context.Value(HTTPRequestKey).(*http.Request)
+				tm := p.Context.Value(TokenManagerKey).(etc.TokenManager)
+
+				token := req.Header.Get("proxyToken")
+
+				err := tm.Verify(token)
+				if err != nil {
+					e := QuantoError.New(QuantoError.InvalidFieldData, "proxyToken", "The specified proxyToken is either invalid or expired.", nil)
+					return nil, e.ToFormattedError()
+				}
+
+				user := tm.GetUserData(token)
+
+				return user.GetFullName(), nil
 			},
 		},
 	},
@@ -48,7 +61,7 @@ var RootManagementMutation = graphql.NewObject(graphql.ObjectConfig{
 				username := p.Args["username"].(string)
 				password := p.Args["password"].(string)
 
-				fingerPrint, err := am.LoginAuth(username, password)
+				fingerPrint, fullname, err := am.LoginAuth(username, password)
 
 				if err != nil {
 					e := QuantoError.New(QuantoError.InvalidFieldData, "username/password", "Invalid username or password", nil)
@@ -62,6 +75,7 @@ var RootManagementMutation = graphql.NewObject(graphql.ObjectConfig{
 					FingerPrint: fingerPrint,
 					Username:    username,
 					CreatedAt:   createdAt,
+					FullName:    fullname,
 				})
 
 				return mgql.Token{

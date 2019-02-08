@@ -48,3 +48,5 @@ __master*
 cover.out
 tmp
 qrs.coverprofile
+cmd/server/users.json
+
