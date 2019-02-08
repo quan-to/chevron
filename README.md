@@ -240,7 +240,12 @@ These are the Environment Variables that you can set to manage the webserver:
 *   `RETHINKDB_HOST` => Hostname of RethinkDB Server (default: "rethinkdb")
 *   `RETHINKDB_USERNAME` => Username of RethinkDB Server (default "admin")
 *   `RETHINKDB_PASSWORD` => Password of RethinKDB Server
+*   `RETHINK_TOKEN_MANAGER` => If a TokenManager using RethinkDB Should be used (defaults to `false`, uses MemoryTokenManager) [Requires ENABLE_RETHINK_SKS]
+*   `RETHINK_AUTH_MANAGER` => If a AuthManager using RethinkDB Should be used (defaults to `false`, uses JSONAuthManager) [Requires ENABLE_RETHINK_SKS]
 *   `RETHINKDB_PORT` => Port of RethinkDB Server (default 28015)
+*   `AGENT_TARGET_URL` => Target URL for Quanto Agent (defaults to `https://quanto-api.com.br/all`)
+*   `AGENT_KEY_FINGERPRINT` => Default Key FingerPrint for Agent
+*   `AGENT_BYPASS_LOGIN` => If the Login for using Quanto Agent should be bypassed. *DO NOT USE THIS IN EXPOSED REMOTESIGNER*
 *   `DATABASE_NAME` => RethinkDB Database Name (default "remote_signer")
 *   `MASTER_GPG_KEY_PATH` => Master GPG Key Path
 *   `MASTER_GPG_KEY_PASSWORD_PATH` => Master GPG Key Password Path
@@ -261,6 +266,11 @@ TODO
 
 Vault Backend
 =============
+
+TODO
+
+Quanto Agent
+============
 
 TODO
 
