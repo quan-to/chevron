@@ -2,6 +2,7 @@ package remote_signer
 
 import (
 	"bytes"
+	"context"
 	"crypto"
 	"encoding/base64"
 	"encoding/hex"
@@ -502,4 +503,12 @@ func ExtractIdentifierFields(identifier string) (name, email, comment string) {
 	}
 
 	return identifier, "", ""
+}
+
+func ContextWithValues(parent context.Context, values map[string]interface{}) context.Context {
+	for k, v := range values {
+		parent = context.WithValue(parent, k, v)
+	}
+
+	return parent
 }
