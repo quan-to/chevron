@@ -64,6 +64,7 @@ func InitTables() {
 		dbLog.Info("Running InitTables")
 		var dbs = GetDatabases()
 		var conn = GetConnection()
+		needWait := false
 
 		if remote_signer.StringIndexOf(remote_signer.DatabaseName, dbs) == -1 {
 			dbLog.Warn("Database %s does not exists. Creating it...", remote_signer.DatabaseName)
@@ -104,6 +105,7 @@ func InitTables() {
 					Timeout: 0,
 				}).Run(conn)
 				time.Sleep(time.Millisecond * 500)
+				needWait = true
 			}
 
 			dbLog.Info("Checking Indexes for table %s", v.TableName)
@@ -118,14 +120,16 @@ func InitTables() {
 						dbLog.Fatal(err)
 					}
 					_ = r.Table(v.TableName).IndexWait().Exec(conn)
+					needWait = true
 				} else {
 					dbLog.Debug("Index %s already exists in table %s. Skipping it...", vidx, v.TableName)
 				}
 			}
 		}
+		if needWait {
+			time.Sleep(5 * time.Second)
+		}
 	}
-
-	time.Sleep(10 * time.Second)
 }
 
 func GetConnection() *r.Session {

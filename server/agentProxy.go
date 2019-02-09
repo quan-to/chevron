@@ -41,24 +41,24 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 		}
 	}()
 
-	q := r.URL.Query()
+	h := r.Header
 
 	targetUrl := remote_signer.AgentTargetURL
 
-	if q.Get("serverUrl") != "" {
-		targetUrl = q.Get("serverUrl")
+	if h.Get("serverUrl") != "" {
+		targetUrl = h.Get("serverUrl")
 	}
 
 	token := ""
 
 	if !remote_signer.AgentBypassLogin {
-		if q.Get("proxyToken") == "" {
+		if h.Get("proxyToken") == "" {
 			PermissionDenied("proxyToken", "Please check if your proxyToken is valid", w, r, agentLog)
 			return
 		}
 
-		token = q.Get("proxyToken")
-		q.Del("proxyToken")
+		token = h.Get("proxyToken")
+		h.Del("proxyToken")
 
 		err := proxy.tm.Verify(token)
 
