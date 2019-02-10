@@ -3,28 +3,23 @@ env:
   global:
   - COMMIT=${TRAVIS_COMMIT::8}
 
-
 language: go
 
 go:
 - 1.10.x
 
-# Only clone the most recent commit.
 git:
   depth: 1
 
 before_install:
- - go get github.com/mattn/goveralls
- - echo "deb http://download.rethinkdb.com/apt xenial main" | sudo tee /etc/apt/sources.list.d/rethinkdb.list
- - wget -qO- https://download.rethinkdb.com/apt/pubkey.gpg | sudo apt-key add -
- - sudo apt-get -qq update && sudo apt-get install -y rethinkdb
- - wget https://releases.hashicorp.com/vault/1.0.2/vault_1.0.2_linux_amd64.zip
- - unzip vault_1.0.2_linux_amd64.zip
- - sudo cp vault /usr/bin
+- go get github.com/mattn/goveralls
+- echo "deb http://download.rethinkdb.com/apt xenial main" | sudo tee /etc/apt/sources.list.d/rethinkdb.list
+- wget -qO- https://download.rethinkdb.com/apt/pubkey.gpg | sudo apt-key add -
+- sudo apt-get -qq update && sudo apt-get install -y rethinkdb
+- wget https://releases.hashicorp.com/vault/1.0.2/vault_1.0.2_linux_amd64.zip
+- unzip vault_1.0.2_linux_amd64.zip
+- sudo cp vault /usr/bin
 
-# script always runs to completion (set +e). If we have linter issues AND a
-# failing test, we want to see both. Configure golangci-lint with a
-# .golangci.yml file at the top level of your repo.
 script:
 - rethinkdb & echo $! > $HOME/rethinkdb.pid
 - echo "RethinkDB PID `cat $HOME/rethinkdb.pid`"
@@ -52,4 +47,17 @@ script:
 - sudo kill -9 `cat ~/rethinkdb.pid`
 - echo "Closing Vault"
 - sudo kill -9 `cat ~/vault.pid`
+- echo "Calling travis-binary-build.sh"
+- ./travis-binary-build.sh
 - echo "Done"
+
+deploy:
+  provider: releases
+  file_glob: true
+  file: zips/*
+  skip_cleanup: true
+  on:
+    tags: true
+    repo: quan-to/remote-signer
+  api_key:
+    secure: Ib/VOdhLDLaUg6CtguRkfy1L5Zrs0y7o0W2z9P3Sxd6KyWnTMdJZqgPBGgwR1ixoFvdaQmtfbyQ0zbZWFigVEts/hzcHmYZsvoRfW6xzMLa46TlDPh0v5xvQ99uOSDiYI9mWOtROPCQym//YZWSu9uzJcRofRtNID7bNwjAEOMiwGENkUP21AgixAc9wKb8mfuIGNWUa+IRRunkqppDkdcmTs+wTdadJAjSnks/4V3nLn2zK1190LS08bOTb3Sj1UhGPgUTTQr8/wESWF2Ni4JYIiy7nItltK3AzHORrQ1MyIQKZkXpdjfuC741kWZX8fHRH+YEY9XK/NPng5tEZXzvOBf7eXZ40gfdaK8E0xWGFm7MbUgK/FN3F098tGcApe97+qIAKyIHevmJMqLNXuN+TI10orPJFeKy5NPZqsMYGuoIW9snVSlGBtSDckaZDysGvKFLiyFSbZyVc05SE9Afx9rJvhr6whERf9Ur8XEcOuGSe6mdrlxSM2/teWU0YjXLLNU5hWVdI+yqXMmd+SdY37XwSNOpzlli3UzkzKSmvqXAMrM6p2m4WkGbXMzxSBCk9yzN9s0ZrgMU5qr1VkrcUTBpoXEiWYQNg3h82XTW/BI3Dg7sUpnptWf5KiRcx7ADTB8mYg0aU29LlcJxIMXCNYVQ2uUB9O9JGqbTnvgE=

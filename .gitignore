@@ -53,3 +53,6 @@ cmd/server/out
 cmd/standalone/out
 bins
 zips
+server/users.json
+cmd/server/remoteSigner-linux*
+cmd/server/remoteSigner-macosx*

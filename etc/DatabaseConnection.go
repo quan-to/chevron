@@ -28,3 +28,7 @@ func DbSetup() {
 func InitTables() {
 	database.InitTables()
 }
+
+func ResetDatabase() {
+	database.ResetDatabase()
+}

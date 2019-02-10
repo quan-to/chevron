@@ -7,7 +7,6 @@ import (
 )
 
 func GetTableIndexes(tableName string) []string {
-	dbLog.Debug("Listing table indexes")
 	var conn = GetConnection()
 
 	c, err := r.Table(tableName).IndexList().CoerceTo("array").Run(conn)
@@ -33,7 +32,6 @@ func GetTableIndexes(tableName string) []string {
 }
 
 func GetDatabases() []string {
-	dbLog.Debug("Listing databases")
 	var conn = GetConnection()
 
 	c, err := r.DBList().CoerceTo("array").Run(conn)
@@ -59,7 +57,6 @@ func GetDatabases() []string {
 }
 
 func GetTables() []string {
-	dbLog.Debug("Listing tables")
 	var conn = GetConnection()
 
 	c, err := r.TableList().CoerceTo("array").Run(conn)
@@ -109,29 +106,63 @@ func NumNodes() int {
 
 	count := int(z.(float64))
 
-	dbLog.Debug("Number of RethinkDB Nodes: %d", count)
-
 	return count
 }
 
 func WaitDatabaseDrop(database string) {
-	nodes := NumNodes()
+	dbLog.Info("Waiting for database drop")
+	nodes := NumNodes() * 4
 	for i := 0; i < nodes; i++ {
 		dbs := GetDatabases()
 		for remote_signer.StringIndexOf(database, dbs) > -1 {
 			time.Sleep(1 * time.Second)
 			dbs = GetDatabases()
 		}
+		time.Sleep(1 * time.Second)
 	}
 }
 
 func WaitDatabaseCreate(database string) {
-	nodes := NumNodes()
+	dbLog.Info("Waiting for database create")
+	nodes := NumNodes() * 4
 	for i := 0; i < nodes; i++ {
 		dbs := GetDatabases()
 		for remote_signer.StringIndexOf(database, dbs) == -1 {
 			time.Sleep(1 * time.Second)
 			dbs = GetDatabases()
+		}
+		time.Sleep(1 * time.Second)
+	}
+	_ = r.DB(database).
+		Wait(r.WaitOpts{Timeout: 0}).
+		Exec(GetConnection())
+}
+
+func WaitTableCreate(table string) {
+	dbLog.Info("Waiting for table create")
+	nodes := NumNodes() * 4
+	for i := 0; i < nodes; i++ {
+		tables := GetTables()
+		for remote_signer.StringIndexOf(table, tables) == -1 {
+			time.Sleep(1 * time.Second)
+			tables = GetTables()
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	_ = r.DB(remote_signer.DatabaseName).
+		Table(table).
+		Wait(r.WaitOpts{Timeout: 0}).
+		Exec(GetConnection())
+}
+
+func WaitTableIndexCreate(table, index string) {
+	dbLog.Info("Waiting for index create")
+	nodes := NumNodes() * 4
+	for i := 0; i < nodes; i++ {
+		indexes := GetTableIndexes(table)
+		for remote_signer.StringIndexOf(index, indexes) == -1 {
+			time.Sleep(100 * time.Millisecond)
+			indexes = GetTableIndexes(table)
 		}
 	}
 }
