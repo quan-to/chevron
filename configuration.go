@@ -294,7 +294,7 @@ func Setup() {
 	}
 
 	if AgentTargetURL == "" {
-		AgentTargetURL = "http://api.dev.contaquanto.net/all"
+		AgentTargetURL = "https://api.dev.contaquanto.net/all"
 	}
 
 	if AgentTokenExpiration == -1 {

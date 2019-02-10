@@ -101,9 +101,9 @@ func InitTables() {
 				if err != nil {
 					dbLog.Fatal(err)
 				}
-				_, _ = r.Table(v.TableName).Wait(r.WaitOpts{
+				_ = r.Table(v.TableName).Wait(r.WaitOpts{
 					Timeout: 0,
-				}).Run(conn)
+				}).Exec(conn)
 				time.Sleep(time.Millisecond * 500)
 				needWait = true
 			}
