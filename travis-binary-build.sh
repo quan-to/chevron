@@ -1,6 +1,4 @@
 #!/bin/bash
-set -e
-
 BUILD_LINUX_ARCH="arm arm64 386 amd64"
 BUILD_OTHER_ARCH="386 amd64"
 BUILD_OS="windows freebsd darwin openbsd"
@@ -10,6 +8,7 @@ TAG=`git describe --exact-match --tags HEAD`
 
 if [ $? -eq 0 ];
 then
+  set -e
   echo "Releasing for tag ${TAG}"
   ORIGINAL_FOLDER="`pwd`"
   echo "I'm in `pwd`"
