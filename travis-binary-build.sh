@@ -14,6 +14,10 @@ then
   echo "I'm in `pwd`"
   mkdir -p zips
 
+  echo "Installing GOX"
+  go get github.com/mitchellh/gox
+
+  echo "Building Projects"
   cd cmd
   for i in *
   do
