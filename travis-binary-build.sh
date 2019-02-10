@@ -23,7 +23,13 @@ then
   do
     echo "Building $i"
     cd $i
+    echo "Running go get for linux"
     go get -v
+    for os in $BUILD_OS
+    do
+	echo "Running go get for $os"
+	GOOS=$os go get -v
+    done
     mkdir -p out
     echo "Building for Linux / ${BUILD_LINUX_ARCH}"
     gox -output "out/remoteSigner-{{.Dir}}-{{.OS}}-{{.Arch}}" -arch="${BUILD_LINUX_ARCH}" -os="linux"
