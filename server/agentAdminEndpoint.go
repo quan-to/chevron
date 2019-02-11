@@ -37,6 +37,10 @@ func MakeAgentAdmin(tm etc.TokenManager, am etc.AuthManager) *AgentAdmin {
 		GraphiQL: false,
 	})
 
+	if tm == nil || am == nil {
+		amLog.Fatal("Token Manager / Auth Manager came nil")
+	}
+
 	return &AgentAdmin{
 		handler: h,
 		tm:      tm,
