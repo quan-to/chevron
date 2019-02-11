@@ -42,6 +42,10 @@ var RootManagementMutation = graphql.NewObject(graphql.ObjectConfig{
 					Type:        graphql.NewNonNull(graphql.String),
 					Description: "Password to Login",
 				},
+				"expiresAfter": &graphql.ArgumentConfig{
+					Type:        graphql.Int,
+					Description: "Number of seconds since creation when the generated token will expire. If 0, defaults to server default.",
+				},
 			},
 			Resolve: resolveLogin,
 		},
@@ -124,14 +128,21 @@ func resolveLogin(p graphql.ResolveParams) (i interface{}, e error) {
 	}
 
 	createdAt := time.Now()
-	exp := createdAt.Add(time.Second * time.Duration(remote_signer.AgentTokenExpiration))
 
-	token := tm.AddUser(&etc.BasicUser{
+	expTime := remote_signer.AgentTokenExpiration
+	exp := createdAt.Add(time.Second * time.Duration(expTime))
+
+	if p.Args["expiresAfter"] != nil {
+		expTime = p.Args["expiresAfter"].(int)
+		exp = createdAt.Add(time.Second * time.Duration(expTime))
+	}
+
+	token := tm.AddUserWithExpiration(&etc.BasicUser{
 		FingerPrint: fingerPrint,
 		Username:    username,
 		CreatedAt:   createdAt,
 		FullName:    fullname,
-	})
+	}, expTime)
 
 	return mgql.Token{
 		Value:                 token,
@@ -159,11 +170,13 @@ func resolveAddUser(p graphql.ResolveParams) (i interface{}, e error) {
 
 	username = p.Args["username"].(string)
 	fullname = p.Args["fullname"].(string)
+
 	if p.Args["fingerPrint"] != nil {
 		fingerPrint = p.Args["fingerPrint"].(string)
 	} else {
 		fingerPrint = remote_signer.AgentKeyFingerPrint
 	}
+
 	password = remote_signer.GeneratePassword()
 
 	err := am.LoginAdd(username, password, fullname, fingerPrint)

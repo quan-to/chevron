@@ -80,7 +80,7 @@ func GetUserToken(conn *r.Session, token string) (ut *UserToken, err error) {
 }
 
 func InvalidateUserTokens(conn *r.Session) (int, error) {
-	wr, err := r.Table(UserTokenTableInit).
+	wr, err := r.Table(UserTokenTableInit.TableName).
 		Filter(r.Row.Field("Expiration").Lt(time.Now())).
 		Delete().
 		RunWrite(conn)
