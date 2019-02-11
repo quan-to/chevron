@@ -1,6 +1,7 @@
 package remote_signer
 
 import (
+	"github.com/quan-to/remote-signer/QuantoError"
 	"github.com/quan-to/remote-signer/SLog"
 	"os"
 	"strconv"
@@ -44,6 +45,7 @@ var AgentBypassLogin bool
 
 var RethinkTokenManager bool
 var RethinkAuthManager bool
+var Environment string
 
 var varStack []map[string]interface{}
 
@@ -89,6 +91,7 @@ func PushVariables() {
 		"AgentBypassLogin":          AgentBypassLogin,
 		"RethinkTokenManager":       RethinkTokenManager,
 		"RethinkAuthManager":        RethinkAuthManager,
+		"Environment":               Environment,
 	}
 
 	varStack = append(varStack, insMap)
@@ -138,6 +141,7 @@ func PopVariables() {
 	AgentBypassLogin = insMap["AgentBypassLogin"].(bool)
 	RethinkTokenManager = insMap["RethinkTokenManager"].(bool)
 	RethinkAuthManager = insMap["RethinkAuthManager"].(bool)
+	Environment = insMap["Environment"].(string)
 }
 
 func Setup() {
@@ -230,6 +234,8 @@ func Setup() {
 		SLog.Fatal("Rethink Auth / Token Manager requires Rethink SKS")
 	}
 
+	Environment = os.Getenv("Environment")
+
 	atke := os.Getenv("AGENT_TOKEN_EXPIRATION")
 
 	if atke != "" {
@@ -301,8 +307,20 @@ func Setup() {
 		AgentTokenExpiration = 3600
 	}
 
+	if Environment == "" {
+		Environment = "development"
+	}
+
 	// Other stuff
 	_ = os.Mkdir(PrivateKeyFolder, 0770)
+
+	if Environment == "development" {
+		SLog.SetDebug(true)
+		QuantoError.EnableStackTrace()
+	} else {
+		SLog.SetDebug(false)
+		QuantoError.DisableStackTrace()
+	}
 }
 
 func init() {

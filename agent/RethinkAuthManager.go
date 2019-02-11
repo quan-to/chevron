@@ -67,7 +67,7 @@ func (ram *RethinkAuthManager) LoginAuth(username, password string) (fingerPrint
 
 	hash, err := base64.StdEncoding.DecodeString(um.Password)
 	if err != nil {
-		jamLog.Error("Error decoding hash: %v", err)
+		ramLog.Error("Error decoding hash: %v", err)
 		return "", "", fmt.Errorf("invalid username or password")
 	}
 
