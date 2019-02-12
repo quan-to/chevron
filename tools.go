@@ -2,6 +2,7 @@ package remote_signer
 
 import (
 	"bytes"
+	"context"
 	"crypto"
 	"encoding/base64"
 	"encoding/hex"
@@ -15,6 +16,7 @@ import (
 	"github.com/quan-to/remote-signer/openpgp/packet"
 	"io"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"path"
 	"regexp"
@@ -502,4 +504,23 @@ func ExtractIdentifierFields(identifier string) (name, email, comment string) {
 	}
 
 	return identifier, "", ""
+}
+
+func ContextWithValues(parent context.Context, values map[string]interface{}) context.Context {
+	for k, v := range values {
+		parent = context.WithValue(parent, k, v)
+	}
+
+	return parent
+}
+
+const passwordBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+const defaultPasswordLength = 14
+
+func GeneratePassword() string {
+	b := make([]byte, defaultPasswordLength)
+	for i := range b {
+		b[i] = passwordBytes[rand.Int63()%int64(len(passwordBytes))]
+	}
+	return string(b)
 }

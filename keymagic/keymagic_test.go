@@ -8,28 +8,14 @@ import (
 	"github.com/quan-to/remote-signer/etc"
 	"github.com/quan-to/remote-signer/keyBackend"
 	"github.com/quan-to/remote-signer/vaultManager"
-	"gopkg.in/rethinkdb/rethinkdb-go.v5"
 	"os"
 	"testing"
-	"time"
 )
 
 var testData = []byte(remote_signer.TestSignatureData)
 
 var pgpMan *PGPManager
 var sm *SecretsManager
-
-func ResetDatabase() {
-	c := etc.GetConnection()
-	dbs := etc.GetDatabases()
-	if remote_signer.StringIndexOf(remote_signer.DatabaseName, dbs) > -1 {
-		_, err := rethinkdb.DBDrop(remote_signer.DatabaseName).Run(c)
-		if err != nil {
-			panic(err)
-		}
-	}
-	time.Sleep(5 * time.Second)
-}
 
 func TestMain(m *testing.M) {
 	QuantoError.EnableStackTrace()
@@ -51,12 +37,9 @@ func TestMain(m *testing.M) {
 
 	SLog.UnsetTestMode()
 	etc.DbSetup()
-	ResetDatabase()
-	time.Sleep(10 * time.Second)
+	etc.ResetDatabase()
 	etc.InitTables()
 	SLog.SetTestMode()
-
-	time.Sleep(10 * time.Second) // Wait rethinkdb to settle
 
 	var kb keyBackend.Backend
 
@@ -80,6 +63,6 @@ func TestMain(m *testing.M) {
 	}
 
 	code := m.Run()
-	ResetDatabase()
+	etc.ResetDatabase()
 	os.Exit(code)
 }

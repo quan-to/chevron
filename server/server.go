@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/SLog"
+	"github.com/quan-to/remote-signer/agent"
 	"github.com/quan-to/remote-signer/etc"
 	"net/http"
 )
@@ -15,6 +16,24 @@ func GenRemoteSignerServerMux(slog *SLog.Instance, sm etc.SMInterface, gpg etc.P
 	te := MakeTestsEndpoint()
 	kre := MakeKeyRingEndpoint(sm, gpg)
 	sks := MakeSKSEndpoint(sm, gpg)
+	tm := agent.MakeTokenManager()
+	am := agent.MakeAuthManager()
+	ap := MakeAgentProxy(gpg, tm)
+	agentAdmin := MakeAgentAdmin(tm, am)
+
+	if ge == nil || ie == nil || te == nil || kre == nil || sks == nil || tm == nil || am == nil || ap == nil || agentAdmin == nil {
+		slog.Error("One or more services has not been initialized.")
+		slog.Error("    GPG Endpoint: %p", ge)
+		slog.Error("    Internal Endpoint: %p", ie)
+		slog.Error("    Tests Endpoint: %p", te)
+		slog.Error("    KeyRing Endpoint: %p", kre)
+		slog.Error("    SKS Endpoint: %p", sks)
+		slog.Error("    Token Manager: %p", tm)
+		slog.Error("    Auth Manager: %p", am)
+		slog.Error("    Agent Proxy: %p", ap)
+		slog.Error("    Agent Admin: %p", agentAdmin)
+		slog.Fatal("Please check if the settings are correct.")
+	}
 
 	r := mux.NewRouter()
 	// Add for /
@@ -32,6 +51,12 @@ func GenRemoteSignerServerMux(slog *SLog.Instance, sm etc.SMInterface, gpg etc.P
 	te.AttachHandlers(r.PathPrefix("/remoteSigner/tests").Subrouter())
 	kre.AttachHandlers(r.PathPrefix("/remoteSigner/keyRing").Subrouter())
 	sks.AttachHandlers(r.PathPrefix("/remoteSigner/sks").Subrouter())
+
+	// Agent
+	ap.AddHandlers(r.PathPrefix("/agent").Subrouter())
+
+	// Agent Admin
+	agentAdmin.AddHandlers(r.PathPrefix("/agentAdmin").Subrouter())
 
 	// Catch All for unhandled endpoints
 	r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -57,7 +57,7 @@ func (sks *SKSEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
 	n, _ := w.Write([]byte(key))
-	LogExit(geLog, r, 200, n)
+	LogExit(sksLog, r, 200, n)
 }
 
 func (sks *SKSEndpoint) searchByName(w http.ResponseWriter, r *http.Request) {
@@ -106,7 +106,7 @@ func (sks *SKSEndpoint) searchByName(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
 	n, _ := w.Write(bodyData)
-	LogExit(geLog, r, 200, n)
+	LogExit(sksLog, r, 200, n)
 }
 
 func (sks *SKSEndpoint) searchByFingerPrint(w http.ResponseWriter, r *http.Request) {
@@ -155,7 +155,7 @@ func (sks *SKSEndpoint) searchByFingerPrint(w http.ResponseWriter, r *http.Reque
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
 	n, _ := w.Write(bodyData)
-	LogExit(geLog, r, 200, n)
+	LogExit(sksLog, r, 200, n)
 }
 
 func (sks *SKSEndpoint) searchByEmail(w http.ResponseWriter, r *http.Request) {
@@ -204,7 +204,7 @@ func (sks *SKSEndpoint) searchByEmail(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
 	n, _ := w.Write(bodyData)
-	LogExit(geLog, r, 200, n)
+	LogExit(sksLog, r, 200, n)
 }
 
 func (sks *SKSEndpoint) search(w http.ResponseWriter, r *http.Request) {
@@ -253,7 +253,7 @@ func (sks *SKSEndpoint) search(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
 	n, _ := w.Write(bodyData)
-	LogExit(geLog, r, 200, n)
+	LogExit(sksLog, r, 200, n)
 }
 
 func (sks *SKSEndpoint) addKey(w http.ResponseWriter, r *http.Request) {
@@ -281,5 +281,5 @@ func (sks *SKSEndpoint) addKey(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
 	n, _ := w.Write([]byte("OK"))
-	LogExit(geLog, r, 200, n)
+	LogExit(sksLog, r, 200, n)
 }

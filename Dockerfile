@@ -22,7 +22,6 @@ FROM alpine:latest
 
 MAINTAINER Lucas Teske <lucas@contaquanto.com.br>
 
-
 RUN apk --no-cache add ca-certificates
 
 RUN mkdir -p /opt/remote-signer/
@@ -60,6 +59,11 @@ ENV VAULT_PATH_PREFIX ""
 ENV VAULT_STORAGE "false"
 ENV READONLY_KEYPATH "false"
 ENV VAULT_SKIP_VERIFY "false"
+ENV AGENT_TARGET_URL ""
+ENV AGENT_KEY_FINGERPRINT ""
+ENV AGENT_BYPASS_LOGIN "false"
+ENV RETHINK_TOKEN_MANAGER "false"
+ENV RETHINK_AUTH_MANAGER "false"
 
 CMD /opt/remote-signer/remote-signer
 

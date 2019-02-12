@@ -1,6 +1,7 @@
 package remote_signer
 
 import (
+	"github.com/quan-to/remote-signer/QuantoError"
 	"github.com/quan-to/remote-signer/SLog"
 	"os"
 	"strconv"
@@ -37,6 +38,14 @@ var VaultPassword string
 var VaultNamespace string
 var VaultBackend string
 var VaultSkipDataType bool
+var AgentTargetURL string
+var AgentTokenExpiration int
+var AgentKeyFingerPrint string
+var AgentBypassLogin bool
+
+var RethinkTokenManager bool
+var RethinkAuthManager bool
+var Environment string
 
 var varStack []map[string]interface{}
 
@@ -76,6 +85,13 @@ func PushVariables() {
 		"VaultNamespace":            VaultNamespace,
 		"VaultBackend":              VaultBackend,
 		"VaultSkipDataType":         VaultSkipDataType,
+		"AgentTargetURL":            AgentTargetURL,
+		"AgentTokenExpiration":      AgentTokenExpiration,
+		"AgentKeyFingerPrint":       AgentKeyFingerPrint,
+		"AgentBypassLogin":          AgentBypassLogin,
+		"RethinkTokenManager":       RethinkTokenManager,
+		"RethinkAuthManager":        RethinkAuthManager,
+		"Environment":               Environment,
 	}
 
 	varStack = append(varStack, insMap)
@@ -119,6 +135,13 @@ func PopVariables() {
 	VaultNamespace = insMap["VaultNamespace"].(string)
 	VaultBackend = insMap["VaultBackend"].(string)
 	VaultSkipDataType = insMap["VaultSkipDataType"].(bool)
+	AgentTargetURL = insMap["AgentTargetURL"].(string)
+	AgentTokenExpiration = insMap["AgentTokenExpiration"].(int)
+	AgentKeyFingerPrint = insMap["AgentKeyFingerPrint"].(string)
+	AgentBypassLogin = insMap["AgentBypassLogin"].(bool)
+	RethinkTokenManager = insMap["RethinkTokenManager"].(bool)
+	RethinkAuthManager = insMap["RethinkAuthManager"].(bool)
+	Environment = insMap["Environment"].(string)
 }
 
 func Setup() {
@@ -127,6 +150,7 @@ func Setup() {
 	HttpPort = -1
 	RethinkDBPort = -1
 	RethinkDBPoolSize = -1
+	AgentTokenExpiration = -1
 
 	// Load envvars
 	SyslogServer = os.Getenv("SYSLOG_IP")
@@ -200,6 +224,27 @@ func Setup() {
 	VaultNamespace = os.Getenv("VAULT_NAMESPACE")
 	VaultBackend = os.Getenv("VAULT_BACKEND")
 	VaultSkipDataType = os.Getenv("VAULT_SKIP_DATA_TYPE") == "true"
+	AgentTargetURL = os.Getenv("AGENT_TARGET_URL")
+	AgentKeyFingerPrint = os.Getenv("AGENT_KEY_FINGERPRINT")
+	AgentBypassLogin = os.Getenv("AGENT_BYPASS_LOGIN") == "true"
+	RethinkTokenManager = os.Getenv("RETHINK_TOKEN_MANAGER") == "true"
+	RethinkAuthManager = os.Getenv("RETHINK_AUTH_MANAGER") == "true"
+
+	if (RethinkAuthManager || RethinkTokenManager) && !EnableRethinkSKS {
+		SLog.Fatal("Rethink Auth / Token Manager requires Rethink SKS")
+	}
+
+	Environment = os.Getenv("Environment")
+
+	atke := os.Getenv("AGENT_TOKEN_EXPIRATION")
+
+	if atke != "" {
+		i, err := strconv.ParseInt(atke, 10, 32)
+		if err != nil {
+			SLog.Error("Error parsing AGENT_TOKEN_EXPIRATION: %s", err)
+		}
+		AgentTokenExpiration = int(i)
+	}
 
 	// Set defaults if not defined
 	if SyslogServer == "" {
@@ -254,8 +299,28 @@ func Setup() {
 		VaultBackend = "secret"
 	}
 
+	if AgentTargetURL == "" {
+		AgentTargetURL = "https://api.dev.contaquanto.net/all"
+	}
+
+	if AgentTokenExpiration == -1 {
+		AgentTokenExpiration = 3600
+	}
+
+	if Environment == "" {
+		Environment = "development"
+	}
+
 	// Other stuff
 	_ = os.Mkdir(PrivateKeyFolder, 0770)
+
+	if Environment == "development" {
+		SLog.SetDebug(true)
+		QuantoError.EnableStackTrace()
+	} else {
+		SLog.SetDebug(false)
+		QuantoError.DisableStackTrace()
+	}
 }
 
 func init() {

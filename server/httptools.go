@@ -68,6 +68,10 @@ func InvalidFieldData(field string, message string, w http.ResponseWriter, r *ht
 	WriteJSON(QuantoError.New(QuantoError.InvalidFieldData, field, message, nil), 400, w, r, logI)
 }
 
+func PermissionDenied(field string, message string, w http.ResponseWriter, r *http.Request, logI *SLog.Instance) {
+	WriteJSON(QuantoError.New(QuantoError.PermissionDenied, field, message, nil), 400, w, r, logI)
+}
+
 func NotFound(field string, message string, w http.ResponseWriter, r *http.Request, logI *SLog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.NotFound, field, message, nil), 400, w, r, logI)
 }

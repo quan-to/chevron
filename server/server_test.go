@@ -8,7 +8,6 @@ import (
 	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/QuantoError"
 	"github.com/quan-to/remote-signer/SLog"
-	"github.com/quan-to/remote-signer/database"
 	"github.com/quan-to/remote-signer/etc"
 	"github.com/quan-to/remote-signer/etc/magicBuilder"
 	"github.com/quan-to/remote-signer/keymagic"
@@ -111,14 +110,21 @@ func executeRequest(req *http.Request) *httptest.ResponseRecorder {
 
 func TestMain(m *testing.M) {
 	QuantoError.EnableStackTrace()
+	SLog.UnsetTestMode()
 
 	remote_signer.DatabaseName = "qrs_test"
 	remote_signer.PrivateKeyFolder = "../tests"
 	remote_signer.KeyPrefix = "testkey_"
 	remote_signer.KeysBase64Encoded = false
 	remote_signer.EnableRethinkSKS = true
-	database.DbSetup()
-	database.InitTables()
+	remote_signer.RethinkDBPoolSize = 1
+
+	SLog.UnsetTestMode()
+	etc.DbSetup()
+	etc.ResetDatabase()
+	etc.InitTables()
+	SLog.SetTestMode()
+
 	remote_signer.EnableRethinkSKS = false
 
 	remote_signer.MasterGPGKeyBase64Encoded = false

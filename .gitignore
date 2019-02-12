@@ -48,3 +48,11 @@ __master*
 cover.out
 tmp
 qrs.coverprofile
+cmd/server/users.json
+cmd/server/out
+cmd/standalone/out
+bins
+zips
+server/users.json
+cmd/server/remoteSigner-linux*
+cmd/server/remoteSigner-macosx*

@@ -19,7 +19,7 @@ var GPGKeyTableInit = TableInitStruct{
 }
 
 type GPGKey struct {
-	Id                     string
+	id                     string
 	FullFingerPrint        string
 	Names                  []string
 	Emails                 []string
@@ -48,7 +48,7 @@ func AddGPGKey(conn *r.Session, data GPGKey) (string, bool, error) {
 	if existing.Next(gpgKey) {
 		// Update
 		_, err := r.Table(GPGKeyTableInit.TableName).
-			Get(gpgKey.Id).
+			Get(gpgKey.id).
 			Update(data).
 			RunWrite(conn)
 
@@ -56,7 +56,7 @@ func AddGPGKey(conn *r.Session, data GPGKey) (string, bool, error) {
 			return "", false, err
 		}
 
-		return gpgKey.Id, false, err
+		return gpgKey.id, false, err
 	} else {
 		// Create
 		wr, err := r.Table(GPGKeyTableInit.TableName).
