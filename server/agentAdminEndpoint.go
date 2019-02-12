@@ -4,8 +4,10 @@ import (
 	"context"
 	"github.com/gorilla/mux"
 	"github.com/quan-to/graphql"
+	"github.com/quan-to/graphql/gqlerrors"
 	"github.com/quan-to/handler"
 	"github.com/quan-to/remote-signer"
+	"github.com/quan-to/remote-signer/QuantoError"
 	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/etc"
 	"github.com/quan-to/remote-signer/server/agent"
@@ -35,6 +37,21 @@ func MakeAgentAdmin(tm etc.TokenManager, am etc.AuthManager) *AgentAdmin {
 		Schema:   &schema,
 		Pretty:   true,
 		GraphiQL: false,
+		CustomErrorFormatter: func(err error) gqlerrors.FormattedError {
+			switch err := err.(type) {
+			case *gqlerrors.Error:
+				amLog.Error("%+v", err.OriginalError)
+				return gqlerrors.FormatError(err)
+			case gqlerrors.ExtendedError:
+				amLog.Error("%+v", err.Error())
+				return gqlerrors.FormatError(err)
+			case *QuantoError.ErrorObject:
+				return err.ToFormattedError()
+			default:
+				amLog.Error("%+v", err.Error())
+				return gqlerrors.FormatError(err)
+			}
+		},
 	})
 
 	if tm == nil || am == nil {
@@ -96,7 +113,6 @@ func (admin *AgentAdmin) handleGraphQL(w http.ResponseWriter, r *http.Request) {
 		user := admin.tm.GetUserData(token)
 		ctx = context.WithValue(ctx, agent.LoggedUserKey, user)
 	}
-
 	admin.handler.ContextHandler(ctx, &gi, r)
 	LogExit(amLog, r, gi.StatusCode, gi.WrittenBytes)
 }
