@@ -8,7 +8,6 @@ import (
 	"strings"
 )
 
-
 const SMEncryptedDataOnly = false
 
 var SyslogServer string
