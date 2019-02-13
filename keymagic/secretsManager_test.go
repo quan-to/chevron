@@ -19,7 +19,7 @@ func TestPutKeyPassword(t *testing.T) {
 		t.FailNow()
 	}
 
-	dec, err := pgpMan.Decrypt(sm.encryptedPasswords[remote_signer.TestKeyFingerprint], smEncryptedDataOnly)
+	dec, err := pgpMan.Decrypt(sm.encryptedPasswords[remote_signer.TestKeyFingerprint], remote_signer.SMEncryptedDataOnly)
 
 	if err != nil {
 		t.Errorf("Got error decrypting password: %s", err)
@@ -41,7 +41,7 @@ func TestPutKeyPassword(t *testing.T) {
 func TestPutEncryptedPassword(t *testing.T) {
 	filename := fmt.Sprintf("key-password-utf8-%s.txt", remote_signer.TestKeyFingerprint)
 
-	encPass, err := sm.gpg.Encrypt(filename, sm.masterKeyFingerPrint, []byte(remote_signer.TestKeyPassword), smEncryptedDataOnly)
+	encPass, err := sm.gpg.Encrypt(filename, sm.masterKeyFingerPrint, []byte(remote_signer.TestKeyPassword), remote_signer.SMEncryptedDataOnly)
 
 	if err != nil {
 		t.Errorf("Error saving password: %s", err)
@@ -68,7 +68,7 @@ func TestGetPasswords(t *testing.T) {
 func TestUnlockLocalKeys(t *testing.T) {
 	filename := fmt.Sprintf("key-password-utf8-%s.txt", remote_signer.TestKeyFingerprint)
 
-	encPass, err := sm.gpg.Encrypt(filename, sm.masterKeyFingerPrint, []byte(remote_signer.TestKeyPassword), smEncryptedDataOnly)
+	encPass, err := sm.gpg.Encrypt(filename, sm.masterKeyFingerPrint, []byte(remote_signer.TestKeyPassword), remote_signer.SMEncryptedDataOnly)
 
 	if err != nil {
 		t.Errorf("Error saving password: %s", err)

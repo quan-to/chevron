@@ -57,12 +57,7 @@ func (ie *InternalEndpoint) getUnlockPasswords(w http.ResponseWriter, r *http.Re
 
 	passwords := ie.sm.GetPasswords()
 
-	bodyData, err := json.Marshal(passwords)
-
-	if err != nil {
-		InternalServerError("Error serializing data", err.Error(), w, r, intLog)
-		return
-	}
+	bodyData, _ := json.Marshal(passwords)
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)

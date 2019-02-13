@@ -8,6 +8,9 @@ import (
 	"strings"
 )
 
+
+const SMEncryptedDataOnly = false
+
 var SyslogServer string
 var SyslogFacility string
 var PrivateKeyFolder string

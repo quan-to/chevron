@@ -5,4 +5,5 @@ type SMInterface interface {
 	PutEncryptedPassword(fingerPrint, encryptedPassword string)
 	GetPasswords() map[string]string
 	UnlockLocalKeys(gpg PGPInterface)
+	GetMasterKeyFingerPrint() string
 }
