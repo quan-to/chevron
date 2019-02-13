@@ -13,8 +13,6 @@ import (
 	"sync"
 )
 
-const smEncryptedDataOnly = false
-
 var smLog = SLog.Scope("SecretsManager")
 
 type SecretsManager struct {
@@ -121,7 +119,7 @@ func (sm *SecretsManager) PutKeyPassword(fingerPrint, password string) {
 
 	filename := fmt.Sprintf("key-password-utf8-%s.txt", fingerPrint)
 
-	encPass, err := sm.gpg.Encrypt(filename, sm.masterKeyFingerPrint, []byte(password), smEncryptedDataOnly)
+	encPass, err := sm.gpg.Encrypt(filename, sm.masterKeyFingerPrint, []byte(password), remote_signer.SMEncryptedDataOnly)
 
 	if err != nil {
 		smLog.Error("Error saving key %s password: %s", fingerPrint, err)
@@ -167,7 +165,7 @@ func (sm *SecretsManager) UnlockLocalKeys(gpg etc.PGPInterface) {
 		}
 
 		smLog.Info("Unlocking key %s", fp)
-		g, err := sm.gpg.Decrypt(pass, smEncryptedDataOnly)
+		g, err := sm.gpg.Decrypt(pass, remote_signer.SMEncryptedDataOnly)
 
 		if err != nil {
 			smLog.Error("Error decrypting password for key %s: %s", fp, err)
@@ -186,4 +184,8 @@ func (sm *SecretsManager) UnlockLocalKeys(gpg etc.PGPInterface) {
 			smLog.Error("Error unlocking key %s: %s", fp, err)
 		}
 	}
+}
+
+func (sm *SecretsManager) GetMasterKeyFingerPrint() string {
+	return sm.masterKeyFingerPrint
 }

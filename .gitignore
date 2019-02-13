@@ -56,3 +56,4 @@ zips
 server/users.json
 cmd/server/remoteSigner-linux*
 cmd/server/remoteSigner-macosx*
+tests/metadata-*

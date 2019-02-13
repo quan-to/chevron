@@ -8,6 +8,9 @@ import (
 	"strings"
 )
 
+
+const SMEncryptedDataOnly = false
+
 var SyslogServer string
 var SyslogFacility string
 var PrivateKeyFolder string
@@ -46,6 +49,9 @@ var AgentBypassLogin bool
 var RethinkTokenManager bool
 var RethinkAuthManager bool
 var Environment string
+
+var AgentExternalURL string
+var AgentAdminExternalURL string
 
 var varStack []map[string]interface{}
 
@@ -92,6 +98,8 @@ func PushVariables() {
 		"RethinkTokenManager":       RethinkTokenManager,
 		"RethinkAuthManager":        RethinkAuthManager,
 		"Environment":               Environment,
+		"AgentExternalURL":          AgentExternalURL,
+		"AgentAdminExternalURL":     AgentAdminExternalURL,
 	}
 
 	varStack = append(varStack, insMap)
@@ -142,6 +150,8 @@ func PopVariables() {
 	RethinkTokenManager = insMap["RethinkTokenManager"].(bool)
 	RethinkAuthManager = insMap["RethinkAuthManager"].(bool)
 	Environment = insMap["Environment"].(string)
+	AgentExternalURL = insMap["AgentExternalURL"].(string)
+	AgentAdminExternalURL = insMap["AgentAdminExternalURL"].(string)
 }
 
 func Setup() {
@@ -234,6 +244,9 @@ func Setup() {
 		SLog.Fatal("Rethink Auth / Token Manager requires Rethink SKS")
 	}
 
+	AgentExternalURL = os.Getenv("AGENT_EXTERNAL_URL")
+	AgentAdminExternalURL = os.Getenv("AGENTADMIN_EXTERNAL_URL")
+
 	Environment = os.Getenv("Environment")
 
 	atke := os.Getenv("AGENT_TOKEN_EXPIRATION")
@@ -309,6 +322,14 @@ func Setup() {
 
 	if Environment == "" {
 		Environment = "development"
+	}
+
+	if AgentExternalURL == "" {
+		AgentExternalURL = "/agent"
+	}
+
+	if AgentAdminExternalURL == "" {
+		AgentAdminExternalURL = "/agentAdmin"
 	}
 
 	// Other stuff
