@@ -7,6 +7,7 @@ import (
 	"github.com/quan-to/remote-signer/SLog"
 	"os"
 	"testing"
+	"time"
 )
 
 func TestMain(m *testing.M) {
@@ -33,6 +34,9 @@ func TestMain(m *testing.M) {
 	SLog.UnsetTestMode()
 
 	ResetDatabase()
+	time.Sleep(5 * time.Second)
+	ResetDatabase()
+	time.Sleep(1 * time.Second)
 	os.Exit(code)
 }
 
