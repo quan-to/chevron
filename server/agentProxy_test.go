@@ -24,6 +24,8 @@ func TestProxy(t *testing.T) {
 
 	d, err := ioutil.ReadAll(res.Body)
 
+	errorDie(err, t)
+
 	if res.Code == 200 {
 		errorDie(fmt.Errorf("expected not 200, got 200"), t)
 	}
