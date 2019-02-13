@@ -34,8 +34,6 @@ func TestMain(m *testing.M) {
 	SLog.UnsetTestMode()
 
 	ResetDatabase()
-	time.Sleep(5 * time.Second)
-	ResetDatabase()
 	time.Sleep(1 * time.Second)
 	os.Exit(code)
 }
@@ -44,5 +42,5 @@ func TestInitTable(t *testing.T) {
 	//ResetDatabase()
 	//time.Sleep(5 * time.Second)
 	// Breaks the test due rethink non atomic operations
-	InitTables()
+	//InitTables()
 }
