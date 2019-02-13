@@ -23,7 +23,7 @@ func (gql *StaticGraphiQL) displayFile(filename string, w http.ResponseWriter, r
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, geLog)
+			CatchAllError(rec, w, r, sgLog)
 		}
 	}()
 
@@ -45,14 +45,11 @@ func (gql *StaticGraphiQL) displayFile(filename string, w http.ResponseWriter, r
 
 	w.WriteHeader(200)
 	n, _ := w.Write([]byte(fileData))
-	LogExit(sksLog, r, 200, n)
+	LogExit(sgLog, r, 200, n)
 }
 
 func (gql *StaticGraphiQL) AttachHandlers(r *mux.Router) {
-	files, err := agent.AssetDir("bundle")
-	if err != nil {
-		sgLog.Fatal(err)
-	}
+	files, _ := agent.AssetDir("bundle")
 
 	for _, v := range files {
 		filePath := path.Join("/", v)
