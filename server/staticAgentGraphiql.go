@@ -66,4 +66,7 @@ func (gql *StaticGraphiQL) AttachHandlers(r *mux.Router) {
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		gql.displayFile("/index.html", w, r)
 	})
+	r.HandleFunc("", func(w http.ResponseWriter, r *http.Request) {
+		gql.displayFile("/index.html", w, r)
+	})
 }
