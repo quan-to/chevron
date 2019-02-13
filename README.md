@@ -246,6 +246,8 @@ These are the Environment Variables that you can set to manage the webserver:
 *   `AGENT_TARGET_URL` => Target URL for Quanto Agent (defaults to `https://quanto-api.com.br/all`)
 *   `AGENT_KEY_FINGERPRINT` => Default Key FingerPrint for Agent
 *   `AGENT_BYPASS_LOGIN` => If the Login for using Quanto Agent should be bypassed. *DO NOT USE THIS IN EXPOSED REMOTESIGNER*
+*   `AGENT_EXTERNAL_URL` => External URL used by GraphiQL to access agent. Defaults to `/agent`
+*   `AGENTADMIN_EXTERNAL_URL` => External URL used by GraphiQL to access agent admin. Defaults to `/agentAdmin`
 *   `DATABASE_NAME` => RethinkDB Database Name (default "remote_signer")
 *   `MASTER_GPG_KEY_PATH` => Master GPG Key Path
 *   `MASTER_GPG_KEY_PASSWORD_PATH` => Master GPG Key Password Path

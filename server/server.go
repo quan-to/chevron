@@ -19,6 +19,7 @@ func GenRemoteSignerServerMux(slog *SLog.Instance, sm etc.SMInterface, gpg etc.P
 	tm := agent.MakeTokenManager()
 	am := agent.MakeAuthManager()
 	ap := MakeAgentProxy(gpg, tm)
+	sGql := MakeStaticGraphiQL()
 	agentAdmin := MakeAgentAdmin(tm, am)
 
 	if ge == nil || ie == nil || te == nil || kre == nil || sks == nil || tm == nil || am == nil || ap == nil || agentAdmin == nil {
@@ -57,6 +58,9 @@ func GenRemoteSignerServerMux(slog *SLog.Instance, sm etc.SMInterface, gpg etc.P
 
 	// Agent Admin
 	agentAdmin.AddHandlers(r.PathPrefix("/agentAdmin").Subrouter())
+
+	// Static GraphiQL
+	sGql.AttachHandlers(r.PathPrefix("/graphiql").Subrouter())
 
 	// Catch All for unhandled endpoints
 	r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
