@@ -218,8 +218,9 @@ func (pm *PGPManager) IsKeyLocked(fp string) bool {
 }
 
 func (pm *PGPManager) unlockKey(fp, password string) error {
-
 	fp = pm.sanitizeFingerprint(fp)
+	_ = pm.LoadKeyFromKB(fp)
+
 	ent := pm.entities[fp]
 
 	if ent == nil {
@@ -279,6 +280,12 @@ func (pm *PGPManager) UnlockKey(fp, password string) error {
 
 func (pm *PGPManager) LoadKeyFromKB(fingerPrint string) error {
 	pgpLog.Info("Loading key %s", fingerPrint)
+
+	if pm.decryptedPrivateKeys[fingerPrint] != nil || pm.entities[fingerPrint] != nil {
+		pgpLog.Warn("Key %s is already loaded", fingerPrint)
+		return nil
+	}
+
 	keyData, m, err := pm.kbkend.Read(fingerPrint)
 	if err != nil {
 		return err
@@ -808,6 +815,7 @@ func (pm *PGPManager) Decrypt(data string, dataOnly bool) (*models.GPGDecryptedD
 	pm.Lock()
 	for _, v := range fps {
 		// Try directly
+		_ = pm.LoadKeyFromKB(v)
 		decv = pm.decryptedPrivateKeys[v]
 		if decv != nil {
 			ent = *pm.entities[v]
@@ -817,6 +825,7 @@ func (pm *PGPManager) Decrypt(data string, dataOnly bool) (*models.GPGDecryptedD
 		// Try subkeys
 		subKeyMaster := pm.subKeyToKey[v]
 		if len(subKeyMaster) > 0 {
+			_ = pm.LoadKeyFromKB(subKeyMaster)
 			// Check if it is decrypted
 			decv = pm.decryptedPrivateKeys[subKeyMaster]
 			if decv != nil {
