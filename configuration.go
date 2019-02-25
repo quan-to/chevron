@@ -44,6 +44,7 @@ var AgentTargetURL string
 var AgentTokenExpiration int
 var AgentKeyFingerPrint string
 var AgentBypassLogin bool
+var OnDemandKeyLoad bool
 
 var RethinkTokenManager bool
 var RethinkAuthManager bool
@@ -99,6 +100,7 @@ func PushVariables() {
 		"Environment":               Environment,
 		"AgentExternalURL":          AgentExternalURL,
 		"AgentAdminExternalURL":     AgentAdminExternalURL,
+		"OnDemandKeyLoad":           OnDemandKeyLoad,
 	}
 
 	varStack = append(varStack, insMap)
@@ -151,6 +153,7 @@ func PopVariables() {
 	Environment = insMap["Environment"].(string)
 	AgentExternalURL = insMap["AgentExternalURL"].(string)
 	AgentAdminExternalURL = insMap["AgentAdminExternalURL"].(string)
+	OnDemandKeyLoad = insMap["OnDemandKeyLoad"].(bool)
 }
 
 func Setup() {
@@ -257,6 +260,8 @@ func Setup() {
 		}
 		AgentTokenExpiration = int(i)
 	}
+
+	OnDemandKeyLoad = os.Getenv("ON_DEMAND_KEY_LOAD") == "true"
 
 	// Set defaults if not defined
 	if SyslogServer == "" {

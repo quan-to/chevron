@@ -67,42 +67,46 @@ func (pm *PGPManager) LoadKeys() {
 	pm.Lock()
 	defer pm.Unlock()
 
-	pgpLog.Info("Loading keys from %s -> %s", pm.kbkend.Name(), pm.kbkend.Path())
+	if remote_signer.OnDemandKeyLoad {
+		pgpLog.Warn("On Demand Key load enabled. Skipping loading keys.")
+	} else {
+		pgpLog.Info("Loading keys from %s -> %s", pm.kbkend.Name(), pm.kbkend.Path())
 
-	files, err := pm.kbkend.List()
-	if err != nil {
-		pgpLog.Fatal("Error listing keys: %s", err)
-	}
-
-	keysLoaded := 0
-
-	for _, file := range files {
-		pgpLog.Info("Loading key %s", file)
-		keyData, m, err := pm.kbkend.Read(file)
+		files, err := pm.kbkend.List()
 		if err != nil {
-			pgpLog.Error("Error loading key %s: %s", file, err)
-			continue
+			pgpLog.Fatal("Error listing keys: %s", err)
 		}
 
-		if pm.KeysBase64Encoded {
-			b, err := base64.StdEncoding.DecodeString(keyData)
+		keysLoaded := 0
+
+		for _, file := range files {
+			pgpLog.Info("Loading key %s", file)
+			keyData, m, err := pm.kbkend.Read(file)
 			if err != nil {
-				pgpLog.Error("Error base64 decoding %s: %s", file, err)
+				pgpLog.Error("Error loading key %s: %s", file, err)
 				continue
 			}
-			keyData = string(b)
+
+			if pm.KeysBase64Encoded {
+				b, err := base64.StdEncoding.DecodeString(keyData)
+				if err != nil {
+					pgpLog.Error("Error base64 decoding %s: %s", file, err)
+					continue
+				}
+				keyData = string(b)
+			}
+
+			err, kl := pm.LoadKeyWithMetadata(keyData, m)
+			if err != nil {
+				pgpLog.Error("Error decoding key %s: %s", file, err)
+				continue
+			}
+
+			keysLoaded += kl
 		}
 
-		err, kl := pm.LoadKeyWithMetadata(keyData, m)
-		if err != nil {
-			pgpLog.Error("Error decoding key %s: %s", file, err)
-			continue
-		}
-
-		keysLoaded += kl
+		pgpLog.Info("Loaded %d private keys.", keysLoaded)
 	}
-
-	pgpLog.Info("Loaded %d private keys.", keysLoaded)
 }
 
 func (pm *PGPManager) LoadKeyWithMetadata(armoredKey, metadata string) (error, int) {
