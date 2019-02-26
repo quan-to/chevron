@@ -528,6 +528,7 @@ func GeneratePassword() string {
 	return string(b)
 }
 
+// RQLStart please don't judge me. That its what it takes to avoid RethinkDB Non-Atomic Database operations on tests :(
 func RQLStart() (*exec.Cmd, error) {
 	genPort := 28020 + rand.Intn(100)
 	_ = os.RemoveAll("./rethinkdb_data")

@@ -50,8 +50,8 @@ func TestMain(m *testing.M) {
 }
 
 func TestInitTable(t *testing.T) {
-	//ResetDatabase()
-	//time.Sleep(5 * time.Second)
+	ResetDatabase()
 	// Breaks the test due rethink non atomic operations
 	InitTables()
+	Cleanup()
 }
