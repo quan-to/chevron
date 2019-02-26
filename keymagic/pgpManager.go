@@ -67,42 +67,46 @@ func (pm *PGPManager) LoadKeys() {
 	pm.Lock()
 	defer pm.Unlock()
 
-	pgpLog.Info("Loading keys from %s -> %s", pm.kbkend.Name(), pm.kbkend.Path())
+	if remote_signer.OnDemandKeyLoad {
+		pgpLog.Warn("On Demand Key load enabled. Skipping loading keys.")
+	} else {
+		pgpLog.Info("Loading keys from %s -> %s", pm.kbkend.Name(), pm.kbkend.Path())
 
-	files, err := pm.kbkend.List()
-	if err != nil {
-		pgpLog.Fatal("Error listing keys: %s", err)
-	}
-
-	keysLoaded := 0
-
-	for _, file := range files {
-		pgpLog.Info("Loading key %s", file)
-		keyData, m, err := pm.kbkend.Read(file)
+		files, err := pm.kbkend.List()
 		if err != nil {
-			pgpLog.Error("Error loading key %s: %s", file, err)
-			continue
+			pgpLog.Fatal("Error listing keys: %s", err)
 		}
 
-		if pm.KeysBase64Encoded {
-			b, err := base64.StdEncoding.DecodeString(keyData)
+		keysLoaded := 0
+
+		for _, file := range files {
+			pgpLog.Info("Loading key %s", file)
+			keyData, m, err := pm.kbkend.Read(file)
 			if err != nil {
-				pgpLog.Error("Error base64 decoding %s: %s", file, err)
+				pgpLog.Error("Error loading key %s: %s", file, err)
 				continue
 			}
-			keyData = string(b)
+
+			if pm.KeysBase64Encoded {
+				b, err := base64.StdEncoding.DecodeString(keyData)
+				if err != nil {
+					pgpLog.Error("Error base64 decoding %s: %s", file, err)
+					continue
+				}
+				keyData = string(b)
+			}
+
+			err, kl := pm.LoadKeyWithMetadata(keyData, m)
+			if err != nil {
+				pgpLog.Error("Error decoding key %s: %s", file, err)
+				continue
+			}
+
+			keysLoaded += kl
 		}
 
-		err, kl := pm.LoadKeyWithMetadata(keyData, m)
-		if err != nil {
-			pgpLog.Error("Error decoding key %s: %s", file, err)
-			continue
-		}
-
-		keysLoaded += kl
+		pgpLog.Info("Loaded %d private keys.", keysLoaded)
 	}
-
-	pgpLog.Info("Loaded %d private keys.", keysLoaded)
 }
 
 func (pm *PGPManager) LoadKeyWithMetadata(armoredKey, metadata string) (error, int) {
@@ -214,8 +218,9 @@ func (pm *PGPManager) IsKeyLocked(fp string) bool {
 }
 
 func (pm *PGPManager) unlockKey(fp, password string) error {
-
 	fp = pm.sanitizeFingerprint(fp)
+	_ = pm.LoadKeyFromKB(fp)
+
 	ent := pm.entities[fp]
 
 	if ent == nil {
@@ -275,6 +280,12 @@ func (pm *PGPManager) UnlockKey(fp, password string) error {
 
 func (pm *PGPManager) LoadKeyFromKB(fingerPrint string) error {
 	pgpLog.Info("Loading key %s", fingerPrint)
+
+	if pm.decryptedPrivateKeys[fingerPrint] != nil || pm.entities[fingerPrint] != nil {
+		pgpLog.Warn("Key %s is already loaded", fingerPrint)
+		return nil
+	}
+
 	keyData, m, err := pm.kbkend.Read(fingerPrint)
 	if err != nil {
 		return err
@@ -804,6 +815,7 @@ func (pm *PGPManager) Decrypt(data string, dataOnly bool) (*models.GPGDecryptedD
 	pm.Lock()
 	for _, v := range fps {
 		// Try directly
+		_ = pm.LoadKeyFromKB(v)
 		decv = pm.decryptedPrivateKeys[v]
 		if decv != nil {
 			ent = *pm.entities[v]
@@ -813,6 +825,7 @@ func (pm *PGPManager) Decrypt(data string, dataOnly bool) (*models.GPGDecryptedD
 		// Try subkeys
 		subKeyMaster := pm.subKeyToKey[v]
 		if len(subKeyMaster) > 0 {
+			_ = pm.LoadKeyFromKB(subKeyMaster)
 			// Check if it is decrypted
 			decv = pm.decryptedPrivateKeys[subKeyMaster]
 			if decv != nil {

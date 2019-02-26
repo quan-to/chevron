@@ -32,3 +32,7 @@ func InitTables() {
 func ResetDatabase() {
 	database.ResetDatabase()
 }
+
+func Cleanup() {
+	database.Cleanup()
+}

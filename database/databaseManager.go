@@ -113,6 +113,17 @@ func InitTables() {
 	}
 }
 
+func Cleanup() {
+	if RthState.connection != nil {
+		err := RthState.connection.Close()
+
+		if err != nil {
+			SLog.Fatal(err)
+		}
+		RthState.connection = nil
+	}
+}
+
 func GetConnection() *r.Session {
 	if RthState.connection == nil {
 		dbLog.Info("GetConnection() - Conection is nil, running DbSetup()")

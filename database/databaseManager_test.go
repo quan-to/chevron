@@ -6,12 +6,21 @@ import (
 	"github.com/quan-to/remote-signer/QuantoError"
 	"github.com/quan-to/remote-signer/SLog"
 	"os"
+	"os/exec"
 	"testing"
 )
 
 func TestMain(m *testing.M) {
-	QuantoError.EnableStackTrace()
 	SLog.UnsetTestMode()
+	var rql *exec.Cmd
+	var err error
+	rql, err = remote_signer.RQLStart()
+	if err != nil {
+		SLog.Error(err)
+		os.Exit(1)
+	}
+
+	QuantoError.EnableStackTrace()
 
 	remote_signer.PrivateKeyFolder = ".."
 	remote_signer.KeyPrefix = "testkey_"
@@ -33,13 +42,16 @@ func TestMain(m *testing.M) {
 	SLog.UnsetTestMode()
 
 	ResetDatabase()
+	SLog.UnsetTestMode()
+	Cleanup()
+	SLog.Warn("STOPPING RETHINKDB")
+	remote_signer.RQLStop(rql)
 	os.Exit(code)
 }
 
 func TestInitTable(t *testing.T) {
-	//DbSetup()
-	//ResetDatabase()
-	//time.Sleep(5 * time.Second)
+	ResetDatabase()
 	// Breaks the test due rethink non atomic operations
-	//InitTables()
+	InitTables()
+	Cleanup()
 }

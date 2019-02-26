@@ -71,4 +71,17 @@ func UnsetTestMode() {
 	SetError(true)
 }
 
+func DebugEnabled() bool {
+	return debugEnabled
+}
+func WarningEnabled() bool {
+	return warnEnabled
+}
+func InfoEnabled() bool {
+	return infoEnabled
+}
+func ErrorEnabled() bool {
+	return errorEnabled
+}
+
 // endregion

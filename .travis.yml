@@ -21,8 +21,8 @@ before_install:
 - sudo cp vault /usr/bin
 
 script:
-- rethinkdb & echo $! > $HOME/rethinkdb.pid
-- echo "RethinkDB PID `cat $HOME/rethinkdb.pid`"
+#- rethinkdb & echo $! > $HOME/rethinkdb.pid
+#- echo "RethinkDB PID `cat $HOME/rethinkdb.pid`"
 - echo "Starting Vault"
 - export VAULT_ADDR='http://127.0.0.1:8200'
 - export VAULT_DEV_ROOT_TOKEN_ID="123456"
@@ -32,6 +32,7 @@ script:
 - export VAULT_USERNAME="remotesigner"
 - export VAULT_PASSWORD="123456"
 - export DATABASE_NAME="qrs_test"
+- export DO_START_RETHINK="true"
 - vault server -dev & echo $! > $HOME/vault.pid
 - echo "Waiting vault settle" & sleep 2
 - echo "Vault started with PID `cat $HOME/vault.pid`"
@@ -43,8 +44,8 @@ script:
 - golangci-lint run
 - go test -v -race ./... -coverprofile=qrs.coverprofile
 - goveralls -coverprofile=qrs.coverprofile -service travis-ci
-- echo "Closing RethinkDB"
-- sudo kill -9 `cat ~/rethinkdb.pid`
+#- echo "Closing RethinkDB"
+#- sudo kill -9 `cat ~/rethinkdb.pid`
 - echo "Closing Vault"
 - sudo kill -9 `cat ~/vault.pid`
 - echo "Calling travis-binary-build.sh"

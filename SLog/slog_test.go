@@ -11,38 +11,38 @@ func TestSetTestMode(t *testing.T) {
 	SetTestMode()
 	// Test Mode should be all unset
 
-	if debugEnabled {
+	if DebugEnabled() {
 		t.Fatalf("Debug is set to true! Should be false")
 	}
 
-	if warnEnabled {
+	if WarningEnabled() {
 		t.Fatalf("Warn is set to true! Should be false")
 	}
 
-	if errorEnabled {
+	if WarningEnabled() {
 		t.Fatalf("Error is set to true! Should be false")
 	}
 
-	if infoEnabled {
+	if InfoEnabled() {
 		t.Fatalf("Info is set to true! Should be false")
 	}
 
 	UnsetTestMode()
 	// Test Mode should be all set
 
-	if !debugEnabled {
+	if !DebugEnabled() {
 		t.Fatalf("Debug is set to false! Should be true")
 	}
 
-	if !warnEnabled {
+	if !WarningEnabled() {
 		t.Fatalf("Warn is set to false! Should be true")
 	}
 
-	if !errorEnabled {
+	if !ErrorEnabled() {
 		t.Fatalf("Error is set to false! Should be true")
 	}
 
-	if !infoEnabled {
+	if !InfoEnabled() {
 		t.Fatalf("Info is set to false! Should be true")
 	}
 }
@@ -89,44 +89,44 @@ func TestScope(t *testing.T) {
 
 func TestSetDebug(t *testing.T) {
 	SetDebug(true)
-	if !debugEnabled {
+	if !DebugEnabled() {
 		t.Fatalf("Debug is set to false! Should be true")
 	}
 	SetDebug(false)
-	if debugEnabled {
+	if DebugEnabled() {
 		t.Fatalf("Debug is set to true! Should be false")
 	}
 }
 
 func TestSetError(t *testing.T) {
 	SetError(true)
-	if !errorEnabled {
+	if !ErrorEnabled() {
 		t.Fatalf("Error is set to false! Should be true")
 	}
 	SetError(false)
-	if errorEnabled {
+	if ErrorEnabled() {
 		t.Fatalf("Error is set to true! Should be false")
 	}
 }
 
 func TestSetInfo(t *testing.T) {
 	SetInfo(true)
-	if !infoEnabled {
+	if !InfoEnabled() {
 		t.Fatalf("Info is set to false! Should be true")
 	}
 	SetInfo(false)
-	if infoEnabled {
+	if InfoEnabled() {
 		t.Fatalf("Info is set to true! Should be false")
 	}
 }
 
 func TestSetWarn(t *testing.T) {
 	SetWarning(true)
-	if !warnEnabled {
+	if !WarningEnabled() {
 		t.Fatalf("Warn is set to false! Should be true")
 	}
 	SetWarning(false)
-	if warnEnabled {
+	if WarningEnabled() {
 		t.Fatalf("Warn is set to true! Should be false")
 	}
 }

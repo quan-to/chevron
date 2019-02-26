@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"os/exec"
 	"runtime/debug"
 	"testing"
 )
@@ -109,8 +110,16 @@ func executeRequest(req *http.Request) *httptest.ResponseRecorder {
 }
 
 func TestMain(m *testing.M) {
-	QuantoError.EnableStackTrace()
 	SLog.UnsetTestMode()
+	var rql *exec.Cmd
+	var err error
+	rql, err = remote_signer.RQLStart()
+	if err != nil {
+		SLog.Error(err)
+		os.Exit(1)
+	}
+
+	QuantoError.EnableStackTrace()
 
 	remote_signer.DatabaseName = "qrs_test"
 	remote_signer.PrivateKeyFolder = "../tests"
@@ -135,7 +144,7 @@ func TestMain(m *testing.M) {
 	gpg = magicBuilder.MakePGP()
 	gpg.LoadKeys()
 
-	err := gpg.UnlockKey(testKeyFingerprint, testKeyPassword)
+	err = gpg.UnlockKey(testKeyFingerprint, testKeyPassword)
 
 	if err != nil {
 		SLog.UnsetTestMode()
@@ -154,7 +163,9 @@ func TestMain(m *testing.M) {
 	SLog.SetTestMode()
 	code := m.Run()
 	SLog.UnsetTestMode()
-
+	etc.Cleanup()
+	SLog.Warn("STOPPING RETHINKDB")
+	remote_signer.RQLStop(rql)
 	os.Exit(code)
 }
 

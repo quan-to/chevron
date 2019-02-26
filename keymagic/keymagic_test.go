@@ -9,6 +9,7 @@ import (
 	"github.com/quan-to/remote-signer/keyBackend"
 	"github.com/quan-to/remote-signer/vaultManager"
 	"os"
+	"os/exec"
 	"testing"
 )
 
@@ -18,6 +19,15 @@ var pgpMan *PGPManager
 var sm *SecretsManager
 
 func TestMain(m *testing.M) {
+	SLog.UnsetTestMode()
+	var rql *exec.Cmd
+	var err error
+	rql, err = remote_signer.RQLStart()
+	if err != nil {
+		SLog.Error(err)
+		os.Exit(1)
+	}
+
 	QuantoError.EnableStackTrace()
 	SLog.SetTestMode()
 
@@ -54,7 +64,7 @@ func TestMain(m *testing.M) {
 
 	sm = MakeSecretsManager()
 
-	err := pgpMan.UnlockKey(remote_signer.TestKeyFingerprint, remote_signer.TestKeyPassword)
+	err = pgpMan.UnlockKey(remote_signer.TestKeyFingerprint, remote_signer.TestKeyPassword)
 
 	if err != nil {
 		SLog.SetError(true)
@@ -64,5 +74,9 @@ func TestMain(m *testing.M) {
 
 	code := m.Run()
 	etc.ResetDatabase()
+	SLog.UnsetTestMode()
+	etc.Cleanup()
+	SLog.Warn("STOPPING RETHINKDB")
+	remote_signer.RQLStop(rql)
 	os.Exit(code)
 }
