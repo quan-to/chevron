@@ -17,10 +17,13 @@ import (
 	"io"
 	"io/ioutil"
 	"math/rand"
+	"net"
 	"os"
+	"os/exec"
 	"path"
 	"regexp"
 	"strings"
+	"time"
 )
 
 var toolsLog = SLog.Scope("Tools")
@@ -523,4 +526,66 @@ func GeneratePassword() string {
 		b[i] = passwordBytes[rand.Int63()%int64(len(passwordBytes))]
 	}
 	return string(b)
+}
+
+func RQLStart() (*exec.Cmd, error) {
+	conn, err := net.DialTimeout("tcp", "127.0.0.1:28015", time.Millisecond*500)
+
+	if err == nil {
+		_ = conn.Close()
+		fmt.Println("RethinkDB Already started")
+		return nil, nil
+	}
+	_ = os.RemoveAll("rethinkdb_data")
+	fmt.Println("Starting RethinkDB")
+	cmd := exec.Command("rethinkdb", "--no-http-admin", "--bind", "127.0.0.1")
+	//cmd.Stdout = os.Stdout
+	//cmd.Stderr = os.Stderr
+	err = cmd.Start()
+
+	if err != nil {
+		fmt.Println(cmd.Output())
+		panic(fmt.Errorf("cannot start rethinkdb: %s", err))
+	}
+
+	fmt.Println("Waiting for rethink to settle")
+	time.Sleep(time.Second)
+	retry := 0
+	started := false
+
+	for retry < 5 {
+		conn, err := net.DialTimeout("tcp", "127.0.0.1:28015", time.Millisecond*500)
+		if err != nil {
+			fmt.Println(err)
+			retry++
+			time.Sleep(time.Second)
+			continue
+		}
+		_ = conn.Close()
+		started = true
+		break
+	}
+
+	if !started {
+		return nil, fmt.Errorf("timeout waiting for rethinkdb to start")
+	}
+
+	return cmd, nil
+}
+
+func RQLStop(cmd *exec.Cmd) {
+	if cmd == nil {
+		return
+	}
+	fmt.Println("Stopping RethinkDB")
+
+	err := cmd.Process.Kill()
+	if err != nil {
+		panic(fmt.Errorf("error killing rethinkdb: %s", err))
+	}
+
+	err = os.RemoveAll("rethinkdb_data")
+	if err != nil {
+		panic(fmt.Errorf("error erasing rethinkdb folder: %s", err))
+	}
 }

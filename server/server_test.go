@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"os/exec"
 	"runtime/debug"
 	"testing"
 )
@@ -109,6 +110,20 @@ func executeRequest(req *http.Request) *httptest.ResponseRecorder {
 }
 
 func TestMain(m *testing.M) {
+	var rql *exec.Cmd
+	var err error
+	if os.Getenv("DO_START_RETHINK") == "true" {
+		rql, err = remote_signer.RQLStart()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		defer func() {
+			remote_signer.RQLStop(rql)
+		}()
+	}
+
 	QuantoError.EnableStackTrace()
 	SLog.UnsetTestMode()
 
@@ -135,7 +150,7 @@ func TestMain(m *testing.M) {
 	gpg = magicBuilder.MakePGP()
 	gpg.LoadKeys()
 
-	err := gpg.UnlockKey(testKeyFingerprint, testKeyPassword)
+	err = gpg.UnlockKey(testKeyFingerprint, testKeyPassword)
 
 	if err != nil {
 		SLog.UnsetTestMode()
@@ -155,6 +170,9 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 	SLog.UnsetTestMode()
 
+	if os.Getenv("DO_START_RETHINK") == "true" {
+		remote_signer.RQLStop(rql)
+	}
 	os.Exit(code)
 }
 

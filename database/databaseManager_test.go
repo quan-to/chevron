@@ -6,11 +6,26 @@ import (
 	"github.com/quan-to/remote-signer/QuantoError"
 	"github.com/quan-to/remote-signer/SLog"
 	"os"
+	"os/exec"
 	"testing"
 	"time"
 )
 
 func TestMain(m *testing.M) {
+	var rql *exec.Cmd
+	var err error
+	if os.Getenv("DO_START_RETHINK") == "true" {
+		rql, err = remote_signer.RQLStart()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		defer func() {
+			remote_signer.RQLStop(rql)
+		}()
+	}
+
 	QuantoError.EnableStackTrace()
 	SLog.UnsetTestMode()
 
