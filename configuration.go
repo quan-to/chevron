@@ -153,7 +153,7 @@ func Setup() {
 	if atke != "" {
 		i, err := strconv.ParseInt(atke, 10, 32)
 		if err != nil {
-			SLog.Error("Error parsing AGENT_TOKEN_EXPIRATION: %s", err)
+			SLog.Fatal("Error parsing AGENT_TOKEN_EXPIRATION: %s", err)
 		}
 		AgentTokenExpiration = int(i)
 	}
