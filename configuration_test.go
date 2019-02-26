@@ -43,7 +43,10 @@ func testIntVar(v *int, envName string, localName string, t *testing.T) {
 func testStringVar(v *string, envName string, localName string, def string, t *testing.T) {
 	SLog.SetTestMode()
 	err := os.Setenv(envName, "")
-
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
 	Setup()
 	if *v != def {
 		t.Error(fmt.Errorf("%s: expected default %s got %s", localName, def, *v))
