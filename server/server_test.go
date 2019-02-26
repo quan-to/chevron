@@ -110,22 +110,16 @@ func executeRequest(req *http.Request) *httptest.ResponseRecorder {
 }
 
 func TestMain(m *testing.M) {
+	SLog.UnsetTestMode()
 	var rql *exec.Cmd
 	var err error
-	if os.Getenv("DO_START_RETHINK") == "true" {
-		rql, err = remote_signer.RQLStart()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		defer func() {
-			remote_signer.RQLStop(rql)
-		}()
+	rql, err = remote_signer.RQLStart()
+	if err != nil {
+		SLog.Error(err)
+		os.Exit(1)
 	}
 
 	QuantoError.EnableStackTrace()
-	SLog.UnsetTestMode()
 
 	remote_signer.DatabaseName = "qrs_test"
 	remote_signer.PrivateKeyFolder = "../tests"
@@ -169,10 +163,9 @@ func TestMain(m *testing.M) {
 	SLog.SetTestMode()
 	code := m.Run()
 	SLog.UnsetTestMode()
-
-	if os.Getenv("DO_START_RETHINK") == "true" {
-		remote_signer.RQLStop(rql)
-	}
+	etc.Cleanup()
+	SLog.Warn("STOPPING RETHINKDB")
+	remote_signer.RQLStop(rql)
 	os.Exit(code)
 }
 

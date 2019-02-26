@@ -529,34 +529,39 @@ func GeneratePassword() string {
 }
 
 func RQLStart() (*exec.Cmd, error) {
-	conn, err := net.DialTimeout("tcp", "127.0.0.1:28015", time.Millisecond*500)
-
+	genPort := 28020 + rand.Intn(100)
+	_ = os.RemoveAll("./rethinkdb_data")
+	connString := fmt.Sprintf("127.0.0.1:%d", genPort)
+	conn, err := net.DialTimeout("tcp", connString, time.Millisecond*500)
 	if err == nil {
+		// Retry another port
 		_ = conn.Close()
-		fmt.Println("RethinkDB Already started")
-		return nil, nil
+		return RQLStart()
 	}
-	_ = os.RemoveAll("rethinkdb_data")
-	fmt.Println("Starting RethinkDB")
-	cmd := exec.Command("rethinkdb", "--no-http-admin", "--bind", "127.0.0.1")
+
+	SLog.Info("Starting RethinkDB")
+	cmd := exec.Command("rethinkdb", "--no-http-admin", "--bind", "127.0.0.1", "--cluster-port", fmt.Sprintf("%d", genPort+200), "--driver-port", fmt.Sprintf("%d", genPort))
 	//cmd.Stdout = os.Stdout
 	//cmd.Stderr = os.Stderr
 	err = cmd.Start()
 
 	if err != nil {
-		fmt.Println(cmd.Output())
+		b, _ := cmd.Output()
+		SLog.Error(string(b))
 		panic(fmt.Errorf("cannot start rethinkdb: %s", err))
 	}
 
-	fmt.Println("Waiting for rethink to settle")
+	RethinkDBPort = genPort
+
+	SLog.Info("Waiting for rethink to settle")
 	time.Sleep(time.Second)
 	retry := 0
 	started := false
 
 	for retry < 5 {
-		conn, err := net.DialTimeout("tcp", "127.0.0.1:28015", time.Millisecond*500)
+		conn, err := net.DialTimeout("tcp", connString, time.Millisecond*500)
 		if err != nil {
-			fmt.Println(err)
+			SLog.Error(err)
 			retry++
 			time.Sleep(time.Second)
 			continue
@@ -574,18 +579,25 @@ func RQLStart() (*exec.Cmd, error) {
 }
 
 func RQLStop(cmd *exec.Cmd) {
-	if cmd == nil {
-		return
+	SLog.Info("Stopping RethinkDB")
+	err := cmd.Process.Signal(os.Kill)
+	if err != nil {
+		panic(fmt.Errorf("error killing rethinkdb: %s", err))
 	}
-	fmt.Println("Stopping RethinkDB")
-
-	err := cmd.Process.Kill()
+	err = cmd.Process.Kill()
 	if err != nil {
 		panic(fmt.Errorf("error killing rethinkdb: %s", err))
 	}
 
-	err = os.RemoveAll("rethinkdb_data")
+	err = os.RemoveAll("./rethinkdb_data")
 	if err != nil {
 		panic(fmt.Errorf("error erasing rethinkdb folder: %s", err))
 	}
+
+	_, err = cmd.Process.Wait()
+	if err != nil {
+		panic(fmt.Errorf("error waiting rethinkdb: %s", err))
+	}
+
+	time.Sleep(10 * time.Second)
 }

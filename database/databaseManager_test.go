@@ -8,26 +8,19 @@ import (
 	"os"
 	"os/exec"
 	"testing"
-	"time"
 )
 
 func TestMain(m *testing.M) {
+	SLog.UnsetTestMode()
 	var rql *exec.Cmd
 	var err error
-	if os.Getenv("DO_START_RETHINK") == "true" {
-		rql, err = remote_signer.RQLStart()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		defer func() {
-			remote_signer.RQLStop(rql)
-		}()
+	rql, err = remote_signer.RQLStart()
+	if err != nil {
+		SLog.Error(err)
+		os.Exit(1)
 	}
 
 	QuantoError.EnableStackTrace()
-	SLog.UnsetTestMode()
 
 	remote_signer.PrivateKeyFolder = ".."
 	remote_signer.KeyPrefix = "testkey_"
@@ -49,7 +42,10 @@ func TestMain(m *testing.M) {
 	SLog.UnsetTestMode()
 
 	ResetDatabase()
-	time.Sleep(120 * time.Second)
+	SLog.UnsetTestMode()
+	Cleanup()
+	SLog.Warn("STOPPING RETHINKDB")
+	remote_signer.RQLStop(rql)
 	os.Exit(code)
 }
 
