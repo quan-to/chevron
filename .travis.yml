@@ -53,6 +53,7 @@ script:
 - echo "Done"
 
 after_success:
+  - mv qrs.coverprofile coverage.txt
   - bash <(curl -s https://codecov.io/bash)
 
 deploy:
