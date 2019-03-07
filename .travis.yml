@@ -52,6 +52,9 @@ script:
 - ./travis-binary-build.sh
 - echo "Done"
 
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
 deploy:
   provider: releases
   file_glob: true
