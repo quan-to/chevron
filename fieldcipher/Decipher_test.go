@@ -28,9 +28,11 @@ func TestDecipher_DecipherPacket(t *testing.T) {
 		"e": map[string]interface{}{
 			"o": []string{"1", "2", "4"},
 			"v": []interface{}{1, "2", true},
+			"t": nil,
 		},
 		"bb": true,
 		"oe": 1234.5,
+		"v":  nil,
 	}
 
 	skipFields := []string{CipherPathCombine("a"), CipherPathCombine("oe")}

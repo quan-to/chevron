@@ -21,6 +21,7 @@ func GenRemoteSignerServerMux(slog *SLog.Instance, sm etc.SMInterface, gpg etc.P
 	ap := MakeAgentProxy(gpg, tm)
 	sGql := MakeStaticGraphiQL()
 	agentAdmin := MakeAgentAdmin(tm, am)
+	jfc := MakeJFCEndpoint(sm, gpg)
 
 	if ge == nil || ie == nil || te == nil || kre == nil || sks == nil || tm == nil || am == nil || ap == nil || agentAdmin == nil {
 		slog.Error("One or more services has not been initialized.")
@@ -44,6 +45,7 @@ func GenRemoteSignerServerMux(slog *SLog.Instance, sm etc.SMInterface, gpg etc.P
 	te.AttachHandlers(r.PathPrefix("/tests").Subrouter())
 	kre.AttachHandlers(r.PathPrefix("/keyRing").Subrouter())
 	sks.AttachHandlers(r.PathPrefix("/sks").Subrouter())
+	jfc.AttachHandlers(r.PathPrefix("/fieldCipher").Subrouter())
 
 	// Add for /remoteSigner
 	AddHKPEndpoints(r.PathPrefix("/remoteSigner/pks").Subrouter())
@@ -52,6 +54,7 @@ func GenRemoteSignerServerMux(slog *SLog.Instance, sm etc.SMInterface, gpg etc.P
 	te.AttachHandlers(r.PathPrefix("/remoteSigner/tests").Subrouter())
 	kre.AttachHandlers(r.PathPrefix("/remoteSigner/keyRing").Subrouter())
 	sks.AttachHandlers(r.PathPrefix("/remoteSigner/sks").Subrouter())
+	jfc.AttachHandlers(r.PathPrefix("/remoteSigner/fieldCipher").Subrouter())
 
 	// Agent
 	ap.AddHandlers(r.PathPrefix("/agent").Subrouter())

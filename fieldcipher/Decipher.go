@@ -1,22 +1,22 @@
 package fieldcipher
 
 import (
-    "bytes"
-    "crypto/aes"
-    "crypto/cipher"
-    "encoding/base64"
-    "fmt"
-    "github.com/quan-to/remote-signer"
-    "github.com/quan-to/remote-signer/openpgp"
-    "io"
-    "io/ioutil"
-    "regexp"
-    "strconv"
-    "strings"
-    "time"
+	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
+	"encoding/base64"
+	"fmt"
+	"github.com/quan-to/remote-signer"
+	"github.com/quan-to/remote-signer/openpgp"
+	"io"
+	"io/ioutil"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
 )
 
-var fieldMatchRegex = regexp.MustCompile(`\((.*)\)\[(.*)\](.*)`)
+var fieldMatchRegex = regexp.MustCompile(`\(([a-zA-Z0-9]*)\)\[([\-A-Za-z0-9+/\\=]*)\](.*)`)
 
 type Decipher struct {
 	privateKey openpgp.EntityList
@@ -116,7 +116,15 @@ func (d *Decipher) decryptArray(data []interface{}, baseKey []byte, currentLevel
 
 	for i, v := range data {
 		nodePath := currentLevel + base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%d", i))) + "/"
-		unmatchedFields, outArray[i], err = d.decryptNode(v, baseKey, nodePath, unmatchedFields)
+
+		switch v2 := v.(type) {
+		case map[string]interface{}:
+			unmatchedFields, outArray[i], err = d.decryptJsonObject(v2, baseKey, nodePath, unmatchedFields)
+		case []interface{}:
+			unmatchedFields, outArray[i], err = d.decryptArray(v2, baseKey, nodePath, unmatchedFields)
+		default:
+			unmatchedFields, outArray[i], err = d.decryptNode(v, baseKey, nodePath, unmatchedFields)
+		}
 
 		if err != nil {
 			return nil, nil, err
@@ -188,6 +196,9 @@ func (d *Decipher) decryptNode(data interface{}, baseKey []byte, currentLevel st
 		objData, err = strconv.ParseInt(dataData, 10, 64)
 	case "datetime":
 		objData, err = time.Parse(time.RFC3339, dataData)
+	case "null":
+		objData = nil
+		err = nil
 	default:
 		return nil, nil, fmt.Errorf("unknown type %s at %s", dataType, CipherPathUnmangle(currentLevel))
 	}

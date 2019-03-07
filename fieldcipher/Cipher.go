@@ -149,6 +149,10 @@ func (c *Cipher) encryptNode(obj interface{}, baseKey []byte, currentLevel strin
 	// map[string]interface{}, for JSON objects
 	// nil for JSON null
 
+	if obj == nil {
+		return c.encryptNull(baseKey, currentLevel)
+	}
+
 	switch v := obj.(type) {
 	case []interface{}:
 		return c.encryptArray(v, baseKey, currentLevel, skipFields)
@@ -202,6 +206,11 @@ func (c *Cipher) encryptBool(v bool, baseKey []byte, currentLevel string) (strin
 
 func (c *Cipher) encryptString(v string, baseKey []byte, currentLevel string) (string, error) {
 	payload := c.genDataPayload("string", v, currentLevel)
+	return AESEncrypt(payload, baseKey)
+}
+
+func (c *Cipher) encryptNull(baseKey []byte, currentLevel string) (string, error) {
+	payload := c.genDataPayload("null", "null", currentLevel)
 	return AESEncrypt(payload, baseKey)
 }
 
