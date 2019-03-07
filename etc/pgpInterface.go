@@ -29,4 +29,5 @@ type PGPInterface interface {
 	SetKeysBase64Encoded(bool)
 	MinKeyBits() int
 	GenerateTestKey() (string, error)
+	GetPrivate(fingerPrint string) openpgp.EntityList
 }

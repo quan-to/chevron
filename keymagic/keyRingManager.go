@@ -123,7 +123,12 @@ func (krm *KeyRingManager) GetKey(fp string) *openpgp.Entity {
 	// Try fetch SKS
 	krmLog.Info("Key %s not found in local cache. Trying fetch KeyStore", fp)
 
-	asciiArmored, _ := PKSGetKey(fp)
+	asciiArmored, err := PKSGetKey(fp)
+
+	if err != nil {
+		krmLog.Error("Error fetching from KeyStore: %s", err)
+		krmLog.Error(err)
+	}
 
 	if len(asciiArmored) > 0 {
 		k, err := remote_signer.ReadKeyToEntity(asciiArmored)

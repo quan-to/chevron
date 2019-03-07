@@ -308,12 +308,15 @@ cd cmd/server
 go build -o remote-signer.exe
 ```
 
-# Adding your private key into keys folder
+# Adding your private key into Remote Signer
 
-If you're using `gpg` command line tools, you can export your key directly into keys folder in text format:
-
-```bash
-gpg --export-secret-keys -a <your fingerprint> > ./keys/the-name-you-want.key
+To add your private key, you can use the AddPrivateKey endpoint at `/keyRing/addPrivateKey` with the following payload:
+```json
+{
+  "EncryptedPrivateKey": "-----BEGIN PGP PRIVATE KEY BLOCK-----\n\n (...) -----END PGP PRIVATE KEY BLOCK-----\n",
+  "SaveToDisk": true,
+  "Password": "12344321"
+}
 ```
-> note: the `.key` extension is not required although it's recommended for better understanding.
 
+The `Password` field is optional, if provided, it will store the password along the key and auto-unlock when open. If not, you should call `UnlockKey` to be able to use the key.

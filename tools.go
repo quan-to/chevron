@@ -206,9 +206,19 @@ func SignatureFix(sig string) string {
 	return sig
 }
 
-func GetFingerPrintFromKey(armored string) (string, error) {
+func ReadKey(armored string) (openpgp.EntityList, error) {
 	kr := strings.NewReader(armored)
 	keys, err := openpgp.ReadArmoredKeyRing(kr)
+	if err != nil {
+		return nil, err
+	}
+
+	return keys, nil
+}
+
+func GetFingerPrintFromKey(armored string) (string, error) {
+	keys, err := ReadKey(armored)
+
 	if err != nil {
 		return "", err
 	}

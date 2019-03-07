@@ -465,6 +465,44 @@ func (pm *PGPManager) GetPublicKey(fingerPrint string) *packet.PublicKey {
 	return pubKey
 }
 
+func (pm *PGPManager) GetSubKeys(fingerPrint string, decrypted bool) openpgp.EntityList {
+	list := make([]*openpgp.Entity, 0)
+	for k, v := range pm.subKeyToKey {
+		if v == fingerPrint {
+			ent := *pm.entities[k]
+			if decrypted && pm.decryptedPrivateKeys[k] != nil {
+				ent.PrivateKey = pm.decryptedPrivateKeys[k]
+			}
+			list = append(list, &ent)
+		}
+	}
+	return list
+}
+
+func (pm *PGPManager) GetPrivate(fingerPrint string) openpgp.EntityList {
+	var ent openpgp.Entity
+	fingerPrint = pm.FixFingerPrint(fingerPrint)
+
+	// Try directly
+	_ = pm.LoadKeyFromKB(fingerPrint)
+	decv := pm.decryptedPrivateKeys[fingerPrint]
+	if decv != nil {
+		ent = *pm.entities[fingerPrint]
+		ent.PrivateKey = pm.decryptedPrivateKeys[fingerPrint]
+		keys := pm.GetSubKeys(fingerPrint, true)
+		keys = append(keys, &ent)
+		return keys
+	}
+
+	// Try subkeys
+	subKeyMaster := pm.subKeyToKey[fingerPrint]
+	if subKeyMaster != fingerPrint {
+		return pm.GetPrivate(subKeyMaster)
+	}
+
+	return nil
+}
+
 func (pm *PGPManager) GetPublicKeyAscii(fingerPrint string) (string, error) {
 	key := ""
 	pubKey := pm.GetPublicKey(fingerPrint)
