@@ -2,7 +2,7 @@ package QuantoError
 
 import (
 	"fmt"
-	"github.com/quan-to/graphql/gqlerrors"
+	"github.com/graphql-go/graphql/gqlerrors"
 	"log"
 	"runtime/debug"
 )
