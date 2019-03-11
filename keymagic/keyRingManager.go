@@ -59,6 +59,11 @@ func (krm *KeyRingManager) AddKey(key *openpgp.Entity, nonErasable bool) {
 		return
 	}
 	if !nonErasable {
+		if len(krm.fingerPrints)+1 > remote_signer.MaxKeyRingCache {
+			lastFp := krm.fingerPrints[0]
+			krmLog.Debug("	There are more cached keys than allowed. Removing first key %s", lastFp)
+			krm.removeFp(lastFp)
+		}
 		krm.addFp(fp)
 	}
 
@@ -74,12 +79,6 @@ func (krm *KeyRingManager) AddKey(key *openpgp.Entity, nonErasable bool) {
 		Bits:                  int(keyBits),
 		ContainsPrivateKey:    false,
 		PrivateKeyIsDecrypted: false,
-	}
-
-	if len(krm.fingerPrints) > remote_signer.MaxKeyRingCache {
-		lastFp := krm.fingerPrints[0]
-		krmLog.Debug("	There are more cached keys than allowed. Removing first key %s", lastFp)
-		krm.removeFp(lastFp)
 	}
 
 	krm.Unlock()
