@@ -3,9 +3,9 @@ package server
 import (
 	"context"
 	"github.com/gorilla/mux"
-	"github.com/quan-to/graphql"
-	"github.com/quan-to/graphql/gqlerrors"
-	"github.com/quan-to/handler"
+	"github.com/graphql-go/graphql"
+	"github.com/graphql-go/graphql/gqlerrors"
+	"github.com/graphql-go/handler"
 	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/QuantoError"
 	"github.com/quan-to/remote-signer/SLog"
@@ -37,7 +37,7 @@ func MakeAgentAdmin(tm etc.TokenManager, am etc.AuthManager) *AgentAdmin {
 		Schema:   &schema,
 		Pretty:   true,
 		GraphiQL: false,
-		CustomErrorFormatter: func(err error) gqlerrors.FormattedError {
+		FormatErrorFn: func(err error) gqlerrors.FormattedError {
 			switch err := err.(type) {
 			case *gqlerrors.Error:
 				amLog.Error("%+v", err.OriginalError)

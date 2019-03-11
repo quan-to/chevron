@@ -2,7 +2,7 @@ package agent
 
 import (
 	"github.com/google/uuid"
-	"github.com/quan-to/graphql"
+	"github.com/graphql-go/graphql"
 	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/QuantoError"
 	"github.com/quan-to/remote-signer/SLog"

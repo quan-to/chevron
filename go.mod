@@ -43,7 +43,7 @@ require (
 	github.com/gorilla/mux v1.7.0
 	github.com/gorilla/websocket v1.4.0 // indirect
 	github.com/graphql-go/graphql v0.7.7
-	github.com/graphql-go/handler v0.2.3 // indirect
+	github.com/graphql-go/handler v0.2.3
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/hashicorp/consul v1.4.3 // indirect
@@ -93,8 +93,6 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35 // indirect
 	github.com/pquerna/otp v1.1.0 // indirect
-	github.com/quan-to/graphql v0.7.5
-	github.com/quan-to/handler v0.2.1
 	github.com/ryanuber/go-glob v1.0.0 // indirect
 	github.com/samuel/go-zookeeper v0.0.0-20180130194729-c4fab1ac1bec // indirect
 	github.com/soheilhy/cmux v0.1.4 // indirect

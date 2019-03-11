@@ -487,10 +487,6 @@ github.com/prometheus/procfs v0.0.0-20180725123919-05ee40e3a273/go.mod h1:c3At6R
 github.com/prometheus/procfs v0.0.0-20181005140218-185b4288413d/go.mod h1:c3At6R/oaqEKCNdg8wHV1ftS6bRYblBhIjjI8uT2IGk=
 github.com/prometheus/procfs v0.0.0-20190117184657-bf6a532e95b1 h1:/K3IL0Z1quvmJ7X0A1AwNEK7CRkVK3YwfOU/QAL4WGg=
 github.com/prometheus/procfs v0.0.0-20190117184657-bf6a532e95b1/go.mod h1:c3At6R/oaqEKCNdg8wHV1ftS6bRYblBhIjjI8uT2IGk=
-github.com/quan-to/graphql v0.7.5 h1:moBb7CENuxIJj+x3kihdAIETmHvf/G7TmQ6eXEs+kYU=
-github.com/quan-to/graphql v0.7.5/go.mod h1:KDpTMwaucl4gXaWbvUC/HjVqtJ4ja2+m0pbmtJ2Lf0I=
-github.com/quan-to/handler v0.2.1 h1:cJmqdPvps1NW+sqpAJmP/hoWnkMsHB93zryZtwAa/TQ=
-github.com/quan-to/handler v0.2.1/go.mod h1:qe7OQUrx5OXj0NM1xp0XYgi2O2M2yW3UVlrtgVncArs=
 github.com/ryanuber/columnize v0.0.0-20160712163229-9b3edd62028f/go.mod h1:sm1tb6uqfes/u+d4ooFouqFdy9/2g9QGwK3SQygK0Ts=
 github.com/ryanuber/columnize v2.1.0+incompatible/go.mod h1:sm1tb6uqfes/u+d4ooFouqFdy9/2g9QGwK3SQygK0Ts=
 github.com/ryanuber/go-glob v0.0.0-20170128012129-256dc444b735/go.mod h1:807d1WSdnB0XRJzKNil9Om6lcp/3a0v4qIHxIXzX/Yc=

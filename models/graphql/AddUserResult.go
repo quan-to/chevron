@@ -1,7 +1,7 @@
 package graphql
 
 import (
-	"github.com/quan-to/graphql"
+	"github.com/graphql-go/graphql"
 	"github.com/quan-to/remote-signer/etc"
 )
 

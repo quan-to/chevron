@@ -1,6 +1,6 @@
 package graphql
 
-import "github.com/quan-to/graphql"
+import "github.com/graphql-go/graphql"
 
 type Token struct {
 	Value                 string
