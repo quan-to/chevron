@@ -1,5 +1,3 @@
-// +build !js,!wasm
-
 package keymagic
 
 import (
@@ -9,7 +7,6 @@ import (
 	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/etc"
 	"github.com/quan-to/remote-signer/keyBackend"
-	"github.com/quan-to/remote-signer/vaultManager"
 	"io/ioutil"
 	"path"
 	"sync"
@@ -28,11 +25,7 @@ type SecretsManager struct {
 func MakeSecretsManager() *SecretsManager {
 	var kb keyBackend.Backend
 
-	if remote_signer.VaultStorage {
-		kb = vaultManager.MakeVaultManager("__master__")
-	} else {
-		kb = keyBackend.MakeSaveToDiskBackend(path.Dir(remote_signer.MasterGPGKeyPath), "__master__")
-	}
+	kb = keyBackend.MakeSaveToDiskBackend(path.Dir(remote_signer.MasterGPGKeyPath), "__master__")
 
 	var sm = &SecretsManager{
 		amIUseless:         false,
