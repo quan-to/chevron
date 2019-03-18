@@ -7,26 +7,26 @@ import (
 	"fmt"
 	"github.com/hashicorp/vault/api"
 	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/SLog"
+	"github.com/quan-to/slog"
 	"net/http"
 )
 
 const VaultData = "data"
 const VaultMetadata = "metadata"
 
-var slog = SLog.Scope("Vault")
+var log = slog.Scope("Vault")
 
 type VaultManager struct {
 	client *api.Client
 	prefix string
-	log    *SLog.Instance
+	log    *slog.Instance
 }
 
 func MakeVaultManager(prefix string) *VaultManager {
-	slog.Info("Initialized Vault Backend at %s with prefix %s", remote_signer.VaultAddress, prefix)
+	log.Info("Initialized Vault Backend at %s with prefix %s", remote_signer.VaultAddress, prefix)
 	var httpClient *http.Client
 	if remote_signer.VaultSkipVerify {
-		slog.Warn("WARNING: Vault Skip Verify is enable. We will not check for SSL Certs in Vault!")
+		log.Warn("WARNING: Vault Skip Verify is enable. We will not check for SSL Certs in Vault!")
 		tr := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
@@ -39,34 +39,34 @@ func MakeVaultManager(prefix string) *VaultManager {
 	})
 
 	if err != nil {
-		slog.Error(err)
+		log.Error(err)
 		return nil
 	}
 	if !remote_signer.VaultUseUserpass {
-		slog.Info("Token Mode enabled.")
+		log.Info("Token Mode enabled.")
 		client.SetToken(remote_signer.VaultRootToken)
 	} else {
 		// to pass the password
 		options := map[string]interface{}{
 			"password": remote_signer.VaultPassword,
 		}
-		slog.Info("Userpass mode enabled. Logging with %s", remote_signer.VaultUsername)
+		log.Info("Userpass mode enabled. Logging with %s", remote_signer.VaultUsername)
 		// PUT call to get a token
 		secret, err := client.Logical().Write(fmt.Sprintf("auth/userpass/login/%s", remote_signer.VaultUsername), options)
 
 		if err != nil {
-			slog.Error(err)
+			log.Error(err)
 			return nil
 		}
 
-		slog.Info("Logged in successfully.")
+		log.Info("Logged in successfully.")
 		client.SetToken(secret.Auth.ClientToken)
 	}
 
 	return &VaultManager{
 		client: client,
 		prefix: prefix,
-		log:    SLog.Scope(fmt.Sprintf("Vault (%s)", prefix)),
+		log:    slog.Scope(fmt.Sprintf("Vault (%s)", prefix)),
 	}
 }
 

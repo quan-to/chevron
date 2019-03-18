@@ -2,13 +2,13 @@ package keymagic
 
 import (
 	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/models"
 	"github.com/quan-to/remote-signer/openpgp"
+	"github.com/quan-to/slog"
 	"sync"
 )
 
-var krmLog = SLog.Scope("KeyRingManager")
+var krmLog = slog.Scope("KeyRingManager")
 
 type KeyRingManager struct {
 	sync.Mutex

@@ -7,10 +7,10 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/QuantoError"
-	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/etc"
 	"github.com/quan-to/remote-signer/etc/magicBuilder"
 	"github.com/quan-to/remote-signer/keymagic"
+	"github.com/quan-to/slog"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -88,7 +88,7 @@ const testDecryptDataOnly = "wcFMA6uJF6HKi88OARAATyFPVauyY3PKircZ3AlTMd2Iy1/FNKV
 
 var sm etc.SMInterface
 var gpg etc.PGPInterface
-var slog = SLog.Scope("TestRemoteSigner")
+var log = slog.Scope("TestRemoteSigner")
 
 var router *mux.Router
 
@@ -110,12 +110,12 @@ func executeRequest(req *http.Request) *httptest.ResponseRecorder {
 }
 
 func TestMain(m *testing.M) {
-	SLog.UnsetTestMode()
+	slog.UnsetTestMode()
 	var rql *exec.Cmd
 	var err error
 	rql, err = remote_signer.RQLStart()
 	if err != nil {
-		SLog.Error(err)
+		slog.Error(err)
 		os.Exit(1)
 	}
 
@@ -128,11 +128,11 @@ func TestMain(m *testing.M) {
 	remote_signer.EnableRethinkSKS = true
 	remote_signer.RethinkDBPoolSize = 1
 
-	SLog.UnsetTestMode()
+	slog.UnsetTestMode()
 	etc.DbSetup()
 	etc.ResetDatabase()
 	etc.InitTables()
-	SLog.SetTestMode()
+	slog.SetTestMode()
 
 	remote_signer.EnableRethinkSKS = false
 
@@ -147,24 +147,24 @@ func TestMain(m *testing.M) {
 	err = gpg.UnlockKey(testKeyFingerprint, testKeyPassword)
 
 	if err != nil {
-		SLog.UnsetTestMode()
-		slog.Error(err)
+		slog.UnsetTestMode()
+		log.Error(err)
 		os.Exit(1)
 	}
 
 	remote_signer.EnableRethinkSKS = true
-	slog.Info("Adding key %s to SKS Database", testKeyFingerprint)
+	log.Info("Adding key %s to SKS Database", testKeyFingerprint)
 	pubKey, _ := gpg.GetPublicKeyAscii(testKeyFingerprint)
-	slog.Info("Result: %s", keymagic.PKSAdd(pubKey))
+	log.Info("Result: %s", keymagic.PKSAdd(pubKey))
 	remote_signer.EnableRethinkSKS = false
 
-	router = GenRemoteSignerServerMux(slog, sm, gpg)
+	router = GenRemoteSignerServerMux(log, sm, gpg)
 
-	SLog.SetTestMode()
+	slog.SetTestMode()
 	code := m.Run()
-	SLog.UnsetTestMode()
+	slog.UnsetTestMode()
 	etc.Cleanup()
-	SLog.Warn("STOPPING RETHINKDB")
+	slog.Warn("STOPPING RETHINKDB")
 	remote_signer.RQLStop(rql)
 	os.Exit(code)
 }

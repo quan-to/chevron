@@ -2,7 +2,7 @@ package remote_signer
 
 import (
 	"github.com/quan-to/remote-signer/QuantoError"
-	"github.com/quan-to/remote-signer/SLog"
+	"github.com/quan-to/slog"
 	"os"
 	"strconv"
 	"strings"
@@ -72,7 +72,7 @@ func Setup() {
 	if maxKeyRingCache != "" {
 		i, err := strconv.ParseInt(maxKeyRingCache, 10, 32)
 		if err != nil {
-			SLog.Error("Error parsing MAX_KEYRING_CACHE_SIZE: %s", err)
+			slog.Error("Error parsing MAX_KEYRING_CACHE_SIZE: %s", err)
 			panic(err)
 		}
 		MaxKeyRingCache = int(i)
@@ -82,7 +82,7 @@ func Setup() {
 	if hp != "" {
 		i, err := strconv.ParseInt(hp, 10, 32)
 		if err != nil {
-			SLog.Error("Error parsing HTTP_PORT: %s", err)
+			slog.Error("Error parsing HTTP_PORT: %s", err)
 			panic(err)
 		}
 		HttpPort = int(i)
@@ -98,7 +98,7 @@ func Setup() {
 	if rdbport != "" {
 		i, err := strconv.ParseInt(rdbport, 10, 32)
 		if err != nil {
-			SLog.Error("Error parsing RETHINKDB_PORT: %s", err)
+			slog.Error("Error parsing RETHINKDB_PORT: %s", err)
 			panic(err)
 		}
 		RethinkDBPort = int(i)
@@ -108,7 +108,7 @@ func Setup() {
 	if poolSize != "" {
 		i, err := strconv.ParseInt(poolSize, 10, 32)
 		if err != nil {
-			SLog.Error("Error parsing RETHINKDB_POOL_SIZE: %s", err)
+			slog.Error("Error parsing RETHINKDB_POOL_SIZE: %s", err)
 			panic(err)
 		}
 		RethinkDBPoolSize = int(i)
@@ -140,7 +140,7 @@ func Setup() {
 	RethinkAuthManager = os.Getenv("RETHINK_AUTH_MANAGER") == "true"
 
 	if (RethinkAuthManager || RethinkTokenManager) && !EnableRethinkSKS {
-		SLog.Fatal("Rethink Auth / Token Manager requires Rethink SKS")
+		slog.Fatal("Rethink Auth / Token Manager requires Rethink SKS")
 	}
 
 	AgentExternalURL = os.Getenv("AGENT_EXTERNAL_URL")
@@ -153,7 +153,7 @@ func Setup() {
 	if atke != "" {
 		i, err := strconv.ParseInt(atke, 10, 32)
 		if err != nil {
-			SLog.Fatal("Error parsing AGENT_TOKEN_EXPIRATION: %s", err)
+			slog.Fatal("Error parsing AGENT_TOKEN_EXPIRATION: %s", err)
 		}
 		AgentTokenExpiration = int(i)
 	}
@@ -237,10 +237,10 @@ func Setup() {
 	_ = os.Mkdir(PrivateKeyFolder, 0770)
 
 	if Environment == "development" {
-		SLog.SetDebug(true)
+		slog.SetDebug(true)
 		QuantoError.EnableStackTrace()
 	} else {
-		SLog.SetDebug(false)
+		slog.SetDebug(false)
 		QuantoError.DisableStackTrace()
 	}
 }

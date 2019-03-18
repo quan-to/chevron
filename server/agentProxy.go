@@ -5,15 +5,15 @@ import (
 	"crypto"
 	"github.com/gorilla/mux"
 	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/etc"
+	"github.com/quan-to/slog"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"time"
 )
 
-var agentLog = SLog.Scope("Agent")
+var agentLog = slog.Scope("Agent")
 
 type AgentProxy struct {
 	gpg       etc.PGPInterface

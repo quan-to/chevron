@@ -2,16 +2,16 @@ package main
 
 import (
 	"github.com/quan-to/remote-signer/QuantoError"
-	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/etc/magicBuilder"
 	"github.com/quan-to/remote-signer/kubernetes"
 	"github.com/quan-to/remote-signer/server"
+	"github.com/quan-to/slog"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
-var slog = SLog.Scope("RemoteSigner")
+var log = slog.Scope("RemoteSigner")
 
 func main() {
 	QuantoError.EnableStackTrace()
@@ -20,7 +20,7 @@ func main() {
 
 	gpg.LoadKeys()
 
-	stop := server.RunRemoteSignerServer(slog, sm, gpg)
+	stop := server.RunRemoteSignerServer(log, sm, gpg)
 	localStop := make(chan bool)
 	kubeStop := make(chan bool)
 
@@ -42,5 +42,5 @@ func main() {
 	}()
 
 	<-localStop
-	slog.Info("Closing Main Routine")
+	log.Info("Closing Main Routine")
 }

@@ -5,7 +5,6 @@ package main
 import (
 	"encoding/json"
 	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/fieldcipher"
 	"github.com/quan-to/remote-signer/keyBackend"
 	"github.com/quan-to/remote-signer/keymagic"
@@ -159,47 +158,47 @@ const testEncryptedData = `{
     }
   }`
 
-var slog = SLog.Scope("GOLANG")
+var log = slog.Scope("GOLANG")
 
 func main() {
 	krm := keymagic.MakeKeyRingManager()
 	kb := keyBackend.MakeSaveToDiskBackend("a", "")
 	pgp := keymagic.MakePGPManagerWithKRM(kb, krm)
 
-	slog.Info("Loading Private Key")
+	log.Info("Loading Private Key")
 	err, n := pgp.LoadKey(testPrivateKey)
 	if err != nil {
-		slog.Fatal(err)
+		log.Fatal(err)
 	}
-	slog.Info("Loaded %d private keys", n)
-	slog.Info("Unlocking Key")
+	log.Info("Loaded %d private keys", n)
+	log.Info("Unlocking Key")
 	err = pgp.UnlockKey(remote_signer.TestKeyFingerprint, remote_signer.TestKeyPassword)
 	if err != nil {
-		slog.Fatal(err)
+		log.Fatal(err)
 	}
 
-	slog.Info("Loading public key")
+	log.Info("Loading public key")
 	pubKey, err := pgp.GetPublicKeyAscii(remote_signer.TestKeyFingerprint)
 	//if err != nil {
 	//	panic(err)
 	//}
 
-	slog.Info("Public Key loaded. Creating Field Cipher")
+	log.Info("Public Key loaded. Creating Field Cipher")
 	cipher := fieldcipher.MakeCipherFromASCIIArmoredKeys([]string{pubKey})
 	decipher, err := fieldcipher.MakeDecipher(pgp.GetPrivate(remote_signer.TestKeyFingerprint))
 
 	if err != nil {
-		slog.Fatal(err)
+		log.Fatal(err)
 	}
 
 	var encData map[string]interface{}
 
 	err = json.Unmarshal([]byte(testEncryptedData), &encData)
 	if err != nil {
-		slog.Fatal(err)
+		log.Fatal(err)
 	}
 
-	slog.Info("Decrypting Data")
+	log.Info("Decrypting Data")
 	t := time.Now()
 	d, err := decipher.DecipherPacket(fieldcipher.CipherPacket{
 		EncryptedKey: "wcFMA6uJF6HKi88OARAAGKMZRQ+UwIQUTnBkfpJQqTCryzmgDXnpNgxnPvjbOXgVZmG7XK28mb5W4IHMQWwpZeu0dZ18MmQhc5w5rVVqr8xYGfcYUA2dUiSJD68Kg8ZrGe8pKrev69rfFIRS5PLSpq9T7w/dNNhS1cDyULZCFni/1kRRtkqd/QAyxkLrKgbBNR56cBmP4beCMkTXgzMGlAilR8zJ2+mYSQAMBmg8/V8QnIDwPjuKcU8Kwsa/T209g9oMuEmqAifaCS9dn/3+ALJtbI5o1ajX5S6NJGDmZFfDa1QQf2yK3n8l3s/FBoZ/zfIodC6WYsTv505lIpIEABDIW5pt5B65ZGG0/Nnr6LpG1shsQZEb9eHrpcQQEdq1wI7c/qxNuY/PpSSnnWCdMQnPclOo1koPY45cysK5DaD7YyAXj9lNxyKjznmVXpiqv0hJ/tr/TKrVm8vMuzG9iPFF3aaPiZacA5gS+JB7/uZrGgfVzLw5BA9aBJNCnGj0SNNn2ULjctpkknLQ35fURgayRWc8YBf5EVnxZBYCeE+8OxvfkKA/rES8uKiPrfIXSd6P7NMMDea33ROOlEMVv95gMviO75cN8Xi0QsgkSX8KhGfM2P6Gj8LwIKTcf0oV7zzRbNwY3ao9zRCJ370WcLW/vMaFy8cORe65p4S1lJvw1RRiKi5OjxuAIthNBj7S4AHkKaKjH53yJw4pwnG3GqyN4uHPwOAH4HXh6xjg+eQ5zMU0yLgKnUCPL9urojou4FDiRjKjo+CC4kQ80uDgKeXq+2oP1MH0szgZpEYjBGHajtd3kfUqLpb6CXczf1dLWODI5PHfHxjMnPI6EyR0/6c2tjviWLMQdOE9DgA=",
@@ -207,22 +206,22 @@ func main() {
 	})
 	delta := time.Since(t)
 	if err != nil {
-		slog.Fatal(err)
+		log.Fatal(err)
 	}
 	sd, _ := json.MarshalIndent(d, "", "   ")
 
-	slog.Info("Took %s", delta)
-	slog.Info("%s", sd)
+	log.Info("Took %s", delta)
+	log.Info("%s", sd)
 
 	cb := js.NewCallback(func(args []js.Value) {
 		t = time.Now()
 		cp, _ := cipher.GenerateEncryptedPacket(d.DecryptedData, nil)
 		delta = time.Since(t)
 
-		slog.Info("Took %s", delta)
+		log.Info("Took %s", delta)
 		sd, _ = json.MarshalIndent(cp, "", "   ")
 
-		slog.Info("%s", sd)
+		log.Info("%s", sd)
 
 		//fmt.Printf("Generating key at %v\n", t)
 		//key, err := pgp.GeneratePGPKey("HUEBR", "123456", 2048)
@@ -234,7 +233,7 @@ func main() {
 	})
 
 	df := js.NewCallback(func(args []js.Value) {
-		slog.Info("Decrypting Data")
+		log.Info("Decrypting Data")
 		t := time.Now()
 		d, err := decipher.DecipherPacket(fieldcipher.CipherPacket{
 			EncryptedKey: "wcFMA6uJF6HKi88OARAAGKMZRQ+UwIQUTnBkfpJQqTCryzmgDXnpNgxnPvjbOXgVZmG7XK28mb5W4IHMQWwpZeu0dZ18MmQhc5w5rVVqr8xYGfcYUA2dUiSJD68Kg8ZrGe8pKrev69rfFIRS5PLSpq9T7w/dNNhS1cDyULZCFni/1kRRtkqd/QAyxkLrKgbBNR56cBmP4beCMkTXgzMGlAilR8zJ2+mYSQAMBmg8/V8QnIDwPjuKcU8Kwsa/T209g9oMuEmqAifaCS9dn/3+ALJtbI5o1ajX5S6NJGDmZFfDa1QQf2yK3n8l3s/FBoZ/zfIodC6WYsTv505lIpIEABDIW5pt5B65ZGG0/Nnr6LpG1shsQZEb9eHrpcQQEdq1wI7c/qxNuY/PpSSnnWCdMQnPclOo1koPY45cysK5DaD7YyAXj9lNxyKjznmVXpiqv0hJ/tr/TKrVm8vMuzG9iPFF3aaPiZacA5gS+JB7/uZrGgfVzLw5BA9aBJNCnGj0SNNn2ULjctpkknLQ35fURgayRWc8YBf5EVnxZBYCeE+8OxvfkKA/rES8uKiPrfIXSd6P7NMMDea33ROOlEMVv95gMviO75cN8Xi0QsgkSX8KhGfM2P6Gj8LwIKTcf0oV7zzRbNwY3ao9zRCJ370WcLW/vMaFy8cORe65p4S1lJvw1RRiKi5OjxuAIthNBj7S4AHkKaKjH53yJw4pwnG3GqyN4uHPwOAH4HXh6xjg+eQ5zMU0yLgKnUCPL9urojou4FDiRjKjo+CC4kQ80uDgKeXq+2oP1MH0szgZpEYjBGHajtd3kfUqLpb6CXczf1dLWODI5PHfHxjMnPI6EyR0/6c2tjviWLMQdOE9DgA=",
@@ -242,12 +241,12 @@ func main() {
 		})
 		delta := time.Since(t)
 		if err != nil {
-			slog.Fatal(err)
+			log.Fatal(err)
 		}
 		sd, _ := json.MarshalIndent(d, "", "   ")
 
-		slog.Info("Took %s", delta)
-		slog.Info("%s", sd)
+		log.Info("Took %s", delta)
+		log.Info("%s", sd)
 	})
 
 	js.Global().Set("myFunc", cb)

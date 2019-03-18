@@ -4,15 +4,15 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/etc"
 	"github.com/quan-to/remote-signer/keyBackend"
+	"github.com/quan-to/slog"
 	"io/ioutil"
 	"path"
 	"sync"
 )
 
-var smLog = SLog.Scope("SecretsManager")
+var smLog = slog.Scope("SecretsManager")
 
 type SecretsManager struct {
 	sync.Mutex

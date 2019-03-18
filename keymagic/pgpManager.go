@@ -11,13 +11,13 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/etc"
 	"github.com/quan-to/remote-signer/keyBackend"
 	"github.com/quan-to/remote-signer/models"
 	"github.com/quan-to/remote-signer/openpgp"
 	"github.com/quan-to/remote-signer/openpgp/armor"
 	"github.com/quan-to/remote-signer/openpgp/packet"
+	"github.com/quan-to/slog"
 	"io"
 	"io/ioutil"
 	"path"
@@ -28,7 +28,7 @@ import (
 
 const MinKeyBits = 2048 // Should be safe until we have decent Quantum Computers
 
-var pgpLog = SLog.Scope("PGPManager")
+var pgpLog = slog.Scope("PGPManager")
 
 type PGPManager struct {
 	sync.Mutex

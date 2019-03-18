@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/QuantoError"
-	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/etc"
 	"github.com/quan-to/remote-signer/keyBackend"
 	"github.com/quan-to/remote-signer/vaultManager"
+	"github.com/quan-to/slog"
 	"os"
 	"os/exec"
 	"testing"
@@ -19,17 +19,17 @@ var pgpMan *PGPManager
 var sm *SecretsManager
 
 func TestMain(m *testing.M) {
-	SLog.UnsetTestMode()
+	slog.UnsetTestMode()
 	var rql *exec.Cmd
 	var err error
 	rql, err = remote_signer.RQLStart()
 	if err != nil {
-		SLog.Error(err)
+		slog.Error(err)
 		os.Exit(1)
 	}
 
 	QuantoError.EnableStackTrace()
-	SLog.SetTestMode()
+	slog.SetTestMode()
 
 	remote_signer.DatabaseName = "qrs_test"
 	remote_signer.PrivateKeyFolder = "../tests/"
@@ -45,11 +45,11 @@ func TestMain(m *testing.M) {
 	remote_signer.EnableRethinkSKS = true
 	remote_signer.PushVariables()
 
-	SLog.UnsetTestMode()
+	slog.UnsetTestMode()
 	etc.DbSetup()
 	etc.ResetDatabase()
 	etc.InitTables()
-	SLog.SetTestMode()
+	slog.SetTestMode()
 
 	var kb keyBackend.Backend
 
@@ -67,16 +67,16 @@ func TestMain(m *testing.M) {
 	err = pgpMan.UnlockKey(remote_signer.TestKeyFingerprint, remote_signer.TestKeyPassword)
 
 	if err != nil {
-		SLog.SetError(true)
-		SLog.Error(err)
+		slog.SetError(true)
+		slog.Error(err)
 		os.Exit(1)
 	}
 
 	code := m.Run()
 	etc.ResetDatabase()
-	SLog.UnsetTestMode()
+	slog.UnsetTestMode()
 	etc.Cleanup()
-	SLog.Warn("STOPPING RETHINKDB")
+	slog.Warn("STOPPING RETHINKDB")
 	remote_signer.RQLStop(rql)
 	os.Exit(code)
 }

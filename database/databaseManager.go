@@ -3,8 +3,8 @@ package database
 import (
 	"fmt"
 	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/models"
+	"github.com/quan-to/slog"
 	r "gopkg.in/rethinkdb/rethinkdb-go.v5"
 	"strings"
 	"time"
@@ -17,7 +17,7 @@ type RethinkDbState struct {
 }
 
 var RthState RethinkDbState
-var dbLog = SLog.Scope("DatabaseManager")
+var dbLog = slog.Scope("DatabaseManager")
 
 var tablesToInitialize = []models.TableInitStruct{
 	models.GPGKeyTableInit,
@@ -53,7 +53,7 @@ func DbSetup() {
 
 func InitTables() {
 	if remote_signer.EnableRethinkSKS {
-		SLog.UnsetTestMode()
+		slog.UnsetTestMode()
 		dbLog.Info("Running InitTables")
 		dbs := GetDatabases()
 		conn := GetConnection()
@@ -118,7 +118,7 @@ func Cleanup() {
 		err := RthState.connection.Close()
 
 		if err != nil {
-			SLog.Fatal(err)
+			slog.Fatal(err)
 		}
 		RthState.connection = nil
 	}
@@ -133,7 +133,7 @@ func GetConnection() *r.Session {
 }
 
 func ResetDatabase() {
-	SLog.UnsetTestMode()
+	slog.UnsetTestMode()
 
 	dbLog.Error("Reseting Database")
 	c := GetConnection()
@@ -149,5 +149,5 @@ func ResetDatabase() {
 	time.Sleep(1 * time.Second)
 
 	dbLog.Info("Database reseted")
-	SLog.SetTestMode()
+	slog.SetTestMode()
 }

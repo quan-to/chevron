@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/etc"
 	"github.com/quan-to/remote-signer/models"
+	"github.com/quan-to/slog"
 	"time"
 )
 
-var rtmLog = SLog.Scope("RQL-TM")
+var rtmLog = slog.Scope("RQL-TM")
 
 type RethinkTokenManager struct {
 }

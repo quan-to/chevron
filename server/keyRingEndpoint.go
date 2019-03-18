@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/etc"
 	"github.com/quan-to/remote-signer/keymagic"
 	"github.com/quan-to/remote-signer/models"
+	"github.com/quan-to/slog"
 	"net/http"
 )
 
-var kreLog = SLog.Scope("KeyRing Endpoint")
+var kreLog = slog.Scope("KeyRing Endpoint")
 
 type KeyRingEndpoint struct {
 	sm  etc.SMInterface

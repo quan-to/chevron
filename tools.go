@@ -9,11 +9,11 @@ import (
 	"fmt"
 	"github.com/mewkiz/pkg/osutil"
 	"github.com/pkg/errors"
-	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/models"
 	"github.com/quan-to/remote-signer/openpgp"
 	"github.com/quan-to/remote-signer/openpgp/armor"
 	"github.com/quan-to/remote-signer/openpgp/packet"
+	"github.com/quan-to/slog"
 	"io"
 	"io/ioutil"
 	"math/rand"
@@ -23,7 +23,7 @@ import (
 	"strings"
 )
 
-var toolsLog = SLog.Scope("Tools")
+var toolsLog = slog.Scope("Tools")
 var pgpsig = regexp.MustCompile("(?s)-----BEGIN PGP SIGNATURE-----\n(.*)-----END PGP SIGNATURE-----")
 
 func StringIndexOf(v string, a []string) int {

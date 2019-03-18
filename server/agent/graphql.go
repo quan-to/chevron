@@ -5,9 +5,9 @@ import (
 	"github.com/graphql-go/graphql"
 	"github.com/quan-to/remote-signer"
 	"github.com/quan-to/remote-signer/QuantoError"
-	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/etc"
 	mgql "github.com/quan-to/remote-signer/models/graphql"
+	"github.com/quan-to/slog"
 	"time"
 )
 
@@ -16,7 +16,7 @@ const AuthManagerKey = "AuthManager"
 const HTTPRequestKey = "HTTPRequest"
 const LoggedUserKey = "LoggerUser"
 
-var amGqlLog = SLog.Scope("Agent-GQL")
+var amGqlLog = slog.Scope("Agent-GQL")
 
 var RootManagementQuery = graphql.NewObject(graphql.ObjectConfig{
 	Name: "ManagementQueries",

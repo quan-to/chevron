@@ -7,13 +7,13 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/etc"
 	"github.com/quan-to/remote-signer/models"
+	"github.com/quan-to/slog"
 	"net/http"
 )
 
-var geLog = SLog.Scope("GPG Endpoint")
+var geLog = slog.Scope("GPG Endpoint")
 
 type GPGEndpoint struct {
 	sm  etc.SMInterface

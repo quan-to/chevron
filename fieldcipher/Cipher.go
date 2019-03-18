@@ -10,9 +10,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/openpgp"
 	"github.com/quan-to/remote-signer/openpgp/packet"
+	"github.com/quan-to/slog"
 	"reflect"
 	"strconv"
 	"time"
@@ -30,7 +30,7 @@ func MakeCipherFromASCIIArmoredKeys(publicKeys []string) *Cipher {
 	for i, v := range publicKeys {
 		keys, err := remote_signer.ReadKey(v)
 		if err != nil {
-			SLog.Error("Error parsing key %d: %s", i, err)
+			slog.Error("Error parsing key %d: %s", i, err)
 			continue
 		}
 

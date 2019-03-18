@@ -3,13 +3,13 @@ package server
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/etc"
 	"github.com/quan-to/remote-signer/models"
+	"github.com/quan-to/slog"
 	"net/http"
 )
 
-var intLog = SLog.Scope("Internal Endpoint")
+var intLog = slog.Scope("Internal Endpoint")
 
 type InternalEndpoint struct {
 	sm  etc.SMInterface

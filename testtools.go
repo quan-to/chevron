@@ -2,7 +2,7 @@ package remote_signer
 
 import (
 	"fmt"
-	"github.com/quan-to/remote-signer/SLog"
+	"github.com/quan-to/slog"
 	"math/rand"
 	"net"
 	"os"
@@ -125,7 +125,7 @@ func RQLStart() (*exec.Cmd, error) {
 		return RQLStart()
 	}
 
-	SLog.Info("Starting RethinkDB")
+	slog.Info("Starting RethinkDB")
 	cmd := exec.Command("rethinkdb", "--no-http-admin", "--bind", "127.0.0.1", "--cluster-port", fmt.Sprintf("%d", genPort+200), "--driver-port", fmt.Sprintf("%d", genPort))
 	//cmd.Stdout = os.Stdout
 	//cmd.Stderr = os.Stderr
@@ -133,13 +133,13 @@ func RQLStart() (*exec.Cmd, error) {
 
 	if err != nil {
 		b, _ := cmd.Output()
-		SLog.Error(string(b))
+		slog.Error(string(b))
 		panic(fmt.Errorf("cannot start rethinkdb: %s", err))
 	}
 
 	RethinkDBPort = genPort
 
-	SLog.Info("Waiting for rethink to settle")
+	slog.Info("Waiting for rethink to settle")
 	time.Sleep(time.Second)
 	retry := 0
 	started := false
@@ -147,7 +147,7 @@ func RQLStart() (*exec.Cmd, error) {
 	for retry < 5 {
 		conn, err := net.DialTimeout("tcp", connString, time.Millisecond*500)
 		if err != nil {
-			SLog.Error(err)
+			slog.Error(err)
 			retry++
 			time.Sleep(time.Second)
 			continue
@@ -165,7 +165,7 @@ func RQLStart() (*exec.Cmd, error) {
 }
 
 func RQLStop(cmd *exec.Cmd) {
-	SLog.Info("Stopping RethinkDB")
+	slog.Info("Stopping RethinkDB")
 	err := cmd.Process.Signal(os.Kill)
 	if err != nil {
 		panic(fmt.Errorf("error killing rethinkdb: %s", err))

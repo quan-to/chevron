@@ -356,7 +356,7 @@ func TestVerifySignatureQuanto(t *testing.T) {
 		var errObj QuantoError.ErrorObject
 		err := json.Unmarshal(d, &errObj)
 		errorDie(err, t)
-		slog.Debug(errObj.StackTrace)
+		log.Debug(errObj.StackTrace)
 		errorDie(fmt.Errorf(errObj.Message), t)
 	}
 
@@ -397,7 +397,7 @@ func TestSign(t *testing.T) {
 
 	errorDie(err, t)
 
-	slog.Debug("Signature: %s", string(d))
+	log.Debug("Signature: %s", string(d))
 	// endregion
 	// region Verify Signature
 	verifyBody := models.GPGVerifySignatureData{
@@ -510,7 +510,7 @@ func TestSignQuanto(t *testing.T) {
 
 	errorDie(err, t)
 
-	slog.Debug("Signature: %s", string(d))
+	log.Debug("Signature: %s", string(d))
 	// endregion
 	// region Verify Signature
 	verifyBody := models.GPGVerifySignatureData{

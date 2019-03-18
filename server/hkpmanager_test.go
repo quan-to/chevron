@@ -110,7 +110,7 @@ func TestLookup(t *testing.T) {
 	remote_signer.PushVariables()
 	defer remote_signer.PopVariables()
 	remote_signer.EnableRethinkSKS = true
-	//SLog.UnsetTestMode()
+	//log.UnsetTestMode()
 	// Ensure key is in SKS
 	key, _ := gpg.GetPublicKeyAscii(testKeyFingerprint)
 	_ = keymagic.PKSAdd(key)

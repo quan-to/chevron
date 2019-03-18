@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/logrusorgru/aurora"
 	"github.com/quan-to/remote-signer/QuantoError"
-	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/models"
+	"github.com/quan-to/slog"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -17,9 +17,9 @@ import (
 
 const httpInternalTimestamp = "___HTTP_INTERNAL_TIMESTAMP___"
 
-var httpToolsLog = SLog.Scope("HTTP Tools")
+var httpToolsLog = slog.Scope("HTTP Tools")
 
-func WriteJSON(data interface{}, statusCode int, w http.ResponseWriter, r *http.Request, logI *SLog.Instance) {
+func WriteJSON(data interface{}, statusCode int, w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
 
 	if logI == nil {
 		logI = httpToolsLog
@@ -42,7 +42,7 @@ func WriteJSON(data interface{}, statusCode int, w http.ResponseWriter, r *http.
 	LogExit(logI, r, statusCode, n)
 }
 
-func UnmarshalBodyOrDie(outData interface{}, w http.ResponseWriter, r *http.Request, logI *SLog.Instance) bool {
+func UnmarshalBodyOrDie(outData interface{}, w http.ResponseWriter, r *http.Request, logI *slog.Instance) bool {
 	body, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
@@ -64,35 +64,35 @@ func UnmarshalBodyOrDie(outData interface{}, w http.ResponseWriter, r *http.Requ
 	return true
 }
 
-func InvalidFieldData(field string, message string, w http.ResponseWriter, r *http.Request, logI *SLog.Instance) {
+func InvalidFieldData(field string, message string, w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.InvalidFieldData, field, message, nil), 400, w, r, logI)
 }
 
-func PermissionDenied(field string, message string, w http.ResponseWriter, r *http.Request, logI *SLog.Instance) {
+func PermissionDenied(field string, message string, w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.PermissionDenied, field, message, nil), 400, w, r, logI)
 }
 
-func NotFound(field string, message string, w http.ResponseWriter, r *http.Request, logI *SLog.Instance) {
+func NotFound(field string, message string, w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.NotFound, field, message, nil), 400, w, r, logI)
 }
 
-func NotImplemented(w http.ResponseWriter, r *http.Request, logI *SLog.Instance) {
+func NotImplemented(w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.NotImplemented, "server", "This call is not implemented", nil), 400, w, r, logI)
 }
 
-func CatchAllError(data interface{}, w http.ResponseWriter, r *http.Request, logI *SLog.Instance) {
+func CatchAllError(data interface{}, w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.InternalServerError, "server", "There was an internal server error.", data), 500, w, r, logI)
 }
 
-func CatchAllRouter(w http.ResponseWriter, r *http.Request, logI *SLog.Instance) {
+func CatchAllRouter(w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.NotFound, "path", "The specified URL does not exists.", nil), 404, w, r, logI)
 }
 
-func InternalServerError(message string, data interface{}, w http.ResponseWriter, r *http.Request, logI *SLog.Instance) {
+func InternalServerError(message string, data interface{}, w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.InternalServerError, "server", message, data), 500, w, r, logI)
 }
 
-func LogExit(slog *SLog.Instance, r *http.Request, statusCode int, bodyLength int) {
+func LogExit(slog *slog.Instance, r *http.Request, statusCode int, bodyLength int) {
 	method := aurora.Bold(r.Method).Cyan()
 	hts := r.Header.Get(httpInternalTimestamp)
 	ts := float64(0)

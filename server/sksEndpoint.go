@@ -4,15 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/quan-to/remote-signer/SLog"
 	"github.com/quan-to/remote-signer/etc"
 	"github.com/quan-to/remote-signer/keymagic"
 	"github.com/quan-to/remote-signer/models"
+	"github.com/quan-to/slog"
 	"net/http"
 	"strconv"
 )
 
-var sksLog = SLog.Scope("SKS Endpoint")
+var sksLog = slog.Scope("SKS Endpoint")
 
 type SKSEndpoint struct {
 	sm  etc.SMInterface
