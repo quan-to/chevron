@@ -7,8 +7,14 @@ require (
 	github.com/Microsoft/go-winio v0.4.12 // indirect
 	github.com/NYTimes/gziphandler v1.1.1 // indirect
 	github.com/SAP/go-hdb v0.14.0 // indirect
+	github.com/akavel/rsrc v0.8.0 // indirect
 	github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190309101156-ba719155c644 // indirect
 	github.com/araddon/gou v0.0.0-20190110011759-c797efecbb61 // indirect
+	github.com/asticode/go-astiamqp v1.0.0 // indirect
+	github.com/asticode/go-astilectron v0.8.0
+	github.com/asticode/go-astilectron-bootstrap v0.0.0-20180616141213-b3211646d205
+	github.com/asticode/go-astilectron-bundler v0.0.0-20190221164801-6b22eafb3c85 // indirect
+	github.com/asticode/go-bindata v0.0.0-20151023091102-a0ff2567cfb7 // indirect
 	github.com/aws/aws-sdk-go v1.17.14 // indirect
 	github.com/boombuler/barcode v1.0.0 // indirect
 	github.com/briankassouf/jose v0.9.1 // indirect
@@ -95,6 +101,7 @@ require (
 	github.com/pquerna/otp v1.1.0 // indirect
 	github.com/quan-to/slog v0.0.0-20190317205605-56a2b4159924
 	github.com/ryanuber/go-glob v1.0.0 // indirect
+	github.com/sam-kamerer/go-plister v1.1.2 // indirect
 	github.com/samuel/go-zookeeper v0.0.0-20180130194729-c4fab1ac1bec // indirect
 	github.com/soheilhy/cmux v0.1.4 // indirect
 	github.com/streadway/amqp v0.0.0-20190225234609-30f8ed68076e // indirect
