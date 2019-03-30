@@ -1,15 +1,12 @@
 Quanto Remote Signer (QRS)
 ====================
 
-[![MIT License](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://tldrlegal.com/license/mit-license)
+[![MIT License](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://tldrlegal.com/license/mit-license) [![Coverage Status](https://coveralls.io/repos/github/quan-to/remote-signer/badge.svg?branch=GoLang)](https://coveralls.io/github/quan-to/remote-signer?branch=master) [![Build Status](https://travis-ci.org/quan-to/remote-signer.svg?branch=master)](https://travis-ci.org/quan-to/remote-signer)
 
 A simple Web Server to act as a GPG Creator / Signer / Verifier. This abstracts the use of the GPG and makes easy to sign / verify any GPG document using just a POST request.
 
 Please notice that this application is *NOT inteded to ran public in the internet*. This is inteded to be a helper service to your application be able to sign / verify data (same as local gpg in the system). Because of that, it only listens for localhost.
 
-It is used internally the [racerxdl's](https://github.com/racerxdl) [AppServer](https://github.com/racerxdl/AppServer) to provide a REST web server. It is authorized by the owner to be licensed at MIT here (check the Owner Signature at the commit that adds this README as the proof)
-
-*If you want to use RethinkDB SKS Driver please check the license of RethinkDb.Driver since for SSL/TLS connections to rethinkdb (for an unknown reason) you need to pay a license fee.*
 
 TODO
 ====
@@ -233,92 +230,93 @@ Environment Variables
 
 These are the Environment Variables that you can set to manage the webserver:
 
+*   `PRIVATE_KEY_FOLDER` => Folder to load / store encrypted private keys. _(defaults to './keys')_
 *   `SYSLOG_IP` => IP of the Syslog Server to send Console Messages _(defaults to '127.0.0.1')_ *Does not apply for Windows*
 *   `SYSLOG_FACILITY` => Facility of the Syslog to use. _(defaults to 'LOG_USER')_
-*   `PRIVATE_KEY_FOLDER` => Folder to load / store encrypted private keys. _(defaults to './keys')_
 *   `SKS_SERVER` => SKS Server to fetch / put public keys. _(defaults to 'http://pgp.mit.edu/')_
+*   `KEY_PREFIX` => Prefix of the name of the keys to load (for example a key prefix `test_` will load any key named `test_XXXX`).
 *   `MAX_KEYRING_CACHE_SIZE` => Maximum Number of Public Keys to cache (does not include Private Keys derived Public Keys). _(defaults to 1000)_
+*   `ENABLE_RETHINKDB_SKS` => Enables Internal SKS Server using RethinkDB (default: false)
+*   `RETHINKDB_HOST` => Hostname of RethinkDB Server (default: "rethinkdb")
+*   `RETHINKDB_USERNAME` => Username of RethinkDB Server (default "admin")
+*   `RETHINKDB_PASSWORD` => Password of RethinKDB Server
+*   `RETHINK_TOKEN_MANAGER` => If a TokenManager using RethinkDB Should be used (defaults to `false`, uses MemoryTokenManager) [Requires ENABLE_RETHINK_SKS]
+*   `RETHINK_AUTH_MANAGER` => If a AuthManager using RethinkDB Should be used (defaults to `false`, uses JSONAuthManager) [Requires ENABLE_RETHINK_SKS]
+*   `RETHINKDB_PORT` => Port of RethinkDB Server (default 28015)
+*   `AGENT_TARGET_URL` => Target URL for Quanto Agent (defaults to `https://quanto-api.com.br/all`)
+*   `AGENT_KEY_FINGERPRINT` => Default Key FingerPrint for Agent
+*   `AGENT_BYPASS_LOGIN` => If the Login for using Quanto Agent should be bypassed. *DO NOT USE THIS IN EXPOSED REMOTESIGNER*
+*   `AGENT_EXTERNAL_URL` => External URL used by GraphiQL to access agent. Defaults to `/agent`
+*   `AGENTADMIN_EXTERNAL_URL` => External URL used by GraphiQL to access agent admin. Defaults to `/agentAdmin`
+*   `DATABASE_NAME` => RethinkDB Database Name (default "remote_signer")
+*   `MASTER_GPG_KEY_PATH` => Master GPG Key Path
+*   `MASTER_GPG_KEY_PASSWORD_PATH` => Master GPG Key Password Path
+*   `MASTER_GPG_KEY_BASE64_ENCODED` => If the Master GPG Key is base64 encoded (default: true)
+*   `VAULT_ADDRESS` => Hashicorp Vault URL
+*   `VAULT_SKIP_VERIFY` => Hashicorp Vault Skip Verify SSL Certs on Connection
+*   `VAULT_ROOT_TOKEN` => Hashicorp Vault Root Token
+*   `VAULT_BACKEND` => Hashicorp Vault Backend (for example `secret`)
+*   `VAULT_STORAGE` => If a Hashicorp Vault should be used to store private keys instead of the disk
+*   `VAULT_NAMESPACE` => if a Hashicorp Vault Namespace to use (appended to backend, for example if namespace is `remote-signer` the keys are stored under `secret/remote-signer`)
+*   `HTTP_PORT` => HTTP Port that Remote Signer will run
+*   `READONLY_KEYPATH` => If the keypath is readonly. If `true` then it will create a temporary folder in `/tmp` and copy all keys to there so it can work over it. 
 
+Cluster Mode
+============
+
+TODO
+
+Vault Backend
+=============
+
+TODO
+
+Quanto Agent
+============
+
+TODO
+
+Binary Builds
+=============
+
+TODO
+
+Docker
+======
+
+TODO
 
 Building
 ========
 
-# For Windows
-Just use the newest version of Visual Studio and hit build. You should have a executable in folder `bin/Debug` or `bin/Release`.
+# Prepare
 
-# For Linux
-You will need `mono` and `nuget`. On `Ubuntu 16.04` you can run:
+First of all, you should be aware how to configure your golang environment (which should be similar to all Operating Systems). For a more specific how-to please refer to official golang install: https://golang.org/doc/install
+
+# Building (any os)
+
+Since Remote Signer is a pure golang program, its build instructions are the same for *any* operating system. 
 ```bash
-sudo apt install mono-complete nuget
-git clone https://github.com/quan-to/remote-signer
-cd remote-signer
-nuget restore
-msbuild /p:Configuration=Release
-mkdir binaries
-cp RemoteSigner/bin/Release/* binaries
-mkdir binaries/keys
-cd binaries
-```
-Aditionally, you can compile an executable that does not need mono to be ran by using mkbundle:
-
-```bash
-mkbundle -z --static --deps RemoteSigner.exe -L /usr/lib/mono/4.5 -o RemoteSigner
+cd cmd/server
+go build -o remote-signer
 ```
 
-This will generate a static binary called `RemoteSigner`.
+If you're on windows, run instead
 
-# For Mac
-
-You will need `mono` and `nuget`. With [Brew](https://brew.sh/) you can run:
-
-```bash
-brew install mono nuget
-git clone https://github.com/quan-to/remote-signer
-cd remote-signer
-nuget restore
-xbuild /p:Configuration=Release
-cd RemoteSigner/bin/Release/
-mkdir keys
-mono RemoteSigner.exe
+```powershell
+cd cmd/server
+go build -o remote-signer.exe
 ```
 
-Aditionally, you can compile an executable that does not need mono to be ran by using mkbundle:
+# Adding your private key into Remote Signer
 
-```bash
-export CC="cc -framework CoreFoundation -lobjc -liconv "
-mkbundle -z --static --deps RemoteSigner.exe -L /usr/local/Cellar/mono/5.4.1.6/lib/mono/4.5 -o RemoteSigner
+To add your private key, you can use the AddPrivateKey endpoint at `/keyRing/addPrivateKey` with the following payload:
+```json
+{
+  "EncryptedPrivateKey": "-----BEGIN PGP PRIVATE KEY BLOCK-----\n\n (...) -----END PGP PRIVATE KEY BLOCK-----\n",
+  "SaveToDisk": true,
+  "Password": "12344321"
+}
 ```
 
-This will generate a static binary called RemoteSigner.
-
-# Adding your private key into keys folder
-
-If you're using `gpg` command line tools, you can export your key directly into keys folder in text format:
-
-```bash
-gpg --export-secret-keys -a <your fingerprint> > ./keys/the-name-you-want.key
-```
-> note: the `.key` extension is not required although it's recommended for better understanding.
-
-Enabling Syslog Support
-=======================
-
-To be able to output to syslog, you need to add UDP support to syslog server.
-
-Edit the file `/etc/rsyslog.conf` and search for these lines:
-
-```
-# provides UDP syslog reception
-#module(load="imudp")
-#input(type="imudp" port="514")
-```
-
-If you find, uncomment the last two, if you dont find, just add to the end of the file.
-
-```
-# provides UDP syslog reception
-module(load="imudp")
-input(type="imudp" port="514")
-```
-
-Then restart syslog. On Ubuntu: `service rsyslog restart`
+The `Password` field is optional, if provided, it will store the password along the key and auto-unlock when open. If not, you should call `UnlockKey` to be able to use the key.

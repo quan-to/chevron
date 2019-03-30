@@ -1,0 +1,199 @@
+<html>
+<head>
+    <style>
+        body {
+            height: 100%;
+            margin: 0;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        #graphiql {
+            height: 100vh;
+        }
+
+        #config {
+            height: 50px;
+            display: flex;
+            /* justify-content: center; */
+            align-items: center;
+            margin-left: 20px;
+            margin-right: 20px;
+        }
+
+        #serverUrl {
+            width: 300px;
+            margin-left: 20px;
+            margin-right: 20px;
+        }
+    </style>
+
+    <script src="/graphiql/es6-promise.auto.min.js"></script>
+    <script src="/graphiql/fetch.min.js"></script>
+    <script src="/graphiql/react.min.js"></script>
+    <script src="/graphiql/react-dom.min.js"></script>
+    <link rel="stylesheet" href="/graphiql/graphiql.css"/>
+    <script src="/graphiql/graphiql.js"></script>
+
+</head>
+<body>
+<div id="config">
+    <div id="serverConfig">
+        Server URL: <input type="text" id="serverUrl" value="{SERVER_URL}"
+                           onkeypress="refreshurl()"/>
+        Logged in as: <div id="loggedName" style="display: inline"></div>
+        Token: <input type="text" id="token" value="" onkeypress="refreshurl()" disabled/>
+    </div>
+    <div id="loginConfig">
+        Username: <input type="text" id="username" value="admin"/> 
+        Password: <input type="password" id="password" value=""/> 
+        <button value="Login" onclick="login()">Login</button>
+    </div>
+</div>
+<div id="graphiql">Loading...</div>
+<script>
+    if (typeof(Storage) !== "undefined") {
+        var v = localStorage.getItem("serverUrl");
+        document.getElementById("serverUrl").value = v && v.length > 0 ? v : document.getElementById("serverUrl").value;
+    } else {
+        console.log('No webstorage support!')
+    }
+    function login() {
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;
+        var loginPayload = {
+            "query" : "mutation Login($username: String!, $password: String!) { Login(username: $username, password: $password) { Value UserName ExpirationDateTimeISO UserFullName  }}",
+            "variables":{
+                "username": username,
+                "password": password
+            },
+            "operationName":"Login",
+            "_timestamp" : Date.now(),
+            "_timeUniqueId": Date.now() + 'agent',
+        };
+
+        var xhr = new XMLHttpRequest();
+
+        xhr.open("POST", "{AGENT_ADMIN_URL}", true);
+
+        xhr.setRequestHeader("Content-type", "application/json");
+        xhr.onreadystatechange = function() {
+            if (this.readyState === 4 && this.status === 200) {
+                var d = JSON.parse(this.responseText);
+                if (d.errors && d.errors.length > 0) {
+                    alert(d.errors[0].message);
+                } else {
+                    d = d.data.Login;
+                    document.getElementById('token').value = d.Value;
+                    document.getElementById('loggedName').innerHTML = d.UserFullName;
+                    document.getElementById("password").value = '';
+                    document.getElementById('loginConfig').style.display = "none";
+                    document.getElementById('serverConfig').style.display = "block";
+                    document.getElementById('graphiql').style.display = 'block';
+                    refreshurl();
+                }
+                
+            }
+        };
+        xhr.send(JSON.stringify(loginPayload));
+    }
+    
+    document.getElementById('serverConfig').style.display = "none";
+    var search = window.location.search;
+    var parameters = {};
+    search.substr(1).split('&').forEach(function (entry) {
+        var eq = entry.indexOf('=');
+        if (eq >= 0) {
+            parameters[decodeURIComponent(entry.slice(0, eq))] =
+                decodeURIComponent(entry.slice(eq + 1));
+        }
+    });
+    // if variables was provided, try to format it.
+    if (parameters.variables) {
+        try {
+            parameters.variables =
+                JSON.stringify(JSON.parse(parameters.variables), null, 2);
+        } catch (e) {
+            // Do nothing, we want to display the invalid JSON as a string, rather
+            // than present an error.
+        }
+    }
+
+    function onEditQuery(newQuery) {
+        parameters.query = newQuery;
+        updateURL();
+    }
+
+    function onEditVariables(newVariables) {
+        parameters.variables = newVariables;
+        updateURL();
+    }
+
+    function onEditOperationName(newOperationName) {
+        parameters.operationName = newOperationName;
+        updateURL();
+    }
+
+    function updateURL() {
+        var newSearch = '?' + Object.keys(parameters).filter(function (key) {
+            return Boolean(parameters[key]);
+        }).map(function (key) {
+            return encodeURIComponent(key) + '=' +
+                encodeURIComponent(parameters[key]);
+        }).join('&');
+        history.replaceState(null, null, newSearch);
+    }
+
+    function refreshurl() {
+        gphi.setState({"response": "", "schema": undefined});
+        gphi._fetchSchema();
+    }
+
+    function graphQLFetcher(graphQLParams) {
+        var headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'serverUrl': document.getElementById('serverUrl').value,
+        };
+        var token = document.getElementById('token').value;
+        
+        if (token.length !== 0) {
+            headers.proxyToken = token
+        }
+        
+        if (typeof(Storage) !== "undefined") {
+            localStorage.setItem("serverUrl", document.getElementById("serverUrl").value);
+        }
+        
+        return fetch('{AGENT_URL}', {
+            method: 'post',
+            headers: headers,
+            body: JSON.stringify(graphQLParams),
+            credentials: 'include',
+        }).then(function (response) {
+            return response.text();
+        }).then(function (responseBody) {
+            try {
+                return JSON.parse(responseBody);
+            } catch (error) {
+                return responseBody;
+            }
+        });
+    }
+
+    var gphi = ReactDOM.render(
+        React.createElement(GraphiQL, {
+            fetcher: graphQLFetcher,
+            query: parameters.query,
+            variables: parameters.variables,
+            operationName: parameters.operationName,
+            onEditQuery: onEditQuery,
+            onEditVariables: onEditVariables,
+            onEditOperationName: onEditOperationName
+        }),
+        document.getElementById('graphiql')
+    );
+    document.getElementById('graphiql').style.display = 'none';
+</script>
+</body>
+</html>
