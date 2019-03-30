@@ -44,8 +44,8 @@ func Run() {
 			Options: &astilectron.WindowOptions{
 				BackgroundColor: astilectron.PtrStr("#333"),
 				Center:          astilectron.PtrBool(true),
-				Height:          astilectron.PtrInt(1600),
-				Width:           astilectron.PtrInt(900),
+				Height:          astilectron.PtrInt(900),
+				Width:           astilectron.PtrInt(1600),
 			},
 		}},
 	}
