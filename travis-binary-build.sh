@@ -4,6 +4,8 @@ BUILD_LINUX_ARCH="arm arm64 386 amd64"
 BUILD_OTHER_ARCH="386 amd64"
 BUILD_OS="windows freebsd darwin openbsd"
 
+export GOCACHE=/tmp/gocache
+
 TAG=`git describe --exact-match --tags HEAD`
 if [[ $? -eq 0 ]];
 then
@@ -52,11 +54,34 @@ then
   done
   # ----------------------------------- #
   echo "Bundling Agent-UI"
-  cd cmd/agent-ui
+  cd agent-ui
+
+  echo "Getting Dependencies"
+  GOOS=linux go get ./...
+  GOOS=darwin go get ./...
+  GOOS=windows go get ./...
+
+  GO111MODULE=off GOOS=linux go get ./...
+  GO111MODULE=off GOOS=darwin go get ./...
+  GO111MODULE=off GOOS=windows go get ./...
+
+  # ----------------------------------- #
+  echo "Installing Astilectron"
+  go get github.com/asticode/go-astilectron
+  go get github.com/asticode/go-astilectron-bootstrap
+  go get github.com/asticode/go-astilectron-bundler/...
+  go install github.com/asticode/go-astilectron-bundler/astilectron-bundler
+
+  GO111MODULE=off go get github.com/asticode/go-astilectron
+  GO111MODULE=off go get github.com/asticode/go-astilectron-bootstrap
+  GO111MODULE=off go get github.com/asticode/go-astilectron-bundler/...
+  GO111MODULE=off go install github.com/asticode/go-astilectron-bundler/astilectron-bundler
+
+  echo "Bundling it"
   ./bundleit.sh
-  zip -r ../../zips/AgentUI.app.zip output/darwin-amd64/AgentUI.app
-  zip -r ../../zips/AgentUI-windows-amd64.zip output/windows-amd64/AgentUI.exe
-  zip -r ../../zips/AgentUI-linux-amd64.zip output/linux-amd64/AgentUI
+  zip -9 -r ../../zips/AgentUI.app.zip output/darwin-amd64/AgentUI.app
+  zip -9 -r ../../zips/AgentUI-windows-amd64.zip output/windows-amd64/AgentUI.exe
+  zip -9 -r ../../zips/AgentUI-linux-amd64.zip output/linux-amd64/AgentUI
   cd ../..
   # ----------------------------------- #
   echo "Zip Files: "

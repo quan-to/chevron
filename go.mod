@@ -88,6 +88,7 @@ require (
 	github.com/mattbaird/elastigo v0.0.0-20170123220020-2fe47fd29e4b // indirect
 	github.com/mewkiz/pkg v0.0.0-20190222151137-b7948a1ad1b1
 	github.com/michaelklishin/rabbit-hole v1.5.0 // indirect
+	github.com/mitchellh/gox v1.0.0 // indirect
 	github.com/mitchellh/hashstructure v1.0.0 // indirect
 	github.com/mitchellh/pointerstructure v0.0.0-20170205204203-f2329fcfa9e2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
