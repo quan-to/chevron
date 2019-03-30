@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-astilectron-bundler -d -w -v
+astilectron-bundler -logger-app-name=AgentUI -d -w -v
