@@ -21,7 +21,7 @@ before_install:
   - unzip vault_1.0.2_linux_amd64.zip
   - sudo cp vault /usr/bin
   - cd cmd/agent-ui
-  - ./placeholder.sh
+  - ./placeholders.sh
   - cd ../..
 
 script:
