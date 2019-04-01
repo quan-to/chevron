@@ -29,10 +29,20 @@ func Run() {
 						Accelerator: astilectron.NewAccelerator("Alt", "CommandOrControl", "I"),
 						Role:        astilectron.MenuItemRoleToggleDevTools,
 					},
+					{
+						Label: astilectron.PtrStr("Add Private Key"),
+						OnClick: func(e astilectron.Event) (deleteListener bool) {
+							_ = w.SendMessage(bootstrap.MessageOut{
+								Name: messageLoadPrivateKey,
+							})
+
+							return
+						},
+					},
 				},
 			},
 		},
-		OnWait: func(a *astilectron.Astilectron, ws []*astilectron.Window, _ *astilectron.Menu, _ *astilectron.Tray, _ *astilectron.Menu) error {
+		OnWait: func(_ *astilectron.Astilectron, ws []*astilectron.Window, _ *astilectron.Menu, _ *astilectron.Tray, _ *astilectron.Menu) error {
 			log.Info("Astilectron backend is ready")
 			w = ws[0]
 			return nil

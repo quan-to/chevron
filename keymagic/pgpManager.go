@@ -307,6 +307,28 @@ func (pm *PGPManager) LoadKeyFromKB(fingerPrint string) error {
 	return nil
 }
 
+func (pm *PGPManager) GetPrivateKeyInfo(fingerPrint string) *models.KeyInfo {
+	for k, e := range pm.entities {
+		v := e.PrivateKey
+		if v == nil {
+			continue
+		}
+
+		if remote_signer.CompareFingerPrint(k, fingerPrint) {
+			z, _ := v.BitLength()
+			return &models.KeyInfo{
+				FingerPrint:           k,
+				Identifier:            remote_signer.SimpleIdentitiesToString(pm.keyIdentity[k]),
+				Bits:                  int(z),
+				ContainsPrivateKey:    true,
+				PrivateKeyIsDecrypted: pm.decryptedPrivateKeys[k] != nil,
+			}
+		}
+	}
+
+	return nil
+}
+
 func (pm *PGPManager) GetLoadedPrivateKeys() []models.KeyInfo {
 	keyInfos := make([]models.KeyInfo, 0)
 

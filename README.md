@@ -1,7 +1,7 @@
 Quanto Remote Signer (QRS)
 ====================
 
-[![MIT License](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://tldrlegal.com/license/mit-license) [![Coverage Status](https://coveralls.io/repos/github/quan-to/remote-signer/badge.svg?branch=GoLang)](https://coveralls.io/github/quan-to/remote-signer?branch=master) [![Build Status](https://travis-ci.org/quan-to/remote-signer.svg?branch=master)](https://travis-ci.org/quan-to/remote-signer)
+[![MIT License](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://tldrlegal.com/license/mit-license) [![Coverage Status](https://coveralls.io/repos/github/quan-to/remote-signer/badge.svg?branch=master)](https://coveralls.io/github/quan-to/remote-signer?branch=master) [![Build Status](https://travis-ci.org/quan-to/remote-signer.svg?branch=master)](https://travis-ci.org/quan-to/remote-signer)
 
 A simple Web Server to act as a GPG Creator / Signer / Verifier. This abstracts the use of the GPG and makes easy to sign / verify any GPG document using just a POST request.
 

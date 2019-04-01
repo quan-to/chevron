@@ -30,4 +30,5 @@ type PGPInterface interface {
 	MinKeyBits() int
 	GenerateTestKey() (string, error)
 	GetPrivate(fingerPrint string) openpgp.EntityList
+	GetPrivateKeyInfo(fingerPrint string) *models.KeyInfo
 }

@@ -20,6 +20,8 @@ func main() {
 	flag.Parse()
 	slog.SetDebug(*debug)
 
+	Migrate()
+
 	// Run bootstrap
 	log.Debug("Running app built at %s", BuiltAt)
 	Begin()

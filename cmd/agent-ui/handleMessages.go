@@ -9,13 +9,16 @@ import (
 )
 
 const (
-	messageLog             = "log"
-	messageSign            = "sign"
-	messageEncrypt         = "encrypt"
-	messageDecrypt         = "decrypt"
-	messageAddPrivateKey   = "addPrivateKey"
-	messageUnlockKey       = "unlockKey"
-	messageListPrivateKeys = "listKeys"
+	messageError                = "error"
+	messageLog                  = "log"
+	messageSign                 = "sign"
+	messageEncrypt              = "encrypt"
+	messageDecrypt              = "decrypt"
+	messageAddPrivateKey        = "addPrivateKey"
+	messageUnlockKey            = "unlockKey"
+	messageListPrivateKeys      = "listKeys"
+	messageLoadPrivateKey       = "loadPrivateKey"
+	messageLoadPrivateKeyResult = "loadPrivateKeyResult"
 )
 
 var electronLog = slog.Scope("Electron")
@@ -23,6 +26,30 @@ var electronLog = slog.Scope("Electron")
 // handleMessages handles messages
 func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload interface{}, err error) {
 	switch m.Name {
+	case messageLoadPrivateKey:
+		var paths []string
+		if err = json.Unmarshal(m.Payload, &paths); err != nil {
+			payload = err.Error()
+			return
+		}
+		hasErrors, errs := AddKeys(paths)
+		if hasErrors {
+			for i, v := range errs {
+				if v != "" {
+					log.Error("Error processing key %d (%s): %s", i, paths[i], v)
+				}
+			}
+			_ = w.SendMessage(bootstrap.MessageOut{
+				Name:    messageError,
+				Payload: errs,
+			})
+			return errs, fmt.Errorf("one or more keys cannot be loaded")
+		}
+		_ = w.SendMessage(bootstrap.MessageOut{
+			Name:    messageLoadPrivateKeyResult,
+			Payload: "OK",
+		})
+		return "OK", nil
 	case messageListPrivateKeys:
 		return ListPrivateKeys()
 	case messageSign:
