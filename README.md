@@ -1,7 +1,7 @@
 Quanto Remote Signer (QRS)
 ====================
 
-[![MIT License](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://tldrlegal.com/license/mit-license) [![Coverage Status](https://coveralls.io/repos/github/quan-to/remote-signer/badge.svg?branch=master)](https://coveralls.io/github/quan-to/remote-signer?branch=master) [![Build Status](https://travis-ci.org/quan-to/remote-signer.svg?branch=master)](https://travis-ci.org/quan-to/remote-signer)
+[![MIT License](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://tldrlegal.com/license/mit-license) [![Coverage Status](https://coveralls.io/repos/github/quan-to/remote-signer/badge.svg?branch=GoLang)](https://coveralls.io/github/quan-to/remote-signer?branch=master) [![Build Status](https://travis-ci.org/quan-to/remote-signer.svg?branch=master)](https://travis-ci.org/quan-to/remote-signer)
 
 A simple Web Server to act as a GPG Creator / Signer / Verifier. This abstracts the use of the GPG and makes easy to sign / verify any GPG document using just a POST request.
 
@@ -62,74 +62,10 @@ Before any sign operation can be done, you need to decrypt the loaded private ke
 ```
 
 #### Signing Data
-
-For signing data, the first thing is to make sure the key is loaded and decrypted. Then encode the data you want to sign in Base64. Let's take for example the following text to sign:
-
-```
-Terrible connections lead to terrible users
-```
-
-We can base64 encode (for example in shellscript):
-```bash
-echo "Terrible Connections lead to Terrible Users" | base64
-VGVycmlibGUgQ29ubmVjdGlvbnMgbGVhZCB0byBUZXJyaWJsZSBVc2Vycwo=
-```
-
-And make a POST request to `/remoteSigner/gpg/sign` with the following JSON payload:
-```json
-{
-  "Base64Data": "VGVycmlibGUgQ29ubmVjdGlvbnMgbGVhZCB0byBUZXJyaWJsZSBVc2Vycwo=",
-  "FingerPrint": "D7362B4CC546DB11"
-}
-```
-Leading to a Ascii Armored GPG Detached Signature:
-```
------BEGIN PGP SIGNATURE-----
-Version: BCPG C# v1.8.1.0
-
-iQIcBAABCgAGBQJaaldaAAoJENc2K0zFRtsRSFoP+gIf8iKOX0+jOJzXis8yGdb6
-yYiDq2iKKhLKrMR110F5gWOkbizLVut47XuR9zj6RBWvE2yd2YUJS/bom2A1F+4n
-UZMdwvk0frpsoJPbwu5wjHKUuWTar3H8dgd5Wdx3BaNlr/j2JvTOq6/MGBzBJQ9y
-39vve5KQnMzimKcKSUga2RY/5dUpGGJFvWKB1KNoh/jGBG7LxqA2zVh+o1b8cWcE
-BW9Qk1fq5j9q+N68LJ9SGuHXALrxVXeR6Z9GGQjcPIwZbTYhPt1IKgr20pvvCc/6
-GaXRSEkcacike+zNjLgMewL4k3/wRMceVEq+FKT1RtGciEr6dd+WsAbPA7DzoOmn
-XtrkCzCFNay9F7AHM1eopYP5qROEOCIBi+vXPLLAsZSua8cPd8DUxmNDDAc9Cq+F
-DCD/v3FZXoqmTmNaJ5QJi6hW8lvUMK9KDzN51CmlOoICyu8BInPZIf0VO4NLlD/d
-v9CR+mHaHWmYcSEpoI4I+YpNB9JmxwIFd8+KluqkQ5tzixBeVx5O0gO2yuStG0Le
-mZTOf886+cl49KwOBzZZS37lx6VCxgMTI3dgUL+4r4L1em4QmOjEoNu0fCbigkoP
-KZ3OYGRhhp3dsmIIBuOWC+6PvbzNKApaph4wH4ysLZDP7/DEtPLC5msuEYW5QcJt
-TPTWS9moWewsplQazivx
-=fEEJ
------END PGP SIGNATURE-----
-```
-
-You might also want to get directly into *Quanto Signature* format (`FingerPrint_Hash_Signature`). For doing so you can send the same payload to `/remoteSigner/gpg/signQuanto` leading to:
-
-```
-D7362B4CC546DB11_SHA512_iQIcBAABCgAGBQJaale3AAoJENc2K0zFRtsRe3IP/jVE19IeT9fWXl1wbSfZ4VLRY8HePogfyGMVELrkqoRQjUwQB3s2cBio/uAZNNzyvYGqkdFVeeSO83GRAsobts8Q94Q//jAJxeYDy6qAzs6JbzOYAf1b8KWhjzosQDnvmqlvyH+95IoxTEXcDK/WFox5XrZGqRda3rlv+9CywzYreAiFHnSuF5LFJ0K+KkPCMjEJ8EgRZQ/WN0gcDNcabgI85ncpJ7gQ6rSzOmvK3tDd3oNyFFfzYGNaGWThQsYKLOwZA3MSri95y86CcBW9SkaLdqT9LRSGW+pEjXYXax4WU13+YlrUa5axT87sHZs0awORKkHZ2Wik082cFN7M903qd1+fUkKNaz3nG1rwbUAp5KiKabQUcvOhz+guXYnZlqeL0IWRBvagAnBDjWLd3O4X9RIhhl4RjqeiHzgzpx3hBbUQRxyDopdnQMGuqIH9PaffJzFUnzqChTgUhnxntYqkISPsYy5DMzzvlLIIESvIgCHOgQu9kxj/upTE6OoDjWMXjBJn3ytpwf2xjsdtKEn0QRe0PV1uCa+P+z5Qg41ZvP0krhxomr1wmNmNvDkPL/uIYD06fN6bWwnuMQf5nI5DS/X4ysp1AN5EEesrwjh9ygBGxpFa4+jlwuJYa7b2HdmesQG3JVzMhkHtNCCMIo7GAHKCc8vhG08eQ0FtAdPr=rV18
-```
+Please check https://github.com/quan-to/remote-signer/wiki/Sign_data
 
 #### Verifing Signatures
-
-The process to verify a signature is similar to signing data. First you need to make sure the public key is loaded into the server (if the private key is, the public is as well) or it is available in the specified SKS Server and then encode the test data in Base64 format and POST the following payload to `/remoteSigner/gpg/verifySignature`
-
-```json
-{
-  "Base64Data": "VGVycmlibGUgQ29ubmVjdGlvbnMgbGVhZCB0byBUZXJyaWJsZSBVc2Vycwo=",
-  "signature":"-----BEGIN PGP SIGNATURE-----\nVersion: BCPG C# v1.8.1.0\n\niQIcBAABCgAGBQJaalMSAAoJENc2K0zFRtsRuxEQAKPz46GpBYvZY99dqfylo/ux\nOcbFx0U/jWnXACEsz4KbfIaKqTNQLNOApt7vC+PTeK18Bx3i6lLDq5s0T56ZZS07\n+12/8qWfq08LOTANtrMetmOP1znaJpzmWzpxCp8t/pTowt1RZJUfGC5zdxoxMLB8\nu3siSbbqSxPlOYx7yfNnJqE7KagHn83WdZYIQTFBYZESqfEhjmazERui+g3YKF74\nUlr8Ey0kIFptVa/DdsIQwgCMjDalWB6zdX8xLiLqH0pRAOSmiMcU7cX8vWSAlC5S\nl7uoam6azzyc/kAYBaBd+3/YORDu6vlnNvHtj6D1cvff0ahinnKHb2gxqN+cBUbL\nNlpBSRKwd5i/O504BjGOplp31rCbza+0vs0lvbQ2/ZMH1HaspuO3I8jdZQpaMxR4\n6GWf9/+clg8SxkNgbaKj8pRHnzvrjEOaEfYNXxdjMV4LgXX6pjZtZi47AfHqXPWc\n/pw7YSG6yJLF4n+Egky/thvoVQHR3GM10VXvUjYVTRdEaxO2P9MpWYLD8Fqa6rMo\nzVNXtCMKtej5Y5qQHMCFcKafG1J0TXPfsqnYCSsG2PpdDsZhz5r6eKgu5LZqN5yO\ntRylJnBDJuE8yweNYBDYWWAMoo1ApziRUItNI5el1I0DC+vwaM4Vxurywjxhcy4q\nHTlBXAdXKpVLINxkRSKy\n=YK2F\n-----END PGP SIGNATURE-----" 
-}
-```
-
-In case of success, it will return an `OK`. In case of failure it will return an `ErrorObject` with an `errorCode` field `INVALID_SIGNATURE`.
-
-You might also want to verify in `Quanto Signature` format. To do so, you can send the same payload with the `signature` field containing the `Quanto Signature` you want to verify to `/remoteSigner/gpg/verifySignatureQuanto`.
-
-```json
-{
-  "Base64Data": "VGVycmlibGUgQ29ubmVjdGlvbnMgbGVhZCB0byBUZXJyaWJsZSBVc2Vycwo=",
-  "signature":"D7362B4CC546DB11_SHA512_iQIcBAABCgAGBQJaale3AAoJENc2K0zFRtsRe3IP/jVE19IeT9fWXl1wbSfZ4VLRY8HePogfyGMVELrkqoRQjUwQB3s2cBio/uAZNNzyvYGqkdFVeeSO83GRAsobts8Q94Q//jAJxeYDy6qAzs6JbzOYAf1b8KWhjzosQDnvmqlvyH+95IoxTEXcDK/WFox5XrZGqRda3rlv+9CywzYreAiFHnSuF5LFJ0K+KkPCMjEJ8EgRZQ/WN0gcDNcabgI85ncpJ7gQ6rSzOmvK3tDd3oNyFFfzYGNaGWThQsYKLOwZA3MSri95y86CcBW9SkaLdqT9LRSGW+pEjXYXax4WU13+YlrUa5axT87sHZs0awORKkHZ2Wik082cFN7M903qd1+fUkKNaz3nG1rwbUAp5KiKabQUcvOhz+guXYnZlqeL0IWRBvagAnBDjWLd3O4X9RIhhl4RjqeiHzgzpx3hBbUQRxyDopdnQMGuqIH9PaffJzFUnzqChTgUhnxntYqkISPsYy5DMzzvlLIIESvIgCHOgQu9kxj/upTE6OoDjWMXjBJn3ytpwf2xjsdtKEn0QRe0PV1uCa+P+z5Qg41ZvP0krhxomr1wmNmNvDkPL/uIYD06fN6bWwnuMQf5nI5DS/X4ysp1AN5EEesrwjh9ygBGxpFa4+jlwuJYa7b2HdmesQG3JVzMhkHtNCCMIo7GAHKCc8vhG08eQ0FtAdPr=rV18" 
-}
-```
+Please check https://github.com/quan-to/remote-signer/wiki/Verifying_Signatures
 
 #### Adding Encrypted Private Key through API
 
@@ -180,29 +116,7 @@ Returns:
 ```
 
 #### Encrypt Data using public key
-Ensure that the public key you want to use is loaded and execute POST to `/remoteSigner/gpg/encrypt` with following payload:
-
-```json
-{
-  "Base64Data": "eyJxdWVyeSI6InF1ZXJ5IHsgR2V0QmFua1N5c3RlbVN0YXR1cyAoYmFua051bWJlcjogXCI2MzNcIikgfSJ9Cg==",
-  "FingerPrint": "870AFA59"
-}
-```
-
-Returns:
-```
------BEGIN PGP MESSAGE-----
-Version: BCPG C# v1.8.1.0
-
-hQIMAwAWqcqHCvpZAQ//TtD4Ne8dC+R7xHa3ED4dcOAVWBhiZ/h/GS8TZHrn7TQE
-MeEg46yF/xbDB1ryivvikubXKRHKcxB1N7DHX1yJc9zI1uWdrePBsheXJMJuFOs9
-(...)
-cKIB0DoBAJ+AcKT89elQ4CgNIUQZzof64gLPNpFq+yknNYR3CifBCQoCMk8WZev8
-ffy3cx45u+q2SkVT+pAIJXZ7PgmaNLGIAWTW+2JaTxv657ZeWW8dhzHTKU+rDqzR
-rnBaQD23nV45ZvmFd6GjvdE=
-=nPAx
------END PGP MESSAGE-----
-```
+Please check https://github.com/quan-to/remote-signer/wiki/Encrypt_data
 
 #### Decrypt Data using decrypted private key
 Ensure that the private key from the data you're trying to decrypt is loaded and decrypted, then execute a POST to `/remoteSigner/gpg/decrypt` with the following payload:
@@ -320,3 +234,4 @@ To add your private key, you can use the AddPrivateKey endpoint at `/keyRing/add
 ```
 
 The `Password` field is optional, if provided, it will store the password along the key and auto-unlock when open. If not, you should call `UnlockKey` to be able to use the key.
+
