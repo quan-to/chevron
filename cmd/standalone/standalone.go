@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/quan-to/remote-signer/etc/magicBuilder"
+	"github.com/quan-to/slog"
 	"golang.org/x/crypto/ssh/terminal"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"io/ioutil"
@@ -21,7 +22,10 @@ func GenerateFlow(password, output, identifier string, bits int) {
 			panic(fmt.Sprintf("Error reading password: %s", err))
 		}
 		password = string(bytePassword)
+		fmt.Println("")
 	}
+
+	_, _ = fmt.Fprint(os.Stderr, "Generating key. This might take a while...")
 
 	key, err := pgpMan.GeneratePGPKey(identifier, password, bits)
 
@@ -36,6 +40,7 @@ func GenerateFlow(password, output, identifier string, bits int) {
 		if err != nil {
 			panic(fmt.Sprintf("Error saving file %s: %s\n", output, err))
 		}
+		_, _ = fmt.Fprintf(os.Stderr, "Key saved to %s", output)
 	}
 }
 
@@ -56,10 +61,9 @@ func BenchmarkGeneration(runs, bits int) {
 }
 
 func main() {
-
 	// region Generate
 	gen := kingpin.Command("gen", "Generate GPG Key")
-	genBits := gen.Flag("bits", "Number of bits").Default("2048").Uint16()
+	genBits := gen.Flag("bits", "Number of bits").Default("4096").Uint16()
 	genIdentifier := gen.Flag("id", "Key Identifier").Default("").String()
 	genOutput := gen.Flag("output", "Filename of the output ( use - for stdout )").Default("-").String()
 	genPassword := gen.Flag("password", "Key Password (if not provided, it will be prompted)").Default("").String()
@@ -79,6 +83,10 @@ func main() {
 	//encryptInput := encrypt.Arg("input", "Filename of the input")
 	//encryptOutput := encrypt.Arg("output", "Filename of the output (use - to stdout)")
 	// endregion
+
+	slog.SetDefaultOutput(os.Stderr)
+	slog.SetInfo(false)
+	slog.SetDebug(false)
 
 	switch kingpin.Parse() {
 	case "gen":
