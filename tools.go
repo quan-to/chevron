@@ -497,6 +497,18 @@ func CopyFiles(src, dst string) error {
 	return nil
 }
 
+func FolderExists(folder string) bool {
+	f, err := os.Stat(folder)
+	if os.IsNotExist(err) {
+		return false
+	}
+	if f.IsDir() {
+		return true
+	}
+
+	return false
+}
+
 var identifierRegex = regexp.MustCompile("(.*) <(.*)>")
 
 func ExtractIdentifierFields(identifier string) (name, email, comment string) {
