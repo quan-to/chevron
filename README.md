@@ -52,14 +52,7 @@ s+iBthuraYJAIPB9snASniMIqYs7sWTpC8T4m+WYEZGB2ejvVscmEgXFNWn6hzKI
 ```
 
 #### Unlocking a Private Key
-Before any sign operation can be done, you need to decrypt the loaded private keys. If the keys is stored in a non-encrypted format (no password) you don't need to do that step. Simple call `/remoteSigner/gpg/unlockKey` with the following JSON payload:
-
-```json
-{
-  "FingerPrint": "D7362B4CC546DB11",
-  "Password": "123456"
-}
-```
+Please check https://github.com/quan-to/remote-signer/wiki/Unlock_private_key
 
 #### Signing Data
 Please check https://github.com/quan-to/remote-signer/wiki/Sign_data
@@ -119,25 +112,7 @@ Returns:
 Please check https://github.com/quan-to/remote-signer/wiki/Encrypt_data
 
 #### Decrypt Data using decrypted private key
-Ensure that the private key from the data you're trying to decrypt is loaded and decrypted, then execute a POST to `/remoteSigner/gpg/decrypt` with the following payload:
-
-```json
-{
-  "AsciiArmoredData": "-----BEGIN PGP MESSAGE-----\nVersion: BCPG C# v1.8.1.0\n\nhQILAwAWqcqHCvpZAQ/4vF53gHVus8aKyKGkzb7jn2R4aZB3KCQ08S2xhAUvZFF8\n0qaeLxPGDdOo4X43zNmOvfIth4IwnDFF/SlD6E9ToxI+oDBC2hU92GyQZmlrb0dm\nHfVtKxCP9D6bAUHb9/G2QrbLSwov7TKlYs4gcqv72Lh4It8wVZaUm+qWb1EL4I33\nM+RHPSkmDPpCVWJxPQv/5Bt0h48wX9V7JtFc2FXJgJhYyrRxxIEFDcof4jdbvH/2\ncd5DDoLJPq3w4R4GKLxgQisgK2fp9jsl5AUzBiNy++l80rJW3m9TL3hLHUqqvL2R\nZrglp5KCR367uB0b6H+oXCRkxsgulTtXWM111HfTEJ0FYkYMfjxwYLdgjeduilhP\n7bkLDXFJgR3TaxHweUx4tOYRREsRSnzlDEDt+RdCHnP27mn/8QOi2wzi5zTP/KIr\nHlNfb+yw1BlFS5swFp+QLj7/QfkZefsneQC+zKfzyV9Hyz0b5tqXmsn+aVREF9D7\nQpqbEyHO1E/amz0hPIqu8CIIxr9Exmjxj5jV4MRgqVZ+5ukjiahG4jnnGuMPMvlp\nYjdZ1lAq0LDs+XSf9QbZE63j4YDT5tuJXNhUYojhb+DSSlL5LmQCuzTtZLNZaS+S\n26fQ5R3NYTWsJF3gvqwyXCr/49gYDxU2YNOBGdHGvOsDqnqchceRqWXfCJ8QlNKG\nAXLylUqQH0y58X0DTbEUEDtKRHAk42f9hicpxQY0FfnrUnggIBFubs385k6LIIDR\n4Xs6LwwjGFT9XqWzNa7adi+60sfrlN2iTYRZJGsNdvGmnMTClS0e6i6rlgQJAqHe\nl5rf7WGniCF+sAjxmbJ53TPBrh/sUlMMl0acXmXz4EZxnaENBJg=\n=n4Ks\n-----END PGP MESSAGE-----",
-}
-```
-
-Returns:
-
-```json
-{
-  "FingerPrint": "0016A9CA870AFA59",
-  "Base64Data": "eyJxdWVyeSI6InF1ZXJ5IHsgR2V0QmFua1N5c3RlbVN0YXR1cyAoYmFua051bWJlcjogXCI2MzNcIikgfSJ9Cg==",
-  "Filename": "QuantoEncrypt-1518071090398.bin",
-  "IsIntegrityProtected": true,
-  "IsIntegrityOK": true
-}
-```
+Please check https://github.com/quan-to/remote-signer/wiki/Decrypt_data
 
 Environment Variables
 =====================
