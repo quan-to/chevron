@@ -375,7 +375,7 @@ func (pm *PGPManager) GetLoadedKeys() []models.KeyInfo {
 	return keyInfos
 }
 
-func (pm *PGPManager) SavePrivateKey(fingerPrint, armoredData string, password interface{}) error {
+func (pm *PGPManager) SaveKey(fingerPrint, armoredData string, password interface{}) error {
 	filename := fmt.Sprintf("%s.key", fingerPrint)
 	if pm.KeysBase64Encoded {
 		filename = fmt.Sprintf("%s.b64", fingerPrint)
@@ -383,12 +383,12 @@ func (pm *PGPManager) SavePrivateKey(fingerPrint, armoredData string, password i
 
 	filePath := path.Join(remote_signer.PrivateKeyFolder, filename)
 
-	pgpLog.Info("Saving private key at %s", filePath)
+	pgpLog.Info("Saving key at %s", filePath)
 
 	data := []byte(armoredData)
 
 	if pm.KeysBase64Encoded {
-		pgpLog.Debug("Base64 Encoding enabled. Encoding private key.")
+		pgpLog.Debug("Base64 Encoding enabled. Encoding key.")
 		data = []byte(base64.StdEncoding.EncodeToString(data))
 	}
 	metadataJson := ""

@@ -37,7 +37,7 @@ func GenerateFlow(password, output, identifier string, bits int) {
 	if output == "-" {
 		fmt.Println(key)
 	} else if output == "+" {
-		err := pgpMan.SavePrivateKey(fingerPrint, key, nil)
+		err := pgpMan.SaveKey(fingerPrint, key, nil)
 		if err != nil {
 			panic(fmt.Sprintf("Error saving key to default backend: %s", err))
 		}

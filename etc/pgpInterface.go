@@ -16,7 +16,7 @@ type PGPInterface interface {
 	UnlockKey(fp, password string) error
 	GetLoadedPrivateKeys() []models.KeyInfo
 	GetLoadedKeys() []models.KeyInfo
-	SavePrivateKey(fingerPrint, armoredData string, password interface{}) error
+	SaveKey(fingerPrint, armoredData string, password interface{}) error
 	SignData(fingerPrint string, data []byte, hashAlgorithm crypto.Hash) (string, error)
 	GetPublicKeyEntity(fingerPrint string) *openpgp.Entity
 	GetPublicKey(fingerPrint string) *packet.PublicKey

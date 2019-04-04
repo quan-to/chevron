@@ -154,7 +154,7 @@ func AddKeys(files []string) (bool, []string) {
 		}
 
 		log.Info("Saving key %s from %s", fingerPrint, file)
-		err = pgp.SavePrivateKey(fingerPrint, string(data), nil)
+		err = pgp.SaveKey(fingerPrint, string(data), nil)
 		if err != nil {
 			errors[i] = err.Error()
 			hasErrors = true

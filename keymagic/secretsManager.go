@@ -99,7 +99,7 @@ func MakeSecretsManager() *SecretsManager {
 		smLog.Fatal("Error unlocking master key: %s", err)
 	}
 
-	err = sm.gpg.SavePrivateKey(masterKeyFp, string(originalKeyBytes), string(masterKeyPassBytes))
+	err = sm.gpg.SaveKey(masterKeyFp, string(originalKeyBytes), string(masterKeyPassBytes))
 
 	if err != nil {
 		smLog.Fatal("Error saving master key to default backend: %s", err)
