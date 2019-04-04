@@ -15,11 +15,13 @@ type PGPInterface interface {
 	IsKeyLocked(fp string) bool
 	UnlockKey(fp, password string) error
 	GetLoadedPrivateKeys() []models.KeyInfo
+	GetLoadedKeys() []models.KeyInfo
 	SavePrivateKey(fingerPrint, armoredData string, password interface{}) error
 	SignData(fingerPrint string, data []byte, hashAlgorithm crypto.Hash) (string, error)
 	GetPublicKeyEntity(fingerPrint string) *openpgp.Entity
 	GetPublicKey(fingerPrint string) *packet.PublicKey
 	GetPublicKeyAscii(fingerPrint string) (string, error)
+	GetPrivateKeyAscii(fingerPrint, password string) (string, error)
 	VerifySignatureStringData(data string, signature string) (bool, error)
 	VerifySignature(data []byte, signature string) (bool, error)
 	GeneratePGPKey(identifier, password string, numBits int) (string, error)
