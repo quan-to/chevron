@@ -86,6 +86,7 @@ require (
 	github.com/keybase/go-crypto v0.0.0-20181127160227-255a5089e85a // indirect
 	github.com/logrusorgru/aurora v0.0.0-20181002194514-a7b3b318ed4e
 	github.com/mattbaird/elastigo v0.0.0-20170123220020-2fe47fd29e4b // indirect
+	github.com/mattn/goveralls v0.0.2 // indirect
 	github.com/mewkiz/pkg v0.0.0-20190222151137-b7948a1ad1b1
 	github.com/michaelklishin/rabbit-hole v1.5.0 // indirect
 	github.com/mitchellh/gox v1.0.0 // indirect
