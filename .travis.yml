@@ -49,7 +49,7 @@ script:
   - echo "Closing Vault"
   - sudo kill -9 `cat ~/vault.pid`
   - echo "Calling travis-binary-build.sh"
-  - ./travis-binary-build.sh
+  - ./scripts/travis-binary-build.sh
   - echo "Done"
 
 after_success:
