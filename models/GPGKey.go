@@ -294,6 +294,15 @@ func AsciiArmored2GPGKey(asciiArmored string) (GPGKey, error) {
 			Names:                 make([]string, 0),
 			KeyUids:               make([]GPGKeyUid, 0),
 			KeyBits:               int(keyBits),
+			Subkeys:               make([]string, 0),
+		}
+
+		fp := strings.ToUpper(hex.EncodeToString(entity.PrimaryKey.Fingerprint[:]))
+		key.Subkeys = append(key.Subkeys, fp[len(fp)-16:])
+
+		for _, v := range entity.Subkeys {
+			fp := strings.ToUpper(hex.EncodeToString(v.PublicKey.Fingerprint[:]))
+			key.Subkeys = append(key.Subkeys, fp[len(fp)-16:])
 		}
 
 		for _, v := range entity.Identities {
