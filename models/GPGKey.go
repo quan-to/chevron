@@ -15,22 +15,37 @@ const DefaultPageEnd = 100
 
 var GPGKeyTableInit = TableInitStruct{
 	TableName:    "gpgKey",
-	TableIndexes: []string{"FullFingerPrint", "Names", "Emails"},
+	TableIndexes: []string{"FullFingerPrint", "Names", "Emails", "Subkeys"},
 }
 
 type GPGKey struct {
-	id                     string
+	Id                     string `rethinkdb:"id"`
 	FullFingerPrint        string
 	Names                  []string
 	Emails                 []string
 	KeyUids                []GPGKeyUid
 	KeyBits                int
+	Subkeys                []string
 	AsciiArmoredPublicKey  string
 	AsciiArmoredPrivateKey string
 }
 
 func (key *GPGKey) GetShortFingerPrint() string {
 	return key.FullFingerPrint[len(key.FullFingerPrint)-16:]
+}
+
+func (key *GPGKey) Save(conn *r.Session) error {
+	return r.Table(GPGKeyTableInit.TableName).
+		Get(key.Id).
+		Update(key).
+		Exec(conn)
+}
+
+func (key *GPGKey) Delete(conn *r.Session) error {
+	return r.Table(GPGKeyTableInit.TableName).
+		Get(key.Id).
+		Delete().
+		Exec(conn)
 }
 
 func AddGPGKey(conn *r.Session, data GPGKey) (string, bool, error) {
@@ -48,7 +63,7 @@ func AddGPGKey(conn *r.Session, data GPGKey) (string, bool, error) {
 	if existing.Next(gpgKey) {
 		// Update
 		_, err := r.Table(GPGKeyTableInit.TableName).
-			Get(gpgKey.id).
+			Get(gpgKey.Id).
 			Update(data).
 			RunWrite(conn)
 
@@ -56,7 +71,7 @@ func AddGPGKey(conn *r.Session, data GPGKey) (string, bool, error) {
 			return "", false, err
 		}
 
-		return gpgKey.id, false, err
+		return gpgKey.Id, false, err
 	} else {
 		// Create
 		wr, err := r.Table(GPGKeyTableInit.TableName).
@@ -69,6 +84,26 @@ func AddGPGKey(conn *r.Session, data GPGKey) (string, bool, error) {
 
 		return wr.GeneratedKeys[0], true, err
 	}
+}
+
+func FetchKeysWithoutSubKeys(conn *r.Session) ([]GPGKey, error) {
+	res, err := r.Table(GPGKeyTableInit.TableName).
+		Filter(r.Row.HasFields("Subkeys").Not().Or(r.Row.Field("Subkeys").Count().Eq(0))).
+		CoerceTo("array").
+		Run(conn)
+
+	if err != nil {
+		return nil, err
+	}
+
+	results := make([]GPGKey, 0)
+	var gpgKey GPGKey
+
+	for res.Next(&gpgKey) {
+		results = append(results, gpgKey)
+	}
+
+	return results, nil
 }
 
 func GetGPGKeyByFingerPrint(conn *r.Session, fingerPrint string) (*GPGKey, error) {

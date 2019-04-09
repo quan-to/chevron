@@ -234,6 +234,29 @@ func GetFingerPrintFromKey(armored string) (string, error) {
 	return "", fmt.Errorf("cannot read key")
 }
 
+func GetFingerPrintsFromKey(armored string) ([]string, error) {
+	keys, err := ReadKey(armored)
+
+	if err != nil {
+		return nil, err
+	}
+
+	fps := make([]string, 0)
+
+	for _, key := range keys {
+		if key.PrimaryKey != nil {
+			fp := ByteFingerPrint2FP16(key.PrimaryKey.Fingerprint[:])
+			fps = append(fps, fp)
+		}
+		for _, v := range key.Subkeys {
+			fp := ByteFingerPrint2FP16(v.PublicKey.Fingerprint[:])
+			fps = append(fps, fp)
+		}
+	}
+
+	return fps, nil
+}
+
 func GetFingerPrintsFromEncryptedMessageRaw(rawB64Data string) ([]string, error) {
 	var fps = make([]string, 0)
 	data, err := base64.StdEncoding.DecodeString(rawB64Data)
