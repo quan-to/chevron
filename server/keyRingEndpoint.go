@@ -153,7 +153,7 @@ func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request
 	kreLog.Info("PKS Add Key: %s", res)
 
 	if data.SaveToDisk {
-		err = kre.gpg.SavePrivateKey(fingerPrint, data.EncryptedPrivateKey, data.Password)
+		err = kre.gpg.SaveKey(fingerPrint, data.EncryptedPrivateKey, data.Password)
 		if err != nil {
 			InternalServerError("There was an error saving your key to disk.", data, w, r, kreLog)
 		}
