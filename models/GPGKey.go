@@ -108,7 +108,10 @@ func FetchKeysWithoutSubKeys(conn *r.Session) ([]GPGKey, error) {
 
 func GetGPGKeyByFingerPrint(conn *r.Session, fingerPrint string) (*GPGKey, error) {
 	res, err := r.Table(GPGKeyTableInit.TableName).
-		Filter(r.Row.Field("FullFingerPrint").Match(fmt.Sprintf("%s$", fingerPrint))).
+		Filter(r.Row.Field("FullFingerPrint").Match(fmt.Sprintf("%s$", fingerPrint)).
+			Or(r.Row.HasFields("Subkeys").And(r.Row.Field("Subkeys").Filter(func(p r.Term) interface{} {
+				return p.Match(fmt.Sprintf("%s$", fingerPrint))
+			}).Count().Gt(0)))).
 		Limit(1).
 		CoerceTo("array").
 		Run(conn)
@@ -172,7 +175,10 @@ func SearchGPGKeyByFingerPrint(conn *r.Session, fingerPrint string, pageStart, p
 	}
 
 	res, err := r.Table(GPGKeyTableInit.TableName).
-		Filter(r.Row.Field("FullFingerPrint").Match(fmt.Sprintf("%s$", fingerPrint))).
+		Filter(r.Row.Field("FullFingerPrint").Match(fmt.Sprintf("%s$", fingerPrint)).
+			Or(r.Row.HasFields("Subkeys").And(r.Row.Field("Subkeys").Filter(func(p r.Term) interface{} {
+				return p.Match(fmt.Sprintf("%s$", fingerPrint))
+			}).Count().Gt(0)))).
 		Slice(pageStart, pageEnd).
 		CoerceTo("array").
 		Run(conn)
