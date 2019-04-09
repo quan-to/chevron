@@ -1,12 +1,12 @@
 package models
 
 import (
-	"bytes"
-	"encoding/hex"
-	"fmt"
-	"github.com/quan-to/remote-signer/openpgp"
-	r "gopkg.in/rethinkdb/rethinkdb-go.v5"
-	"strings"
+    "bytes"
+    "encoding/hex"
+    "fmt"
+    "github.com/quan-to/remote-signer/openpgp"
+    r "gopkg.in/rethinkdb/rethinkdb-go.v5"
+    "strings"
 )
 
 const DefaultValue = -1
@@ -19,7 +19,7 @@ var GPGKeyTableInit = TableInitStruct{
 }
 
 type GPGKey struct {
-	Id                     string `rethinkdb:"id"`
+	Id                     string `rethinkdb:"id,omitempty"`
 	FullFingerPrint        string
 	Names                  []string
 	Emails                 []string
@@ -81,7 +81,6 @@ func AddGPGKey(conn *r.Session, data GPGKey) (string, bool, error) {
 		if err != nil {
 			return "", false, err
 		}
-
 		return wr.GeneratedKeys[0], true, err
 	}
 }
