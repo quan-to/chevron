@@ -12,6 +12,7 @@ import (
 	"github.com/quan-to/slog"
 	"io/ioutil"
 	"path"
+	"strings"
 	"sync"
 )
 
@@ -39,8 +40,6 @@ func MakeSecretsManager() *SecretsManager {
 		encryptedPasswords: map[string]string{},
 	}
 	masterKeyBytes, err := ioutil.ReadFile(remote_signer.MasterGPGKeyPath)
-
-	originalKeyBytes := masterKeyBytes
 
 	if err != nil {
 		smLog.Error("Error loading master key from %s: %s", remote_signer.MasterGPGKeyPath, err)
@@ -93,13 +92,20 @@ func MakeSecretsManager() *SecretsManager {
 		smLog.Fatal("Error loading key password from %s: %s", remote_signer.MasterGPGKeyPasswordPath, err)
 	}
 
-	err = sm.gpg.UnlockKey(masterKeyFp, string(masterKeyPassBytes))
+	if remote_signer.MasterGPGKeyBase64Encoded { // If key is encoded, the password should be to
+		masterKeyPassBytes, err = base64.StdEncoding.DecodeString(string(masterKeyPassBytes))
+		if err != nil {
+			smLog.Fatal("Error decoding key password from %s: %s", remote_signer.MasterGPGKeyPasswordPath, err)
+		}
+	}
+
+	err = sm.gpg.UnlockKey(masterKeyFp, strings.Trim(string(masterKeyPassBytes), "\n\r"))
 
 	if err != nil {
 		smLog.Fatal("Error unlocking master key: %s", err)
 	}
 
-	err = sm.gpg.SaveKey(masterKeyFp, string(originalKeyBytes), string(masterKeyPassBytes))
+	err = sm.gpg.SaveKey(masterKeyFp, string(masterKeyBytes), string(masterKeyPassBytes))
 
 	if err != nil {
 		smLog.Fatal("Error saving master key to default backend: %s", err)

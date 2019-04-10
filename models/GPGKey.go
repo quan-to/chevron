@@ -1,12 +1,12 @@
 package models
 
 import (
-    "bytes"
-    "encoding/hex"
-    "fmt"
-    "github.com/quan-to/remote-signer/openpgp"
-    r "gopkg.in/rethinkdb/rethinkdb-go.v5"
-    "strings"
+	"bytes"
+	"encoding/hex"
+	"fmt"
+	"github.com/quan-to/remote-signer/openpgp"
+	r "gopkg.in/rethinkdb/rethinkdb-go.v5"
+	"strings"
 )
 
 const DefaultValue = -1
