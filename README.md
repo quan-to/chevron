@@ -1,4 +1,4 @@
-![Logo](https://raw.githubusercontent.com/quan-to/remote-signer/develop/logo/chevron.png)
+![Logo](https://raw.githubusercontent.com/quan-to/chevron/develop/logo/chevron.png)
 
 [![MIT License](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://tldrlegal.com/license/mit-license) [![Coverage Status](https://coveralls.io/repos/github/quan-to/chevron/badge.svg?branch=master)](https://coveralls.io/github/quan-to/chevron?branch=master) [![Build Status](https://travis-ci.org/quan-to/chevron.svg?branch=master)](https://travis-ci.org/quan-to/chevron)
 
