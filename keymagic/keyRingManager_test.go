@@ -175,20 +175,20 @@ func TestGetKeyExternal(t *testing.T) {
 		t.Errorf("Expected %s == %s", fp, gpgKey.FullFingerPrint)
 	}
 
-	// Test Bad Scenario
-	gpgKey.FullFingerPrint = "ABCDABCDABCDABCDABCDABCDABCDABCD"
-	gpgKey.AsciiArmoredPublicKey = "HUEBR"
-	_, _, err = models.AddGPGKey(c, gpgKey)
-	if err != nil {
-		t.Errorf("Fail to add key to database: %s", err)
-		t.FailNow()
-	}
-
-	e = krm.GetKey(gpgKey.FullFingerPrint)
-
-	if e != nil {
-		t.Errorf("Expected key to be null got %v", e)
-	}
+	//// Test Bad Scenario
+	//gpgKey.FullFingerPrint = "ABCDABCDABCDABCDABCDABCDABCDABCD"
+	//gpgKey.AsciiArmoredPublicKey = "HUEBR"
+	//_, _, err = models.AddGPGKey(c, gpgKey)
+	//if err != nil {
+	//	t.Errorf("Fail to add key to database: %s", err)
+	//	t.FailNow()
+	//}
+	//
+	//e = krm.GetKey(gpgKey.FullFingerPrint)
+	//
+	//if e != nil {
+	//	t.Errorf("Expected key to be null got %v", e)
+	//}
 }
 
 //func TestBigPublicKeyExponent(t *testing.T) {
