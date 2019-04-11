@@ -1,6 +1,7 @@
 package keymagic
 
 import (
+	"fmt"
 	"github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/database"
 	"github.com/quan-to/chevron/models"
@@ -140,6 +141,7 @@ func TestPKSAdd(t *testing.T) {
 
 	if err != nil {
 		t.Error(err)
+		t.Error(fmt.Errorf("key data: %s", string(p)))
 		t.FailNow()
 	}
 
