@@ -9,9 +9,9 @@ import (
 	"io"
 	"time"
 
-	"github.com/quan-to/remote-signer/openpgp/armor"
-	"github.com/quan-to/remote-signer/openpgp/errors"
-	"github.com/quan-to/remote-signer/openpgp/packet"
+	"github.com/quan-to/chevron/openpgp/armor"
+	"github.com/quan-to/chevron/openpgp/errors"
+	"github.com/quan-to/chevron/openpgp/packet"
 )
 
 // PublicKeyType is the armor type for a PGP public key.

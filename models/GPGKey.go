@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"github.com/quan-to/remote-signer/openpgp"
+	"github.com/quan-to/chevron/openpgp"
 	r "gopkg.in/rethinkdb/rethinkdb-go.v5"
 	"strings"
 )
@@ -15,22 +15,37 @@ const DefaultPageEnd = 100
 
 var GPGKeyTableInit = TableInitStruct{
 	TableName:    "gpgKey",
-	TableIndexes: []string{"FullFingerPrint", "Names", "Emails"},
+	TableIndexes: []string{"FullFingerPrint", "Names", "Emails", "Subkeys"},
 }
 
 type GPGKey struct {
-	id                     string
+	Id                     string `rethinkdb:"id,omitempty"`
 	FullFingerPrint        string
 	Names                  []string
 	Emails                 []string
 	KeyUids                []GPGKeyUid
 	KeyBits                int
+	Subkeys                []string
 	AsciiArmoredPublicKey  string
 	AsciiArmoredPrivateKey string
 }
 
 func (key *GPGKey) GetShortFingerPrint() string {
 	return key.FullFingerPrint[len(key.FullFingerPrint)-16:]
+}
+
+func (key *GPGKey) Save(conn *r.Session) error {
+	return r.Table(GPGKeyTableInit.TableName).
+		Get(key.Id).
+		Update(key).
+		Exec(conn)
+}
+
+func (key *GPGKey) Delete(conn *r.Session) error {
+	return r.Table(GPGKeyTableInit.TableName).
+		Get(key.Id).
+		Delete().
+		Exec(conn)
 }
 
 func AddGPGKey(conn *r.Session, data GPGKey) (string, bool, error) {
@@ -48,7 +63,7 @@ func AddGPGKey(conn *r.Session, data GPGKey) (string, bool, error) {
 	if existing.Next(gpgKey) {
 		// Update
 		_, err := r.Table(GPGKeyTableInit.TableName).
-			Get(gpgKey.id).
+			Get(gpgKey.Id).
 			Update(data).
 			RunWrite(conn)
 
@@ -56,7 +71,7 @@ func AddGPGKey(conn *r.Session, data GPGKey) (string, bool, error) {
 			return "", false, err
 		}
 
-		return gpgKey.id, false, err
+		return gpgKey.Id, false, err
 	} else {
 		// Create
 		wr, err := r.Table(GPGKeyTableInit.TableName).
@@ -66,14 +81,36 @@ func AddGPGKey(conn *r.Session, data GPGKey) (string, bool, error) {
 		if err != nil {
 			return "", false, err
 		}
-
 		return wr.GeneratedKeys[0], true, err
 	}
 }
 
+func FetchKeysWithoutSubKeys(conn *r.Session) ([]GPGKey, error) {
+	res, err := r.Table(GPGKeyTableInit.TableName).
+		Filter(r.Row.HasFields("Subkeys").Not().Or(r.Row.Field("Subkeys").Count().Eq(0))).
+		CoerceTo("array").
+		Run(conn)
+
+	if err != nil {
+		return nil, err
+	}
+
+	results := make([]GPGKey, 0)
+	var gpgKey GPGKey
+
+	for res.Next(&gpgKey) {
+		results = append(results, gpgKey)
+	}
+
+	return results, nil
+}
+
 func GetGPGKeyByFingerPrint(conn *r.Session, fingerPrint string) (*GPGKey, error) {
 	res, err := r.Table(GPGKeyTableInit.TableName).
-		Filter(r.Row.Field("FullFingerPrint").Match(fmt.Sprintf("%s$", fingerPrint))).
+		Filter(r.Row.Field("FullFingerPrint").Match(fmt.Sprintf("%s$", fingerPrint)).
+			Or(r.Row.HasFields("Subkeys").And(r.Row.Field("Subkeys").Filter(func(p r.Term) interface{} {
+				return p.Match(fmt.Sprintf("%s$", fingerPrint))
+			}).Count().Gt(0)))).
 		Limit(1).
 		CoerceTo("array").
 		Run(conn)
@@ -137,7 +174,10 @@ func SearchGPGKeyByFingerPrint(conn *r.Session, fingerPrint string, pageStart, p
 	}
 
 	res, err := r.Table(GPGKeyTableInit.TableName).
-		Filter(r.Row.Field("FullFingerPrint").Match(fmt.Sprintf("%s$", fingerPrint))).
+		Filter(r.Row.Field("FullFingerPrint").Match(fmt.Sprintf("%s$", fingerPrint)).
+			Or(r.Row.HasFields("Subkeys").And(r.Row.Field("Subkeys").Filter(func(p r.Term) interface{} {
+				return p.Match(fmt.Sprintf("%s$", fingerPrint))
+			}).Count().Gt(0)))).
 		Slice(pageStart, pageEnd).
 		CoerceTo("array").
 		Run(conn)
@@ -253,6 +293,15 @@ func AsciiArmored2GPGKey(asciiArmored string) (GPGKey, error) {
 			Names:                 make([]string, 0),
 			KeyUids:               make([]GPGKeyUid, 0),
 			KeyBits:               int(keyBits),
+			Subkeys:               make([]string, 0),
+		}
+
+		fp := strings.ToUpper(hex.EncodeToString(entity.PrimaryKey.Fingerprint[:]))
+		key.Subkeys = append(key.Subkeys, fp[len(fp)-16:])
+
+		for _, v := range entity.Subkeys {
+			fp := strings.ToUpper(hex.EncodeToString(v.PublicKey.Fingerprint[:]))
+			key.Subkeys = append(key.Subkeys, fp[len(fp)-16:])
 		}
 
 		for _, v := range entity.Identities {

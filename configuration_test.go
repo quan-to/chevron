@@ -2,7 +2,7 @@ package remote_signer
 
 import (
 	"fmt"
-	"github.com/quan-to/remote-signer/SLog"
+	"github.com/quan-to/slog"
 	"math/rand"
 	"os"
 	"reflect"
@@ -17,7 +17,7 @@ func TestPushPopVars(t *testing.T) {
 }
 
 func testIntVar(v *int, envName string, localName string, t *testing.T) {
-	SLog.SetTestMode()
+	slog.SetTestMode()
 	err := os.Setenv(envName, "huebr")
 	if err != nil {
 		t.Error(err)
@@ -37,11 +37,11 @@ func testIntVar(v *int, envName string, localName string, t *testing.T) {
 	if *v != val {
 		t.Errorf("%s variable does not come from %s. Expected %d got %d", localName, envName, *v, val)
 	}
-	SLog.UnsetTestMode()
+	slog.UnsetTestMode()
 }
 
 func testStringVar(v *string, envName string, localName string, def string, t *testing.T) {
-	SLog.SetTestMode()
+	slog.SetTestMode()
 	err := os.Setenv(envName, "")
 	if err != nil {
 		t.Error(err)
@@ -65,7 +65,7 @@ func testStringVar(v *string, envName string, localName string, def string, t *t
 	if *v != val {
 		t.Errorf("%s variable does not come from %s. Expected %s got %s", localName, envName, *v, val)
 	}
-	SLog.UnsetTestMode()
+	slog.UnsetTestMode()
 }
 
 func assertEqual(a interface{}, b interface{}, message string, t *testing.T) {
@@ -114,7 +114,7 @@ func assertEqual(a interface{}, b interface{}, message string, t *testing.T) {
 }
 
 func TestConfiguration(t *testing.T) {
-	SLog.SetTestMode()
+	slog.SetTestMode()
 	PushVariables()
 
 	testIntVar(&MaxKeyRingCache, "MAX_KEYRING_CACHE_SIZE", "MaxKeyRingCache", t)
@@ -138,7 +138,7 @@ func TestConfiguration(t *testing.T) {
 	testStringVar(&AgentAdminExternalURL, "AGENTADMIN_EXTERNAL_URL", "AgentAdminExternalURL", "/agentAdmin", t)
 
 	PushVariables()
-	SLog.SetTestMode()
+	slog.SetTestMode()
 	assertPanic(t, func() {
 		_ = os.Setenv("ENABLE_RETHINKDB_SKS", "false")
 		_ = os.Setenv("RETHINK_TOKEN_MANAGER", "true")
@@ -151,18 +151,18 @@ func TestConfiguration(t *testing.T) {
 		Setup()
 	}, "Rethink Auth requires Rethink SKS so it should panic...")
 	PopVariables()
-	SLog.UnsetTestMode()
+	slog.UnsetTestMode()
 
 	_ = os.Setenv("ENABLE_RETHINKDB_SKS", "true")
 
 	_ = os.Setenv("Environment", "development")
 	Setup()
-	assertEqual(SLog.DebugEnabled(), true, "Debug should be enabled in development", t)
+	assertEqual(slog.DebugEnabled(), true, "Debug should be enabled in development", t)
 
 	_ = os.Setenv("Environment", "production")
 	Setup()
-	assertEqual(SLog.DebugEnabled(), false, "Debug should be disabled in production", t)
+	assertEqual(slog.DebugEnabled(), false, "Debug should be disabled in production", t)
 
 	PopVariables()
-	SLog.UnsetTestMode()
+	slog.UnsetTestMode()
 }

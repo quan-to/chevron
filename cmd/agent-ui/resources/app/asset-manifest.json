@@ -1,0 +1,18 @@
+{
+  "index.css": "static/css/index.css",
+  "index.css.map": "static/css/index.css.map",
+  "index.js": "static/js/index.js",
+  "index.js.map": "static/js/index.js.map",
+  "middleware.css": "static/css/middleware.css",
+  "middleware.css.map": "static/css/middleware.css.map",
+  "middleware.js": "static/js/middleware.js",
+  "middleware.js.map": "static/js/middleware.js.map",
+  "static/media/GraphQLLanguageService.js.flow": "static/media/GraphQLLanguageService.js.fa07138d.flow",
+  "static/media/autocompleteUtils.js.flow": "static/media/autocompleteUtils.js.4ce7ba19.flow",
+  "static/media/getAutocompleteSuggestions.js.flow": "static/media/getAutocompleteSuggestions.js.5f735c7b.flow",
+  "static/media/getDefinition.js.flow": "static/media/getDefinition.js.0c48668e.flow",
+  "static/media/getDiagnostics.js.flow": "static/media/getDiagnostics.js.889c0b27.flow",
+  "static/media/getOutline.js.flow": "static/media/getOutline.js.458a3518.flow",
+  "static/media/index.js.flow": "static/media/index.js.641230f5.flow",
+  "static/media/logo.png": "static/media/logo.57ee3b60.png"
+}

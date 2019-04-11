@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/quan-to/remote-signer"
+	"github.com/quan-to/chevron"
 	r "gopkg.in/rethinkdb/rethinkdb-go.v5"
 	"time"
 )

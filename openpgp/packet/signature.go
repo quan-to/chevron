@@ -17,8 +17,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/quan-to/remote-signer/openpgp/errors"
-	"github.com/quan-to/remote-signer/openpgp/s2k"
+	"github.com/quan-to/chevron/openpgp/errors"
+	"github.com/quan-to/chevron/openpgp/s2k"
 )
 
 const (

@@ -9,11 +9,11 @@ import (
 	"fmt"
 	"github.com/mewkiz/pkg/osutil"
 	"github.com/pkg/errors"
-	"github.com/quan-to/remote-signer/SLog"
-	"github.com/quan-to/remote-signer/models"
-	"github.com/quan-to/remote-signer/openpgp"
-	"github.com/quan-to/remote-signer/openpgp/armor"
-	"github.com/quan-to/remote-signer/openpgp/packet"
+	"github.com/quan-to/chevron/models"
+	"github.com/quan-to/chevron/openpgp"
+	"github.com/quan-to/chevron/openpgp/armor"
+	"github.com/quan-to/chevron/openpgp/packet"
+	"github.com/quan-to/slog"
 	"io"
 	"io/ioutil"
 	"math/rand"
@@ -23,7 +23,7 @@ import (
 	"strings"
 )
 
-var toolsLog = SLog.Scope("Tools")
+var toolsLog = slog.Scope("Tools")
 var pgpsig = regexp.MustCompile("(?s)-----BEGIN PGP SIGNATURE-----\n(.*)-----END PGP SIGNATURE-----")
 
 func StringIndexOf(v string, a []string) int {
@@ -232,6 +232,29 @@ func GetFingerPrintFromKey(armored string) (string, error) {
 	}
 
 	return "", fmt.Errorf("cannot read key")
+}
+
+func GetFingerPrintsFromKey(armored string) ([]string, error) {
+	keys, err := ReadKey(armored)
+
+	if err != nil {
+		return nil, err
+	}
+
+	fps := make([]string, 0)
+
+	for _, key := range keys {
+		if key.PrimaryKey != nil {
+			fp := ByteFingerPrint2FP16(key.PrimaryKey.Fingerprint[:])
+			fps = append(fps, fp)
+		}
+		for _, v := range key.Subkeys {
+			fp := ByteFingerPrint2FP16(v.PublicKey.Fingerprint[:])
+			fps = append(fps, fp)
+		}
+	}
+
+	return fps, nil
 }
 
 func GetFingerPrintsFromEncryptedMessageRaw(rawB64Data string) ([]string, error) {
@@ -495,6 +518,18 @@ func CopyFiles(src, dst string) error {
 	}
 
 	return nil
+}
+
+func FolderExists(folder string) bool {
+	f, err := os.Stat(folder)
+	if os.IsNotExist(err) {
+		return false
+	}
+	if f.IsDir() {
+		return true
+	}
+
+	return false
 }
 
 var identifierRegex = regexp.MustCompile("(.*) <(.*)>")

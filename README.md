@@ -1,229 +1,33 @@
-Quanto Remote Signer (QRS)
-====================
+![Logo](https://raw.githubusercontent.com/quan-to/chevron/develop/logo/chevron.png)
 
-[![MIT License](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://tldrlegal.com/license/mit-license) [![Coverage Status](https://coveralls.io/repos/github/quan-to/remote-signer/badge.svg?branch=GoLang)](https://coveralls.io/github/quan-to/remote-signer?branch=master) [![Build Status](https://travis-ci.org/quan-to/remote-signer.svg?branch=master)](https://travis-ci.org/quan-to/remote-signer)
+[![MIT License](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://tldrlegal.com/license/mit-license) [![Coverage Status](https://coveralls.io/repos/github/quan-to/chevron/badge.svg?branch=master)](https://coveralls.io/github/quan-to/chevron?branch=master) [![Build Status](https://travis-ci.org/quan-to/chevron.svg?branch=master)](https://travis-ci.org/quan-to/chevron)
 
-A simple Web Server to act as a GPG Creator / Signer / Verifier. This abstracts the use of the GPG and makes easy to sign / verify any GPG document using just a POST request.
-
-Please notice that this application is *NOT inteded to ran public in the internet*. This is inteded to be a helper service to your application be able to sign / verify data (same as local gpg in the system). Because of that, it only listens for localhost.
-
-
-TODO
-====
-
-*   Increment this document with models and enums
+A simple Toolkit to act as a GPG Creator / Signer / Verifier. This abstracts the use of the GPG and makes easy to sign / verify any GPG document using just a POST request.
 
 Usage
-=====
+=======
 
-This application opens up a WebServer listening on port *5100* and have a base URL defined as `/remoteSigner`.
+* [Getting Started](https://github.com/quan-to/chevron/wiki)
+* [Creating GPG Keys](https://github.com/quan-to/chevron/wiki/Creating-GPG-keys)
+* [Setting up Keys](https://github.com/quan-to/remote-signer/wiki/SettingUp-keys)
+* [Listing loaded private keys](https://github.com/quan-to/chevron/wiki/List-loaded-private-keys)
+* [Unlock Private Key](https://github.com/quan-to/remote-signer/wiki/Unlock-private-key)
+* [Signing Data](https://github.com/quan-to/remote-signer/wiki/Signing-Data)
+* [Listing cached public keys](https://github.com/quan-to/chevron/wiki/List-cached-public-keys)
+* [Verifying Signatures](https://github.com/quan-to/remote-signer/wiki/Verifying-Signatures)
+* [Encrypting Data](https://github.com/quan-to/remote-signer/wiki/Encrypting-Data)
+* [Decrypting Data](https://github.com/quan-to/remote-signer/wiki/Decrypting-Data)
 
-#### Setting up GPG Private Keys
+Advanced Usage
+==============
 
-By default QRS searchs for encrypted private keys at `./keys`. Put all the private keys you want to use in Encrypted Ascii Armored Format inside it. It will iterate over all files and load them. If you don't have one, you can either create using the `gpg` toolkit or by calling the create api. Notice that calling the create API does not automatically store the key at the `keys` folder.
+* [Cluster Mode](https://github.com/quan-to/chevron/wiki/Cluster-Mode)
+* [Vault Backend](https://github.com/quan-to/chevron/wiki/Hashicorp-Vault-Key-Backend)
+* [Quanto Agent](https://github.com/quan-to/chevron/wiki/Quanto-Agent)
+* Binary Builds
+* Docker
+* [Building](https://github.com/quan-to/chevron/wiki/Building)
 
-The keys folder can be overrided by the `PRIVATE_KEY_FOLDER` environment variable.
-
-#### Creating a GPG Key
-
-Although creating a GPG Key here might not be a good idea, you can use QRS to generate new GPG Keys on the fly. To do so, make a POST request to `/remoteSigner/gpg/generateKey` with the following JSON Content:
-
-```json
-{
-  "Identifier": "Lucas Teske <lucas@teske.com.br>",
-  "Password": "123456",
-  "Bits": 3072
-}
-```
-
-It should return your Encrypted GPG Private Key in ASCII Armored format.
-
-```
------BEGIN PGP PRIVATE KEY BLOCK-----
-Version: BCPG C# v1.8.1.0
-
-lQVsBFpqVT0BDADIMVGd96DMUGf+zrcs0cGTzofbvV56WTWFju9WzIiUMigON6Qw
-XdpdHUad1H31pnI1COCKH+k2t3TOlQr7qgXHMFOjW+/xHKoN6NhGMZVC7MkUllaj
-uTFDH9823N/fhbJ4BRuBb2a5X4HBIeIDscu19xsW5B3HvwggojjhZ5iKRCt49Hsv
-dJ6gPA5fDURGAbt9xdAqWvlkT9xagHqylVSG1A1CxOmeP3p+Vfjh/IhCgZ/nbi52
-s+iBthuraYJAIPB9snASniMIqYs7sWTpC8T4m+WYEZGB2ejvVscmEgXFNWn6hzKI
-(...)
------END PGP PRIVATE KEY BLOCK-----
-```
-
-#### Unlocking a Private Key
-Before any sign operation can be done, you need to decrypt the loaded private keys. If the keys is stored in a non-encrypted format (no password) you don't need to do that step. Simple call `/remoteSigner/gpg/unlockKey` with the following JSON payload:
-
-```json
-{
-  "FingerPrint": "D7362B4CC546DB11",
-  "Password": "123456"
-}
-```
-
-#### Signing Data
-
-For signing data, the first thing is to make sure the key is loaded and decrypted. Then encode the data you want to sign in Base64. Let's take for example the following text to sign:
-
-```
-Terrible connections lead to terrible users
-```
-
-We can base64 encode (for example in shellscript):
-```bash
-echo "Terrible Connections lead to Terrible Users" | base64
-VGVycmlibGUgQ29ubmVjdGlvbnMgbGVhZCB0byBUZXJyaWJsZSBVc2Vycwo=
-```
-
-And make a POST request to `/remoteSigner/gpg/sign` with the following JSON payload:
-```json
-{
-  "Base64Data": "VGVycmlibGUgQ29ubmVjdGlvbnMgbGVhZCB0byBUZXJyaWJsZSBVc2Vycwo=",
-  "FingerPrint": "D7362B4CC546DB11"
-}
-```
-Leading to a Ascii Armored GPG Detached Signature:
-```
------BEGIN PGP SIGNATURE-----
-Version: BCPG C# v1.8.1.0
-
-iQIcBAABCgAGBQJaaldaAAoJENc2K0zFRtsRSFoP+gIf8iKOX0+jOJzXis8yGdb6
-yYiDq2iKKhLKrMR110F5gWOkbizLVut47XuR9zj6RBWvE2yd2YUJS/bom2A1F+4n
-UZMdwvk0frpsoJPbwu5wjHKUuWTar3H8dgd5Wdx3BaNlr/j2JvTOq6/MGBzBJQ9y
-39vve5KQnMzimKcKSUga2RY/5dUpGGJFvWKB1KNoh/jGBG7LxqA2zVh+o1b8cWcE
-BW9Qk1fq5j9q+N68LJ9SGuHXALrxVXeR6Z9GGQjcPIwZbTYhPt1IKgr20pvvCc/6
-GaXRSEkcacike+zNjLgMewL4k3/wRMceVEq+FKT1RtGciEr6dd+WsAbPA7DzoOmn
-XtrkCzCFNay9F7AHM1eopYP5qROEOCIBi+vXPLLAsZSua8cPd8DUxmNDDAc9Cq+F
-DCD/v3FZXoqmTmNaJ5QJi6hW8lvUMK9KDzN51CmlOoICyu8BInPZIf0VO4NLlD/d
-v9CR+mHaHWmYcSEpoI4I+YpNB9JmxwIFd8+KluqkQ5tzixBeVx5O0gO2yuStG0Le
-mZTOf886+cl49KwOBzZZS37lx6VCxgMTI3dgUL+4r4L1em4QmOjEoNu0fCbigkoP
-KZ3OYGRhhp3dsmIIBuOWC+6PvbzNKApaph4wH4ysLZDP7/DEtPLC5msuEYW5QcJt
-TPTWS9moWewsplQazivx
-=fEEJ
------END PGP SIGNATURE-----
-```
-
-You might also want to get directly into *Quanto Signature* format (`FingerPrint_Hash_Signature`). For doing so you can send the same payload to `/remoteSigner/gpg/signQuanto` leading to:
-
-```
-D7362B4CC546DB11_SHA512_iQIcBAABCgAGBQJaale3AAoJENc2K0zFRtsRe3IP/jVE19IeT9fWXl1wbSfZ4VLRY8HePogfyGMVELrkqoRQjUwQB3s2cBio/uAZNNzyvYGqkdFVeeSO83GRAsobts8Q94Q//jAJxeYDy6qAzs6JbzOYAf1b8KWhjzosQDnvmqlvyH+95IoxTEXcDK/WFox5XrZGqRda3rlv+9CywzYreAiFHnSuF5LFJ0K+KkPCMjEJ8EgRZQ/WN0gcDNcabgI85ncpJ7gQ6rSzOmvK3tDd3oNyFFfzYGNaGWThQsYKLOwZA3MSri95y86CcBW9SkaLdqT9LRSGW+pEjXYXax4WU13+YlrUa5axT87sHZs0awORKkHZ2Wik082cFN7M903qd1+fUkKNaz3nG1rwbUAp5KiKabQUcvOhz+guXYnZlqeL0IWRBvagAnBDjWLd3O4X9RIhhl4RjqeiHzgzpx3hBbUQRxyDopdnQMGuqIH9PaffJzFUnzqChTgUhnxntYqkISPsYy5DMzzvlLIIESvIgCHOgQu9kxj/upTE6OoDjWMXjBJn3ytpwf2xjsdtKEn0QRe0PV1uCa+P+z5Qg41ZvP0krhxomr1wmNmNvDkPL/uIYD06fN6bWwnuMQf5nI5DS/X4ysp1AN5EEesrwjh9ygBGxpFa4+jlwuJYa7b2HdmesQG3JVzMhkHtNCCMIo7GAHKCc8vhG08eQ0FtAdPr=rV18
-```
-
-#### Verifing Signatures
-
-The process to verify a signature is similar to signing data. First you need to make sure the public key is loaded into the server (if the private key is, the public is as well) or it is available in the specified SKS Server and then encode the test data in Base64 format and POST the following payload to `/remoteSigner/gpg/verifySignature`
-
-```json
-{
-  "Base64Data": "VGVycmlibGUgQ29ubmVjdGlvbnMgbGVhZCB0byBUZXJyaWJsZSBVc2Vycwo=",
-  "signature":"-----BEGIN PGP SIGNATURE-----\nVersion: BCPG C# v1.8.1.0\n\niQIcBAABCgAGBQJaalMSAAoJENc2K0zFRtsRuxEQAKPz46GpBYvZY99dqfylo/ux\nOcbFx0U/jWnXACEsz4KbfIaKqTNQLNOApt7vC+PTeK18Bx3i6lLDq5s0T56ZZS07\n+12/8qWfq08LOTANtrMetmOP1znaJpzmWzpxCp8t/pTowt1RZJUfGC5zdxoxMLB8\nu3siSbbqSxPlOYx7yfNnJqE7KagHn83WdZYIQTFBYZESqfEhjmazERui+g3YKF74\nUlr8Ey0kIFptVa/DdsIQwgCMjDalWB6zdX8xLiLqH0pRAOSmiMcU7cX8vWSAlC5S\nl7uoam6azzyc/kAYBaBd+3/YORDu6vlnNvHtj6D1cvff0ahinnKHb2gxqN+cBUbL\nNlpBSRKwd5i/O504BjGOplp31rCbza+0vs0lvbQ2/ZMH1HaspuO3I8jdZQpaMxR4\n6GWf9/+clg8SxkNgbaKj8pRHnzvrjEOaEfYNXxdjMV4LgXX6pjZtZi47AfHqXPWc\n/pw7YSG6yJLF4n+Egky/thvoVQHR3GM10VXvUjYVTRdEaxO2P9MpWYLD8Fqa6rMo\nzVNXtCMKtej5Y5qQHMCFcKafG1J0TXPfsqnYCSsG2PpdDsZhz5r6eKgu5LZqN5yO\ntRylJnBDJuE8yweNYBDYWWAMoo1ApziRUItNI5el1I0DC+vwaM4Vxurywjxhcy4q\nHTlBXAdXKpVLINxkRSKy\n=YK2F\n-----END PGP SIGNATURE-----" 
-}
-```
-
-In case of success, it will return an `OK`. In case of failure it will return an `ErrorObject` with an `errorCode` field `INVALID_SIGNATURE`.
-
-You might also want to verify in `Quanto Signature` format. To do so, you can send the same payload with the `signature` field containing the `Quanto Signature` you want to verify to `/remoteSigner/gpg/verifySignatureQuanto`.
-
-```json
-{
-  "Base64Data": "VGVycmlibGUgQ29ubmVjdGlvbnMgbGVhZCB0byBUZXJyaWJsZSBVc2Vycwo=",
-  "signature":"D7362B4CC546DB11_SHA512_iQIcBAABCgAGBQJaale3AAoJENc2K0zFRtsRe3IP/jVE19IeT9fWXl1wbSfZ4VLRY8HePogfyGMVELrkqoRQjUwQB3s2cBio/uAZNNzyvYGqkdFVeeSO83GRAsobts8Q94Q//jAJxeYDy6qAzs6JbzOYAf1b8KWhjzosQDnvmqlvyH+95IoxTEXcDK/WFox5XrZGqRda3rlv+9CywzYreAiFHnSuF5LFJ0K+KkPCMjEJ8EgRZQ/WN0gcDNcabgI85ncpJ7gQ6rSzOmvK3tDd3oNyFFfzYGNaGWThQsYKLOwZA3MSri95y86CcBW9SkaLdqT9LRSGW+pEjXYXax4WU13+YlrUa5axT87sHZs0awORKkHZ2Wik082cFN7M903qd1+fUkKNaz3nG1rwbUAp5KiKabQUcvOhz+guXYnZlqeL0IWRBvagAnBDjWLd3O4X9RIhhl4RjqeiHzgzpx3hBbUQRxyDopdnQMGuqIH9PaffJzFUnzqChTgUhnxntYqkISPsYy5DMzzvlLIIESvIgCHOgQu9kxj/upTE6OoDjWMXjBJn3ytpwf2xjsdtKEn0QRe0PV1uCa+P+z5Qg41ZvP0krhxomr1wmNmNvDkPL/uIYD06fN6bWwnuMQf5nI5DS/X4ysp1AN5EEesrwjh9ygBGxpFa4+jlwuJYa7b2HdmesQG3JVzMhkHtNCCMIo7GAHKCc8vhG08eQ0FtAdPr=rV18" 
-}
-```
-
-#### Adding Encrypted Private Key through API
-
-To add a private key, you can make a POST to `/remoteSigner/keyRing/addPrivateKey` with the following payload:
-
-```json
-{
-  "EncryptedPrivateKey": "-----BEGIN PGP PRIVATE KEY BLOCK-----\nVersion: GnuPG (...) JSlmyLSuTHXzeKo72hP40y3Xkf\nuugqVOWHeE7v7ARMu1mhXS6qWzZmxsjixV1d0kXSo9LzUyFqNtkasUiL2aoXQ70z\nlbMia0X7KJbYnbG5XLEDiMjzDQ==\n=JwWd\n-----END PGP PRIVATE KEY BLOCK-----",
-  "SaveToDisk": true
-}
-```
-
-The `SaveToDisk` parameter tells the server to save that private keys in the `KeysFolder`.
-
-#### List Cached Public Keys
-
-Execute GET to `/remoteSigner/keyRing/cachedKeys`
-
-Returns:
-
-```json
-[
-    {
-        "FingerPrint": "D7362B4CC546DB11",
-        "Identifier":"Benchmark Test Key",
-        "Bits": 4096,
-        "ContainsPrivateKey": false,
-        "PrivateKeyDecrypted": false
-    }
-]
-```
-
-#### List Loaded Private Keys
-Execute GET to `/remoteSigner/keyRing/privateKeys`
-
-Returns:
-
-```json
-[
-    {
-        "FingerPrint": "D7362B4CC546DB11",
-        "Identifier": "Benchmark Test Key",
-        "Bits": 4096,
-        "ContainsPrivateKey": true,
-        "PrivateKeyDecrypted": false
-    }
-]
-```
-
-#### Encrypt Data using public key
-Ensure that the public key you want to use is loaded and execute POST to `/remoteSigner/gpg/encrypt` with following payload:
-
-```json
-{
-  "Base64Data": "eyJxdWVyeSI6InF1ZXJ5IHsgR2V0QmFua1N5c3RlbVN0YXR1cyAoYmFua051bWJlcjogXCI2MzNcIikgfSJ9Cg==",
-  "FingerPrint": "870AFA59"
-}
-```
-
-Returns:
-```
------BEGIN PGP MESSAGE-----
-Version: BCPG C# v1.8.1.0
-
-hQIMAwAWqcqHCvpZAQ//TtD4Ne8dC+R7xHa3ED4dcOAVWBhiZ/h/GS8TZHrn7TQE
-MeEg46yF/xbDB1ryivvikubXKRHKcxB1N7DHX1yJc9zI1uWdrePBsheXJMJuFOs9
-(...)
-cKIB0DoBAJ+AcKT89elQ4CgNIUQZzof64gLPNpFq+yknNYR3CifBCQoCMk8WZev8
-ffy3cx45u+q2SkVT+pAIJXZ7PgmaNLGIAWTW+2JaTxv657ZeWW8dhzHTKU+rDqzR
-rnBaQD23nV45ZvmFd6GjvdE=
-=nPAx
------END PGP MESSAGE-----
-```
-
-#### Decrypt Data using decrypted private key
-Ensure that the private key from the data you're trying to decrypt is loaded and decrypted, then execute a POST to `/remoteSigner/gpg/decrypt` with the following payload:
-
-```json
-{
-  "AsciiArmoredData": "-----BEGIN PGP MESSAGE-----\nVersion: BCPG C# v1.8.1.0\n\nhQILAwAWqcqHCvpZAQ/4vF53gHVus8aKyKGkzb7jn2R4aZB3KCQ08S2xhAUvZFF8\n0qaeLxPGDdOo4X43zNmOvfIth4IwnDFF/SlD6E9ToxI+oDBC2hU92GyQZmlrb0dm\nHfVtKxCP9D6bAUHb9/G2QrbLSwov7TKlYs4gcqv72Lh4It8wVZaUm+qWb1EL4I33\nM+RHPSkmDPpCVWJxPQv/5Bt0h48wX9V7JtFc2FXJgJhYyrRxxIEFDcof4jdbvH/2\ncd5DDoLJPq3w4R4GKLxgQisgK2fp9jsl5AUzBiNy++l80rJW3m9TL3hLHUqqvL2R\nZrglp5KCR367uB0b6H+oXCRkxsgulTtXWM111HfTEJ0FYkYMfjxwYLdgjeduilhP\n7bkLDXFJgR3TaxHweUx4tOYRREsRSnzlDEDt+RdCHnP27mn/8QOi2wzi5zTP/KIr\nHlNfb+yw1BlFS5swFp+QLj7/QfkZefsneQC+zKfzyV9Hyz0b5tqXmsn+aVREF9D7\nQpqbEyHO1E/amz0hPIqu8CIIxr9Exmjxj5jV4MRgqVZ+5ukjiahG4jnnGuMPMvlp\nYjdZ1lAq0LDs+XSf9QbZE63j4YDT5tuJXNhUYojhb+DSSlL5LmQCuzTtZLNZaS+S\n26fQ5R3NYTWsJF3gvqwyXCr/49gYDxU2YNOBGdHGvOsDqnqchceRqWXfCJ8QlNKG\nAXLylUqQH0y58X0DTbEUEDtKRHAk42f9hicpxQY0FfnrUnggIBFubs385k6LIIDR\n4Xs6LwwjGFT9XqWzNa7adi+60sfrlN2iTYRZJGsNdvGmnMTClS0e6i6rlgQJAqHe\nl5rf7WGniCF+sAjxmbJ53TPBrh/sUlMMl0acXmXz4EZxnaENBJg=\n=n4Ks\n-----END PGP MESSAGE-----",
-}
-```
-
-Returns:
-
-```json
-{
-  "FingerPrint": "0016A9CA870AFA59",
-  "Base64Data": "eyJxdWVyeSI6InF1ZXJ5IHsgR2V0QmFua1N5c3RlbVN0YXR1cyAoYmFua051bWJlcjogXCI2MzNcIikgfSJ9Cg==",
-  "Filename": "QuantoEncrypt-1518071090398.bin",
-  "IsIntegrityProtected": true,
-  "IsIntegrityOK": true
-}
-```
 
 Environment Variables
 =====================
@@ -261,62 +65,3 @@ These are the Environment Variables that you can set to manage the webserver:
 *   `HTTP_PORT` => HTTP Port that Remote Signer will run
 *   `READONLY_KEYPATH` => If the keypath is readonly. If `true` then it will create a temporary folder in `/tmp` and copy all keys to there so it can work over it. 
 
-Cluster Mode
-============
-
-TODO
-
-Vault Backend
-=============
-
-TODO
-
-Quanto Agent
-============
-
-TODO
-
-Binary Builds
-=============
-
-TODO
-
-Docker
-======
-
-TODO
-
-Building
-========
-
-# Prepare
-
-First of all, you should be aware how to configure your golang environment (which should be similar to all Operating Systems). For a more specific how-to please refer to official golang install: https://golang.org/doc/install
-
-# Building (any os)
-
-Since Remote Signer is a pure golang program, its build instructions are the same for *any* operating system. 
-```bash
-cd cmd/server
-go build -o remote-signer
-```
-
-If you're on windows, run instead
-
-```powershell
-cd cmd/server
-go build -o remote-signer.exe
-```
-
-# Adding your private key into Remote Signer
-
-To add your private key, you can use the AddPrivateKey endpoint at `/keyRing/addPrivateKey` with the following payload:
-```json
-{
-  "EncryptedPrivateKey": "-----BEGIN PGP PRIVATE KEY BLOCK-----\n\n (...) -----END PGP PRIVATE KEY BLOCK-----\n",
-  "SaveToDisk": true,
-  "Password": "12344321"
-}
-```
-
-The `Password` field is optional, if provided, it will store the password along the key and auto-unlock when open. If not, you should call `UnlockKey` to be able to use the key.

@@ -2,9 +2,9 @@ package etc
 
 import (
 	"crypto"
-	"github.com/quan-to/remote-signer/models"
-	"github.com/quan-to/remote-signer/openpgp"
-	"github.com/quan-to/remote-signer/openpgp/packet"
+	"github.com/quan-to/chevron/models"
+	"github.com/quan-to/chevron/openpgp"
+	"github.com/quan-to/chevron/openpgp/packet"
 )
 
 type PGPInterface interface {
@@ -15,11 +15,13 @@ type PGPInterface interface {
 	IsKeyLocked(fp string) bool
 	UnlockKey(fp, password string) error
 	GetLoadedPrivateKeys() []models.KeyInfo
-	SavePrivateKey(fingerPrint, armoredData string, password interface{}) error
+	GetLoadedKeys() []models.KeyInfo
+	SaveKey(fingerPrint, armoredData string, password interface{}) error
 	SignData(fingerPrint string, data []byte, hashAlgorithm crypto.Hash) (string, error)
 	GetPublicKeyEntity(fingerPrint string) *openpgp.Entity
 	GetPublicKey(fingerPrint string) *packet.PublicKey
 	GetPublicKeyAscii(fingerPrint string) (string, error)
+	GetPrivateKeyAscii(fingerPrint, password string) (string, error)
 	VerifySignatureStringData(data string, signature string) (bool, error)
 	VerifySignature(data []byte, signature string) (bool, error)
 	GeneratePGPKey(identifier, password string, numBits int) (string, error)
@@ -30,4 +32,5 @@ type PGPInterface interface {
 	MinKeyBits() int
 	GenerateTestKey() (string, error)
 	GetPrivate(fingerPrint string) openpgp.EntityList
+	GetPrivateKeyInfo(fingerPrint string) *models.KeyInfo
 }

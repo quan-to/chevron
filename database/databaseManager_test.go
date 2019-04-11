@@ -2,21 +2,21 @@ package database
 
 import (
 	"fmt"
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/QuantoError"
-	"github.com/quan-to/remote-signer/SLog"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/QuantoError"
+	"github.com/quan-to/slog"
 	"os"
 	"os/exec"
 	"testing"
 )
 
 func TestMain(m *testing.M) {
-	SLog.UnsetTestMode()
+	slog.UnsetTestMode()
 	var rql *exec.Cmd
 	var err error
 	rql, err = remote_signer.RQLStart()
 	if err != nil {
-		SLog.Error(err)
+		slog.Error(err)
 		os.Exit(1)
 	}
 
@@ -37,14 +37,14 @@ func TestMain(m *testing.M) {
 	remote_signer.EnableRethinkSKS = true
 	DbSetup()
 
-	SLog.SetTestMode()
+	slog.SetTestMode()
 	code := m.Run()
-	SLog.UnsetTestMode()
+	slog.UnsetTestMode()
 
 	ResetDatabase()
-	SLog.UnsetTestMode()
+	slog.UnsetTestMode()
 	Cleanup()
-	SLog.Warn("STOPPING RETHINKDB")
+	slog.Warn("STOPPING RETHINKDB")
 	remote_signer.RQLStop(rql)
 	os.Exit(code)
 }

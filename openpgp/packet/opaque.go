@@ -9,7 +9,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/quan-to/remote-signer/openpgp/errors"
+	"github.com/quan-to/chevron/openpgp/errors"
 )
 
 // OpaquePacket represents an OpenPGP packet as raw, unparsed data. This is

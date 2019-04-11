@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mewkiz/pkg/osutil"
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/SLog"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/slog"
 	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"
 	"sync"
@@ -15,7 +15,7 @@ import (
 const jamFileName = "users.json"
 const jamFilePerm = 0600
 
-var jamLog = SLog.Scope("JSON-AM")
+var jamLog = slog.Scope("JSON-AM")
 
 type jsonUser struct {
 	Username    string
@@ -30,7 +30,7 @@ type JSONAuthManager struct {
 }
 
 func MakeJSONAuthManager() *JSONAuthManager {
-	ramLog.Info("Creating JSON Auth Manager")
+	jamLog.Info("Creating JSON Auth Manager")
 	jam := JSONAuthManager{}
 	jam.loadFile()
 	return &jam

@@ -2,7 +2,7 @@ package graphql
 
 import (
 	"github.com/graphql-go/graphql"
-	"github.com/quan-to/remote-signer/etc"
+	"github.com/quan-to/chevron/etc"
 )
 
 type AddUserResult struct {

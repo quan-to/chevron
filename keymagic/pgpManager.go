@@ -10,14 +10,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/SLog"
-	"github.com/quan-to/remote-signer/etc"
-	"github.com/quan-to/remote-signer/keyBackend"
-	"github.com/quan-to/remote-signer/models"
-	"github.com/quan-to/remote-signer/openpgp"
-	"github.com/quan-to/remote-signer/openpgp/armor"
-	"github.com/quan-to/remote-signer/openpgp/packet"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/etc"
+	"github.com/quan-to/chevron/keyBackend"
+	"github.com/quan-to/chevron/models"
+	"github.com/quan-to/chevron/openpgp"
+	"github.com/quan-to/chevron/openpgp/armor"
+	"github.com/quan-to/chevron/openpgp/packet"
+	"github.com/quan-to/slog"
 	"io"
 	"io/ioutil"
 	"path"
@@ -28,7 +28,7 @@ import (
 
 const MinKeyBits = 2048 // Should be safe until we have decent Quantum Computers
 
-var pgpLog = SLog.Scope("PGPManager")
+var pgpLog = slog.Scope("PGPManager")
 
 type PGPManager struct {
 	sync.Mutex
@@ -159,8 +159,10 @@ func (pm *PGPManager) LoadKey(armoredKey string) (error, int) {
 	}
 
 	for _, key := range keys {
-		if key.PrivateKey != nil {
+		if key.PrimaryKey != nil { // Cache Public Key
 			fp := remote_signer.ByteFingerPrint2FP16(key.PrimaryKey.Fingerprint[:])
+			pgpLog.Info("Loaded public key %s", fp)
+			pm.krm.AddKey(key, true) // Add sticky public keys
 			ids := make([]*openpgp.Identity, 0)
 			for _, v := range key.Identities {
 				// Get only first
@@ -170,6 +172,9 @@ func (pm *PGPManager) LoadKey(armoredKey string) (error, int) {
 			pm.keyIdentity[fp] = ids
 			pm.fp8to16[fp[8:]] = fp
 			pm.entities[fp] = key
+		}
+		if key.PrivateKey != nil {
+			fp := remote_signer.ByteFingerPrint2FP16(key.PrimaryKey.Fingerprint[:])
 			pgpLog.Info("Loaded private key %s", fp)
 
 			for _, sub := range key.Subkeys {
@@ -307,6 +312,28 @@ func (pm *PGPManager) LoadKeyFromKB(fingerPrint string) error {
 	return nil
 }
 
+func (pm *PGPManager) GetPrivateKeyInfo(fingerPrint string) *models.KeyInfo {
+	for k, e := range pm.entities {
+		v := e.PrivateKey
+		if v == nil {
+			continue
+		}
+
+		if remote_signer.CompareFingerPrint(k, fingerPrint) {
+			z, _ := v.BitLength()
+			return &models.KeyInfo{
+				FingerPrint:           k,
+				Identifier:            remote_signer.SimpleIdentitiesToString(pm.keyIdentity[k]),
+				Bits:                  int(z),
+				ContainsPrivateKey:    true,
+				PrivateKeyIsDecrypted: pm.decryptedPrivateKeys[k] != nil,
+			}
+		}
+	}
+
+	return nil
+}
+
 func (pm *PGPManager) GetLoadedPrivateKeys() []models.KeyInfo {
 	keyInfos := make([]models.KeyInfo, 0)
 
@@ -330,7 +357,25 @@ func (pm *PGPManager) GetLoadedPrivateKeys() []models.KeyInfo {
 	return keyInfos
 }
 
-func (pm *PGPManager) SavePrivateKey(fingerPrint, armoredData string, password interface{}) error {
+func (pm *PGPManager) GetLoadedKeys() []models.KeyInfo {
+	keyInfos := make([]models.KeyInfo, 0)
+
+	for k, e := range pm.entities {
+		z, _ := e.PrimaryKey.BitLength()
+		keyInfo := models.KeyInfo{
+			FingerPrint:           k,
+			Identifier:            remote_signer.SimpleIdentitiesToString(pm.keyIdentity[k]),
+			Bits:                  int(z),
+			ContainsPrivateKey:    e.PrivateKey != nil,
+			PrivateKeyIsDecrypted: pm.decryptedPrivateKeys[k] != nil,
+		}
+		keyInfos = append(keyInfos, keyInfo)
+	}
+
+	return keyInfos
+}
+
+func (pm *PGPManager) SaveKey(fingerPrint, armoredData string, password interface{}) error {
 	filename := fmt.Sprintf("%s.key", fingerPrint)
 	if pm.KeysBase64Encoded {
 		filename = fmt.Sprintf("%s.b64", fingerPrint)
@@ -338,12 +383,12 @@ func (pm *PGPManager) SavePrivateKey(fingerPrint, armoredData string, password i
 
 	filePath := path.Join(remote_signer.PrivateKeyFolder, filename)
 
-	pgpLog.Info("Saving private key at %s", filePath)
+	pgpLog.Info("Saving key at %s", filePath)
 
 	data := []byte(armoredData)
 
 	if pm.KeysBase64Encoded {
-		pgpLog.Debug("Base64 Encoding enabled. Encoding private key.")
+		pgpLog.Debug("Base64 Encoding enabled. Encoding key.")
 		data = []byte(base64.StdEncoding.EncodeToString(data))
 	}
 	metadataJson := ""
@@ -479,6 +524,25 @@ func (pm *PGPManager) GetSubKeys(fingerPrint string, decrypted bool) openpgp.Ent
 	return list
 }
 
+func (pm *PGPManager) GetKey(fingerPrint string) *openpgp.Entity {
+	fingerPrint = pm.FixFingerPrint(fingerPrint)
+
+	// Try directly
+	_ = pm.LoadKeyFromKB(fingerPrint)
+	decv := pm.entities[fingerPrint]
+	if decv != nil {
+		return decv
+	}
+
+	// Try subkeys
+	subKeyMaster := pm.subKeyToKey[fingerPrint]
+	if subKeyMaster != fingerPrint {
+		return pm.GetKey(subKeyMaster)
+	}
+
+	return nil
+}
+
 func (pm *PGPManager) GetPrivate(fingerPrint string) openpgp.EntityList {
 	var ent openpgp.Entity
 	fingerPrint = pm.FixFingerPrint(fingerPrint)
@@ -564,6 +628,55 @@ func (pm *PGPManager) GetPublicKeyAscii(fingerPrint string) (string, error) {
 		}
 
 		key = buf.String()
+	}
+
+	return key, nil
+}
+
+func (pm *PGPManager) GetPrivateKeyAscii(fingerPrint, password string) (string, error) {
+	key := ""
+	ent := pm.GetKey(fingerPrint)
+
+	if ent != nil && ent.PrivateKey != nil { // Try get full entity first
+		// Decrypt / Encrypt to initialize Signer
+		err := ent.PrivateKey.Decrypt([]byte(password))
+
+		if err != nil {
+			return "", err
+		}
+
+		_ = ent.PrivateKey.Encrypt([]byte(password))
+
+		serializedEntity := bytes.NewBuffer(nil)
+		err = ent.SerializePrivate(serializedEntity, &packet.Config{
+			DefaultHash: crypto.SHA512,
+		})
+		if err != nil {
+			return "", err
+		}
+
+		buf := bytes.NewBuffer(nil)
+		headers := map[string]string{
+			"Version": "GnuPG v2",
+			"Comment": "Generated by Quanto Remote Signer",
+		}
+
+		w, err := armor.Encode(buf, openpgp.PrivateKeyType, headers)
+		if err != nil {
+			return "", err
+		}
+		_, err = w.Write(serializedEntity.Bytes())
+		if err != nil {
+			return "", err
+		}
+		err = w.Close()
+		if err != nil {
+			return "", err
+		}
+
+		key = buf.String()
+	} else {
+		return "", fmt.Errorf("cannot find private key for %s", fingerPrint)
 	}
 
 	return key, nil

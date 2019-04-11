@@ -6,15 +6,15 @@ import (
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/graphql/gqlerrors"
 	"github.com/graphql-go/handler"
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/QuantoError"
-	"github.com/quan-to/remote-signer/SLog"
-	"github.com/quan-to/remote-signer/etc"
-	"github.com/quan-to/remote-signer/server/agent"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/QuantoError"
+	"github.com/quan-to/chevron/etc"
+	"github.com/quan-to/chevron/server/agent"
+	"github.com/quan-to/slog"
 	"net/http"
 )
 
-var amLog = SLog.Scope("AgentAdmin")
+var amLog = slog.Scope("AgentAdmin")
 
 type AgentAdmin struct {
 	tm      etc.TokenManager

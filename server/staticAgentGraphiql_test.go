@@ -3,9 +3,9 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/QuantoError"
-	"github.com/quan-to/remote-signer/server/agent"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/QuantoError"
+	"github.com/quan-to/chevron/server/agent"
 	"io/ioutil"
 	"net/http"
 	"strings"

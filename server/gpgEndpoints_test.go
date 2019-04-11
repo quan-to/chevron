@@ -5,9 +5,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/QuantoError"
-	"github.com/quan-to/remote-signer/models"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/QuantoError"
+	"github.com/quan-to/chevron/models"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -356,7 +356,7 @@ func TestVerifySignatureQuanto(t *testing.T) {
 		var errObj QuantoError.ErrorObject
 		err := json.Unmarshal(d, &errObj)
 		errorDie(err, t)
-		slog.Debug(errObj.StackTrace)
+		log.Debug(errObj.StackTrace)
 		errorDie(fmt.Errorf(errObj.Message), t)
 	}
 
@@ -397,7 +397,7 @@ func TestSign(t *testing.T) {
 
 	errorDie(err, t)
 
-	slog.Debug("Signature: %s", string(d))
+	log.Debug("Signature: %s", string(d))
 	// endregion
 	// region Verify Signature
 	verifyBody := models.GPGVerifySignatureData{
@@ -510,7 +510,7 @@ func TestSignQuanto(t *testing.T) {
 
 	errorDie(err, t)
 
-	slog.Debug("Signature: %s", string(d))
+	log.Debug("Signature: %s", string(d))
 	// endregion
 	// region Verify Signature
 	verifyBody := models.GPGVerifySignatureData{

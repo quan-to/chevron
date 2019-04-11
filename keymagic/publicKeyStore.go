@@ -2,13 +2,13 @@ package keymagic
 
 import (
 	"fmt"
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/SLog"
-	"github.com/quan-to/remote-signer/database"
-	"github.com/quan-to/remote-signer/models"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/database"
+	"github.com/quan-to/chevron/models"
+	"github.com/quan-to/slog"
 )
 
-var pksLog = SLog.Scope("PKS")
+var pksLog = slog.Scope("PKS")
 
 func PKSGetKey(fingerPrint string) (string, error) {
 	if !remote_signer.EnableRethinkSKS {

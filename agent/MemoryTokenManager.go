@@ -3,14 +3,14 @@ package agent
 import (
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/SLog"
-	"github.com/quan-to/remote-signer/etc"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/etc"
+	"github.com/quan-to/slog"
 	"sync"
 	"time"
 )
 
-var mtmLog = SLog.Scope("Memory-TM")
+var mtmLog = slog.Scope("Memory-TM")
 
 type MemoryUser struct {
 	username    string

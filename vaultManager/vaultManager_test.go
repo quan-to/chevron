@@ -1,7 +1,7 @@
 package vaultManager
 
 import (
-	"github.com/quan-to/remote-signer"
+	"github.com/quan-to/chevron"
 	"os"
 	"testing"
 )

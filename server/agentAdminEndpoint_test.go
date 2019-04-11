@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/quan-to/remote-signer/QuantoError"
+	"github.com/quan-to/chevron/QuantoError"
 	"io/ioutil"
 	"net/http"
 	"testing"

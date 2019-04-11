@@ -56,4 +56,9 @@ zips
 server/users.json
 cmd/server/remoteSigner-linux*
 cmd/server/remoteSigner-macosx*
+cmd/standalone/keys
 tests/metadata-*
+
+vault.log
+keymagic/rethinkdb_data
+server/rethinkdb_data

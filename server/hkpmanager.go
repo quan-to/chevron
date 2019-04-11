@@ -3,15 +3,15 @@ package server
 import (
 	"errors"
 	"github.com/gorilla/mux"
-	"github.com/quan-to/remote-signer/SLog"
-	"github.com/quan-to/remote-signer/keymagic"
-	"github.com/quan-to/remote-signer/models/HKP"
+	"github.com/quan-to/chevron/keymagic"
+	"github.com/quan-to/chevron/models/HKP"
+	"github.com/quan-to/slog"
 	"net/http"
 )
 
 /// HKP Server based on https://tools.ietf.org/html/draft-shaw-openpgp-hkp-00
 
-var hkpLog = SLog.Scope("HKP")
+var hkpLog = slog.Scope("HKP")
 
 func operationGet(options, searchData string, machineReadable, noModification bool) (error, string) {
 	if searchData[:2] == "0x" {

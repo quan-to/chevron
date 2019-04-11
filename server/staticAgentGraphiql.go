@@ -2,15 +2,15 @@ package server
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/SLog"
-	"github.com/quan-to/remote-signer/server/agent"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/server/agent"
+	"github.com/quan-to/slog"
 	"net/http"
 	"path"
 	"strings"
 )
 
-var sgLog = SLog.Scope("GraphiQL")
+var sgLog = slog.Scope("GraphiQL")
 
 type StaticGraphiQL struct{}
 

@@ -1,8 +1,8 @@
 package magicBuilder
 
 import (
-	"github.com/quan-to/remote-signer/etc"
-	"github.com/quan-to/remote-signer/keymagic"
+	"github.com/quan-to/chevron/etc"
+	"github.com/quan-to/chevron/keymagic"
 )
 
 func MakeSM() etc.SMInterface {

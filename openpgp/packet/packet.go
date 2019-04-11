@@ -4,7 +4,7 @@
 
 // Package packet implements parsing and serialization of OpenPGP packets, as
 // specified in RFC 4880.
-package packet // import "github.com/quan-to/remote-signer/openpgp/packet"
+package packet // import "github.com/quan-to/chevron/openpgp/packet"
 
 import (
 	"bufio"
@@ -15,7 +15,7 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/quan-to/remote-signer/openpgp/errors"
+	"github.com/quan-to/chevron/openpgp/errors"
 	"golang.org/x/crypto/cast5"
 )
 

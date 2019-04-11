@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mewkiz/pkg/osutil"
-	"github.com/quan-to/remote-signer/SLog"
-	"github.com/quan-to/remote-signer/models/KubernetesModels"
+	"github.com/quan-to/chevron/models/KubernetesModels"
+	"github.com/quan-to/slog"
 	"io/ioutil"
 	"os"
 	"path"
@@ -17,7 +17,7 @@ var inKubernetes = false
 var currentNamespace = ""
 var currentHostname = ""
 var currentKubeToken = ""
-var kubeLog = SLog.Scope("Kubernetes")
+var kubeLog = slog.Scope("Kubernetes")
 var me *KubernetesModels.Pod
 
 func serviceURL() string {

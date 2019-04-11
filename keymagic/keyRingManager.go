@@ -1,14 +1,14 @@
 package keymagic
 
 import (
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/SLog"
-	"github.com/quan-to/remote-signer/models"
-	"github.com/quan-to/remote-signer/openpgp"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/models"
+	"github.com/quan-to/chevron/openpgp"
+	"github.com/quan-to/slog"
 	"sync"
 )
 
-var krmLog = SLog.Scope("KeyRingManager")
+var krmLog = slog.Scope("KeyRingManager")
 
 type KeyRingManager struct {
 	sync.Mutex
@@ -59,6 +59,11 @@ func (krm *KeyRingManager) AddKey(key *openpgp.Entity, nonErasable bool) {
 		return
 	}
 	if !nonErasable {
+		if len(krm.fingerPrints)+1 > remote_signer.MaxKeyRingCache {
+			lastFp := krm.fingerPrints[0]
+			krmLog.Debug("	There are more cached keys than allowed. Removing first key %s", lastFp)
+			krm.removeFp(lastFp)
+		}
 		krm.addFp(fp)
 	}
 
@@ -74,12 +79,6 @@ func (krm *KeyRingManager) AddKey(key *openpgp.Entity, nonErasable bool) {
 		Bits:                  int(keyBits),
 		ContainsPrivateKey:    false,
 		PrivateKeyIsDecrypted: false,
-	}
-
-	if len(krm.fingerPrints) > remote_signer.MaxKeyRingCache {
-		lastFp := krm.fingerPrints[0]
-		krmLog.Debug("	There are more cached keys than allowed. Removing first key %s", lastFp)
-		krm.removeFp(lastFp)
 	}
 
 	krm.Unlock()

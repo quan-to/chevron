@@ -3,10 +3,10 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/QuantoError"
-	"github.com/quan-to/remote-signer/keymagic"
-	"github.com/quan-to/remote-signer/models/HKP"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/QuantoError"
+	"github.com/quan-to/chevron/keymagic"
+	"github.com/quan-to/chevron/models/HKP"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -110,7 +110,7 @@ func TestLookup(t *testing.T) {
 	remote_signer.PushVariables()
 	defer remote_signer.PopVariables()
 	remote_signer.EnableRethinkSKS = true
-	//SLog.UnsetTestMode()
+	//log.UnsetTestMode()
 	// Ensure key is in SKS
 	key, _ := gpg.GetPublicKeyAscii(testKeyFingerprint)
 	_ = keymagic.PKSAdd(key)
