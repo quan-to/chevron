@@ -11,8 +11,8 @@ import (
 	"math/big"
 	"strconv"
 
-	"github.com/quan-to/remote-signer/openpgp/elgamal"
-	"github.com/quan-to/remote-signer/openpgp/errors"
+	"github.com/quan-to/chevron/openpgp/elgamal"
+	"github.com/quan-to/chevron/openpgp/errors"
 )
 
 const encryptedKeyVersion = 3

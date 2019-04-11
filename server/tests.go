@@ -2,7 +2,7 @@ package server
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/quan-to/remote-signer/models"
+	"github.com/quan-to/chevron/models"
 	"net/http"
 )
 

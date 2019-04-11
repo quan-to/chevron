@@ -2,7 +2,7 @@ package keymagic
 
 import (
 	"fmt"
-	"github.com/quan-to/remote-signer"
+	"github.com/quan-to/chevron"
 	"io/ioutil"
 	"net/http"
 	"net/url"

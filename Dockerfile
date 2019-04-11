@@ -4,16 +4,16 @@ RUN apk update
 
 RUN apk add git ca-certificates
 
-ADD . /go/src/github.com/quan-to/remote-signer
+ADD . /go/src/github.com/quan-to/chevron
 
 
 # Compile Server
-WORKDIR /go/src/github.com/quan-to/remote-signer/cmd/server
+WORKDIR /go/src/github.com/quan-to/chevron/cmd/server
 RUN go get -v
 RUN CGO_ENABLED=0 GOOS=linux go build -o ../../remote-signer
 
 # Compile Standalone
-WORKDIR /go/src/github.com/quan-to/remote-signer/cmd/standalone
+WORKDIR /go/src/github.com/quan-to/chevron/cmd/standalone
 RUN go get -v
 RUN CGO_ENABLED=0 GOOS=linux go build -o ../../standalone
 
@@ -27,8 +27,8 @@ RUN apk --no-cache add ca-certificates
 RUN mkdir -p /opt/remote-signer/
 WORKDIR /opt/remote-signer
 
-COPY --from=build /go/src/github.com/quan-to/remote-signer/remote-signer .
-COPY --from=build /go/src/github.com/quan-to/remote-signer/standalone .
+COPY --from=build /go/src/github.com/quan-to/chevron/remote-signer .
+COPY --from=build /go/src/github.com/quan-to/chevron/standalone .
 
 RUN mkdir -p /keys
 

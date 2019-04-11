@@ -8,7 +8,7 @@ import (
 	"crypto/cipher"
 	"crypto/sha1"
 	"crypto/subtle"
-	"github.com/quan-to/remote-signer/openpgp/errors"
+	"github.com/quan-to/chevron/openpgp/errors"
 	"hash"
 	"io"
 	"strconv"

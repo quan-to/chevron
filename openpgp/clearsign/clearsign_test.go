@@ -6,7 +6,7 @@ package clearsign
 
 import (
 	"bytes"
-	"github.com/quan-to/remote-signer/openpgp"
+	"github.com/quan-to/chevron/openpgp"
 	"testing"
 )
 

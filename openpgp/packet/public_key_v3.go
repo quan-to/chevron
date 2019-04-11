@@ -16,7 +16,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/quan-to/remote-signer/openpgp/errors"
+	"github.com/quan-to/chevron/openpgp/errors"
 )
 
 // PublicKeyV3 represents older, version 3 public keys. These keys are less secure and

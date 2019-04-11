@@ -1,7 +1,7 @@
 Quanto Remote Signer (QRS)
 ====================
 
-[![MIT License](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://tldrlegal.com/license/mit-license) [![Coverage Status](https://coveralls.io/repos/github/quan-to/remote-signer/badge.svg?branch=master)](https://coveralls.io/github/quan-to/remote-signer?branch=master) [![Build Status](https://travis-ci.org/quan-to/remote-signer.svg?branch=master)](https://travis-ci.org/quan-to/remote-signer)
+[![MIT License](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://tldrlegal.com/license/mit-license) [![Coverage Status](https://coveralls.io/repos/github/quan-to/chevron/badge.svg?branch=master)](https://coveralls.io/github/quan-to/chevron?branch=master) [![Build Status](https://travis-ci.org/quan-to/chevron.svg?branch=master)](https://travis-ci.org/quan-to/chevron)
 
 A simple Web Server to act as a GPG Creator / Signer / Verifier. This abstracts the use of the GPG and makes easy to sign / verify any GPG document using just a POST request.
 
@@ -52,13 +52,13 @@ s+iBthuraYJAIPB9snASniMIqYs7sWTpC8T4m+WYEZGB2ejvVscmEgXFNWn6hzKI
 ```
 
 #### Unlocking a Private Key
-Please check https://github.com/quan-to/remote-signer/wiki/Unlock_private_key
+Please check https://github.com/quan-to/chevron/wiki/Unlock_private_key
 
 #### Signing Data
-Please check https://github.com/quan-to/remote-signer/wiki/Sign_data
+Please check https://github.com/quan-to/chevron/wiki/Sign_data
 
 #### Verifing Signatures
-Please check https://github.com/quan-to/remote-signer/wiki/Verifying_Signatures
+Please check https://github.com/quan-to/chevron/wiki/Verifying_Signatures
 
 #### Adding Encrypted Private Key through API
 
@@ -109,10 +109,10 @@ Returns:
 ```
 
 #### Encrypt Data using public key
-Please check https://github.com/quan-to/remote-signer/wiki/Encrypt_data
+Please check https://github.com/quan-to/chevron/wiki/Encrypt_data
 
 #### Decrypt Data using decrypted private key
-Please check https://github.com/quan-to/remote-signer/wiki/Decrypt_data
+Please check https://github.com/quan-to/chevron/wiki/Decrypt_data
 
 Environment Variables
 =====================

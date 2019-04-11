@@ -2,9 +2,9 @@ package keymagic
 
 import (
 	"fmt"
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/database"
-	"github.com/quan-to/remote-signer/models"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/database"
+	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/slog"
 )
 

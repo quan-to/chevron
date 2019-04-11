@@ -1,7 +1,7 @@
 package fieldcipher
 
 import (
-	"github.com/quan-to/remote-signer"
+	"github.com/quan-to/chevron"
 	"testing"
 )
 

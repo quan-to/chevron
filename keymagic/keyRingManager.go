@@ -1,9 +1,9 @@
 package keymagic
 
 import (
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/models"
-	"github.com/quan-to/remote-signer/openpgp"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/models"
+	"github.com/quan-to/chevron/openpgp"
 	"github.com/quan-to/slog"
 	"sync"
 )

@@ -6,7 +6,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"github.com/hashicorp/vault/api"
-	"github.com/quan-to/remote-signer"
+	"github.com/quan-to/chevron"
 	"github.com/quan-to/slog"
 	"net/http"
 )

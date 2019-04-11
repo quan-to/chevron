@@ -1,7 +1,7 @@
 package remote_signer
 
 import (
-	"github.com/quan-to/remote-signer/QuantoError"
+	"github.com/quan-to/chevron/QuantoError"
 	"github.com/quan-to/slog"
 	"os"
 	"strconv"

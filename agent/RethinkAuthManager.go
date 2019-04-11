@@ -3,9 +3,9 @@ package agent
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/etc"
-	"github.com/quan-to/remote-signer/models"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/etc"
+	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/slog"
 	"golang.org/x/crypto/bcrypt"
 	"sync"

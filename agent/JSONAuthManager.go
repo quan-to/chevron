@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mewkiz/pkg/osutil"
-	"github.com/quan-to/remote-signer"
+	"github.com/quan-to/chevron"
 	"github.com/quan-to/slog"
 	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Assumes racerxdl/goxenialtest and repository mounted to /go/src/github.com/quan-to/remote-signer
+# Assumes racerxdl/goxenialtest and repository mounted to /go/src/github.com/quan-to/chevron
 set -e
 
 export DEBIAN_FRONTEND=noninteractive
@@ -38,7 +38,7 @@ vault server -dev 2>> /dev/null 1>>/dev/null & echo $! > $HOME/vault.pid
 echo "Waiting vault settle" & sleep 2
 echo "Vault started with PID `cat $HOME/vault.pid`"
 
-cd /go/src/github.com/quan-to/remote-signer/
+cd /go/src/github.com/quan-to/chevron/
 
 echo "Adding test-policy.hcl to vault"
 vault auth enable userpass

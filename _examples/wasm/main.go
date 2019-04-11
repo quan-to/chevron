@@ -4,10 +4,10 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/fieldcipher"
-	"github.com/quan-to/remote-signer/keyBackend"
-	"github.com/quan-to/remote-signer/keymagic"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/fieldcipher"
+	"github.com/quan-to/chevron/keyBackend"
+	"github.com/quan-to/chevron/keymagic"
 	"syscall/js"
 	"time"
 )

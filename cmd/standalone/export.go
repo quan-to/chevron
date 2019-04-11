@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/quan-to/remote-signer/etc/magicBuilder"
-	"github.com/quan-to/remote-signer/models"
+	"github.com/quan-to/chevron/etc/magicBuilder"
+	"github.com/quan-to/chevron/models"
 	"golang.org/x/crypto/ssh/terminal"
 	"os"
 	"strings"

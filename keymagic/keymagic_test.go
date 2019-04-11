@@ -2,11 +2,11 @@ package keymagic
 
 import (
 	"fmt"
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/QuantoError"
-	"github.com/quan-to/remote-signer/etc"
-	"github.com/quan-to/remote-signer/keyBackend"
-	"github.com/quan-to/remote-signer/vaultManager"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/QuantoError"
+	"github.com/quan-to/chevron/etc"
+	"github.com/quan-to/chevron/keyBackend"
+	"github.com/quan-to/chevron/vaultManager"
 	"github.com/quan-to/slog"
 	"os"
 	"os/exec"
