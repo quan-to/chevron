@@ -1,8 +1,8 @@
 package agent
 
 import (
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/etc"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/etc"
 )
 
 func MakeTokenManager() etc.TokenManager {

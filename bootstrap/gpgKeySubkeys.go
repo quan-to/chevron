@@ -1,8 +1,8 @@
 package bootstrap
 
 import (
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/models"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/models"
 	r "gopkg.in/rethinkdb/rethinkdb-go.v5"
 )
 

@@ -1,6 +1,6 @@
 package etc
 
-import "github.com/quan-to/remote-signer/models"
+import "github.com/quan-to/chevron/models"
 
 type PKSInterface interface {
 	PKSGetKey(fingerPrint string) string

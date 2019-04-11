@@ -1,4 +1,4 @@
-module github.com/quan-to/remote-signer
+module github.com/quan-to/chevron
 
 go 1.12
 

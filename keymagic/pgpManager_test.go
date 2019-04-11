@@ -3,7 +3,7 @@ package keymagic
 import (
 	"crypto"
 	"encoding/base64"
-	"github.com/quan-to/remote-signer"
+	"github.com/quan-to/chevron"
 	"testing"
 )
 

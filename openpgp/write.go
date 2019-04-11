@@ -11,10 +11,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/quan-to/remote-signer/openpgp/armor"
-	"github.com/quan-to/remote-signer/openpgp/errors"
-	"github.com/quan-to/remote-signer/openpgp/packet"
-	"github.com/quan-to/remote-signer/openpgp/s2k"
+	"github.com/quan-to/chevron/openpgp/armor"
+	"github.com/quan-to/chevron/openpgp/errors"
+	"github.com/quan-to/chevron/openpgp/packet"
+	"github.com/quan-to/chevron/openpgp/s2k"
 )
 
 // DetachSign signs message with the private key from signer (which must

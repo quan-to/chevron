@@ -7,7 +7,7 @@
 //
 // Clearsigned messages are cryptographically signed, but the contents of the
 // message are kept in plaintext so that it can be read without special tools.
-package clearsign // import "github.com/quan-to/remote-signer/openpgp/clearsign"
+package clearsign // import "github.com/quan-to/chevron/openpgp/clearsign"
 
 import (
 	"bufio"
@@ -18,9 +18,9 @@ import (
 	"net/textproto"
 	"strconv"
 
-	"github.com/quan-to/remote-signer/openpgp/armor"
-	"github.com/quan-to/remote-signer/openpgp/errors"
-	"github.com/quan-to/remote-signer/openpgp/packet"
+	"github.com/quan-to/chevron/openpgp/armor"
+	"github.com/quan-to/chevron/openpgp/errors"
+	"github.com/quan-to/chevron/openpgp/packet"
 )
 
 // A Block represents a clearsigned message. A signature on a Block can

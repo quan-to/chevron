@@ -12,7 +12,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/quan-to/remote-signer/openpgp/armor"
+	"github.com/quan-to/chevron/openpgp/armor"
 )
 
 func TestSignatureV3Read(t *testing.T) {

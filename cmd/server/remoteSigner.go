@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/quan-to/remote-signer/QuantoError"
-	"github.com/quan-to/remote-signer/bootstrap"
-	"github.com/quan-to/remote-signer/etc/magicBuilder"
-	"github.com/quan-to/remote-signer/kubernetes"
-	"github.com/quan-to/remote-signer/server"
+	"github.com/quan-to/chevron/QuantoError"
+	"github.com/quan-to/chevron/bootstrap"
+	"github.com/quan-to/chevron/etc/magicBuilder"
+	"github.com/quan-to/chevron/kubernetes"
+	"github.com/quan-to/chevron/server"
 	"github.com/quan-to/slog"
 	"os"
 	"os/signal"

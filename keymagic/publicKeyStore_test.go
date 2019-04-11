@@ -1,9 +1,10 @@
 package keymagic
 
 import (
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/database"
-	"github.com/quan-to/remote-signer/models"
+	"fmt"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/database"
+	"github.com/quan-to/chevron/models"
 	"io/ioutil"
 	"testing"
 )
@@ -140,6 +141,7 @@ func TestPKSAdd(t *testing.T) {
 
 	if err != nil {
 		t.Error(err)
+		t.Error(fmt.Errorf("key data: %s", string(p)))
 		t.FailNow()
 	}
 

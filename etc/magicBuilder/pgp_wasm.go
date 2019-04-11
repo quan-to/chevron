@@ -1,10 +1,10 @@
 package magicBuilder
 
 import (
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/etc"
-	"github.com/quan-to/remote-signer/keyBackend"
-	"github.com/quan-to/remote-signer/keymagic"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/etc"
+	"github.com/quan-to/chevron/keyBackend"
+	"github.com/quan-to/chevron/keymagic"
 )
 
 func MakePGP() etc.PGPInterface {

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"github.com/quan-to/remote-signer/openpgp"
+	"github.com/quan-to/chevron/openpgp"
 	r "gopkg.in/rethinkdb/rethinkdb-go.v5"
 	"strings"
 )

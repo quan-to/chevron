@@ -3,10 +3,10 @@ package agent
 import (
 	"github.com/google/uuid"
 	"github.com/graphql-go/graphql"
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/QuantoError"
-	"github.com/quan-to/remote-signer/etc"
-	mgql "github.com/quan-to/remote-signer/models/graphql"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/QuantoError"
+	"github.com/quan-to/chevron/etc"
+	mgql "github.com/quan-to/chevron/models/graphql"
 	"github.com/quan-to/slog"
 	"time"
 )

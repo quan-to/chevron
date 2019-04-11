@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/quan-to/remote-signer/etc/magicBuilder"
+	"github.com/quan-to/chevron/etc/magicBuilder"
 )
 
 func ListKeys() {

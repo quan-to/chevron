@@ -3,8 +3,8 @@ package server
 import (
 	"errors"
 	"github.com/gorilla/mux"
-	"github.com/quan-to/remote-signer/keymagic"
-	"github.com/quan-to/remote-signer/models/HKP"
+	"github.com/quan-to/chevron/keymagic"
+	"github.com/quan-to/chevron/models/HKP"
 	"github.com/quan-to/slog"
 	"net/http"
 )

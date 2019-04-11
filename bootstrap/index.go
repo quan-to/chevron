@@ -1,8 +1,8 @@
 package bootstrap
 
 import (
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/database"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/database"
 	"github.com/quan-to/slog"
 )
 

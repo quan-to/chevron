@@ -1,7 +1,7 @@
 package etc
 
 import (
-	"github.com/quan-to/remote-signer/database"
+	"github.com/quan-to/chevron/database"
 	"gopkg.in/rethinkdb/rethinkdb-go.v5"
 )
 

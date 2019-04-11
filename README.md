@@ -1,118 +1,33 @@
-Quanto Remote Signer (QRS)
-====================
+![Logo](https://raw.githubusercontent.com/quan-to/chevron/develop/logo/chevron.png)
 
-[![MIT License](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://tldrlegal.com/license/mit-license) [![Coverage Status](https://coveralls.io/repos/github/quan-to/remote-signer/badge.svg?branch=master)](https://coveralls.io/github/quan-to/remote-signer?branch=master) [![Build Status](https://travis-ci.org/quan-to/remote-signer.svg?branch=master)](https://travis-ci.org/quan-to/remote-signer)
+[![MIT License](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://tldrlegal.com/license/mit-license) [![Coverage Status](https://coveralls.io/repos/github/quan-to/chevron/badge.svg?branch=master)](https://coveralls.io/github/quan-to/chevron?branch=master) [![Build Status](https://travis-ci.org/quan-to/chevron.svg?branch=master)](https://travis-ci.org/quan-to/chevron)
 
-A simple Web Server to act as a GPG Creator / Signer / Verifier. This abstracts the use of the GPG and makes easy to sign / verify any GPG document using just a POST request.
-
-Please notice that this application is *NOT inteded to ran public in the internet*. This is inteded to be a helper service to your application be able to sign / verify data (same as local gpg in the system). Because of that, it only listens for localhost.
-
-
-TODO
-====
-
-*   Increment this document with models and enums
+A simple Toolkit to act as a GPG Creator / Signer / Verifier. This abstracts the use of the GPG and makes easy to sign / verify any GPG document using just a POST request.
 
 Usage
-=====
+=======
 
-This application opens up a WebServer listening on port *5100* and have a base URL defined as `/remoteSigner`.
+* [Getting Started](https://github.com/quan-to/chevron/wiki)
+* [Creating GPG Keys](https://github.com/quan-to/chevron/wiki/Creating-GPG-keys)
+* [Setting up Keys](https://github.com/quan-to/remote-signer/wiki/SettingUp-keys)
+* [Listing loaded private keys](https://github.com/quan-to/chevron/wiki/List-loaded-private-keys)
+* [Unlock Private Key](https://github.com/quan-to/remote-signer/wiki/Unlock-private-key)
+* [Signing Data](https://github.com/quan-to/remote-signer/wiki/Signing-Data)
+* [Listing cached public keys](https://github.com/quan-to/chevron/wiki/List-cached-public-keys)
+* [Verifying Signatures](https://github.com/quan-to/remote-signer/wiki/Verifying-Signatures)
+* [Encrypting Data](https://github.com/quan-to/remote-signer/wiki/Encrypting-Data)
+* [Decrypting Data](https://github.com/quan-to/remote-signer/wiki/Decrypting-Data)
 
-#### Setting up GPG Private Keys
+Advanced Usage
+==============
 
-By default QRS searchs for encrypted private keys at `./keys`. Put all the private keys you want to use in Encrypted Ascii Armored Format inside it. It will iterate over all files and load them. If you don't have one, you can either create using the `gpg` toolkit or by calling the create api. Notice that calling the create API does not automatically store the key at the `keys` folder.
+* [Cluster Mode](https://github.com/quan-to/chevron/wiki/Cluster-Mode)
+* [Vault Backend](https://github.com/quan-to/chevron/wiki/Hashicorp-Vault-Key-Backend)
+* [Quanto Agent](https://github.com/quan-to/chevron/wiki/Quanto-Agent)
+* Binary Builds
+* Docker
+* [Building](https://github.com/quan-to/chevron/wiki/Building)
 
-The keys folder can be overrided by the `PRIVATE_KEY_FOLDER` environment variable.
-
-#### Creating a GPG Key
-
-Although creating a GPG Key here might not be a good idea, you can use QRS to generate new GPG Keys on the fly. To do so, make a POST request to `/remoteSigner/gpg/generateKey` with the following JSON Content:
-
-```json
-{
-  "Identifier": "Lucas Teske <lucas@teske.com.br>",
-  "Password": "123456",
-  "Bits": 3072
-}
-```
-
-It should return your Encrypted GPG Private Key in ASCII Armored format.
-
-```
------BEGIN PGP PRIVATE KEY BLOCK-----
-Version: BCPG C# v1.8.1.0
-
-lQVsBFpqVT0BDADIMVGd96DMUGf+zrcs0cGTzofbvV56WTWFju9WzIiUMigON6Qw
-XdpdHUad1H31pnI1COCKH+k2t3TOlQr7qgXHMFOjW+/xHKoN6NhGMZVC7MkUllaj
-uTFDH9823N/fhbJ4BRuBb2a5X4HBIeIDscu19xsW5B3HvwggojjhZ5iKRCt49Hsv
-dJ6gPA5fDURGAbt9xdAqWvlkT9xagHqylVSG1A1CxOmeP3p+Vfjh/IhCgZ/nbi52
-s+iBthuraYJAIPB9snASniMIqYs7sWTpC8T4m+WYEZGB2ejvVscmEgXFNWn6hzKI
-(...)
------END PGP PRIVATE KEY BLOCK-----
-```
-
-#### Unlocking a Private Key
-Please check https://github.com/quan-to/remote-signer/wiki/Unlock_private_key
-
-#### Signing Data
-Please check https://github.com/quan-to/remote-signer/wiki/Sign_data
-
-#### Verifing Signatures
-Please check https://github.com/quan-to/remote-signer/wiki/Verifying_Signatures
-
-#### Adding Encrypted Private Key through API
-
-To add a private key, you can make a POST to `/remoteSigner/keyRing/addPrivateKey` with the following payload:
-
-```json
-{
-  "EncryptedPrivateKey": "-----BEGIN PGP PRIVATE KEY BLOCK-----\nVersion: GnuPG (...) JSlmyLSuTHXzeKo72hP40y3Xkf\nuugqVOWHeE7v7ARMu1mhXS6qWzZmxsjixV1d0kXSo9LzUyFqNtkasUiL2aoXQ70z\nlbMia0X7KJbYnbG5XLEDiMjzDQ==\n=JwWd\n-----END PGP PRIVATE KEY BLOCK-----",
-  "SaveToDisk": true
-}
-```
-
-The `SaveToDisk` parameter tells the server to save that private keys in the `KeysFolder`.
-
-#### List Cached Public Keys
-
-Execute GET to `/remoteSigner/keyRing/cachedKeys`
-
-Returns:
-
-```json
-[
-    {
-        "FingerPrint": "D7362B4CC546DB11",
-        "Identifier":"Benchmark Test Key",
-        "Bits": 4096,
-        "ContainsPrivateKey": false,
-        "PrivateKeyDecrypted": false
-    }
-]
-```
-
-#### List Loaded Private Keys
-Execute GET to `/remoteSigner/keyRing/privateKeys`
-
-Returns:
-
-```json
-[
-    {
-        "FingerPrint": "D7362B4CC546DB11",
-        "Identifier": "Benchmark Test Key",
-        "Bits": 4096,
-        "ContainsPrivateKey": true,
-        "PrivateKeyDecrypted": false
-    }
-]
-```
-
-#### Encrypt Data using public key
-Please check https://github.com/quan-to/remote-signer/wiki/Encrypt_data
-
-#### Decrypt Data using decrypted private key
-Please check https://github.com/quan-to/remote-signer/wiki/Decrypt_data
 
 Environment Variables
 =====================
@@ -149,64 +64,4 @@ These are the Environment Variables that you can set to manage the webserver:
 *   `VAULT_NAMESPACE` => if a Hashicorp Vault Namespace to use (appended to backend, for example if namespace is `remote-signer` the keys are stored under `secret/remote-signer`)
 *   `HTTP_PORT` => HTTP Port that Remote Signer will run
 *   `READONLY_KEYPATH` => If the keypath is readonly. If `true` then it will create a temporary folder in `/tmp` and copy all keys to there so it can work over it. 
-
-Cluster Mode
-============
-
-TODO
-
-Vault Backend
-=============
-
-TODO
-
-Quanto Agent
-============
-
-TODO
-
-Binary Builds
-=============
-
-TODO
-
-Docker
-======
-
-TODO
-
-Building
-========
-
-# Prepare
-
-First of all, you should be aware how to configure your golang environment (which should be similar to all Operating Systems). For a more specific how-to please refer to official golang install: https://golang.org/doc/install
-
-# Building (any os)
-
-Since Remote Signer is a pure golang program, its build instructions are the same for *any* operating system. 
-```bash
-cd cmd/server
-go build -o remote-signer
-```
-
-If you're on windows, run instead
-
-```powershell
-cd cmd/server
-go build -o remote-signer.exe
-```
-
-# Adding your private key into Remote Signer
-
-To add your private key, you can use the AddPrivateKey endpoint at `/keyRing/addPrivateKey` with the following payload:
-```json
-{
-  "EncryptedPrivateKey": "-----BEGIN PGP PRIVATE KEY BLOCK-----\n\n (...) -----END PGP PRIVATE KEY BLOCK-----\n",
-  "SaveToDisk": true,
-  "Password": "12344321"
-}
-```
-
-The `Password` field is optional, if provided, it will store the password along the key and auto-unlock when open. If not, you should call `UnlockKey` to be able to use the key.
 

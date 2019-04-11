@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package openpgp implements high level operations on OpenPGP messages.
-package openpgp // import "github.com/quan-to/remote-signer/openpgp"
+package openpgp // import "github.com/quan-to/chevron/openpgp"
 
 import (
 	"crypto"
@@ -12,9 +12,9 @@ import (
 	"io"
 	"strconv"
 
-	"github.com/quan-to/remote-signer/openpgp/armor"
-	"github.com/quan-to/remote-signer/openpgp/errors"
-	"github.com/quan-to/remote-signer/openpgp/packet"
+	"github.com/quan-to/chevron/openpgp/armor"
+	"github.com/quan-to/chevron/openpgp/errors"
+	"github.com/quan-to/chevron/openpgp/packet"
 )
 
 // SignatureType is the armor type for a PGP signature.

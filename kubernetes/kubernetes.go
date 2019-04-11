@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mewkiz/pkg/osutil"
-	"github.com/quan-to/remote-signer/models/KubernetesModels"
+	"github.com/quan-to/chevron/models/KubernetesModels"
 	"github.com/quan-to/slog"
 	"io/ioutil"
 	"os"

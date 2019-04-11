@@ -2,9 +2,9 @@ package etc
 
 import (
 	"crypto"
-	"github.com/quan-to/remote-signer/models"
-	"github.com/quan-to/remote-signer/openpgp"
-	"github.com/quan-to/remote-signer/openpgp/packet"
+	"github.com/quan-to/chevron/models"
+	"github.com/quan-to/chevron/openpgp"
+	"github.com/quan-to/chevron/openpgp/packet"
 )
 
 type PGPInterface interface {

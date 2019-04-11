@@ -1,8 +1,8 @@
 package kbBuilder
 
 import (
-	"github.com/quan-to/remote-signer"
-	"github.com/quan-to/remote-signer/keyBackend"
+	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/keyBackend"
 )
 
 func BuildKeyBackend() keyBackend.Backend {

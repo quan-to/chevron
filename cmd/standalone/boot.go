@@ -1,6 +1,6 @@
 package main
 
-import "github.com/quan-to/remote-signer"
+import "github.com/quan-to/chevron"
 
 // Bootstrap default variables
 func init() {

@@ -10,7 +10,7 @@
 // This form of ElGamal embeds PKCS#1 v1.5 padding, which may make it
 // unsuitable for other protocols. RSA should be used in preference in any
 // case.
-package elgamal // import "github.com/quan-to/remote-signer/openpgp/elgamal"
+package elgamal // import "github.com/quan-to/chevron/openpgp/elgamal"
 
 import (
 	"crypto/rand"
