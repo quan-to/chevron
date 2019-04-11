@@ -10,12 +10,12 @@ ADD . /go/src/github.com/quan-to/remote-signer
 # Compile Server
 WORKDIR /go/src/github.com/quan-to/remote-signer/cmd/server
 RUN go get -v
-RUN GO111MODULE=on CGO_ENABLED=0 GOOS=linux go build -o ../../remote-signer
+RUN CGO_ENABLED=0 GOOS=linux go build -o ../../remote-signer
 
 # Compile Standalone
 WORKDIR /go/src/github.com/quan-to/remote-signer/cmd/standalone
 RUN go get -v
-RUN GO111MODULE=on CGO_ENABLED=0 GOOS=linux go build -o ../../standalone
+RUN CGO_ENABLED=0 GOOS=linux go build -o ../../standalone
 
 
 FROM alpine:latest
