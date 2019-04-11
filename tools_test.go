@@ -513,3 +513,63 @@ func TestCopyFiles(t *testing.T) {
 		}
 	}
 }
+
+func TestBrokenMacOSXKey(t *testing.T) {
+	s := strings.Split(BrokenMacOSXSignature, "\n")
+	s = brokenMacOSXArrayFix(s, true)
+
+	fixed := strings.Join(s, "\n")
+	if fixed != BrokenMacOSXSignatureFixed {
+		t.Errorf("macosx signature not fixed. Expected:\n%s\nGot:\n%s", BrokenMacOSXSignatureFixed, fixed)
+	}
+}
+
+func TestOneLineSignature(t *testing.T) {
+	sig := SignatureFix(OneLineSignature)
+	if sig != BrokenMacOSXSignatureFixed {
+		t.Errorf("expected one line signature to be fixed. Expected:\n%s\nGot:\n%s", BrokenMacOSXSignatureFixed, sig)
+	}
+}
+
+func TestGetFingerPrintsFromKey(t *testing.T) {
+	fps, err := GetFingerPrintsFromKey(TestPublicKeyManySubkeys)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, v := range fps {
+		if StringIndexOf(v, SubKeysFromTestPublicKeyManySubkeys) == -1 {
+			t.Errorf("expected %s to be in fingerprints list", v)
+		}
+	}
+}
+
+func TestFolderExists(t *testing.T) {
+	v := FolderExists("tests")
+	if !v {
+		t.Errorf("expected FolderExists(\"tests\") == true")
+	}
+
+	v = FolderExists("__heuerbabsueaius31i2u3n13ubae___")
+	if v {
+		t.Errorf("expected FolderExists(\"__heuerbabsueaius31i2u3n13ubae___\") == false")
+	}
+
+	v = FolderExists("tools_test.go")
+	if v {
+		t.Errorf("expected FolderExists(\"tools_test.go\") == false")
+	}
+}
+
+func TestGeneratePassword(t *testing.T) {
+	b := GeneratePassword()
+	if len(b) != defaultPasswordLength {
+		t.Errorf("expected password to be %d bytes long", defaultPasswordLength)
+	}
+
+	for _, v := range b {
+		if strings.Index(passwordBytes, string(v)) == -1 {
+			t.Errorf("char %s is not in passwordBytes list.", string(v))
+		}
+	}
+}

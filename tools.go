@@ -60,18 +60,11 @@ func Quanto2GPG(signature string) string {
 	gpgSig := s[2]
 	checkSum := ""
 
-	// check if Checksum is 4 or 5 bytes
-	_, err := base64.StdEncoding.DecodeString(gpgSig[:len(gpgSig)-5])
+	// check if Checksum is 5 bytes
 
-	if err != nil {
-		// try 4
-		_, err := base64.StdEncoding.DecodeString(gpgSig[:len(gpgSig)-4])
-		if err != nil {
-			// Broken Base64
-			return ""
-		}
-		checkSum = gpgSig[len(gpgSig)-4:]
-		gpgSig = gpgSig[:len(gpgSig)-4]
+	if !mightBeChecksum(gpgSig[:len(gpgSig)-5]) {
+		// The GPG Has embedded checksum
+		checkSum = ""
 	} else {
 		checkSum = gpgSig[len(gpgSig)-5:]
 		gpgSig = gpgSig[:len(gpgSig)-5]
@@ -144,6 +137,16 @@ func brokenMacOSXArrayFix(s []string, includeHead bool) []string {
 	return s
 }
 
+// CanDecodeBase64 returns true if s is a valid base64
+func CanDecodeBase64(s string) bool {
+	_, err := base64.StdEncoding.DecodeString(s)
+	return err == nil
+}
+
+func mightBeChecksum(s string) bool {
+	return (s[0] == '=' && CanDecodeBase64(s[1:])) || CanDecodeBase64(s)
+}
+
 // SignatureFix recalculates the CRC
 func SignatureFix(sig string) string {
 	if pgpsig.MatchString(sig) {
@@ -153,8 +156,14 @@ func SignatureFix(sig string) string {
 			data := brokenMacOSXArrayFix(strings.Split(strings.Trim(g[1], " "), "\n"), false)
 			save := false
 			embeddedCrc := false
-			if len(data) == 1 {
-				sig = data[0]
+
+			if len(data) == 3 {
+				sig = data[1] // Single Line
+				if mightBeChecksum(sig[len(sig)-5:]) {
+					sig = sig[:len(sig)-5]
+				} else {
+					embeddedCrc = true
+				}
 			} else {
 				// PGP Has metadata header, wait for a single empty line before getting base64
 				for _, v := range data {
