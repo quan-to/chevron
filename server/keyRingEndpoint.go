@@ -73,6 +73,7 @@ func (kre *KeyRingEndpoint) getCachedKeys(w http.ResponseWriter, r *http.Request
 	bodyData, err := json.Marshal(cachedKeys)
 
 	if err != nil {
+		kreLog.Error("Error getting cached keys: %s", err)
 		InternalServerError("There was an error processing your request. Please try again.", nil, w, r, kreLog)
 		return
 	}
@@ -155,7 +156,9 @@ func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request
 	if data.SaveToDisk {
 		err = kre.gpg.SaveKey(fingerPrint, data.EncryptedPrivateKey, data.Password)
 		if err != nil {
+			kreLog.Error("Error saving key: %s", err)
 			InternalServerError("There was an error saving your key to disk.", data, w, r, kreLog)
+			return
 		}
 	}
 
@@ -169,5 +172,5 @@ func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
 	n, _ = w.Write(d)
-	LogExit(geLog, r, 200, n)
+	LogExit(kreLog, r, 200, n)
 }
