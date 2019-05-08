@@ -24,6 +24,13 @@ import (
 	"strings"
 	"sync"
 	"time"
+	// Import for including hashing algorithms
+
+	_ "crypto/md5"
+	_ "crypto/sha1"
+	_ "crypto/sha256"
+	_ "crypto/sha512"
+	_ "golang.org/x/crypto/ripemd160"
 )
 
 const MinKeyBits = 2048 // Should be safe until we have decent Quantum Computers

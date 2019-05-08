@@ -37,10 +37,10 @@ func main() {
 	// endregion
 
 	// region Encrypt
-	//encrypt := kingpin.Command("encrypt", "Encrypt Data")
-	//encryptRecipient := encrypt.Arg("recipient", "Fingerprint of who to encrypt for")
-	//encryptInput := encrypt.Arg("input", "Filename of the input")
-	//encryptOutput := encrypt.Arg("output", "Filename of the output (use - to stdout)")
+	encrypt := kingpin.Command("encrypt", "Encrypt Data")
+	encryptRecipient := encrypt.Arg("recipient", "Fingerprint of who to encrypt for").String()
+	encryptInput := encrypt.Flag("input", "Filename of the input (use - to stdin)").Default("-").String()
+	encryptOutput := encrypt.Flag("output", "Filename of the output (use - to stdout)").Default("-").String()
 	// endregion
 
 	selectedCmd := kingpin.Parse()
@@ -66,5 +66,7 @@ func main() {
 		ListKeys()
 	case "export":
 		ExportKey(*exportName, *exportPass, *exportSecret)
+	case "encrypt":
+		EncryptFile(*encryptInput, *encryptOutput, *encryptRecipient)
 	}
 }
