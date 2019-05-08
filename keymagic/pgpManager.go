@@ -24,12 +24,16 @@ import (
 	"strings"
 	"sync"
 	"time"
-	// Import for including hashing algorithms
 
+	// Include MD5 hashing algorithm by default
 	_ "crypto/md5"
+	// Include SHA1 hashing algorithm by default
 	_ "crypto/sha1"
+	// Include SHA256 hashing algorithm by default
 	_ "crypto/sha256"
+	// Include SHA512 hashing algorithm by default
 	_ "crypto/sha512"
+	// Include RIPEMD160 hashing algorithm by default
 	_ "golang.org/x/crypto/ripemd160"
 )
 

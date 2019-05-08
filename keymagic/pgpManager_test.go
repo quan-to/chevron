@@ -4,24 +4,25 @@ import (
 	"crypto"
 	"encoding/base64"
 	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/rstest"
 	"testing"
 )
 
 // region Tests
 func TestVerifySign(t *testing.T) {
-	valid, err := pgpMan.VerifySignature(testData, remote_signer.TestSignatureSignature)
+	valid, err := pgpMan.VerifySignature(testData, rstest.TestSignatureSignature)
 	if err != nil || !valid {
 		t.Errorf("Signature not valid or error found: %s", err)
 	}
 
-	valid, err = pgpMan.VerifySignatureStringData(remote_signer.TestSignatureData, remote_signer.TestSignatureSignature)
+	valid, err = pgpMan.VerifySignatureStringData(rstest.TestSignatureData, rstest.TestSignatureSignature)
 	if err != nil || !valid {
 		t.Errorf("Signature not valid or error found: %s", err)
 	}
 
 	invalidTestData := []byte("huebr for the win!" + "makemeinvalid")
 
-	valid, err = pgpMan.VerifySignature(invalidTestData, remote_signer.TestSignatureSignature)
+	valid, err = pgpMan.VerifySignature(invalidTestData, rstest.TestSignatureSignature)
 
 	if valid || err == nil {
 		t.Error("A invalid test data passed to verify has been validated!")
@@ -29,14 +30,14 @@ func TestVerifySign(t *testing.T) {
 }
 
 func TestSign(t *testing.T) {
-	_, err := pgpMan.SignData(remote_signer.TestKeyFingerprint, testData, crypto.SHA512)
+	_, err := pgpMan.SignData(rstest.TestKeyFingerprint, testData, crypto.SHA512)
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func TestDecrypt(t *testing.T) {
-	g, err := pgpMan.Decrypt(remote_signer.TestDecryptDataAscii, false)
+	g, err := pgpMan.Decrypt(rstest.TestDecryptDataAscii, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -46,11 +47,11 @@ func TestDecrypt(t *testing.T) {
 		t.Error(err)
 	}
 
-	if string(gd) != remote_signer.TestSignatureData {
-		t.Errorf("Decrypted data does no match. Expected \"%s\" got \"%s\"", string(gd), remote_signer.TestSignatureData)
+	if string(gd) != rstest.TestSignatureData {
+		t.Errorf("Decrypted data does no match. Expected \"%s\" got \"%s\"", string(gd), rstest.TestSignatureData)
 	}
 
-	g, err = pgpMan.Decrypt(remote_signer.TestDecryptDataOnly, true)
+	g, err = pgpMan.Decrypt(rstest.TestDecryptDataOnly, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -60,13 +61,13 @@ func TestDecrypt(t *testing.T) {
 		t.Error(err)
 	}
 
-	if string(gd) != remote_signer.TestSignatureData {
-		t.Errorf("Decrypted data does no match. Expected \"%s\" got \"%s\"", string(gd), remote_signer.TestSignatureData)
+	if string(gd) != rstest.TestSignatureData {
+		t.Errorf("Decrypted data does no match. Expected \"%s\" got \"%s\"", string(gd), rstest.TestSignatureData)
 	}
 }
 
 func TestEncrypt(t *testing.T) {
-	d, err := pgpMan.Encrypt("testing", remote_signer.TestKeyFingerprint, testData, false)
+	d, err := pgpMan.Encrypt("testing", rstest.TestKeyFingerprint, testData, false)
 
 	if err != nil {
 		t.Error(err)
@@ -83,11 +84,11 @@ func TestEncrypt(t *testing.T) {
 		t.Error(err)
 	}
 
-	if string(gd) != remote_signer.TestSignatureData {
-		t.Errorf("Decrypted data does no match. Expected \"%s\" got \"%s\"", string(gd), remote_signer.TestSignatureData)
+	if string(gd) != rstest.TestSignatureData {
+		t.Errorf("Decrypted data does no match. Expected \"%s\" got \"%s\"", string(gd), rstest.TestSignatureData)
 	}
 	// endregion
-	d, err = pgpMan.Encrypt("testing", remote_signer.TestKeyFingerprint, testData, true)
+	d, err = pgpMan.Encrypt("testing", rstest.TestKeyFingerprint, testData, true)
 
 	if err != nil {
 		t.Error(err)
@@ -104,14 +105,14 @@ func TestEncrypt(t *testing.T) {
 		t.Error(err)
 	}
 
-	if string(gd) != remote_signer.TestSignatureData {
-		t.Errorf("Decrypted data does no match. Expected \"%s\" got \"%s\"", string(gd), remote_signer.TestSignatureData)
+	if string(gd) != rstest.TestSignatureData {
+		t.Errorf("Decrypted data does no match. Expected \"%s\" got \"%s\"", string(gd), rstest.TestSignatureData)
 	}
 	// endregion
 }
 
 func TestGenerateKey(t *testing.T) {
-	key, err := pgpMan.GeneratePGPKey("HUE", remote_signer.TestKeyPassword, pgpMan.MinKeyBits())
+	key, err := pgpMan.GeneratePGPKey("HUE", rstest.TestKeyFingerprint, pgpMan.MinKeyBits())
 
 	if err != nil {
 		t.Error(err)
@@ -126,7 +127,7 @@ func TestGenerateKey(t *testing.T) {
 	fp, _ := remote_signer.GetFingerPrintFromKey(key)
 
 	// Unlock Key
-	err = pgpMan.UnlockKey(fp, remote_signer.TestKeyPassword)
+	err = pgpMan.UnlockKey(fp, rstest.TestKeyFingerprint)
 	if err != nil {
 		t.Error(err)
 	}
@@ -150,7 +151,7 @@ func TestGenerateKey(t *testing.T) {
 // region Benchmarks
 func BenchmarkSign(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_, err := pgpMan.SignData(remote_signer.TestKeyFingerprint, testData, crypto.SHA512)
+		_, err := pgpMan.SignData(rstest.TestKeyFingerprint, testData, crypto.SHA512)
 		if err != nil {
 			b.Error(err)
 		}
@@ -158,7 +159,7 @@ func BenchmarkSign(b *testing.B) {
 }
 func BenchmarkVerifySignature(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_, err := pgpMan.VerifySignature(testData, remote_signer.TestSignatureSignature)
+		_, err := pgpMan.VerifySignature(testData, rstest.TestSignatureSignature)
 		if err != nil {
 			b.Error(err)
 		}
@@ -166,7 +167,7 @@ func BenchmarkVerifySignature(b *testing.B) {
 }
 func BenchmarkVerifySignatureStringData(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_, err := pgpMan.VerifySignatureStringData(remote_signer.TestSignatureData, remote_signer.TestSignatureSignature)
+		_, err := pgpMan.VerifySignatureStringData(rstest.TestSignatureData, rstest.TestSignatureSignature)
 		if err != nil {
 			b.Error(err)
 		}
@@ -174,7 +175,7 @@ func BenchmarkVerifySignatureStringData(b *testing.B) {
 }
 func BenchmarkEncryptASCII(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_, err := pgpMan.Encrypt("", remote_signer.TestKeyFingerprint, testData, false)
+		_, err := pgpMan.Encrypt("", rstest.TestKeyFingerprint, testData, false)
 		if err != nil {
 			b.Error(err)
 		}
@@ -182,7 +183,7 @@ func BenchmarkEncryptASCII(b *testing.B) {
 }
 func BenchmarkEncryptDataOnly(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_, err := pgpMan.Encrypt("", remote_signer.TestKeyFingerprint, testData, true)
+		_, err := pgpMan.Encrypt("", rstest.TestKeyFingerprint, testData, true)
 		if err != nil {
 			b.Error(err)
 		}

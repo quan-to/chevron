@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/QuantoError"
+	"github.com/quan-to/chevron/rstest"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -13,28 +14,28 @@ import (
 
 /*
 func TestGetPasswords(t *testing.T) {
-	sm.PutKeyPassword(remote_signer.TestKeyFingerprint, remote_signer.TestKeyPassword)
+	sm.PutKeyPassword(rstest.TestKeyFingerprint, rstest.TestKeyFingerprint)
 
 	passwords := sm.GetPasswords()
 
-	if passwords[remote_signer.TestKeyFingerprint] == "" {
-		t.Errorf("Expected %s key password to be in password list.", remote_signer.TestKeyFingerprint)
+	if passwords[rstest.TestKeyFingerprint] == "" {
+		t.Errorf("Expected %s key password to be in password list.", rstest.TestKeyFingerprint)
 	}
 }
 
 func TestUnlockLocalKeys(t *testing.T) {
-	filename := fmt.Sprintf("key-password-utf8-%s.txt", remote_signer.TestKeyFingerprint)
+	filename := fmt.Sprintf("key-password-utf8-%s.txt", rstest.TestKeyFingerprint)
 
-	encPass, err := sm.gpg.Encrypt(filename, sm.masterKeyFingerPrint, []byte(remote_signer.TestKeyPassword), smEncryptedDataOnly)
+	encPass, err := sm.gpg.Encrypt(filename, sm.masterKeyFingerPrint, []byte(rstest.TestKeyFingerprint), smEncryptedDataOnly)
 
 	if err != nil {
 		t.Errorf("Error saving password: %s", err)
 		t.FailNow()
 	}
 
-	sm.PutEncryptedPassword(remote_signer.TestKeyFingerprint, encPass)
+	sm.PutEncryptedPassword(rstest.TestKeyFingerprint, encPass)
 
-	if sm.encryptedPasswords[remote_signer.TestKeyFingerprint] != encPass {
+	if sm.encryptedPasswords[rstest.TestKeyFingerprint] != encPass {
 		t.Errorf("Expected stored encrypted password to be set.")
 	}
 
@@ -43,16 +44,16 @@ func TestUnlockLocalKeys(t *testing.T) {
 */
 
 func TestGetUnlockPasswords(t *testing.T) {
-	filename := fmt.Sprintf("key-password-utf8-%s.txt", remote_signer.TestKeyFingerprint)
+	filename := fmt.Sprintf("key-password-utf8-%s.txt", rstest.TestKeyFingerprint)
 
-	encPass, err := gpg.Encrypt(filename, sm.GetMasterKeyFingerPrint(), []byte(remote_signer.TestKeyPassword), remote_signer.SMEncryptedDataOnly)
+	encPass, err := gpg.Encrypt(filename, sm.GetMasterKeyFingerPrint(), []byte(rstest.TestKeyPassword), remote_signer.SMEncryptedDataOnly)
 
 	if err != nil {
 		t.Errorf("Error saving password: %s", err)
 		t.FailNow()
 	}
 
-	sm.PutEncryptedPassword(remote_signer.TestKeyFingerprint, encPass)
+	sm.PutEncryptedPassword(rstest.TestKeyFingerprint, encPass)
 
 	req, err := http.NewRequest("GET", "/__internal/__getUnlockPasswords", nil)
 
@@ -80,7 +81,7 @@ func TestGetUnlockPasswords(t *testing.T) {
 	found := false
 
 	for k, v := range data {
-		if k == remote_signer.TestKeyFingerprint {
+		if k == rstest.TestKeyFingerprint {
 			found = true
 			if v != encPass {
 				t.Errorf("The encrypted password is not the expected one.")
@@ -95,9 +96,9 @@ func TestGetUnlockPasswords(t *testing.T) {
 }
 
 func TestPostUnlockPassword(t *testing.T) {
-	filename := fmt.Sprintf("key-password-utf8-%s.txt", remote_signer.TestKeyFingerprint)
+	filename := fmt.Sprintf("key-password-utf8-%s.txt", rstest.TestKeyFingerprint)
 
-	encPass, err := gpg.Encrypt(filename, sm.GetMasterKeyFingerPrint(), []byte(remote_signer.TestKeyPassword), remote_signer.SMEncryptedDataOnly)
+	encPass, err := gpg.Encrypt(filename, sm.GetMasterKeyFingerPrint(), []byte(rstest.TestKeyFingerprint), remote_signer.SMEncryptedDataOnly)
 
 	if err != nil {
 		t.Errorf("Error saving password: %s", err)
@@ -105,7 +106,7 @@ func TestPostUnlockPassword(t *testing.T) {
 	}
 
 	payload := map[string]string{
-		remote_signer.TestKeyFingerprint: encPass,
+		rstest.TestKeyFingerprint: encPass,
 	}
 
 	d, _ := json.Marshal(payload)
@@ -134,8 +135,8 @@ func TestPostUnlockPassword(t *testing.T) {
 	}
 
 	passwords := sm.GetPasswords()
-	if passwords[remote_signer.TestKeyFingerprint] != encPass {
-		t.Errorf("Expected key %s to be in the password list.", remote_signer.TestKeyFingerprint)
+	if passwords[rstest.TestKeyFingerprint] != encPass {
+		t.Errorf("Expected key %s to be in the password list.", rstest.TestKeyFingerprint)
 	}
 }
 

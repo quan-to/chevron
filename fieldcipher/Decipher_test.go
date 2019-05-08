@@ -1,7 +1,7 @@
 package fieldcipher
 
 import (
-	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/rstest"
 	"io/ioutil"
 	"testing"
 )
@@ -20,7 +20,7 @@ func TestDecipher_DecipherPacket(t *testing.T) {
 		t.Fatalf("Error reading private key password: %s", err)
 	}
 
-	cipher := MakeCipherFromASCIIArmoredKeys([]string{remote_signer.TestPublicKey})
+	cipher := MakeCipherFromASCIIArmoredKeys([]string{rstest.TestPublicKey})
 
 	dataToCipher := map[string]interface{}{
 		"a": "b",

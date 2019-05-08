@@ -10,6 +10,7 @@ import (
 	"syscall"
 )
 
+// GenerateFlow generates a GPG Key with specified parameters
 func GenerateFlow(password, output, identifier string, bits int) {
 	pgpMan := magicBuilder.MakePGP()
 	if password == "" {

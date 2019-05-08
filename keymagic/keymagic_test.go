@@ -6,6 +6,7 @@ import (
 	"github.com/quan-to/chevron/QuantoError"
 	"github.com/quan-to/chevron/etc"
 	"github.com/quan-to/chevron/keyBackend"
+	"github.com/quan-to/chevron/rstest"
 	"github.com/quan-to/chevron/vaultManager"
 	"github.com/quan-to/slog"
 	"os"
@@ -13,7 +14,7 @@ import (
 	"testing"
 )
 
-var testData = []byte(remote_signer.TestSignatureData)
+var testData = []byte(rstest.TestSignatureData)
 
 var pgpMan *PGPManager
 var sm *SecretsManager
@@ -22,7 +23,7 @@ func TestMain(m *testing.M) {
 	slog.UnsetTestMode()
 	var rql *exec.Cmd
 	var err error
-	rql, err = remote_signer.RQLStart()
+	rql, err = rstest.RQLStart()
 	if err != nil {
 		slog.Error(err)
 		os.Exit(1)
@@ -64,7 +65,7 @@ func TestMain(m *testing.M) {
 
 	sm = MakeSecretsManager()
 
-	err = pgpMan.UnlockKey(remote_signer.TestKeyFingerprint, remote_signer.TestKeyPassword)
+	err = pgpMan.UnlockKey(rstest.TestKeyFingerprint, rstest.TestKeyFingerprint)
 
 	if err != nil {
 		slog.SetError(true)
@@ -77,6 +78,6 @@ func TestMain(m *testing.M) {
 	slog.UnsetTestMode()
 	etc.Cleanup()
 	slog.Warn("STOPPING RETHINKDB")
-	remote_signer.RQLStop(rql)
+	rstest.RQLStop(rql)
 	os.Exit(code)
 }

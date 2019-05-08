@@ -5,6 +5,7 @@ import (
 	"github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/database"
 	"github.com/quan-to/chevron/models"
+	"github.com/quan-to/chevron/rstest"
 	"io/ioutil"
 	"testing"
 )
@@ -47,7 +48,7 @@ func TestPKSGetKey(t *testing.T) {
 	remote_signer.EnableRethinkSKS = false
 	remote_signer.SKSServer = "https://keyserver.ubuntu.com/"
 
-	key, _ = PKSGetKey(remote_signer.ExternalKeyFingerprint)
+	key, _ = PKSGetKey(rstest.ExternalKeyFingerprint)
 
 	fp, err = remote_signer.GetFingerPrintFromKey(key)
 
@@ -56,8 +57,8 @@ func TestPKSGetKey(t *testing.T) {
 		t.FailNow()
 	}
 
-	if !remote_signer.CompareFingerPrint(remote_signer.ExternalKeyFingerprint, fp) {
-		t.Errorf("Expected %s got %s", remote_signer.ExternalKeyFingerprint, fp)
+	if !remote_signer.CompareFingerPrint(rstest.ExternalKeyFingerprint, fp) {
+		t.Errorf("Expected %s got %s", rstest.ExternalKeyFingerprint, fp)
 	}
 }
 

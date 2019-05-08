@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// EncryptFile encrypts a file / data from input for the specified recipient
 func EncryptFile(input, output, recipient string) {
 	var err error
 	var data []byte
