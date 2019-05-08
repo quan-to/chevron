@@ -2,7 +2,6 @@ package rstest
 
 import (
 	"fmt"
-	"github.com/quan-to/chevron"
 	"github.com/quan-to/slog"
 	"math/rand"
 	"net"
@@ -12,7 +11,7 @@ import (
 )
 
 // RQLStart please don't judge me. That its what it takes to avoid RethinkDB Non-Atomic Database operations on tests :(
-func RQLStart() (*exec.Cmd, error) {
+func RQLStart() (*exec.Cmd, int, error) {
 	genPort := 28020 + rand.Intn(100)
 	_ = os.RemoveAll("./rethinkdb_data")
 	connString := fmt.Sprintf("127.0.0.1:%d", genPort)
@@ -35,7 +34,7 @@ func RQLStart() (*exec.Cmd, error) {
 		panic(fmt.Errorf("cannot start rethinkdb: %s", err))
 	}
 
-	remote_signer.RethinkDBPort = genPort
+	//remote_signer.RethinkDBPort = genPort
 
 	slog.Info("Waiting for rethink to settle")
 	time.Sleep(time.Second)
@@ -56,10 +55,10 @@ func RQLStart() (*exec.Cmd, error) {
 	}
 
 	if !started {
-		return nil, fmt.Errorf("timeout waiting for rethinkdb to start")
+		return nil, genPort, fmt.Errorf("timeout waiting for rethinkdb to start")
 	}
 
-	return cmd, nil
+	return cmd, genPort, nil
 }
 
 // RQLStop stops a RethinkDB instance that has been started with RQLStart

@@ -23,7 +23,8 @@ func TestMain(m *testing.M) {
 	slog.UnsetTestMode()
 	var rql *exec.Cmd
 	var err error
-	rql, err = rstest.RQLStart()
+	var port int
+	rql, port, err = rstest.RQLStart()
 	if err != nil {
 		slog.Error(err)
 		os.Exit(1)
@@ -44,6 +45,7 @@ func TestMain(m *testing.M) {
 	remote_signer.HttpPort = 40000
 	remote_signer.SKSServer = fmt.Sprintf("http://localhost:%d/sks/", remote_signer.HttpPort)
 	remote_signer.EnableRethinkSKS = true
+	remote_signer.RethinkDBPort = port
 	remote_signer.PushVariables()
 
 	slog.UnsetTestMode()

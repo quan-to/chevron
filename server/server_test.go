@@ -114,7 +114,8 @@ func TestMain(m *testing.M) {
 	slog.UnsetTestMode()
 	var rql *exec.Cmd
 	var err error
-	rql, err = rstest.RQLStart()
+	var port int
+	rql, port, err = rstest.RQLStart()
 	if err != nil {
 		slog.Error(err)
 		os.Exit(1)
@@ -128,6 +129,7 @@ func TestMain(m *testing.M) {
 	remote_signer.KeysBase64Encoded = false
 	remote_signer.EnableRethinkSKS = true
 	remote_signer.RethinkDBPoolSize = 1
+	remote_signer.RethinkDBPort = port
 
 	slog.UnsetTestMode()
 	etc.DbSetup()
