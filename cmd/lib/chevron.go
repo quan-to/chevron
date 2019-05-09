@@ -68,4 +68,37 @@ func SignBase64Data(b64data, fingerprint string) (result string, err string) {
 	return
 }
 
+//export GetKeyFingerprints
+func GetKeyFingerprints(keyData string) (result []string, err string) {
+	r, e := chevronlib.GetKeyFingerprints(keyData)
+	result = r
+	if e != nil {
+		err = e.Error()
+	}
+
+	return
+}
+
+//export ChangeKeyPassword
+func ChangeKeyPassword(keyData, currentPassword, newPassword string) (result string, err string) {
+	r, e := chevronlib.ChangeKeyPassword(keyData, currentPassword, newPassword)
+	result = r
+	if e != nil {
+		err = e.Error()
+	}
+
+	return
+}
+
+//export GetPublicKey
+func GetPublicKey(fingerprint string) (result string, err string) {
+	r, e := chevronlib.GetPublicKey(fingerprint)
+	result = r
+	if e != nil {
+		err = e.Error()
+	}
+
+	return
+}
+
 func main() {}
