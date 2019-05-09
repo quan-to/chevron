@@ -12,3 +12,7 @@ func MakePGP() etc.PGPInterface {
 
 	return keymagic.MakePGPManagerWithKRM(kb, keymagic.MakeKeyRingManager())
 }
+
+func MakeVoidPGP() etc.PGPInterface {
+	return keymagic.MakePGPManagerWithKRM(keyBackend.MakeVoidBackend(), keymagic.MakeKeyRingManager())
+}

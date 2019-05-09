@@ -133,7 +133,7 @@ func GetConnection() *r.Session {
 }
 
 func ResetDatabase() {
-	slog.UnsetTestMode()
+	//slog.UnsetTestMode()
 
 	dbLog.Error("Reseting Database")
 	c := GetConnection()
@@ -149,5 +149,5 @@ func ResetDatabase() {
 	time.Sleep(1 * time.Second)
 
 	dbLog.Info("Database reseted")
-	slog.SetTestMode()
+	//slog.SetTestMode()
 }
