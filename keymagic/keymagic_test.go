@@ -67,11 +67,12 @@ func TestMain(m *testing.M) {
 
 	sm = MakeSecretsManager()
 
-	err = pgpMan.UnlockKey(rstest.TestKeyFingerprint, rstest.TestKeyFingerprint)
+	err = pgpMan.UnlockKey(rstest.TestKeyFingerprint, rstest.TestKeyPassword)
 
 	if err != nil {
 		slog.SetError(true)
 		slog.Error(err)
+		rstest.RQLStop(rql)
 		os.Exit(1)
 	}
 
@@ -79,7 +80,6 @@ func TestMain(m *testing.M) {
 	etc.ResetDatabase()
 	slog.UnsetTestMode()
 	etc.Cleanup()
-	slog.Warn("STOPPING RETHINKDB")
 	rstest.RQLStop(rql)
 	os.Exit(code)
 }
