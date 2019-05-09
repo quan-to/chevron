@@ -25,7 +25,7 @@ then
   cd cmd
   for i in *
   do
-    if [[ "${i}" != "agent-ui" ]]
+    if [[ "${i}" != "agent-ui" && "${i}" != "lib" ]]
     then
         echo "Building $i"
         cd $i
