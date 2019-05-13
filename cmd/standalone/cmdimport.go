@@ -69,9 +69,11 @@ func ImportKey(filename, keyPassword string, keyPasswordFd int) {
 			private, err := pgpMan.GetPrivateKeyAscii(v, keyPassword)
 
 			if err == nil {
-				pgpMan.SaveKey(v, private, keyPassword)
-				fmt.Fprintf(os.Stderr, "Imported private key %s\n", v)
-				continue
+				err = pgpMan.SaveKey(v, private, keyPassword)
+				if err == nil {
+					fmt.Fprintf(os.Stderr, "Imported private key %s\n", v)
+					continue
+				}
 			}
 
 			fmt.Fprintf(os.Stderr, "Cannot import private key %s with supplied password: %s\n", v, err)
@@ -81,9 +83,11 @@ func ImportKey(filename, keyPassword string, keyPasswordFd int) {
 		// Try public if no private
 		public, err := pgpMan.GetPublicKeyAscii(v)
 		if err == nil {
-			fmt.Fprintf(os.Stderr, "Imported public key %s\n", v)
-			pgpMan.SaveKey(v, public, nil)
-			continue
+			err = pgpMan.SaveKey(v, public, nil)
+			if err == nil {
+				fmt.Fprintf(os.Stderr, "Imported public key %s\n", v)
+				continue
+			}
 		}
 
 		fmt.Fprintf(os.Stderr, "Cannot import public key %s: %s\n", v, err)
