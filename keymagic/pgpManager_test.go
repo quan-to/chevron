@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/rstest"
+	"io/ioutil"
 	"testing"
 )
 
@@ -64,6 +65,22 @@ func TestDecrypt(t *testing.T) {
 	if string(gd) != rstest.TestSignatureData {
 		t.Errorf("Decrypted data does no match. Expected \"%s\" got \"%s\"", string(gd), rstest.TestSignatureData)
 	}
+}
+
+func TestDecryptRaw(t *testing.T) {
+	b, err := ioutil.ReadFile("../tests/testraw.gpg")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	d := string(b)
+
+	_, err = pgpMan.Decrypt(d, false)
+	if err != nil {
+		t.Error(err)
+	}
+
 }
 
 func TestEncrypt(t *testing.T) {

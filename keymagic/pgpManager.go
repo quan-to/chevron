@@ -1020,13 +1020,17 @@ func (pm *PGPManager) Decrypt(data string, dataOnly bool) (*models.GPGDecryptedD
 		}
 		rd = bytes.NewReader(d)
 	} else {
-		srd := strings.NewReader(data)
-		p, err := armor.Decode(srd)
-		if err != nil {
-			return nil, err
-		}
+		if remote_signer.IsASCIIArmored(data) {
+			srd := strings.NewReader(data)
+			p, err := armor.Decode(srd)
+			if err != nil {
+				return nil, err
+			}
 
-		rd = p.Body
+			rd = p.Body
+		} else {
+			rd = strings.NewReader(data)
+		}
 	}
 
 	md, err := openpgp.ReadMessage(rd, keyRing, nil, nil)

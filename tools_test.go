@@ -574,3 +574,42 @@ func TestGeneratePassword(t *testing.T) {
 		}
 	}
 }
+
+func TestIsASCIIArmored(t *testing.T) {
+	b, err := ioutil.ReadFile("tests/nonasciiencrypted.gpg")
+	if err != nil {
+		t.Errorf("Error loading file: %s", err)
+	}
+
+	nonascii := string(b)
+
+	if IsASCIIArmored(nonascii) != false {
+		t.Errorf("Expected NONASCII from tests/nonasciiencrypted.gpg")
+	}
+
+	if IsASCIIArmored(sigConvertGPG) != true {
+		t.Errorf("Expected ASCII from sigConvertGPG")
+	}
+}
+
+func TestNonASCIIFingerprints(t *testing.T) {
+	b, err := ioutil.ReadFile("tests/nonasciiencrypted.gpg")
+	if err != nil {
+		t.Errorf("Error loading file: %s", err)
+	}
+
+	nonascii := string(b)
+
+	fps, err := GetFingerPrintsFromEncryptedMessage(nonascii)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	if len(fps) != 1 {
+		t.Fatalf("Expected one fingerprint on encrypted got %d", len(fps))
+	}
+
+	if fps[0] != "344C911D5CA6B681" {
+		t.Fatalf("Expected fingerprint to be 344C911D5CA6B681")
+	}
+}

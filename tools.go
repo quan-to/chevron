@@ -147,6 +147,11 @@ func mightBeChecksum(s string) bool {
 	return (s[0] == '=' && CanDecodeBase64(s[1:])) || CanDecodeBase64(s)
 }
 
+// IsASCIIArmored returns true if data is ascii armored
+func IsASCIIArmored(data string) bool {
+	return data[:5] == "-----"
+}
+
 // SignatureFix recalculates the CRC
 func SignatureFix(sig string) string {
 	if pgpsig.MatchString(sig) {
@@ -300,18 +305,26 @@ func GetFingerPrintsFromEncryptedMessageRaw(rawB64Data string) ([]string, error)
 
 func GetFingerPrintsFromEncryptedMessage(armored string) ([]string, error) {
 	var fps = make([]string, 0)
-	aem := strings.NewReader(armored)
-	block, err := armor.Decode(aem)
+	var r io.Reader
 
-	if err != nil {
-		return nil, err
+	if IsASCIIArmored(armored) {
+		aem := strings.NewReader(armored)
+		block, err := armor.Decode(aem)
+
+		if err != nil {
+			return nil, err
+		}
+
+		if block.Type != "PGP MESSAGE" {
+			return nil, fmt.Errorf("expected pgp message but got: %s", block.Type)
+		}
+
+		r = block.Body
+	} else {
+		r = strings.NewReader(armored)
 	}
 
-	if block.Type != "PGP MESSAGE" {
-		return nil, fmt.Errorf("expected pgp message but got: %s", block.Type)
-	}
-
-	reader := packet.NewReader(block.Body)
+	reader := packet.NewReader(r)
 
 	for {
 		p, err := reader.Next()
@@ -324,6 +337,10 @@ func GetFingerPrintsFromEncryptedMessage(armored string) ([]string, error) {
 		case *packet.EncryptedKey:
 			fps = append(fps, IssuerKeyIdToFP16(v.KeyId))
 		}
+	}
+
+	if len(fps) == 0 {
+		return nil, fmt.Errorf("no fingerprints found")
 	}
 
 	return fps, nil
