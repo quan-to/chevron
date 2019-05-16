@@ -172,20 +172,20 @@ func main() {
 	}
 	log.Info("Loaded %d private keys", n)
 	log.Info("Unlocking Key")
-	err = pgp.UnlockKey(remote_signer.TestKeyFingerprint, remote_signer.TestKeyPassword)
+	err = pgp.UnlockKey(rstest.TestKeyFingerprint, rstest.TestKeyFingerprint)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	log.Info("Loading public key")
-	pubKey, err := pgp.GetPublicKeyAscii(remote_signer.TestKeyFingerprint)
+	pubKey, err := pgp.GetPublicKeyAscii(rstest.TestKeyFingerprint)
 	//if err != nil {
 	//	panic(err)
 	//}
 
 	log.Info("Public Key loaded. Creating Field Cipher")
 	cipher := fieldcipher.MakeCipherFromASCIIArmoredKeys([]string{pubKey})
-	decipher, err := fieldcipher.MakeDecipher(pgp.GetPrivate(remote_signer.TestKeyFingerprint))
+	decipher, err := fieldcipher.MakeDecipher(pgp.GetPrivate(rstest.TestKeyFingerprint))
 
 	if err != nil {
 		log.Fatal(err)

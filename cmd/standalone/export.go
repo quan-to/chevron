@@ -10,6 +10,7 @@ import (
 	"syscall"
 )
 
+// ExportKey exports the specified public / secret key
 func ExportKey(name, password string, secret bool) {
 	var err error
 	pgpMan := magicBuilder.MakePGP()

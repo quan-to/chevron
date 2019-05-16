@@ -5,6 +5,7 @@ import (
 	"github.com/quan-to/chevron/database"
 	"github.com/quan-to/chevron/keyBackend"
 	"github.com/quan-to/chevron/models"
+	"github.com/quan-to/chevron/rstest"
 	"github.com/quan-to/chevron/vaultManager"
 	"io/ioutil"
 	"testing"
@@ -131,7 +132,7 @@ func TestGetKeyExternal(t *testing.T) {
 	remote_signer.SKSServer = "https://keyserver.ubuntu.com/"
 	krm := MakeKeyRingManager()
 	remote_signer.EnableRethinkSKS = false
-	e := krm.GetKey(remote_signer.ExternalKeyFingerprint)
+	e := krm.GetKey(rstest.ExternalKeyFingerprint)
 
 	if e == nil {
 		t.Error("Expected External key to be fetch")
@@ -140,8 +141,8 @@ func TestGetKeyExternal(t *testing.T) {
 
 	fp := remote_signer.IssuerKeyIdToFP16(e.PrimaryKey.KeyId)
 
-	if fp != remote_signer.ExternalKeyFingerprint {
-		t.Errorf("Expected key %s got %s", remote_signer.ExternalKeyFingerprint, fp)
+	if fp != rstest.ExternalKeyFingerprint {
+		t.Errorf("Expected key %s got %s", rstest.ExternalKeyFingerprint, fp)
 	}
 
 	// Test SKS Internal

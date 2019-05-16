@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// BenchmarkGeneration benchmarks the key generation
 func BenchmarkGeneration(runs, bits int) {
 	pgpMan := magicBuilder.MakePGP()
 

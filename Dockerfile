@@ -1,4 +1,4 @@
-FROM golang:alpine as build
+FROM golang:1.12-alpine as build
 
 RUN apk update
 
@@ -6,6 +6,7 @@ RUN apk add git ca-certificates
 
 ADD . /go/src/github.com/quan-to/chevron
 
+ENV GO111MODULE=on
 
 # Compile Server
 WORKDIR /go/src/github.com/quan-to/chevron/cmd/server

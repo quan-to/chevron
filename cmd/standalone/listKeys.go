@@ -5,6 +5,7 @@ import (
 	"github.com/quan-to/chevron/etc/magicBuilder"
 )
 
+// ListKeys list the Public / Private keys stored in the default backend
 func ListKeys() {
 	pgpMan := magicBuilder.MakePGP()
 	pgpMan.LoadKeys()

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/QuantoError"
+	"github.com/quan-to/chevron/rstest"
 	"github.com/quan-to/slog"
 	"os"
 	"os/exec"
@@ -14,7 +15,9 @@ func TestMain(m *testing.M) {
 	slog.UnsetTestMode()
 	var rql *exec.Cmd
 	var err error
-	rql, err = remote_signer.RQLStart()
+	var port int
+
+	rql, port, err = rstest.RQLStart()
 	if err != nil {
 		slog.Error(err)
 		os.Exit(1)
@@ -35,6 +38,7 @@ func TestMain(m *testing.M) {
 	remote_signer.HttpPort = 40000
 	remote_signer.SKSServer = fmt.Sprintf("http://localhost:%d/sks/", remote_signer.HttpPort)
 	remote_signer.EnableRethinkSKS = true
+	remote_signer.RethinkDBPort = port
 	DbSetup()
 
 	slog.SetTestMode()
@@ -45,7 +49,7 @@ func TestMain(m *testing.M) {
 	slog.UnsetTestMode()
 	Cleanup()
 	slog.Warn("STOPPING RETHINKDB")
-	remote_signer.RQLStop(rql)
+	rstest.RQLStop(rql)
 	os.Exit(code)
 }
 
