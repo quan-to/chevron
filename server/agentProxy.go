@@ -3,6 +3,8 @@ package server
 import (
 	"bytes"
 	"crypto"
+	"encoding/json"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/etc"
@@ -85,6 +87,20 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 		InternalServerError("There was an error processing your request", err.Error(), w, r, agentLog)
 		return
 	}
+
+	var jsondata map[string]interface{}
+
+	err = json.Unmarshal(bodyData, &jsondata)
+
+	if err != nil {
+		InternalServerError("There was an error processing your request", err.Error(), w, r, agentLog)
+		return
+	}
+
+	jsondata["_timestamp"] = time.Now().Unix() * 1000
+	jsondata["_timeUniqueId"] = uuid.New().String()
+
+	bodyData, _ = json.Marshal(jsondata)
 
 	req, err := http.NewRequest(r.Method, targetUrl, bytes.NewBuffer(bodyData))
 
