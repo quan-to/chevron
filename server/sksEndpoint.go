@@ -40,7 +40,7 @@ func (sks *SKSEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, geLog)
+			CatchAllError(rec, w, r, sksLog)
 		}
 	}()
 
@@ -65,7 +65,7 @@ func (sks *SKSEndpoint) searchByName(w http.ResponseWriter, r *http.Request) {
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, geLog)
+			CatchAllError(rec, w, r, sksLog)
 		}
 	}()
 
@@ -114,7 +114,7 @@ func (sks *SKSEndpoint) searchByFingerPrint(w http.ResponseWriter, r *http.Reque
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, geLog)
+			CatchAllError(rec, w, r, sksLog)
 		}
 	}()
 
@@ -163,7 +163,7 @@ func (sks *SKSEndpoint) searchByEmail(w http.ResponseWriter, r *http.Request) {
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, geLog)
+			CatchAllError(rec, w, r, sksLog)
 		}
 	}()
 

@@ -46,7 +46,7 @@ func UnmarshalBodyOrDie(outData interface{}, w http.ResponseWriter, r *http.Requ
 	body, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
-		geLog.Error(err)
+		logI.Error(err)
 		WriteJSON(QuantoError.New(QuantoError.InternalServerError, "body", err.Error(), nil), 500, w, r, logI)
 		return false
 	}
@@ -56,7 +56,7 @@ func UnmarshalBodyOrDie(outData interface{}, w http.ResponseWriter, r *http.Requ
 	err = json.Unmarshal(body, outData)
 
 	if err != nil {
-		geLog.Error(err)
+		logI.Error(err)
 		WriteJSON(QuantoError.New(QuantoError.InvalidFieldData, "body", err.Error(), nil), 500, w, r, logI)
 		return false
 	}

@@ -76,7 +76,7 @@ func (jfc *JFCEndpoint) cipher(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
 	n, _ := w.Write([]byte(d))
-	LogExit(geLog, r, 200, n)
+	LogExit(jfcLog, r, 200, n)
 }
 
 func (jfc *JFCEndpoint) decipher(w http.ResponseWriter, r *http.Request) {
@@ -124,5 +124,5 @@ func (jfc *JFCEndpoint) decipher(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
 	n, _ := w.Write([]byte(d))
-	LogExit(geLog, r, 200, n)
+	LogExit(jfcLog, r, 200, n)
 }

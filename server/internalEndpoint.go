@@ -43,7 +43,7 @@ func (ie *InternalEndpoint) triggerKeyUnlock(w http.ResponseWriter, r *http.Requ
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
 	n, _ := w.Write([]byte("OK"))
-	LogExit(geLog, r, 200, n)
+	LogExit(intLog, r, 200, n)
 }
 
 func (ie *InternalEndpoint) getUnlockPasswords(w http.ResponseWriter, r *http.Request) {
@@ -51,7 +51,7 @@ func (ie *InternalEndpoint) getUnlockPasswords(w http.ResponseWriter, r *http.Re
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, geLog)
+			CatchAllError(rec, w, r, intLog)
 		}
 	}()
 
@@ -62,7 +62,7 @@ func (ie *InternalEndpoint) getUnlockPasswords(w http.ResponseWriter, r *http.Re
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
 	n, _ := w.Write(bodyData)
-	LogExit(geLog, r, 200, n)
+	LogExit(intLog, r, 200, n)
 }
 
 func (ie *InternalEndpoint) postUnlockPasswords(w http.ResponseWriter, r *http.Request) {
@@ -87,5 +87,5 @@ func (ie *InternalEndpoint) postUnlockPasswords(w http.ResponseWriter, r *http.R
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
 	n, _ := w.Write([]byte("OK"))
-	LogExit(geLog, r, 200, n)
+	LogExit(intLog, r, 200, n)
 }

@@ -38,7 +38,7 @@ func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, geLog)
+			CatchAllError(rec, w, r, kreLog)
 		}
 	}()
 
@@ -56,7 +56,7 @@ func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
 	n, _ := w.Write([]byte(key))
-	LogExit(geLog, r, 200, n)
+	LogExit(kreLog, r, 200, n)
 }
 
 func (kre *KeyRingEndpoint) getCachedKeys(w http.ResponseWriter, r *http.Request) {
@@ -64,7 +64,7 @@ func (kre *KeyRingEndpoint) getCachedKeys(w http.ResponseWriter, r *http.Request
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, geLog)
+			CatchAllError(rec, w, r, kreLog)
 		}
 	}()
 
@@ -81,7 +81,7 @@ func (kre *KeyRingEndpoint) getCachedKeys(w http.ResponseWriter, r *http.Request
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
 	n, _ := w.Write(bodyData)
-	LogExit(geLog, r, 200, n)
+	LogExit(kreLog, r, 200, n)
 }
 
 func (kre *KeyRingEndpoint) getLoadedPrivateKeys(w http.ResponseWriter, r *http.Request) {
@@ -89,7 +89,7 @@ func (kre *KeyRingEndpoint) getLoadedPrivateKeys(w http.ResponseWriter, r *http.
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, geLog)
+			CatchAllError(rec, w, r, kreLog)
 		}
 	}()
 
@@ -105,7 +105,7 @@ func (kre *KeyRingEndpoint) getLoadedPrivateKeys(w http.ResponseWriter, r *http.
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
 	n, _ := w.Write(bodyData)
-	LogExit(geLog, r, 200, n)
+	LogExit(kreLog, r, 200, n)
 }
 
 func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request) {
@@ -114,11 +114,11 @@ func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, geLog)
+			CatchAllError(rec, w, r, kreLog)
 		}
 	}()
 
-	if !UnmarshalBodyOrDie(&data, w, r, geLog) {
+	if !UnmarshalBodyOrDie(&data, w, r, kreLog) {
 		return
 	}
 
