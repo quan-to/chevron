@@ -17,7 +17,7 @@ const VaultMetadata = "metadata"
 var log = slog.Scope("Vault")
 
 type VaultManager struct {
-	client *api.Client
+	Client *api.Client
 	prefix string
 	log    *slog.Instance
 }
@@ -64,7 +64,7 @@ func MakeVaultManager(prefix string) *VaultManager {
 	}
 
 	return &VaultManager{
-		client: client,
+		Client: client,
 		prefix: prefix,
 		log:    slog.Scope(fmt.Sprintf("Vault (%s)", prefix)),
 	}
@@ -83,7 +83,7 @@ func (vm *VaultManager) vaultPath(dataType, key string) string {
 
 func (vm *VaultManager) putSecret(key string, data map[string]string) error {
 	vm.log.Debug("Saving %s to %s", key, vm.vaultPath(VaultData, key))
-	_, err := vm.client.Logical().Write(vm.vaultPath(VaultData, key), map[string]interface{}{
+	_, err := vm.Client.Logical().Write(vm.vaultPath(VaultData, key), map[string]interface{}{
 		"data": data,
 	})
 
@@ -92,7 +92,7 @@ func (vm *VaultManager) putSecret(key string, data map[string]string) error {
 
 func (vm *VaultManager) getSecret(key string) (string, string, error) {
 	//vm.log.Debug("getSecret(%s)", key)
-	s, err := vm.client.Logical().Read(vm.vaultPath(VaultData, key))
+	s, err := vm.Client.Logical().Read(vm.vaultPath(VaultData, key))
 	if err != nil {
 		return "", "", err
 	}
@@ -142,7 +142,7 @@ func (vm *VaultManager) Read(key string) (data string, metadata string, err erro
 
 func (vm *VaultManager) List() ([]string, error) {
 	vm.log.Debug("Listing keys on %s", baseVaultPath(VaultMetadata))
-	s, err := vm.client.Logical().List(baseVaultPath(VaultMetadata))
+	s, err := vm.Client.Logical().List(baseVaultPath(VaultMetadata))
 	if err != nil {
 		return nil, err
 	}
