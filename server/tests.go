@@ -6,8 +6,12 @@ import (
 	"github.com/quan-to/chevron/database"
 	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/chevron/vaultManager"
+	"github.com/quan-to/slog"
+	r "gopkg.in/rethinkdb/rethinkdb-go.v5"
 	"net/http"
 )
+
+var teLog = slog.Scope("Test Endpoint")
 
 type TestsEndpoint struct{}
 
@@ -25,7 +29,9 @@ func (ge *TestsEndpoint) checkExternal() bool {
 	if remote_signer.EnableRethinkSKS {
 		conn := database.GetConnection()
 
-		if !conn.IsConnected() {
+		_, err := r.Expr(1).Run(conn)
+		if err != nil {
+			teLog.Error(err)
 			isHealthy = false
 		}
 	}
@@ -35,10 +41,12 @@ func (ge *TestsEndpoint) checkExternal() bool {
 		health, err := vm.HealthStatus()
 
 		if err != nil {
+			teLog.Error(err)
 			isHealthy = false
 		}
 
 		if !health.Initialized || health.Sealed {
+			teLog.Info("Vault initialized? %t, is sealed? %t", health.Initialized, health.Sealed)
 			isHealthy = false
 		}
 	}
