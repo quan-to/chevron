@@ -84,6 +84,17 @@ func TestVaultManager_Read(t *testing.T) {
 		t.Errorf("Expected error for unknown key")
 	}
 }
+func TestVaultManager_HeathStatus(t *testing.T) {
+	status, err := vm.HealthStatus()
+	if err != nil {
+		t.Errorf("Error loading status: %s", err)
+		t.FailNow()
+	}
+
+	if status.Initialized != true {
+		t.Errorf("Expected %t got %t", true, status.Initialized)
+	}
+}
 
 func TestVaultManager_Path(t *testing.T) {
 	if vm.Path() != vm.vaultPath(VaultData, vm.prefix+"*") {
