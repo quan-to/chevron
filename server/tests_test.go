@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	remote_signer "github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/QuantoError"
 	"io/ioutil"
 	"net/http"
@@ -12,6 +13,9 @@ import (
 
 func TestPing(t *testing.T) {
 	// region Generate Signature
+	remote_signer.EnableRethinkSKS = true
+	remote_signer.VaultStorage = true
+
 	r := bytes.NewReader([]byte(""))
 
 	req, err := http.NewRequest("POST", "/tests/ping", r)
