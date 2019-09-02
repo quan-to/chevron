@@ -3,8 +3,8 @@ package server
 import (
 	"github.com/gorilla/mux"
 	remote_signer "github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/chevron/database"
+	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/chevron/vaultManager"
 	"net/http"
 )
@@ -31,8 +31,8 @@ func (ge *TestsEndpoint) checkExternal() bool {
 	}
 
 	if remote_signer.VaultStorage {
-		kb := vaultManager.MakeVaultManager(remote_signer.KeyPrefix)
-		health, err := kb.Client.Sys().Health()
+		vm := vaultManager.MakeVaultManager(remote_signer.KeyPrefix)
+		health, err := vm.HealthStatus()
 
 		if err != nil {
 			isHealthy = false
