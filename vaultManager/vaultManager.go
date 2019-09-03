@@ -116,6 +116,10 @@ func (vm *VaultManager) getSecret(key string) (string, string, error) {
 	return d, m, nil
 }
 
+func (vm *VaultManager) HealthStatus() (*api.HealthResponse, error) {
+	return vm.client.Sys().Health()
+}
+
 func (vm *VaultManager) Save(key, data string) error {
 	vm.log.Debug("Saving %s", key)
 	return vm.putSecret(vm.prefix+key, map[string]string{
