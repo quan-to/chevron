@@ -15,27 +15,34 @@ import (
 	"time"
 )
 
-var agentLog = slog.Scope("Agent")
-
 type AgentProxy struct {
 	gpg       etc.PGPInterface
 	transport *http.Transport
 	tm        etc.TokenManager
+	log       slog.Instance
 }
 
-func MakeAgentProxy(gpg etc.PGPInterface, tm etc.TokenManager) *AgentProxy {
+func MakeAgentProxy(log slog.Instance, gpg etc.PGPInterface, tm etc.TokenManager) *AgentProxy {
+	if log == nil {
+		log = slog.Scope("Agent")
+	} else {
+		log = log.SubScope("Agent")
+	}
+
 	return &AgentProxy{
 		gpg: gpg,
 		transport: &http.Transport{
 			MaxIdleConns:    10,
 			IdleConnTimeout: 30 * time.Second,
 		},
-		tm: tm,
+		tm:  tm,
+		log: log,
 	}
 }
 
 func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) {
 	InitHTTPTimer(r)
+	log := wrapLogWithRequestId(proxy.log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -51,21 +58,27 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 		targetUrl = h.Get("serverUrl")
 	}
 
+	log = log.WithFields(map[string]interface{}{
+		"targetUrl": targetUrl,
+	})
+
 	token := ""
 
 	if !remote_signer.AgentBypassLogin {
 		if h.Get("proxyToken") == "" {
-			PermissionDenied("proxyToken", "Please check if your proxyToken is valid", w, r, agentLog)
+			PermissionDenied("proxyToken", "Please check if your proxyToken is valid", w, r, log)
 			return
 		}
 
 		token = h.Get("proxyToken")
 		h.Del("proxyToken")
 
+		log.Await("Verifying user token")
 		err := proxy.tm.Verify(token)
+		log.Done("Token verified")
 
 		if err != nil {
-			PermissionDenied("proxyToken", "Please check if your proxyToken is valid", w, r, agentLog)
+			PermissionDenied("proxyToken", "Please check if your proxyToken is valid", w, r, log)
 			return
 		}
 	}
@@ -81,10 +94,12 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 		fingerPrint = user.GetFingerPrint()
 	}
 
+	log.Operation(slog.AWAIT).Debug("Reading body")
 	bodyData, err := ioutil.ReadAll(r.Body)
+	log.Operation(slog.DONE).Debug("Body read")
 
 	if err != nil {
-		InternalServerError("There was an error processing your request", err.Error(), w, r, agentLog)
+		InternalServerError("There was an error processing your request", err.Error(), w, r, log)
 		return
 	}
 
@@ -93,7 +108,7 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 	err = json.Unmarshal(bodyData, &jsondata)
 
 	if err != nil {
-		InternalServerError("There was an error processing your request", err.Error(), w, r, agentLog)
+		InternalServerError("There was an error processing your request", err.Error(), w, r, log)
 		return
 	}
 
@@ -105,14 +120,16 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 	req, err := http.NewRequest(r.Method, targetUrl, bytes.NewBuffer(bodyData))
 
 	if err != nil {
-		InternalServerError("There was an error processing your request", err.Error(), w, r, agentLog)
+		InternalServerError("There was an error processing your request", err.Error(), w, r, log)
 		return
 	}
 
+	log.Await("Signing data with %s", fingerPrint)
 	signature, err := proxy.gpg.SignData(fingerPrint, bodyData, crypto.SHA512)
+	log.Done("Data signed")
 
 	if err != nil {
-		InternalServerError("There was an error signing your request", err.Error(), w, r, agentLog)
+		InternalServerError("There was an error signing your request", err.Error(), w, r, log)
 		return
 	}
 
@@ -131,10 +148,12 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
+	log.Await("Sending request to %s", targetUrl)
 	res, err := client.Do(req)
+	log.Done("Received response")
 
 	if err != nil {
-		InternalServerError("There was an error processing your request", err.Error(), w, r, agentLog)
+		InternalServerError("There was an error processing your request", err.Error(), w, r, log)
 		return
 	}
 
@@ -148,8 +167,9 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
+	log.Info("Sending response")
 	n, _ := io.Copy(w, res.Body)
-	LogExit(geLog, r, res.StatusCode, int(n))
+	LogExit(log, r, res.StatusCode, int(n))
 }
 
 func (proxy *AgentProxy) AddHandlers(r *mux.Router) {

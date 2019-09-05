@@ -17,18 +17,17 @@ import (
 
 const httpInternalTimestamp = "___HTTP_INTERNAL_TIMESTAMP___"
 
-var httpToolsLog = slog.Scope("HTTP Tools")
+type HttpHandleFunc = func(w http.ResponseWriter, r *http.Request)
+type HttpHandleFuncWithLog = func(log slog.Instance, w http.ResponseWriter, r *http.Request)
 
 func WriteJSON(data interface{}, statusCode int, w http.ResponseWriter, r *http.Request, logI slog.Instance) {
-
-	if logI == nil {
-		logI = httpToolsLog
-	}
 
 	b, err := json.Marshal(data)
 
 	if err != nil {
-		httpToolsLog.Error("Error serializing object: %s", err)
+		logI.WithFields(map[string]interface{}{
+			"data": data,
+		}).Error("Error serializing object: %s", err)
 		w.Header().Set("Content-Type", models.MimeText)
 		w.WriteHeader(500)
 		_, _ = w.Write([]byte("Internal Server Error"))
@@ -123,13 +122,29 @@ func LogExit(slog slog.Instance, r *http.Request, statusCode int, bodyLength int
 	remote := aurora.Gray(7, host)
 
 	if ts != 0 {
-		slog.LogNoFormat("%s (%8.2f ms) {%8d bytes} %-4s %s from %s", statusCodeStr, ts, bodyLength, method, aurora.Gray(7, r.URL.Path), remote)
+		slog.Log("%s (%8.2f ms) {%8d bytes} %-4s %s from %s", statusCodeStr, ts, bodyLength, method, aurora.Gray(7, r.URL.Path), remote)
 	} else {
-		slog.LogNoFormat("%s {%8d bytes}          %-4s %s from %s", statusCodeStr, bodyLength, method, aurora.Gray(7, r.URL.Path), remote)
+		slog.Log("%s {%8d bytes}          %-4s %s from %s", statusCodeStr, bodyLength, method, aurora.Gray(7, r.URL.Path), remote)
 	}
 }
 
 func InitHTTPTimer(r *http.Request) {
 	t := time.Now().UnixNano()
 	r.Header.Set(httpInternalTimestamp, fmt.Sprintf("%d", t))
+}
+
+func wrapWithLog(log slog.Instance, f HttpHandleFuncWithLog) HttpHandleFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		f(log, w, r)
+	}
+}
+
+func wrapLogWithRequestId(log slog.Instance, r *http.Request) slog.Instance {
+	id, ok := r.Header["originRequestId"]
+	if ok && len(id) >= 1 {
+		// Generate Req ID
+		return log.Tag(id[0])
+	}
+
+	return log
 }

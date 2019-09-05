@@ -12,18 +12,25 @@ import (
 	"time"
 )
 
-var ramLog = slog.Scope("RQL-AM")
-
 type RethinkAuthManager struct {
 	sync.Mutex
+	log slog.Instance
 }
 
-func MakeRethinkAuthManager() *RethinkAuthManager {
-	ramLog.Info("Creating RethinkDB Auth Manager")
-	ram := &RethinkAuthManager{}
+func MakeRethinkAuthManager(logger slog.Instance) *RethinkAuthManager {
+	if logger == nil {
+		logger = slog.Scope("RQL-AM")
+	} else {
+		logger = logger.SubScope("RQL-AM")
+	}
+
+	logger.Info("Creating RethinkDB Auth Manager")
+	ram := &RethinkAuthManager{
+		log: logger,
+	}
 
 	if !ram.UserExists("admin") {
-		ramLog.Warn("User admin does not exists. Creating default")
+		ram.log.Warn("User admin does not exists. Creating default")
 		ram.addDefaultAdmin()
 	}
 
@@ -34,7 +41,7 @@ func (ram *RethinkAuthManager) addDefaultAdmin() {
 	err := ram.LoginAdd("admin", "admin", "Administrator", remote_signer.AgentKeyFingerPrint)
 
 	if err != nil {
-		ramLog.Fatal("Error adding default admin: %v", err)
+		ram.log.Fatal("Error adding default admin: %v", err)
 	}
 }
 
@@ -67,7 +74,7 @@ func (ram *RethinkAuthManager) LoginAuth(username, password string) (fingerPrint
 
 	hash, err := base64.StdEncoding.DecodeString(um.Password)
 	if err != nil {
-		ramLog.Error("Error decoding hash: %v", err)
+		ram.log.Error("Error decoding hash: %v", err)
 		return "", "", fmt.Errorf("invalid username or password")
 	}
 

@@ -3,20 +3,21 @@ package agent
 import (
 	"github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/etc"
+	"github.com/quan-to/slog"
 )
 
-func MakeTokenManager() etc.TokenManager {
+func MakeTokenManager(logger slog.Instance) etc.TokenManager {
 	if remote_signer.RethinkTokenManager {
-		return MakeRethinkTokenManager()
+		return MakeRethinkTokenManager(logger)
 	}
 
-	return MakeMemoryTokenManager()
+	return MakeMemoryTokenManager(logger)
 }
 
-func MakeAuthManager() etc.AuthManager {
+func MakeAuthManager(logger slog.Instance) etc.AuthManager {
 	if remote_signer.RethinkAuthManager {
-		return MakeRethinkAuthManager()
+		return MakeRethinkAuthManager(logger)
 	}
 
-	return MakeJSONAuthManager()
+	return MakeJSONAuthManager(logger)
 }

@@ -14,7 +14,7 @@ func AddSubkeysToGPGKey(conn *r.Session) {
 		l.Fatal(err)
 	}
 
-	l.Info("Got %d keys to fill subkeys", len(keys))
+	l.Note("Got %d keys to fill subkeys", len(keys))
 
 	for _, k := range keys {
 		fps, err := remote_signer.GetFingerPrintsFromKey(k.AsciiArmoredPublicKey)
@@ -23,7 +23,7 @@ func AddSubkeysToGPGKey(conn *r.Session) {
 			_ = k.Delete(conn)
 			continue
 		}
-		l.Info("Base: %s Keys: %v", k.GetShortFingerPrint(), fps)
+		l.Note("Base: %s Keys: %v", k.GetShortFingerPrint(), fps)
 		k.Subkeys = fps
 		err = k.Save(conn)
 		if err != nil {

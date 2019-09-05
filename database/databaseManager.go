@@ -32,7 +32,7 @@ func init() {
 
 func DbSetup() {
 	if remote_signer.EnableRethinkSKS && RthState.connection == nil {
-		dbLog.Info("RethinkDB SKS Enabled. Starting %d connections to %s:%d", remote_signer.RethinkDBPoolSize, remote_signer.RethinkDBHost, remote_signer.RethinkDBPort)
+		dbLog.Await("RethinkDB SKS Enabled. Starting %d connections to %s:%d", remote_signer.RethinkDBPoolSize, remote_signer.RethinkDBHost, remote_signer.RethinkDBPort)
 		conn, err := r.Connect(r.ConnectOpts{
 			Address:    fmt.Sprintf("%s:%d", remote_signer.RethinkDBHost, remote_signer.RethinkDBPort),
 			Username:   remote_signer.RethinkDBUsername,
@@ -46,7 +46,7 @@ func DbSetup() {
 		if err != nil {
 			dbLog.Fatal(err)
 		}
-		dbLog.Info("Connected!")
+		dbLog.Done("Connected!")
 		RthState.connection = conn
 	}
 }
@@ -54,26 +54,26 @@ func DbSetup() {
 func InitTables() {
 	if remote_signer.EnableRethinkSKS {
 		slog.UnsetTestMode()
-		dbLog.Info("Running InitTables")
+		dbLog.Await("Running InitTables")
 		dbs := GetDatabases()
 		conn := GetConnection()
 
 		if remote_signer.StringIndexOf(remote_signer.DatabaseName, dbs) == -1 {
-			dbLog.Warn("Database %s does not exists. Creating it...", remote_signer.DatabaseName)
+			dbLog.Note("Database %s does not exists. Creating it...", remote_signer.DatabaseName)
 			err := r.DBCreate(remote_signer.DatabaseName).Exec(conn)
 			if err != nil && strings.Index(err.Error(), " already exists") == -1 {
 				dbLog.Fatal(err)
 			}
 		} else {
-			dbLog.Debug("Database %s already exists. Skipping...", remote_signer.DatabaseName)
+			dbLog.Operation(slog.NOTE).Debug("Database %s already exists. Skipping...", remote_signer.DatabaseName)
 		}
 
 		WaitDatabaseCreate(remote_signer.DatabaseName)
 
-		dbLog.Warn("Waiting for database %s to be ready", remote_signer.DatabaseName)
+		dbLog.Await("Waiting for database %s to be ready", remote_signer.DatabaseName)
 		_ = r.DB(remote_signer.DatabaseName).Wait(r.WaitOpts{Timeout: 0}).Exec(conn)
 
-		dbLog.Info("Database %s is ready", remote_signer.DatabaseName)
+		dbLog.Success("Database %s is ready", remote_signer.DatabaseName)
 
 		conn.Use(remote_signer.DatabaseName)
 
@@ -82,7 +82,7 @@ func InitTables() {
 
 		for _, v := range tablesToInitialize {
 			if remote_signer.StringIndexOf(v.TableName, tables) == -1 {
-				dbLog.Info("Table %s does not exists. Creating...", v.TableName)
+				dbLog.Await("Table %s does not exists. Creating...", v.TableName)
 				err := r.TableCreate(v.TableName, r.TableCreateOpts{
 					Durability: "hard",
 					Replicas:   numNodes,
@@ -91,15 +91,16 @@ func InitTables() {
 					dbLog.Fatal(err)
 				}
 				WaitTableCreate(v.TableName)
+				dbLog.Success("Table %s created.", v.TableName)
 			}
 
-			dbLog.Info("        Checking Indexes for table %s", v.TableName)
+			dbLog.Await("        Checking Indexes for table %s", v.TableName)
 			idxs := GetTableIndexes(v.TableName)
 
 			for _, vidx := range v.TableIndexes {
-				dbLog.Debug("           Checking index %s in %s", v.TableName, vidx)
+				dbLog.Await("           Checking index %s in %s", v.TableName, vidx)
 				if remote_signer.StringIndexOf(vidx, idxs) == -1 {
-					dbLog.Warn("           Index %s not found at table %s. Creating it...", vidx, v.TableName)
+					dbLog.Note("           Index %s not found at table %s. Creating it...", vidx, v.TableName)
 					err := r.Table(v.TableName).IndexCreate(vidx).Exec(conn)
 					if err != nil && strings.Index(err.Error(), " already exists") == -1 {
 						dbLog.Fatal(err)
@@ -109,6 +110,8 @@ func InitTables() {
 					dbLog.Debug("           Index %s already exists in table %s. Skipping it...", vidx, v.TableName)
 				}
 			}
+
+			dbLog.Success("        Finished getting indexes for table %s", v.TableName)
 		}
 	}
 }

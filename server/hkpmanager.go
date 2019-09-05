@@ -11,8 +11,6 @@ import (
 
 /// HKP Server based on https://tools.ietf.org/html/draft-shaw-openpgp-hkp-00
 
-var hkpLog = slog.Scope("HKP")
-
 func operationGet(options, searchData string, machineReadable, noModification bool) (error, string) {
 	if searchData[:2] == "0x" {
 		k, _ := keymagic.PKSGetKey(searchData[2:])
@@ -45,7 +43,9 @@ func operationVIndex(options, searchData string, machineReadable, noModification
 	return errors.New("not implemented"), ""
 }
 
-func hkpLookup(w http.ResponseWriter, r *http.Request) {
+func hkpLookup(log slog.Instance, w http.ResponseWriter, r *http.Request) {
+	log = wrapLogWithRequestId(log.SubScope("HKP"), r)
+
 	InitHTTPTimer(r)
 	q := r.URL.Query()
 	op := q.Get("op")
@@ -61,25 +61,49 @@ func hkpLookup(w http.ResponseWriter, r *http.Request) {
 
 	switch op {
 	case HKP.OperationGet:
+		log.WithFields(map[string]interface{}{
+			"options": options,
+			"search":  search,
+			"mr":      mr,
+			"nm":      nm,
+		}).Await("Running operation GET")
 		err, result = operationGet(options, search, mr, nm)
 	case HKP.OperationIndex:
+		log.WithFields(map[string]interface{}{
+			"options":     options,
+			"search":      search,
+			"mr":          mr,
+			"nm":          nm,
+			"fingerPrint": fingerPrint,
+			"exact":       exact,
+		}).Await("Running operation Index")
 		err, result = operationIndex(options, search, mr, nm, fingerPrint, exact)
 	case HKP.OperationVindex:
+		log.WithFields(map[string]interface{}{
+			"options":     options,
+			"search":      search,
+			"mr":          mr,
+			"nm":          nm,
+			"fingerPrint": fingerPrint,
+			"exact":       exact,
+		}).Await("Running operation Vindex")
 		err, result = operationVIndex(options, search, mr, nm, fingerPrint, exact)
 	}
 
+	log.Done("Finished operation")
+
 	if err != nil {
 		if err.Error() == "not found" {
-			CatchAllRouter(w, r, hkpLog)
+			CatchAllRouter(w, r, log)
 			return
 		}
 
 		if err.Error() == "not implemented" {
-			NotImplemented(w, r, hkpLog)
+			NotImplemented(w, r, log)
 			return
 		}
 
-		InternalServerError("Internal Server Error", err.Error(), w, r, hkpLog)
+		InternalServerError("Internal Server Error", err.Error(), w, r, log)
 		return
 	}
 
@@ -89,25 +113,31 @@ func hkpLookup(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte(result))
-	LogExit(hkpLog, r, http.StatusOK, len(result))
+	LogExit(log, r, http.StatusOK, len(result))
 }
 
-func hkpAdd(w http.ResponseWriter, r *http.Request) {
+func hkpAdd(log slog.Instance, w http.ResponseWriter, r *http.Request) {
+	log = wrapLogWithRequestId(log.SubScope("HKP"), r)
+
 	InitHTTPTimer(r)
+	log.Await("Parsing Form Fields")
 	err := r.ParseForm()
+	log.Done("Parsed")
 	if err != nil {
-		InvalidFieldData("request", "Invalid request to add key. Please check if its HKP standard", w, r, hkpLog)
+		InvalidFieldData("request", "Invalid request to add key. Please check if its HKP standard", w, r, log)
 		return
 	}
 
 	key := r.Form.Get("keytext")
+	log.Await("Adding key")
 	result := keymagic.PKSAdd(key)
+	log.Done("Key add result: %s", result)
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte(result))
-	LogExit(hkpLog, r, http.StatusOK, len(result))
+	LogExit(log, r, http.StatusOK, len(result))
 }
 
-func AddHKPEndpoints(r *mux.Router) {
-	r.HandleFunc("/lookup", hkpLookup).Methods("GET")
-	r.HandleFunc("/add", hkpAdd).Methods("POST")
+func AddHKPEndpoints(log slog.Instance, r *mux.Router) {
+	r.HandleFunc("/lookup", wrapWithLog(log, hkpLookup)).Methods("GET")
+	r.HandleFunc("/add", wrapWithLog(log, hkpAdd)).Methods("POST")
 }

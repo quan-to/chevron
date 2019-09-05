@@ -15,8 +15,6 @@ import (
 const jamFileName = "users.json"
 const jamFilePerm = 0600
 
-var jamLog = slog.Scope("JSON-AM")
-
 type jsonUser struct {
 	Username    string
 	Password    string
@@ -27,11 +25,18 @@ type jsonUser struct {
 type JSONAuthManager struct {
 	sync.Mutex
 	users map[string]jsonUser
+	log   slog.Instance
 }
 
-func MakeJSONAuthManager() *JSONAuthManager {
-	jamLog.Info("Creating JSON Auth Manager")
-	jam := JSONAuthManager{}
+func MakeJSONAuthManager(logger slog.Instance) *JSONAuthManager {
+	if logger == nil {
+		logger = slog.Scope("JSON-AM")
+	} else {
+		logger = logger.SubScope("JSON-AM")
+	}
+
+	logger.Info("Creating JSON Auth Manager")
+	jam := JSONAuthManager{log: logger}
 	jam.loadFile()
 	return &jam
 }
@@ -39,25 +44,25 @@ func MakeJSONAuthManager() *JSONAuthManager {
 func (jam *JSONAuthManager) loadFile() {
 	// Load From Self folder
 	if !osutil.Exists(jamFileName) {
-		jamLog.Warn("File %s does not exists. Creating one...", jamFileName)
+		jam.log.Warn("File %s does not exists. Creating one...", jamFileName)
 		err := ioutil.WriteFile(jamFileName, []byte("{}"), jamFilePerm)
 		if err != nil {
-			jamLog.Fatal("Error writing file %s: %s", jamFileName, err)
+			jam.log.Fatal("Error writing file %s: %s", jamFileName, err)
 		}
 	}
 
 	data, err := ioutil.ReadFile("users.json")
 	if err != nil {
-		jamLog.Fatal("Error writing file %s: %s", jamFileName, err)
+		jam.log.Fatal("Error writing file %s: %s", jamFileName, err)
 	}
 
 	err = json.Unmarshal(data, &jam.users)
 
 	if err != nil {
-		jamLog.Fatal("Corrupted or invalid JSON at %s: %s", jamFileName, err)
+		jam.log.Fatal("Corrupted or invalid JSON at %s: %s", jamFileName, err)
 	}
 
-	jamLog.Info("Loaded %d users from %s", len(jam.users), jamFileName)
+	jam.log.Info("Loaded %d users from %s", len(jam.users), jamFileName)
 
 	if len(jam.users) == 0 {
 		jam.addDefaultAdmin()
@@ -68,16 +73,16 @@ func (jam *JSONAuthManager) addDefaultAdmin() {
 	err := jam.LoginAdd("admin", "admin", "Administrator", remote_signer.AgentKeyFingerPrint)
 
 	if err != nil {
-		jamLog.Fatal("Error adding default admin: %v", err)
+		jam.log.Fatal("Error adding default admin: %v", err)
 	}
 }
 
 func (jam *JSONAuthManager) flushFile() {
-	jamLog.Warn("Saving credentials to %s", jamFileName)
+	jam.log.Warn("Saving credentials to %s", jamFileName)
 	data, _ := json.Marshal(jam.users)
 	err := ioutil.WriteFile(jamFileName, data, jamFilePerm)
 	if err != nil {
-		jamLog.Error("Error saving credentials: %s", err)
+		jam.log.Error("Error saving credentials: %s", err)
 	}
 }
 
@@ -102,7 +107,7 @@ func (jam *JSONAuthManager) LoginAuth(username, password string) (fingerPrint, f
 
 	hash, err := base64.StdEncoding.DecodeString(user.Password)
 	if err != nil {
-		jamLog.Error("Error decoding hash: %v", err)
+		jam.log.Error("Error decoding hash: %v", err)
 		return "", "", fmt.Errorf("invalid username or password")
 	}
 

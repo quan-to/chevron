@@ -11,13 +11,14 @@ import (
 )
 
 func GenRemoteSignerServerMux(slog slog.Instance, sm etc.SMInterface, gpg etc.PGPInterface) *mux.Router {
+	log := slog.Scope("MUX")
 	ge := MakeGPGEndpoint(sm, gpg)
 	ie := MakeInternalEndpoint(sm, gpg)
 	te := MakeTestsEndpoint()
 	kre := MakeKeyRingEndpoint(sm, gpg)
 	sks := MakeSKSEndpoint(sm, gpg)
-	tm := agent.MakeTokenManager()
-	am := agent.MakeAuthManager()
+	tm := agent.MakeTokenManager(log)
+	am := agent.MakeAuthManager(log)
 	ap := MakeAgentProxy(gpg, tm)
 	sGql := MakeStaticGraphiQL()
 	agentAdmin := MakeAgentAdmin(tm, am)

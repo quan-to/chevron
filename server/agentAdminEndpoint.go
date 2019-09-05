@@ -14,15 +14,20 @@ import (
 	"net/http"
 )
 
-var amLog = slog.Scope("AgentAdmin")
-
 type AgentAdmin struct {
 	tm      etc.TokenManager
 	handler *handler.Handler
 	ctx     context.Context
+	log     slog.Instance
 }
 
-func MakeAgentAdmin(tm etc.TokenManager, am etc.AuthManager) *AgentAdmin {
+func MakeAgentAdmin(log slog.Instance, tm etc.TokenManager, am etc.AuthManager) *AgentAdmin {
+	if log == nil {
+		log = slog.Scope("AgentAdmin")
+	} else {
+		log = log.SubScope("AgentAdmin")
+	}
+
 	schemaConfig := graphql.SchemaConfig{
 		Query:    agent.RootManagementQuery,
 		Mutation: agent.RootManagementMutation,
@@ -30,7 +35,7 @@ func MakeAgentAdmin(tm etc.TokenManager, am etc.AuthManager) *AgentAdmin {
 	schema, err := graphql.NewSchema(schemaConfig)
 
 	if err != nil {
-		amLog.Fatal(err)
+		log.Fatal(err)
 	}
 
 	h := handler.New(&handler.Config{
@@ -40,15 +45,15 @@ func MakeAgentAdmin(tm etc.TokenManager, am etc.AuthManager) *AgentAdmin {
 		FormatErrorFn: func(err error) gqlerrors.FormattedError {
 			switch err := err.(type) {
 			case *gqlerrors.Error:
-				amLog.Error("%+v", err.OriginalError)
+				log.Error("%+v", err.OriginalError)
 				return gqlerrors.FormatError(err)
 			case gqlerrors.ExtendedError:
-				amLog.Error("%+v", err.Error())
+				log.Error("%+v", err.Error())
 				return gqlerrors.FormatError(err)
 			case *QuantoError.ErrorObject:
 				return err.ToFormattedError()
 			default:
-				amLog.Error("%+v", err.Error())
+				log.Error("%+v", err.Error())
 				return gqlerrors.FormatError(err)
 			}
 		},
@@ -61,6 +66,7 @@ func MakeAgentAdmin(tm etc.TokenManager, am etc.AuthManager) *AgentAdmin {
 			agent.TokenManagerKey: tm,
 			agent.AuthManagerKey:  am,
 		}),
+		log: log,
 	}
 }
 
@@ -87,10 +93,11 @@ func (gi *graphIntercept) WriteHeader(statusCode int) {
 
 func (admin *AgentAdmin) handleGraphQL(w http.ResponseWriter, r *http.Request) {
 	InitHTTPTimer(r)
+	log := wrapLogWithRequestId(admin.log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, amLog)
+			CatchAllError(rec, w, r, log)
 		}
 	}()
 
@@ -102,7 +109,7 @@ func (admin *AgentAdmin) handleGraphQL(w http.ResponseWriter, r *http.Request) {
 	if token != "" {
 		err := admin.tm.Verify(token)
 		if err != nil {
-			InvalidFieldData("proxyToken", "The specified proxyToken is either invalid or expired.", w, r, amLog)
+			InvalidFieldData("proxyToken", "The specified proxyToken is either invalid or expired.", w, r, log)
 			return
 		}
 
@@ -110,7 +117,7 @@ func (admin *AgentAdmin) handleGraphQL(w http.ResponseWriter, r *http.Request) {
 		ctx = context.WithValue(ctx, agent.LoggedUserKey, user)
 	}
 	admin.handler.ContextHandler(ctx, &gi, r)
-	LogExit(amLog, r, gi.StatusCode, gi.WrittenBytes)
+	LogExit(log, r, gi.StatusCode, gi.WrittenBytes)
 }
 
 func (admin *AgentAdmin) AddHandlers(r *mux.Router) {
