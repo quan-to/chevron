@@ -19,7 +19,7 @@ var log = slog.Scope("Vault")
 type VaultManager struct {
 	client *api.Client
 	prefix string
-	log    *slog.Instance
+	log    slog.Instance
 }
 
 func MakeVaultManager(prefix string) *VaultManager {

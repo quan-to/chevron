@@ -26,13 +26,13 @@ require (
 	github.com/hashicorp/vault v1.1.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/kr/pty v1.1.4 // indirect
-	github.com/logrusorgru/aurora v0.0.0-20181002194514-a7b3b318ed4e
+	github.com/logrusorgru/aurora v0.0.0-20190803045625-94edacc10f9b
 	github.com/mewkiz/pkg v0.0.0-20190317153131-e8616647c365
 	github.com/mitchellh/mapstructure v1.1.2 // indirect
 	github.com/opentracing/opentracing-go v1.1.0 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/pkg/errors v0.8.1
-	github.com/quan-to/slog v0.0.0-20190317205605-56a2b4159924
+	github.com/quan-to/slog v0.0.0-20190905193433-8124876c3f10
 	github.com/ryanuber/go-glob v1.0.0 // indirect
 	github.com/sam-kamerer/go-plister v1.1.2 // indirect
 	github.com/sirupsen/logrus v1.4.1 // indirect

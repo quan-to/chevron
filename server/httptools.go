@@ -19,7 +19,7 @@ const httpInternalTimestamp = "___HTTP_INTERNAL_TIMESTAMP___"
 
 var httpToolsLog = slog.Scope("HTTP Tools")
 
-func WriteJSON(data interface{}, statusCode int, w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
+func WriteJSON(data interface{}, statusCode int, w http.ResponseWriter, r *http.Request, logI slog.Instance) {
 
 	if logI == nil {
 		logI = httpToolsLog
@@ -42,7 +42,7 @@ func WriteJSON(data interface{}, statusCode int, w http.ResponseWriter, r *http.
 	LogExit(logI, r, statusCode, n)
 }
 
-func UnmarshalBodyOrDie(outData interface{}, w http.ResponseWriter, r *http.Request, logI *slog.Instance) bool {
+func UnmarshalBodyOrDie(outData interface{}, w http.ResponseWriter, r *http.Request, logI slog.Instance) bool {
 	body, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
@@ -64,35 +64,35 @@ func UnmarshalBodyOrDie(outData interface{}, w http.ResponseWriter, r *http.Requ
 	return true
 }
 
-func InvalidFieldData(field string, message string, w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
+func InvalidFieldData(field string, message string, w http.ResponseWriter, r *http.Request, logI slog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.InvalidFieldData, field, message, nil), 400, w, r, logI)
 }
 
-func PermissionDenied(field string, message string, w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
+func PermissionDenied(field string, message string, w http.ResponseWriter, r *http.Request, logI slog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.PermissionDenied, field, message, nil), 400, w, r, logI)
 }
 
-func NotFound(field string, message string, w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
+func NotFound(field string, message string, w http.ResponseWriter, r *http.Request, logI slog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.NotFound, field, message, nil), 400, w, r, logI)
 }
 
-func NotImplemented(w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
+func NotImplemented(w http.ResponseWriter, r *http.Request, logI slog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.NotImplemented, "server", "This call is not implemented", nil), 400, w, r, logI)
 }
 
-func CatchAllError(data interface{}, w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
+func CatchAllError(data interface{}, w http.ResponseWriter, r *http.Request, logI slog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.InternalServerError, "server", "There was an internal server error.", data), 500, w, r, logI)
 }
 
-func CatchAllRouter(w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
+func CatchAllRouter(w http.ResponseWriter, r *http.Request, logI slog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.NotFound, "path", "The specified URL does not exists.", nil), 404, w, r, logI)
 }
 
-func InternalServerError(message string, data interface{}, w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
+func InternalServerError(message string, data interface{}, w http.ResponseWriter, r *http.Request, logI slog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.InternalServerError, "server", message, data), 500, w, r, logI)
 }
 
-func LogExit(slog *slog.Instance, r *http.Request, statusCode int, bodyLength int) {
+func LogExit(slog slog.Instance, r *http.Request, statusCode int, bodyLength int) {
 	method := aurora.Bold(r.Method).Cyan()
 	hts := r.Header.Get(httpInternalTimestamp)
 	ts := float64(0)
@@ -115,17 +115,17 @@ func LogExit(slog *slog.Instance, r *http.Request, statusCode int, bodyLength in
 	case 200:
 		statusCodeStr = aurora.Green(statusCodeStr).Inverse().Bold()
 	default:
-		statusCodeStr = aurora.Gray(statusCodeStr).Bold()
+		statusCodeStr = aurora.Gray(7, statusCodeStr).Bold()
 	}
 
 	host, _, _ := net.SplitHostPort(r.RemoteAddr)
 
-	remote := aurora.Gray(host)
+	remote := aurora.Gray(7, host)
 
 	if ts != 0 {
-		slog.LogNoFormat("%s (%8.2f ms) {%8d bytes} %-4s %s from %s", statusCodeStr, ts, bodyLength, method, aurora.Gray(r.URL.Path), remote)
+		slog.LogNoFormat("%s (%8.2f ms) {%8d bytes} %-4s %s from %s", statusCodeStr, ts, bodyLength, method, aurora.Gray(7, r.URL.Path), remote)
 	} else {
-		slog.LogNoFormat("%s {%8d bytes}          %-4s %s from %s", statusCodeStr, bodyLength, method, aurora.Gray(r.URL.Path), remote)
+		slog.LogNoFormat("%s {%8d bytes}          %-4s %s from %s", statusCodeStr, bodyLength, method, aurora.Gray(7, r.URL.Path), remote)
 	}
 }
 

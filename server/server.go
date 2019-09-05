@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-func GenRemoteSignerServerMux(slog *slog.Instance, sm etc.SMInterface, gpg etc.PGPInterface) *mux.Router {
+func GenRemoteSignerServerMux(slog slog.Instance, sm etc.SMInterface, gpg etc.PGPInterface) *mux.Router {
 	ge := MakeGPGEndpoint(sm, gpg)
 	ie := MakeInternalEndpoint(sm, gpg)
 	te := MakeTestsEndpoint()
@@ -74,7 +74,7 @@ func GenRemoteSignerServerMux(slog *slog.Instance, sm etc.SMInterface, gpg etc.P
 	return r
 }
 
-func RunRemoteSignerServer(slog *slog.Instance, sm etc.SMInterface, gpg etc.PGPInterface) chan bool {
+func RunRemoteSignerServer(slog slog.Instance, sm etc.SMInterface, gpg etc.PGPInterface) chan bool {
 
 	r := GenRemoteSignerServerMux(slog, sm, gpg)
 
