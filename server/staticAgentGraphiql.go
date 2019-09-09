@@ -10,20 +10,29 @@ import (
 	"strings"
 )
 
-var sgLog = slog.Scope("GraphiQL")
+type StaticGraphiQL struct {
+	log slog.Instance
+}
 
-type StaticGraphiQL struct{}
+func MakeStaticGraphiQL(log slog.Instance) *StaticGraphiQL {
+	if log == nil {
+		log = slog.Scope("GraphiQL")
+	} else {
+		log = log.SubScope("GraphiQL")
+	}
 
-func MakeStaticGraphiQL() *StaticGraphiQL {
-	return &StaticGraphiQL{}
+	return &StaticGraphiQL{
+		log: log,
+	}
 }
 
 func (gql *StaticGraphiQL) displayFile(filename string, w http.ResponseWriter, r *http.Request) {
 	InitHTTPTimer(r)
+	log := wrapLogWithRequestId(gql.log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, sgLog)
+			CatchAllError(rec, w, r, log)
 		}
 	}()
 
@@ -39,13 +48,13 @@ func (gql *StaticGraphiQL) displayFile(filename string, w http.ResponseWriter, r
 	}
 
 	if err != nil {
-		InternalServerError("There was an internal server error. Please try again", nil, w, r, sksLog)
+		InternalServerError("There was an internal server error. Please try again", nil, w, r, log)
 		return
 	}
 
 	w.WriteHeader(200)
 	n, _ := w.Write([]byte(fileData))
-	LogExit(sgLog, r, 200, n)
+	LogExit(log, r, 200, n)
 }
 
 func (gql *StaticGraphiQL) AttachHandlers(r *mux.Router) {
@@ -53,13 +62,13 @@ func (gql *StaticGraphiQL) AttachHandlers(r *mux.Router) {
 
 	for _, v := range files {
 		filePath := path.Join("/", v)
-		sgLog.Debug("Attaching %s", filePath)
+		gql.log.Debug("Attaching %s", filePath)
 		r.HandleFunc(filePath, func(w http.ResponseWriter, r *http.Request) {
 			gql.displayFile(filePath, w, r)
 		})
 	}
 
-	sgLog.Debug("Attaching /")
+	gql.log.Debug("Attaching /")
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		gql.displayFile("/index.html", w, r)
 	})

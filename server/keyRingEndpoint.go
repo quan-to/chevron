@@ -12,17 +12,23 @@ import (
 	"net/http"
 )
 
-var kreLog = slog.Scope("KeyRing Endpoint")
-
 type KeyRingEndpoint struct {
 	sm  etc.SMInterface
 	gpg etc.PGPInterface
+	log slog.Instance
 }
 
-func MakeKeyRingEndpoint(sm etc.SMInterface, gpg etc.PGPInterface) *KeyRingEndpoint {
+func MakeKeyRingEndpoint(log slog.Instance, sm etc.SMInterface, gpg etc.PGPInterface) *KeyRingEndpoint {
+	if log == nil {
+		log = slog.Scope("KeyRing")
+	} else {
+		log = log.SubScope("KeyRing")
+	}
+
 	return &KeyRingEndpoint{
 		sm:  sm,
 		gpg: gpg,
+		log: log,
 	}
 }
 
@@ -35,10 +41,11 @@ func (kre *KeyRingEndpoint) AttachHandlers(r *mux.Router) {
 
 func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 	InitHTTPTimer(r)
+	log := wrapLogWithRequestId(kre.log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, kreLog)
+			CatchAllError(rec, w, r, log)
 		}
 	}()
 
@@ -49,22 +56,23 @@ func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 	key, _ := kre.gpg.GetPublicKeyAscii(fingerPrint)
 
 	if key == "" {
-		NotFound("fingerPrint", fmt.Sprintf("Key with fingerPrint %s was not found", fingerPrint), w, r, kreLog)
+		NotFound("fingerPrint", fmt.Sprintf("Key with fingerPrint %s was not found", fingerPrint), w, r, log)
 		return
 	}
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
 	n, _ := w.Write([]byte(key))
-	LogExit(kreLog, r, 200, n)
+	LogExit(log, r, 200, n)
 }
 
 func (kre *KeyRingEndpoint) getCachedKeys(w http.ResponseWriter, r *http.Request) {
 	InitHTTPTimer(r)
+	log := wrapLogWithRequestId(kre.log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, kreLog)
+			CatchAllError(rec, w, r, log)
 		}
 	}()
 
@@ -73,23 +81,24 @@ func (kre *KeyRingEndpoint) getCachedKeys(w http.ResponseWriter, r *http.Request
 	bodyData, err := json.Marshal(cachedKeys)
 
 	if err != nil {
-		kreLog.Error("Error getting cached keys: %s", err)
-		InternalServerError("There was an error processing your request. Please try again.", nil, w, r, kreLog)
+		log.Error("Error getting cached keys: %s", err)
+		InternalServerError("There was an error processing your request. Please try again.", nil, w, r, log)
 		return
 	}
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
 	n, _ := w.Write(bodyData)
-	LogExit(kreLog, r, 200, n)
+	LogExit(log, r, 200, n)
 }
 
 func (kre *KeyRingEndpoint) getLoadedPrivateKeys(w http.ResponseWriter, r *http.Request) {
 	InitHTTPTimer(r)
+	log := wrapLogWithRequestId(kre.log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, kreLog)
+			CatchAllError(rec, w, r, log)
 		}
 	}()
 
@@ -98,41 +107,42 @@ func (kre *KeyRingEndpoint) getLoadedPrivateKeys(w http.ResponseWriter, r *http.
 	bodyData, err := json.Marshal(privateKeys)
 
 	if err != nil {
-		InternalServerError("There was an error processing your request. Please try again.", nil, w, r, kreLog)
+		InternalServerError("There was an error processing your request. Please try again.", nil, w, r, log)
 		return
 	}
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
 	n, _ := w.Write(bodyData)
-	LogExit(kreLog, r, 200, n)
+	LogExit(log, r, 200, n)
 }
 
 func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request) {
 	var data models.KeyRingAddPrivateKeyData
 	InitHTTPTimer(r)
+	log := wrapLogWithRequestId(kre.log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, kreLog)
+			CatchAllError(rec, w, r, log)
 		}
 	}()
 
-	if !UnmarshalBodyOrDie(&data, w, r, kreLog) {
+	if !UnmarshalBodyOrDie(&data, w, r, log) {
 		return
 	}
 
 	fp, err := remote_signer.GetFingerPrintFromKey(data.EncryptedPrivateKey)
 
 	if err != nil {
-		InvalidFieldData("EncryptedPrivateKey", "Invalid key provided. Check if its in ASCII Armored Format. Cannot read fingerprint", w, r, kreLog)
+		InvalidFieldData("EncryptedPrivateKey", "Invalid key provided. Check if its in ASCII Armored Format. Cannot read fingerprint", w, r, log)
 		return
 	}
 
 	_, n := kre.gpg.LoadKey(data.EncryptedPrivateKey) // Error never happens here due GetFingerPrintFromKey
 
 	if n == 0 {
-		NotFound("EncryptedPrivateKey", "No private keys found at specified payload", w, r, kreLog)
+		NotFound("EncryptedPrivateKey", "No private keys found at specified payload", w, r, log)
 		return
 	}
 
@@ -142,22 +152,22 @@ func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request
 		pass := data.Password.(string)
 		err := kre.gpg.UnlockKey(fp, pass)
 		if err != nil {
-			InvalidFieldData("Password", "Invalid password for the key provided", w, r, kreLog)
+			InvalidFieldData("Password", "Invalid password for the key provided", w, r, log)
 			return
 		}
 	}
 
 	pubKey, _ := kre.gpg.GetPublicKeyAscii(fp)
 
-	kreLog.Info("Adding public key for %s on PKS", fp)
+	log.Info("Adding public key for %s on PKS", fp)
 	res := keymagic.PKSAdd(pubKey)
-	kreLog.Info("PKS Add Key: %s", res)
+	log.Info("PKS Add Key: %s", res)
 
 	if data.SaveToDisk {
 		err = kre.gpg.SaveKey(fingerPrint, data.EncryptedPrivateKey, data.Password)
 		if err != nil {
-			kreLog.Error("Error saving key: %s", err)
-			InternalServerError("There was an error saving your key to disk.", data, w, r, kreLog)
+			log.Error("Error saving key: %s", err)
+			InternalServerError("There was an error saving your key to disk.", data, w, r, log)
 			return
 		}
 	}
@@ -172,5 +182,5 @@ func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
 	n, _ = w.Write(d)
-	LogExit(kreLog, r, 200, n)
+	LogExit(log, r, 200, n)
 }

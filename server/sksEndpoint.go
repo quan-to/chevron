@@ -12,17 +12,23 @@ import (
 	"strconv"
 )
 
-var sksLog = slog.Scope("SKS Endpoint")
-
 type SKSEndpoint struct {
 	sm  etc.SMInterface
 	gpg etc.PGPInterface
+	log slog.Instance
 }
 
-func MakeSKSEndpoint(sm etc.SMInterface, gpg etc.PGPInterface) *SKSEndpoint {
+func MakeSKSEndpoint(log slog.Instance, sm etc.SMInterface, gpg etc.PGPInterface) *SKSEndpoint {
+	if log == nil {
+		log = slog.Scope("SKS")
+	} else {
+		log = log.SubScope("SKS")
+	}
+
 	return &SKSEndpoint{
 		sm:  sm,
 		gpg: gpg,
+		log: log,
 	}
 }
 
@@ -37,10 +43,11 @@ func (sks *SKSEndpoint) AttachHandlers(r *mux.Router) {
 
 func (sks *SKSEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 	InitHTTPTimer(r)
+	log := wrapLogWithRequestId(sks.log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, sksLog)
+			CatchAllError(rec, w, r, log)
 		}
 	}()
 
@@ -50,22 +57,23 @@ func (sks *SKSEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 	key, _ := sks.gpg.GetPublicKeyAscii(fingerPrint)
 
 	if key == "" {
-		NotFound("fingerPrint", fmt.Sprintf("Key with fingerPrint %s was not found", fingerPrint), w, r, sksLog)
+		NotFound("fingerPrint", fmt.Sprintf("Key with fingerPrint %s was not found", fingerPrint), w, r, log)
 		return
 	}
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
 	n, _ := w.Write([]byte(key))
-	LogExit(sksLog, r, 200, n)
+	LogExit(log, r, 200, n)
 }
 
 func (sks *SKSEndpoint) searchByName(w http.ResponseWriter, r *http.Request) {
 	InitHTTPTimer(r)
+	log := wrapLogWithRequestId(sks.log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, sksLog)
+			CatchAllError(rec, w, r, log)
 		}
 	}()
 
@@ -75,7 +83,7 @@ func (sks *SKSEndpoint) searchByName(w http.ResponseWriter, r *http.Request) {
 	pageEndS := q.Get("pageEnd")
 
 	if name == "" {
-		InvalidFieldData("name", "you should provide a name", w, r, sksLog)
+		InvalidFieldData("name", "you should provide a name", w, r, log)
 		return
 	}
 
@@ -92,29 +100,30 @@ func (sks *SKSEndpoint) searchByName(w http.ResponseWriter, r *http.Request) {
 	gpgKeys, err := keymagic.PKSSearchByName(name, int(pageStart), int(pageEnd))
 
 	if err != nil {
-		NotFound("name", err.Error(), w, r, sksLog)
+		NotFound("name", err.Error(), w, r, log)
 		return
 	}
 
 	bodyData, err := json.Marshal(gpgKeys)
 
 	if err != nil {
-		InternalServerError("There was an internal server error. Please try again", nil, w, r, sksLog)
+		InternalServerError("There was an internal server error. Please try again", nil, w, r, log)
 		return
 	}
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
 	n, _ := w.Write(bodyData)
-	LogExit(sksLog, r, 200, n)
+	LogExit(log, r, 200, n)
 }
 
 func (sks *SKSEndpoint) searchByFingerPrint(w http.ResponseWriter, r *http.Request) {
 	InitHTTPTimer(r)
+	log := wrapLogWithRequestId(sks.log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, sksLog)
+			CatchAllError(rec, w, r, log)
 		}
 	}()
 
@@ -124,7 +133,7 @@ func (sks *SKSEndpoint) searchByFingerPrint(w http.ResponseWriter, r *http.Reque
 	pageEndS := q.Get("pageEnd")
 
 	if fingerPrint == "" {
-		InvalidFieldData("fingerPrint", "you should provide a fingerPrint", w, r, sksLog)
+		InvalidFieldData("fingerPrint", "you should provide a fingerPrint", w, r, log)
 		return
 	}
 
@@ -141,29 +150,30 @@ func (sks *SKSEndpoint) searchByFingerPrint(w http.ResponseWriter, r *http.Reque
 	gpgKeys, err := keymagic.PKSSearchByFingerPrint(fingerPrint, int(pageStart), int(pageEnd))
 
 	if err != nil {
-		NotFound("fingerPrint", err.Error(), w, r, sksLog)
+		NotFound("fingerPrint", err.Error(), w, r, log)
 		return
 	}
 
 	bodyData, err := json.Marshal(gpgKeys)
 
 	if err != nil {
-		InternalServerError("There was an internal server error. Please try again", nil, w, r, sksLog)
+		InternalServerError("There was an internal server error. Please try again", nil, w, r, log)
 		return
 	}
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
 	n, _ := w.Write(bodyData)
-	LogExit(sksLog, r, 200, n)
+	LogExit(log, r, 200, n)
 }
 
 func (sks *SKSEndpoint) searchByEmail(w http.ResponseWriter, r *http.Request) {
 	InitHTTPTimer(r)
+	log := wrapLogWithRequestId(sks.log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, sksLog)
+			CatchAllError(rec, w, r, log)
 		}
 	}()
 
@@ -173,7 +183,7 @@ func (sks *SKSEndpoint) searchByEmail(w http.ResponseWriter, r *http.Request) {
 	pageEndS := q.Get("pageEnd")
 
 	if email == "" {
-		InvalidFieldData("email", "you should provide a email", w, r, sksLog)
+		InvalidFieldData("email", "you should provide a email", w, r, log)
 		return
 	}
 
@@ -190,29 +200,30 @@ func (sks *SKSEndpoint) searchByEmail(w http.ResponseWriter, r *http.Request) {
 	gpgKeys, err := keymagic.PKSSearchByEmail(email, int(pageStart), int(pageEnd))
 
 	if err != nil {
-		NotFound("email", err.Error(), w, r, sksLog)
+		NotFound("email", err.Error(), w, r, log)
 		return
 	}
 
 	bodyData, err := json.Marshal(gpgKeys)
 
 	if err != nil {
-		InternalServerError("There was an internal server error. Please try again", nil, w, r, sksLog)
+		InternalServerError("There was an internal server error. Please try again", nil, w, r, log)
 		return
 	}
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
 	n, _ := w.Write(bodyData)
-	LogExit(sksLog, r, 200, n)
+	LogExit(log, r, 200, n)
 }
 
 func (sks *SKSEndpoint) search(w http.ResponseWriter, r *http.Request) {
 	InitHTTPTimer(r)
+	log := wrapLogWithRequestId(sks.log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, sksLog)
+			CatchAllError(rec, w, r, log)
 		}
 	}()
 
@@ -222,7 +233,7 @@ func (sks *SKSEndpoint) search(w http.ResponseWriter, r *http.Request) {
 	pageEndS := q.Get("pageEnd")
 
 	if valueData == "" {
-		InvalidFieldData("email", "you should provide a valueData", w, r, sksLog)
+		InvalidFieldData("email", "you should provide a valueData", w, r, log)
 		return
 	}
 
@@ -239,47 +250,48 @@ func (sks *SKSEndpoint) search(w http.ResponseWriter, r *http.Request) {
 	gpgKeys, err := keymagic.PKSSearch(valueData, int(pageStart), int(pageEnd))
 
 	if err != nil {
-		NotFound("valueData", err.Error(), w, r, sksLog)
+		NotFound("valueData", err.Error(), w, r, log)
 		return
 	}
 
 	bodyData, err := json.Marshal(gpgKeys)
 
 	if err != nil {
-		InternalServerError("There was an internal server error. Please try again", nil, w, r, sksLog)
+		InternalServerError("There was an internal server error. Please try again", nil, w, r, log)
 		return
 	}
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
 	n, _ := w.Write(bodyData)
-	LogExit(sksLog, r, 200, n)
+	LogExit(log, r, 200, n)
 }
 
 func (sks *SKSEndpoint) addKey(w http.ResponseWriter, r *http.Request) {
 	InitHTTPTimer(r)
+	log := wrapLogWithRequestId(sks.log, r)
 
 	var data models.SKSAddKey
 
-	if !UnmarshalBodyOrDie(&data, w, r, sksLog) {
+	if !UnmarshalBodyOrDie(&data, w, r, log) {
 		return
 	}
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, sksLog)
+			CatchAllError(rec, w, r, log)
 		}
 	}()
 
 	status := keymagic.PKSAdd(data.PublicKey)
 
 	if status != "OK" {
-		InvalidFieldData("PublicKey", "Invalid Public Key specified. Check if its in ASCII Armored Format", w, r, sksLog)
+		InvalidFieldData("PublicKey", "Invalid Public Key specified. Check if its in ASCII Armored Format", w, r, log)
 		return
 	}
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
 	n, _ := w.Write([]byte("OK"))
-	LogExit(sksLog, r, 200, n)
+	LogExit(log, r, 200, n)
 }

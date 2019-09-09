@@ -46,7 +46,7 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, intLog)
+			CatchAllError(rec, w, r, log)
 		}
 	}()
 

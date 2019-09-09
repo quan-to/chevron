@@ -2,7 +2,7 @@ package server
 
 import (
 	"github.com/gorilla/mux"
-	remote_signer "github.com/quan-to/chevron"
+	"github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/database"
 	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/chevron/vaultManager"
@@ -11,12 +11,20 @@ import (
 	"net/http"
 )
 
-var teLog = slog.Scope("Test Endpoint")
+type TestsEndpoint struct {
+	log slog.Instance
+}
 
-type TestsEndpoint struct{}
+func MakeTestsEndpoint(log slog.Instance) *TestsEndpoint {
+	if log == nil {
+		log = slog.Scope("Tests")
+	} else {
+		log = log.SubScope("Tests")
+	}
 
-func MakeTestsEndpoint() *TestsEndpoint {
-	return &TestsEndpoint{}
+	return &TestsEndpoint{
+		log: log,
+	}
 }
 
 func (ge *TestsEndpoint) AttachHandlers(r *mux.Router) {
@@ -31,7 +39,7 @@ func (ge *TestsEndpoint) checkExternal() bool {
 
 		_, err := r.Expr(1).Run(conn)
 		if err != nil {
-			teLog.Error(err)
+			ge.log.Error(err)
 			isHealthy = false
 		}
 	}
@@ -41,12 +49,12 @@ func (ge *TestsEndpoint) checkExternal() bool {
 		health, err := vm.HealthStatus()
 
 		if err != nil {
-			teLog.Error(err)
+			ge.log.Error(err)
 			isHealthy = false
 		}
 
 		if !health.Initialized || health.Sealed {
-			teLog.Info("Vault initialized? %t, is sealed? %t", health.Initialized, health.Sealed)
+			ge.log.Info("Vault initialized? %t, is sealed? %t", health.Initialized, health.Sealed)
 			isHealthy = false
 		}
 	}
