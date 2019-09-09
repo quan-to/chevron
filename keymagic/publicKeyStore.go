@@ -11,6 +11,7 @@ import (
 var pksLog = slog.Scope("PKS")
 
 func PKSGetKey(fingerPrint string) (string, error) {
+	pksLog.Operation(slog.NOTE).Debug("PKSGetKey(%s)", fingerPrint)
 	if !remote_signer.EnableRethinkSKS {
 		return GetSKSKey(fingerPrint)
 	}
@@ -26,6 +27,7 @@ func PKSGetKey(fingerPrint string) (string, error) {
 }
 
 func PKSSearchByName(name string, pageStart, pageEnd int) ([]models.GPGKey, error) {
+	pksLog.Operation(slog.NOTE).Debug("PKSSearchByName(%s, %d, %d)", name, pageStart, pageEnd)
 	if remote_signer.EnableRethinkSKS {
 		conn := database.GetConnection()
 		return models.SearchGPGKeyByName(conn, name, pageStart, pageEnd)
@@ -34,6 +36,7 @@ func PKSSearchByName(name string, pageStart, pageEnd int) ([]models.GPGKey, erro
 }
 
 func PKSSearchByFingerPrint(fingerPrint string, pageStart, pageEnd int) ([]models.GPGKey, error) {
+	pksLog.Operation(slog.NOTE).Debug("PKSSearchByFingerPrint(%s, %d, %d)", fingerPrint, pageStart, pageEnd)
 	if remote_signer.EnableRethinkSKS {
 		conn := database.GetConnection()
 		return models.SearchGPGKeyByFingerPrint(conn, fingerPrint, pageStart, pageEnd)
@@ -42,6 +45,7 @@ func PKSSearchByFingerPrint(fingerPrint string, pageStart, pageEnd int) ([]model
 }
 
 func PKSSearchByEmail(email string, pageStart, pageEnd int) ([]models.GPGKey, error) {
+	pksLog.Operation(slog.NOTE).Debug("PKSSearchByEmail(%s, %d, %d)", email, pageStart, pageEnd)
 	if remote_signer.EnableRethinkSKS {
 		conn := database.GetConnection()
 		return models.SearchGPGKeyByEmail(conn, email, pageStart, pageEnd)
@@ -50,6 +54,7 @@ func PKSSearchByEmail(email string, pageStart, pageEnd int) ([]models.GPGKey, er
 }
 
 func PKSSearch(value string, pageStart, pageEnd int) ([]models.GPGKey, error) {
+	pksLog.Operation(slog.NOTE).Debug("PKSSearch(%s, %d, %d)", value, pageStart, pageEnd)
 	if remote_signer.EnableRethinkSKS {
 		conn := database.GetConnection()
 		return models.SearchGPGKeyByValue(conn, value, pageStart, pageEnd)
@@ -58,6 +63,7 @@ func PKSSearch(value string, pageStart, pageEnd int) ([]models.GPGKey, error) {
 }
 
 func PKSAdd(pubKey string) string {
+	pksLog.Operation(slog.NOTE).Debug("PKSAdd(---)")
 	if remote_signer.EnableRethinkSKS {
 		conn := database.GetConnection()
 		key, err := models.AsciiArmored2GPGKey(pubKey)

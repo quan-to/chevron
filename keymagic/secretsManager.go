@@ -121,6 +121,7 @@ func MakeSecretsManager(log slog.Instance) *SecretsManager {
 }
 
 func (sm *SecretsManager) PutKeyPassword(fingerPrint, password string) {
+	pksLog.Operation(slog.NOTE).Debug("PutKeyPassword(%s, ---)", fingerPrint)
 	if sm.amIUseless {
 		sm.log.Warn("Not saving password. Master Key not loaded")
 		return
@@ -144,6 +145,7 @@ func (sm *SecretsManager) PutKeyPassword(fingerPrint, password string) {
 }
 
 func (sm *SecretsManager) PutEncryptedPassword(fingerPrint, encryptedPassword string) {
+	pksLog.Operation(slog.NOTE).Debug("PutEncryptedPassword(%s, ---)", fingerPrint)
 	if sm.amIUseless {
 		sm.log.Warn("Not saving password. Master Key not loaded")
 	}
@@ -155,6 +157,7 @@ func (sm *SecretsManager) PutEncryptedPassword(fingerPrint, encryptedPassword st
 }
 
 func (sm *SecretsManager) GetPasswords() map[string]string {
+	pksLog.Operation(slog.NOTE).Debug("GetPasswords()")
 	pss := make(map[string]string) // Force copy
 
 	for fp, pass := range sm.encryptedPasswords {
@@ -165,6 +168,7 @@ func (sm *SecretsManager) GetPasswords() map[string]string {
 }
 
 func (sm *SecretsManager) UnlockLocalKeys(gpg etc.PGPInterface) {
+	pksLog.Operation(slog.NOTE).Debug("UnlockLocalKeys(---)")
 	if sm.amIUseless {
 		sm.log.Warn("Not saving password. Master Key not loaded")
 	}
@@ -201,5 +205,6 @@ func (sm *SecretsManager) UnlockLocalKeys(gpg etc.PGPInterface) {
 }
 
 func (sm *SecretsManager) GetMasterKeyFingerPrint() string {
+	pksLog.Operation(slog.NOTE).Debug("GetMasterKeyFingerPrint()")
 	return sm.masterKeyFingerPrint
 }
