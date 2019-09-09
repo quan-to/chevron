@@ -97,6 +97,8 @@ github.com/quan-to/slog v0.0.0-20190317205605-56a2b4159924 h1:LRAAFmYMlaelEo4YLL
 github.com/quan-to/slog v0.0.0-20190317205605-56a2b4159924/go.mod h1:xc9X6JvWjqAAIox9u4uuolisjwl/GbfkktH6f+nOgqU=
 github.com/quan-to/slog v0.0.0-20190905193433-8124876c3f10 h1:CIpo6c3/oBwJrtrOUTBmQD+1d8pnF8WJZRRnfKsME00=
 github.com/quan-to/slog v0.0.0-20190905193433-8124876c3f10/go.mod h1:wOsMU2OzOaJwUZQwbcZ5EjpkLuFq0GOdUSs10kRk1Qs=
+github.com/quan-to/slog v0.0.0-20190909180121-5c065d253670 h1:NwEO4+lK8hattTBNcGsdQd8bBzLkNZclBxiKzCUd/Dk=
+github.com/quan-to/slog v0.0.0-20190909180121-5c065d253670/go.mod h1:wOsMU2OzOaJwUZQwbcZ5EjpkLuFq0GOdUSs10kRk1Qs=
 github.com/ryanuber/columnize v2.1.0+incompatible/go.mod h1:sm1tb6uqfes/u+d4ooFouqFdy9/2g9QGwK3SQygK0Ts=
 github.com/ryanuber/go-glob v1.0.0 h1:iQh3xXAumdQ+4Ufa5b25cRpC5TYKlno6hsv6Cb3pkBk=
 github.com/ryanuber/go-glob v1.0.0/go.mod h1:807d1WSdnB0XRJzKNil9Om6lcp/3a0v4qIHxIXzX/Yc=

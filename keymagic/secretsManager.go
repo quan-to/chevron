@@ -16,34 +16,40 @@ import (
 	"sync"
 )
 
-var smLog = slog.Scope("SecretsManager")
-
 type SecretsManager struct {
 	sync.Mutex
 	encryptedPasswords   map[string]string
 	gpg                  etc.PGPInterface
 	masterKeyFingerPrint string
 	amIUseless           bool
+	log                  slog.Instance
 }
 
-func MakeSecretsManager() *SecretsManager {
+func MakeSecretsManager(log slog.Instance) *SecretsManager {
+	if log == nil {
+		log = slog.Scope("SM")
+	} else {
+		log = log.SubScope("SM")
+	}
+
 	var kb keyBackend.Backend
 
 	if remote_signer.VaultStorage {
-		kb = vaultManager.MakeVaultManager("__master__")
+		kb = vaultManager.MakeVaultManager(log, "__master__")
 	} else {
-		kb = keyBackend.MakeSaveToDiskBackend(path.Dir(remote_signer.MasterGPGKeyPath), "__master__")
+		kb = keyBackend.MakeSaveToDiskBackend(log, path.Dir(remote_signer.MasterGPGKeyPath), "__master__")
 	}
 
 	var sm = &SecretsManager{
 		amIUseless:         false,
 		encryptedPasswords: map[string]string{},
+		log:                log,
 	}
 	masterKeyBytes, err := ioutil.ReadFile(remote_signer.MasterGPGKeyPath)
 
 	if err != nil {
-		smLog.Error("Error loading master key from %s: %s", remote_signer.MasterGPGKeyPath, err)
-		smLog.Error("I'm useless :(")
+		sm.log.Error("Error loading master key from %s: %s", remote_signer.MasterGPGKeyPath, err)
+		sm.log.Error("I'm useless :(")
 		sm.amIUseless = true
 		return sm
 	}
@@ -51,8 +57,8 @@ func MakeSecretsManager() *SecretsManager {
 	if remote_signer.MasterGPGKeyBase64Encoded {
 		masterKeyBytes, err = base64.StdEncoding.DecodeString(string(masterKeyBytes))
 		if err != nil {
-			smLog.Error("Error loading master key from %s: %s", remote_signer.MasterGPGKeyPath, err)
-			smLog.Error("I'm useless :(")
+			sm.log.Error("Error loading master key from %s: %s", remote_signer.MasterGPGKeyPath, err)
+			sm.log.Error("I'm useless :(")
 			sm.amIUseless = true
 			return sm
 		}
@@ -61,27 +67,27 @@ func MakeSecretsManager() *SecretsManager {
 	masterKeyFp, err := remote_signer.GetFingerPrintFromKey(string(masterKeyBytes))
 
 	if err != nil {
-		smLog.Error("Error loading master key from %s: %s", remote_signer.MasterGPGKeyPath, err)
-		smLog.Error("I'm useless :(")
+		sm.log.Error("Error loading master key from %s: %s", remote_signer.MasterGPGKeyPath, err)
+		sm.log.Error("I'm useless :(")
 		sm.amIUseless = true
 		return sm
 	}
 
-	smLog.Info("Master Key FingerPrint: %s", masterKeyFp)
+	sm.log.Info("Master Key FingerPrint: %s", masterKeyFp)
 
 	sm.masterKeyFingerPrint = masterKeyFp
 
-	sm.gpg = MakePGPManagerWithKRM(kb, MakeKeyRingManager())
+	sm.gpg = MakePGPManagerWithKRM(log, kb, MakeKeyRingManager(log))
 	sm.gpg.SetKeysBase64Encoded(remote_signer.MasterGPGKeyBase64Encoded)
 
 	err, n := sm.gpg.LoadKey(string(masterKeyBytes))
 
 	if err != nil {
-		smLog.Fatal("Error loading private master key: %s", err)
+		sm.log.Fatal("Error loading private master key: %s", err)
 	}
 
 	if n == 0 {
-		smLog.Fatal("The specified key doesnt have any private keys inside.")
+		sm.log.Fatal("The specified key doesnt have any private keys inside.")
 	}
 
 	sm.gpg.LoadKeys()
@@ -89,26 +95,26 @@ func MakeSecretsManager() *SecretsManager {
 	masterKeyPassBytes, err := ioutil.ReadFile(remote_signer.MasterGPGKeyPasswordPath)
 
 	if err != nil {
-		smLog.Fatal("Error loading key password from %s: %s", remote_signer.MasterGPGKeyPasswordPath, err)
+		sm.log.Fatal("Error loading key password from %s: %s", remote_signer.MasterGPGKeyPasswordPath, err)
 	}
 
 	if remote_signer.MasterGPGKeyBase64Encoded { // If key is encoded, the password should be to
 		masterKeyPassBytes, err = base64.StdEncoding.DecodeString(string(masterKeyPassBytes))
 		if err != nil {
-			smLog.Fatal("Error decoding key password from %s: %s", remote_signer.MasterGPGKeyPasswordPath, err)
+			sm.log.Fatal("Error decoding key password from %s: %s", remote_signer.MasterGPGKeyPasswordPath, err)
 		}
 	}
 
 	err = sm.gpg.UnlockKey(masterKeyFp, strings.Trim(string(masterKeyPassBytes), "\n\r"))
 
 	if err != nil {
-		smLog.Fatal("Error unlocking master key: %s", err)
+		sm.log.Fatal("Error unlocking master key: %s", err)
 	}
 
 	err = sm.gpg.SaveKey(masterKeyFp, string(masterKeyBytes), string(masterKeyPassBytes))
 
 	if err != nil {
-		smLog.Fatal("Error saving master key to default backend: %s", err)
+		sm.log.Fatal("Error saving master key to default backend: %s", err)
 	}
 
 	return sm
@@ -116,21 +122,21 @@ func MakeSecretsManager() *SecretsManager {
 
 func (sm *SecretsManager) PutKeyPassword(fingerPrint, password string) {
 	if sm.amIUseless {
-		smLog.Warn("Not saving password. Master Key not loaded")
+		sm.log.Warn("Not saving password. Master Key not loaded")
 		return
 	}
 
 	sm.Lock()
 	defer sm.Unlock()
 
-	smLog.Info("Saving password for key %s", fingerPrint)
+	sm.log.Info("Saving password for key %s", fingerPrint)
 
 	filename := fmt.Sprintf("key-password-utf8-%s.txt", fingerPrint)
 
 	encPass, err := sm.gpg.Encrypt(filename, sm.masterKeyFingerPrint, []byte(password), remote_signer.SMEncryptedDataOnly)
 
 	if err != nil {
-		smLog.Error("Error saving key %s password: %s", fingerPrint, err)
+		sm.log.Error("Error saving key %s password: %s", fingerPrint, err)
 		return
 	}
 
@@ -139,7 +145,7 @@ func (sm *SecretsManager) PutKeyPassword(fingerPrint, password string) {
 
 func (sm *SecretsManager) PutEncryptedPassword(fingerPrint, encryptedPassword string) {
 	if sm.amIUseless {
-		smLog.Warn("Not saving password. Master Key not loaded")
+		sm.log.Warn("Not saving password. Master Key not loaded")
 	}
 
 	sm.Lock()
@@ -160,7 +166,7 @@ func (sm *SecretsManager) GetPasswords() map[string]string {
 
 func (sm *SecretsManager) UnlockLocalKeys(gpg etc.PGPInterface) {
 	if sm.amIUseless {
-		smLog.Warn("Not saving password. Master Key not loaded")
+		sm.log.Warn("Not saving password. Master Key not loaded")
 	}
 
 	sm.Lock()
@@ -172,11 +178,11 @@ func (sm *SecretsManager) UnlockLocalKeys(gpg etc.PGPInterface) {
 			continue
 		}
 
-		smLog.Info("Unlocking key %s", fp)
+		sm.log.Info("Unlocking key %s", fp)
 		g, err := sm.gpg.Decrypt(pass, remote_signer.SMEncryptedDataOnly)
 
 		if err != nil {
-			smLog.Error("Error decrypting password for key %s: %s", fp, err)
+			sm.log.Error("Error decrypting password for key %s: %s", fp, err)
 			continue
 		}
 
@@ -184,12 +190,12 @@ func (sm *SecretsManager) UnlockLocalKeys(gpg etc.PGPInterface) {
 
 		if err != nil {
 			// Shouldn't happen
-			smLog.Error("Error decoding decrypted data: %s", err)
+			sm.log.Error("Error decoding decrypted data: %s", err)
 		}
 
 		err = gpg.UnlockKey(fp, string(pass))
 		if err != nil {
-			smLog.Error("Error unlocking key %s: %s", fp, err)
+			sm.log.Error("Error unlocking key %s: %s", fp, err)
 		}
 	}
 }

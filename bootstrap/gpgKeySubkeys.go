@@ -7,7 +7,7 @@ import (
 )
 
 func AddSubkeysToGPGKey(conn *r.Session) {
-	l := log.SubScope("AddSubkeysToGPGKey")
+	l := log.SubScope("SubKey")
 	l.Info("Running")
 	keys, err := models.FetchKeysWithoutSubKeys(conn)
 	if err != err {

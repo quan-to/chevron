@@ -140,7 +140,7 @@ func wrapWithLog(log slog.Instance, f HttpHandleFuncWithLog) HttpHandleFunc {
 }
 
 func wrapLogWithRequestId(log slog.Instance, r *http.Request) slog.Instance {
-	id, ok := r.Header["originRequestId"]
+	id, ok := r.Header["Origin-Request-Id"]
 	if ok && len(id) >= 1 {
 		// Generate Req ID
 		return log.Tag(id[0])

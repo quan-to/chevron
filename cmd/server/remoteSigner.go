@@ -12,15 +12,15 @@ import (
 	"syscall"
 )
 
-var log = slog.Scope("RemoteSigner")
+var log = slog.Scope("QRS")
 
 func main() {
 	QuantoError.EnableStackTrace()
 
 	bootstrap.RunBootstraps()
 
-	sm := magicBuilder.MakeSM()
-	gpg := magicBuilder.MakePGP()
+	sm := magicBuilder.MakeSM(log)
+	gpg := magicBuilder.MakePGP(log)
 
 	gpg.LoadKeys()
 
