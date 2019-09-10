@@ -40,8 +40,8 @@ func (kre *KeyRingEndpoint) AttachHandlers(r *mux.Router) {
 }
 
 func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
-	InitHTTPTimer(r)
 	log := wrapLogWithRequestId(kre.log, r)
+	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -67,8 +67,8 @@ func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 }
 
 func (kre *KeyRingEndpoint) getCachedKeys(w http.ResponseWriter, r *http.Request) {
-	InitHTTPTimer(r)
 	log := wrapLogWithRequestId(kre.log, r)
+	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -93,8 +93,8 @@ func (kre *KeyRingEndpoint) getCachedKeys(w http.ResponseWriter, r *http.Request
 }
 
 func (kre *KeyRingEndpoint) getLoadedPrivateKeys(w http.ResponseWriter, r *http.Request) {
-	InitHTTPTimer(r)
 	log := wrapLogWithRequestId(kre.log, r)
+	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -119,8 +119,8 @@ func (kre *KeyRingEndpoint) getLoadedPrivateKeys(w http.ResponseWriter, r *http.
 
 func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request) {
 	var data models.KeyRingAddPrivateKeyData
-	InitHTTPTimer(r)
 	log := wrapLogWithRequestId(kre.log, r)
+	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {

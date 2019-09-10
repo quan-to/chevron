@@ -68,8 +68,8 @@ func GenRemoteSignerServerMux(slog slog.Instance, sm etc.SMInterface, gpg etc.PG
 
 	// Catch All for unhandled endpoints
 	r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		InitHTTPTimer(r)
-		CatchAllRouter(w, r, slog)
+		InitHTTPTimer(log, r)
+		CatchAllRouter(w, r, log)
 	})
 
 	return r

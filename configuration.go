@@ -52,6 +52,7 @@ var Environment string
 
 var AgentExternalURL string
 var AgentAdminExternalURL string
+var ShowLines bool
 
 func Setup() {
 	// Pre init
@@ -60,6 +61,7 @@ func Setup() {
 	RethinkDBPort = -1
 	RethinkDBPoolSize = -1
 	AgentTokenExpiration = -1
+	ShowLines = false
 
 	// Load envvars
 	SyslogServer = os.Getenv("SYSLOG_IP")
@@ -67,6 +69,11 @@ func Setup() {
 	PrivateKeyFolder = os.Getenv("PRIVATE_KEY_FOLDER")
 	SKSServer = os.Getenv("SKS_SERVER")
 	KeyPrefix = os.Getenv("KEY_PREFIX")
+	ShowLines = os.Getenv("SHOW_LINES") == "true"
+
+	if ShowLines {
+		slog.SetShowLines(true)
+	}
 
 	var maxKeyRingCache = os.Getenv("MAX_KEYRING_CACHE_SIZE")
 	if maxKeyRingCache != "" {

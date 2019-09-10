@@ -36,8 +36,8 @@ func (ie *InternalEndpoint) AttachHandlers(r *mux.Router) {
 }
 
 func (ie *InternalEndpoint) triggerKeyUnlock(w http.ResponseWriter, r *http.Request) {
-	InitHTTPTimer(r)
 	log := wrapLogWithRequestId(ie.log, r)
+	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -54,8 +54,8 @@ func (ie *InternalEndpoint) triggerKeyUnlock(w http.ResponseWriter, r *http.Requ
 }
 
 func (ie *InternalEndpoint) getUnlockPasswords(w http.ResponseWriter, r *http.Request) {
-	InitHTTPTimer(r)
 	log := wrapLogWithRequestId(ie.log, r)
+	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -74,8 +74,8 @@ func (ie *InternalEndpoint) getUnlockPasswords(w http.ResponseWriter, r *http.Re
 }
 
 func (ie *InternalEndpoint) postUnlockPasswords(w http.ResponseWriter, r *http.Request) {
-	InitHTTPTimer(r)
 	log := wrapLogWithRequestId(ie.log, r)
+	InitHTTPTimer(log, r)
 
 	var passwords map[string]string
 

@@ -17,7 +17,7 @@ type RethinkDbState struct {
 }
 
 var RthState RethinkDbState
-var dbLog = slog.Scope("DatabaseManager")
+var dbLog = slog.Scope("DatabaseManager").Tag(remote_signer.DefaultTag)
 
 var tablesToInitialize = []models.TableInitStruct{
 	models.GPGKeyTableInit,
@@ -65,7 +65,7 @@ func InitTables() {
 				dbLog.Fatal(err)
 			}
 		} else {
-			dbLog.Operation(slog.NOTE).Debug("Database %s already exists. Skipping...", remote_signer.DatabaseName)
+			dbLog.WarnDone("Database %s already exists. Skipping...", remote_signer.DatabaseName)
 		}
 
 		WaitDatabaseCreate(remote_signer.DatabaseName)
@@ -107,7 +107,7 @@ func InitTables() {
 					}
 					WaitTableIndexCreate(v.TableName, vidx)
 				} else {
-					dbLog.Debug("           Index %s already exists in table %s. Skipping it...", vidx, v.TableName)
+					dbLog.WarnDone("           Index %s already exists in table %s. Skipping it...", vidx, v.TableName)
 				}
 			}
 

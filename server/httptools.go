@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/logrusorgru/aurora"
+	"github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/QuantoError"
 	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/slog"
@@ -122,15 +123,21 @@ func LogExit(slog slog.Instance, r *http.Request, statusCode int, bodyLength int
 	remote := aurora.Gray(7, host)
 
 	if ts != 0 {
-		slog.Log("%s (%8.2f ms) {%8d bytes} %-4s %s from %s", statusCodeStr, ts, bodyLength, method, aurora.Gray(7, r.URL.Path), remote)
+		slog.Done("%s (%8.2f ms) {%8d bytes} %-4s %s from %s", statusCodeStr, ts, bodyLength, method, aurora.Gray(7, r.URL.Path), remote)
 	} else {
-		slog.Log("%s {%8d bytes}          %-4s %s from %s", statusCodeStr, bodyLength, method, aurora.Gray(7, r.URL.Path), remote)
+		slog.Done("%s {%8d bytes}          %-4s %s from %s", statusCodeStr, bodyLength, method, aurora.Gray(7, r.URL.Path), remote)
 	}
 }
 
-func InitHTTPTimer(r *http.Request) {
+func InitHTTPTimer(log slog.Instance, r *http.Request) {
+	method := aurora.Bold(r.Method).Cyan()
+	host, _, _ := net.SplitHostPort(r.RemoteAddr)
+
+	remote := aurora.Gray(7, host)
+
 	t := time.Now().UnixNano()
 	r.Header.Set(httpInternalTimestamp, fmt.Sprintf("%d", t))
+	log.Await("%s                                %-4s %s from %s", aurora.Yellow("[...]").Inverse().Bold(), method, aurora.Gray(7, r.URL.Path), remote)
 }
 
 func wrapWithLog(log slog.Instance, f HttpHandleFuncWithLog) HttpHandleFunc {
@@ -142,9 +149,11 @@ func wrapWithLog(log slog.Instance, f HttpHandleFuncWithLog) HttpHandleFunc {
 func wrapLogWithRequestId(log slog.Instance, r *http.Request) slog.Instance {
 	id, ok := r.Header["X-Quanto-Request-Id"]
 	if ok && len(id) >= 1 {
-		// Generate Req ID
+		// Tag the log
 		return log.Tag(id[0])
 	}
 
-	return log
+	// Generate a Request ID
+
+	return log.Tag(remote_signer.GenerateTag())
 }

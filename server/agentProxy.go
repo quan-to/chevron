@@ -41,8 +41,8 @@ func MakeAgentProxy(log slog.Instance, gpg etc.PGPInterface, tm etc.TokenManager
 }
 
 func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) {
-	InitHTTPTimer(r)
 	log := wrapLogWithRequestId(proxy.log, r)
+	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -94,9 +94,9 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 		fingerPrint = user.GetFingerPrint()
 	}
 
-	log.Operation(slog.AWAIT).Debug("Reading body")
+	log.DebugAwait("Reading body")
 	bodyData, err := ioutil.ReadAll(r.Body)
-	log.Operation(slog.DONE).Debug("Body read")
+	log.DebugDone("Body read")
 
 	if err != nil {
 		InternalServerError("There was an error processing your request", err.Error(), w, r, log)

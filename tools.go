@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/mewkiz/pkg/osutil"
 	"github.com/pkg/errors"
 	"github.com/quan-to/chevron/models"
@@ -598,4 +599,24 @@ func GeneratePassword() string {
 		b[i] = passwordBytes[rand.Int63()%int64(len(passwordBytes))]
 	}
 	return string(b)
+}
+
+const DefaultTag = "00000000+0000+0000+0000+000000000000"
+
+const maxFieldLength = 40
+
+func TruncateFieldForDisplay(fieldData string) string {
+	fieldData = strings.ReplaceAll(fieldData, "\n", "\\n")
+	fieldData = strings.ReplaceAll(fieldData, "\r", "\\r")
+
+	if len(fieldData) <= maxFieldLength {
+		return fieldData
+	}
+
+	return fieldData[:maxFieldLength/2] + "..." + fieldData[len(fieldData)-maxFieldLength/2:]
+}
+
+func GenerateTag() string {
+	u := uuid.New()
+	return strings.ReplaceAll(u.String(), "-", "+")
 }

@@ -46,7 +46,7 @@ func operationVIndex(options, searchData string, machineReadable, noModification
 func hkpLookup(log slog.Instance, w http.ResponseWriter, r *http.Request) {
 	log = wrapLogWithRequestId(log.SubScope("HKP"), r)
 
-	InitHTTPTimer(r)
+	InitHTTPTimer(log, r)
 	q := r.URL.Query()
 	op := q.Get("op")
 	options := q.Get("options")
@@ -119,7 +119,7 @@ func hkpLookup(log slog.Instance, w http.ResponseWriter, r *http.Request) {
 func hkpAdd(log slog.Instance, w http.ResponseWriter, r *http.Request) {
 	log = wrapLogWithRequestId(log.SubScope("HKP"), r)
 
-	InitHTTPTimer(r)
+	InitHTTPTimer(log, r)
 	log.Await("Parsing Form Fields")
 	err := r.ParseForm()
 	log.Done("Parsed")

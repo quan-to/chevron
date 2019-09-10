@@ -86,13 +86,13 @@ func (vm *VaultManager) vaultPath(dataType, key string) string {
 }
 
 func (vm *VaultManager) putSecret(key string, data map[string]string) error {
-	vm.log.Operation(slog.AWAIT).Debug("Saving %s to %s", key, vm.vaultPath(VaultData, key))
+	vm.log.DebugAwait("Saving %s to %s", key, vm.vaultPath(VaultData, key))
 	_, err := vm.client.Logical().Write(vm.vaultPath(VaultData, key), map[string]interface{}{
 		"data": data,
 	})
 
 	if err != nil {
-		vm.log.Operation(slog.DONE).Error("Error saving %s to %s: %s", err)
+		vm.log.ErrorDone("Error saving %s to %s: %s", err)
 	}
 
 	return err
@@ -129,7 +129,7 @@ func (vm *VaultManager) HealthStatus() (*api.HealthResponse, error) {
 }
 
 func (vm *VaultManager) Save(key, data string) error {
-	vm.log.Operation(slog.AWAIT).Debug("Saving %s", key)
+	vm.log.DebugAwait("Saving %s", key)
 	return vm.putSecret(vm.prefix+key, map[string]string{
 		"data": data,
 	})

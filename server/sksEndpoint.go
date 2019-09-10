@@ -42,8 +42,8 @@ func (sks *SKSEndpoint) AttachHandlers(r *mux.Router) {
 }
 
 func (sks *SKSEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
-	InitHTTPTimer(r)
 	log := wrapLogWithRequestId(sks.log, r)
+	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -68,8 +68,8 @@ func (sks *SKSEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 }
 
 func (sks *SKSEndpoint) searchByName(w http.ResponseWriter, r *http.Request) {
-	InitHTTPTimer(r)
 	log := wrapLogWithRequestId(sks.log, r)
+	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -118,8 +118,8 @@ func (sks *SKSEndpoint) searchByName(w http.ResponseWriter, r *http.Request) {
 }
 
 func (sks *SKSEndpoint) searchByFingerPrint(w http.ResponseWriter, r *http.Request) {
-	InitHTTPTimer(r)
 	log := wrapLogWithRequestId(sks.log, r)
+	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -168,8 +168,8 @@ func (sks *SKSEndpoint) searchByFingerPrint(w http.ResponseWriter, r *http.Reque
 }
 
 func (sks *SKSEndpoint) searchByEmail(w http.ResponseWriter, r *http.Request) {
-	InitHTTPTimer(r)
 	log := wrapLogWithRequestId(sks.log, r)
+	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -218,8 +218,8 @@ func (sks *SKSEndpoint) searchByEmail(w http.ResponseWriter, r *http.Request) {
 }
 
 func (sks *SKSEndpoint) search(w http.ResponseWriter, r *http.Request) {
-	InitHTTPTimer(r)
 	log := wrapLogWithRequestId(sks.log, r)
+	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -268,8 +268,8 @@ func (sks *SKSEndpoint) search(w http.ResponseWriter, r *http.Request) {
 }
 
 func (sks *SKSEndpoint) addKey(w http.ResponseWriter, r *http.Request) {
-	InitHTTPTimer(r)
 	log := wrapLogWithRequestId(sks.log, r)
+	InitHTTPTimer(log, r)
 
 	var data models.SKSAddKey
 

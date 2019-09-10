@@ -57,7 +57,7 @@ func (krm *KeyRingManager) addFp(fp string) {
 }
 
 func (krm *KeyRingManager) AddKey(key *openpgp.Entity, nonErasable bool) {
-	krm.log.Operation(slog.NOTE).Debug("AddKey(---, %v)", nonErasable)
+	krm.log.DebugNote("AddKey(---, %v)", nonErasable)
 	krm.Lock()
 	fp := remote_signer.ByteFingerPrint2FP16(key.PrimaryKey.Fingerprint[:])
 	if krm.containsFp(fp) {
@@ -99,7 +99,7 @@ func (krm *KeyRingManager) AddKey(key *openpgp.Entity, nonErasable bool) {
 }
 
 func (krm *KeyRingManager) GetCachedKeys() []models.KeyInfo {
-	krm.log.Operation(slog.NOTE).Debug("GetCachedKeys()")
+	krm.log.DebugNote("GetCachedKeys()")
 	krm.Lock()
 	defer krm.Unlock()
 	arr := make([]models.KeyInfo, 0)
@@ -112,7 +112,7 @@ func (krm *KeyRingManager) GetCachedKeys() []models.KeyInfo {
 }
 
 func (krm *KeyRingManager) ContainsKey(fp string) bool {
-	krm.log.Operation(slog.NOTE).Debug("ContainsKey(%s)", fp)
+	krm.log.DebugNote("ContainsKey(%s)", fp)
 	krm.Lock()
 	defer krm.Unlock()
 
@@ -120,7 +120,7 @@ func (krm *KeyRingManager) ContainsKey(fp string) bool {
 }
 
 func (krm *KeyRingManager) GetKey(fp string) *openpgp.Entity {
-	krm.log.Operation(slog.NOTE).Debug("GetKey(%s)", fp)
+	krm.log.DebugNote("GetKey(%s)", fp)
 	krm.Lock()
 	ent := krm.entities[fp]
 	krm.Unlock()
@@ -155,6 +155,6 @@ func (krm *KeyRingManager) GetKey(fp string) *openpgp.Entity {
 }
 
 func (krm *KeyRingManager) GetFingerPrints() []string {
-	krm.log.Operation(slog.NOTE).Debug("GetFingerPrints()")
+	krm.log.DebugNote("GetFingerPrints()")
 	return krm.fingerPrints
 }

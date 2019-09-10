@@ -63,39 +63,39 @@ func (d *Disk) Save(key, data string) error {
 		return nil
 	}
 
-	d.log.Operation(slog.AWAIT).Debug("Saving to %s", path.Join(d.folder, d.prefix+key))
+	d.log.DebugAwait("Saving to %s", path.Join(d.folder, d.prefix+key))
 
 	err := ioutil.WriteFile(path.Join(d.folder, d.prefix+key), []byte(data), 0600)
 
 	if err != nil {
-		d.log.Operation(slog.DONE).Error("Error saving to %s: %s", path.Join(d.folder, d.prefix+key), err)
+		d.log.ErrorDone("Error saving to %s: %s", path.Join(d.folder, d.prefix+key), err)
 	}
 
 	return err
 }
 
 func (d *Disk) SaveWithMetadata(key, data, metadata string) error {
-	d.log.Operation(slog.AWAIT).Debug("Saving to %s", path.Join(d.folder, d.prefix+key))
+	d.log.DebugAwait("Saving to %s", path.Join(d.folder, d.prefix+key))
 	err := ioutil.WriteFile(path.Join(d.folder, d.prefix+key), []byte(data), 0600)
 	if err != nil {
-		d.log.Operation(slog.DONE).Error("Error saving to %s: %s", path.Join(d.folder, d.prefix+key), err)
+		d.log.ErrorDone("Error saving to %s: %s", path.Join(d.folder, d.prefix+key), err)
 		return err
 	}
 
 	err = ioutil.WriteFile(path.Join(d.folder, "metadata-"+d.prefix+key), []byte(metadata), 0600)
 
 	if err != nil {
-		d.log.Operation(slog.DONE).Error("Error saving to %s: %s", path.Join(d.folder, d.prefix+key), err)
+		d.log.ErrorDone("Error saving to %s: %s", path.Join(d.folder, d.prefix+key), err)
 	}
 
 	return err
 }
 
 func (d *Disk) Read(key string) (data string, metadata string, err error) {
-	d.log.Operation(slog.AWAIT).Debug("Reading from %s", path.Join(d.folder, d.prefix+key))
+	d.log.DebugAwait("Reading from %s", path.Join(d.folder, d.prefix+key))
 	sdata, err := ioutil.ReadFile(path.Join(d.folder, d.prefix+key))
 	if err != nil {
-		d.log.Operation(slog.DONE).Error("Error saving to %s: %s", path.Join(d.folder, d.prefix+key), err)
+		d.log.ErrorDone("Error reading to %s: %s", path.Join(d.folder, d.prefix+key), err)
 		return "", "", err
 	}
 

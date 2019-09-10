@@ -81,7 +81,7 @@ func (pm *PGPManager) MinKeyBits() int {
 }
 
 func (pm *PGPManager) LoadKeys() {
-	pm.log.Operation(slog.NOTE).Debug("LoadKeys()")
+	pm.log.DebugNote("LoadKeys()")
 	pm.Lock()
 	defer pm.Unlock()
 
@@ -128,7 +128,7 @@ func (pm *PGPManager) LoadKeys() {
 }
 
 func (pm *PGPManager) LoadKeyWithMetadata(armoredKey, metadata string) (error, int) {
-	pm.log.Operation(slog.NOTE).Debug("LoadKeyWithMetadata(---, ---)")
+	pm.log.DebugNote("LoadKeyWithMetadata(---, ---)")
 	err, n := pm.LoadKey(armoredKey)
 
 	if err != nil {
@@ -166,12 +166,12 @@ func (pm *PGPManager) LoadKeyWithMetadata(armoredKey, metadata string) (error, i
 }
 
 func (pm *PGPManager) SetKeysBase64Encoded(k bool) {
-	pm.log.Operation(slog.NOTE).Debug("SetKeysBase64Encoded(%s)", k)
+	pm.log.DebugNote("SetKeysBase64Encoded(%t)", k)
 	pm.KeysBase64Encoded = k
 }
 
 func (pm *PGPManager) LoadKey(armoredKey string) (error, int) {
-	pm.log.Operation(slog.NOTE).Debug("LoadKey(---)")
+	pm.log.DebugNote("LoadKey(---)")
 	keysLoaded := 0
 	kr := strings.NewReader(armoredKey)
 	keys, err := openpgp.ReadArmoredKeyRing(kr)
@@ -298,7 +298,7 @@ func (pm *PGPManager) unlockKey(fp, password string) error {
 }
 
 func (pm *PGPManager) UnlockKey(fp, password string) error {
-	pm.log.Operation(slog.NOTE).Debug("UnlockKey(%s, ---)", fp)
+	pm.log.DebugNote("UnlockKey(%s, ---)", fp)
 	pm.Lock()
 	defer pm.Unlock()
 
@@ -309,7 +309,7 @@ func (pm *PGPManager) LoadKeyFromKB(fingerPrint string) error {
 	pm.log.Info("Loading key %s", fingerPrint)
 
 	if pm.decryptedPrivateKeys[fingerPrint] != nil || pm.entities[fingerPrint] != nil {
-		pm.log.Warn("Key %s is already loaded", fingerPrint)
+		pm.log.Warn("Public Key %s is already loaded", fingerPrint)
 		return nil
 	}
 
@@ -335,7 +335,7 @@ func (pm *PGPManager) LoadKeyFromKB(fingerPrint string) error {
 }
 
 func (pm *PGPManager) GetPrivateKeyInfo(fingerPrint string) *models.KeyInfo {
-	pm.log.Operation(slog.NOTE).Debug("GetPrivateKeyInfo(%s)", fingerPrint)
+	pm.log.DebugNote("GetPrivateKeyInfo(%s)", fingerPrint)
 	for k, e := range pm.entities {
 		v := e.PrivateKey
 		if v == nil {
@@ -358,7 +358,7 @@ func (pm *PGPManager) GetPrivateKeyInfo(fingerPrint string) *models.KeyInfo {
 }
 
 func (pm *PGPManager) GetLoadedPrivateKeys() []models.KeyInfo {
-	pm.log.Operation(slog.NOTE).Debug("GetLoadedPrivateKeys()")
+	pm.log.DebugNote("GetLoadedPrivateKeys()")
 	keyInfos := make([]models.KeyInfo, 0)
 
 	for k, e := range pm.entities {
@@ -382,7 +382,7 @@ func (pm *PGPManager) GetLoadedPrivateKeys() []models.KeyInfo {
 }
 
 func (pm *PGPManager) GetLoadedKeys() []models.KeyInfo {
-	pm.log.Operation(slog.NOTE).Debug("GetLoadedKeys()")
+	pm.log.DebugNote("GetLoadedKeys()")
 	keyInfos := make([]models.KeyInfo, 0)
 
 	for k, e := range pm.entities {
@@ -401,7 +401,7 @@ func (pm *PGPManager) GetLoadedKeys() []models.KeyInfo {
 }
 
 func (pm *PGPManager) SaveKey(fingerPrint, armoredData string, password interface{}) error {
-	pm.log.Operation(slog.NOTE).Debug("SaveKey(%s, ---, ---)", fingerPrint)
+	pm.log.DebugNote("SaveKey(%s, %s, ---)", fingerPrint, remote_signer.TruncateFieldForDisplay(armoredData))
 	filename := fmt.Sprintf("%s.key", fingerPrint)
 	if pm.KeysBase64Encoded {
 		filename = fmt.Sprintf("%s.b64", fingerPrint)
@@ -437,14 +437,14 @@ func (pm *PGPManager) SaveKey(fingerPrint, armoredData string, password interfac
 }
 
 func (pm *PGPManager) SignData(fingerPrint string, data []byte, hashAlgorithm crypto.Hash) (string, error) {
-	pm.log.Operation(slog.NOTE).Debug("SignData(%s, ---, %s)", fingerPrint, hashAlgorithm)
+	pm.log.DebugNote("SignData(%s, ---, %v)", fingerPrint, hashAlgorithm)
 	fingerPrint = pm.sanitizeFingerprint(fingerPrint)
 	pm.Lock()
 	pk := pm.decryptedPrivateKeys[fingerPrint]
 
 	if pk == nil {
 		pm.Unlock()
-		pm.log.Warn("Key %s not loaded. Trying to load from keybackend", fingerPrint)
+		pm.log.Warn("Private key %s not loaded or decrypted. Trying to load from keybackend", fingerPrint)
 		err := pm.LoadKeyFromKB(fingerPrint)
 		if err != nil {
 			return "", errors.New(fmt.Sprintf("key %s is not decrypt or not loaded", fingerPrint))
@@ -485,7 +485,7 @@ func (pm *PGPManager) SignData(fingerPrint string, data []byte, hashAlgorithm cr
 }
 
 func (pm *PGPManager) GetPublicKeyEntity(fingerPrint string) *openpgp.Entity {
-	pm.log.Operation(slog.NOTE).Debug("GetPublicKeyEntity(%s)", fingerPrint)
+	pm.log.DebugNote("GetPublicKeyEntity(%s)", fingerPrint)
 	pm.Lock()
 	defer pm.Unlock()
 	fingerPrint = pm.sanitizeFingerprint(fingerPrint)
@@ -511,7 +511,7 @@ func (pm *PGPManager) GetPublicKeyEntity(fingerPrint string) *openpgp.Entity {
 }
 
 func (pm *PGPManager) GetPublicKey(fingerPrint string) *packet.PublicKey {
-	pm.log.Operation(slog.NOTE).Debug("GetPublicKey(%s)", fingerPrint)
+	pm.log.DebugNote("GetPublicKey(%s)", fingerPrint)
 	var pubKey *packet.PublicKey
 	pm.Lock()
 	defer pm.Unlock()
@@ -534,7 +534,7 @@ func (pm *PGPManager) GetPublicKey(fingerPrint string) *packet.PublicKey {
 			pm.log.Await("Not found as subkey. Checking in KeyRingManager")
 			ent = pm.krm.GetKey(fingerPrint)
 			if ent == nil {
-				pm.log.Operation(slog.DONE).Warn("Not found in KeyRingManager")
+				pm.log.WarnDone("Not found in KeyRingManager")
 			} else {
 				pm.log.Success("Found in Key Ring Manager")
 			}
@@ -550,7 +550,7 @@ func (pm *PGPManager) GetPublicKey(fingerPrint string) *packet.PublicKey {
 }
 
 func (pm *PGPManager) GetSubKeys(fingerPrint string, decrypted bool) openpgp.EntityList {
-	pm.log.Operation(slog.NOTE).Debug("GetSubKeys(%s, %v)", fingerPrint, decrypted)
+	pm.log.DebugNote("GetSubKeys(%s, %v)", fingerPrint, decrypted)
 	list := make([]*openpgp.Entity, 0)
 	for k, v := range pm.subKeyToKey {
 		if v == fingerPrint {
@@ -565,7 +565,7 @@ func (pm *PGPManager) GetSubKeys(fingerPrint string, decrypted bool) openpgp.Ent
 }
 
 func (pm *PGPManager) GetKey(fingerPrint string) *openpgp.Entity {
-	pm.log.Operation(slog.NOTE).Debug("GetKey(%s)", fingerPrint)
+	pm.log.DebugNote("GetKey(%s)", fingerPrint)
 	fingerPrint = pm.FixFingerPrint(fingerPrint)
 
 	// Try directly
@@ -585,7 +585,7 @@ func (pm *PGPManager) GetKey(fingerPrint string) *openpgp.Entity {
 }
 
 func (pm *PGPManager) GetPrivate(fingerPrint string) openpgp.EntityList {
-	pm.log.Operation(slog.NOTE).Debug("GetPrivate(%s)", fingerPrint)
+	pm.log.DebugNote("GetPrivate(%s)", fingerPrint)
 	var ent openpgp.Entity
 	fingerPrint = pm.FixFingerPrint(fingerPrint)
 
@@ -682,7 +682,7 @@ func (pm *PGPManager) GetPublicKeyAscii(fingerPrint string) (string, error) {
 }
 
 func (pm *PGPManager) GetPrivateKeyAscii(fingerPrint, password string) (string, error) {
-	pm.log.Operation(slog.NOTE).Debug("GetPrivateKeyAscii(%s, ---)", fingerPrint)
+	pm.log.DebugNote("GetPrivateKeyAscii(%s, ---)", fingerPrint)
 	key := ""
 	ent := pm.GetKey(fingerPrint)
 
@@ -732,12 +732,12 @@ func (pm *PGPManager) GetPrivateKeyAscii(fingerPrint, password string) (string, 
 }
 
 func (pm *PGPManager) VerifySignatureStringData(data string, signature string) (bool, error) {
-	pm.log.Operation(slog.NOTE).Debug("VerifySignatureStringData(---, %s)", signature)
+	pm.log.DebugNote("VerifySignatureStringData(---, %s)", remote_signer.TruncateFieldForDisplay(signature))
 	return pm.VerifySignature([]byte(data), signature)
 }
 
 func (pm *PGPManager) VerifySignature(data []byte, signature string) (bool, error) {
-	pm.log.Operation(slog.NOTE).Debug("VerifySignature(---, %s)", signature)
+	pm.log.DebugNote("VerifySignature(---, %s)", remote_signer.TruncateFieldForDisplay(signature))
 	var issuerKeyId uint64
 	var publicKey *packet.PublicKey
 	var fingerPrint string
@@ -803,7 +803,7 @@ func (pm *PGPManager) VerifySignature(data []byte, signature string) (bool, erro
 }
 
 func (pm *PGPManager) GenerateTestKey() (string, error) {
-	pm.log.Operation(slog.NOTE).Debug("GenerateTestKey()")
+	pm.log.DebugNote("GenerateTestKey()")
 	privateKey, err := rsa.GenerateKey(rand.Reader, 1024)
 
 	if err != nil {
@@ -855,7 +855,7 @@ func (pm *PGPManager) GenerateTestKey() (string, error) {
 }
 
 func (pm *PGPManager) GeneratePGPKey(identifier, password string, numBits int) (string, error) {
-	pm.log.Operation(slog.NOTE).Debug("GeneratePGPKey(%s, ---, %d)", identifier, numBits)
+	pm.log.DebugNote("GeneratePGPKey(%s, ---, %d)", identifier, numBits)
 	if numBits < MinKeyBits {
 		return "", errors.New(fmt.Sprintf("dont generate RSA keys with less than %d, its not safe. try use 3072 or higher", MinKeyBits))
 	}
@@ -917,7 +917,7 @@ func (pm *PGPManager) GeneratePGPKey(identifier, password string, numBits int) (
 }
 
 func (pm *PGPManager) Encrypt(filename, fingerPrint string, data []byte, dataOnly bool) (string, error) {
-	pm.log.Operation(slog.NOTE).Debug("Encrypt(%s, %s, ---, %v)", filename, fingerPrint, dataOnly)
+	pm.log.DebugNote("Encrypt(%s, %s, ---, %v)", filename, fingerPrint, dataOnly)
 	var pubKey = pm.GetPublicKey(fingerPrint)
 
 	if pubKey == nil {
@@ -993,7 +993,7 @@ func (pm *PGPManager) Encrypt(filename, fingerPrint string, data []byte, dataOnl
 }
 
 func (pm *PGPManager) Decrypt(data string, dataOnly bool) (*models.GPGDecryptedData, error) {
-	pm.log.Operation(slog.NOTE).Debug("Decrypt(---, %v)", dataOnly)
+	pm.log.DebugNote("Decrypt(%s, %v)", remote_signer.TruncateFieldForDisplay(data), dataOnly)
 	var err error
 	var fps []string
 	ret := &models.GPGDecryptedData{}
@@ -1097,6 +1097,6 @@ func (pm *PGPManager) Decrypt(data string, dataOnly bool) (*models.GPGDecryptedD
 }
 
 func (pm *PGPManager) GetCachedKeys() []models.KeyInfo {
-	pm.log.Operation(slog.NOTE).Debug("GetCachedKeys()")
+	pm.log.DebugNote("GetCachedKeys()")
 	return pm.krm.GetCachedKeys()
 }

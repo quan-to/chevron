@@ -92,8 +92,8 @@ func (gi *graphIntercept) WriteHeader(statusCode int) {
 }
 
 func (admin *AgentAdmin) handleGraphQL(w http.ResponseWriter, r *http.Request) {
-	InitHTTPTimer(r)
 	log := wrapLogWithRequestId(admin.log, r)
+	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
