@@ -9,7 +9,7 @@ import (
 var vm *VaultManager
 
 func TestMain(m *testing.M) {
-	vm = MakeVaultManager("test_")
+	vm = MakeVaultManager(nil, "test_")
 
 	code := m.Run()
 
@@ -20,7 +20,7 @@ func TestVaultManager_Make(t *testing.T) {
 	remote_signer.PushVariables()
 	// Test Vault SkipVerify
 	remote_signer.VaultSkipVerify = true
-	tmpVm := MakeVaultManager("test_")
+	tmpVm := MakeVaultManager(nil, "test_")
 	if tmpVm == nil {
 		t.Errorf("Expected to get a vaultManager instance, got nil")
 	}
@@ -28,7 +28,7 @@ func TestVaultManager_Make(t *testing.T) {
 	// Test With Root Token
 	remote_signer.VaultUseUserpass = false
 	t.Logf("Root Token: %s", remote_signer.VaultRootToken)
-	tmpVm = MakeVaultManager("test_")
+	tmpVm = MakeVaultManager(nil, "test_")
 	if tmpVm == nil {
 		t.Errorf("Expected to get a vaultManager instance, got nil")
 	}

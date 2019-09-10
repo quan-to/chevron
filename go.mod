@@ -11,6 +11,7 @@ require (
 	github.com/asticode/go-astilectron-bootstrap v0.0.0-20180616141213-b3211646d205
 	github.com/asticode/go-astilectron-bundler v0.0.0-20190406155441-5fc4c9f0c990 // indirect
 	github.com/asticode/go-bindata v0.0.0-20151023091102-a0ff2567cfb7 // indirect
+	github.com/bouk/monkey v1.0.1
 	github.com/cenkalti/backoff v2.1.1+incompatible // indirect
 	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/golang/snappy v0.0.1 // indirect

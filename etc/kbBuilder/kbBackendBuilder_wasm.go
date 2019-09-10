@@ -5,6 +5,6 @@ import (
 	"github.com/quan-to/chevron/keyBackend"
 )
 
-func BuildKeyBackend() keyBackend.Backend {
-	return keyBackend.MakeSaveToDiskBackend(remote_signer.PrivateKeyFolder, remote_signer.KeyPrefix)
+func BuildKeyBackend(log slog.Instance) keyBackend.Backend {
+	return keyBackend.MakeSaveToDiskBackend(log, remote_signer.PrivateKeyFolder, remote_signer.KeyPrefix)
 }

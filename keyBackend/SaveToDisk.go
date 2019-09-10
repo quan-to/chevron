@@ -16,7 +16,7 @@ type Disk struct {
 
 func MakeSaveToDiskBackend(log slog.Instance, folder, prefix string) *Disk {
 	if log == nil {
-		log = log.Scope("Disk")
+		log = slog.Scope("Disk")
 	} else {
 		log = log.SubScope("Disk")
 	}

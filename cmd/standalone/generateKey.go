@@ -12,7 +12,7 @@ import (
 
 // GenerateFlow generates a GPG Key with specified parameters
 func GenerateFlow(password, output, identifier string, bits int) {
-	pgpMan := magicBuilder.MakePGP()
+	pgpMan := magicBuilder.MakePGP(nil)
 	if password == "" {
 		_, _ = fmt.Fprint(os.Stderr, "Please enter the password: ")
 		bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
