@@ -602,12 +602,11 @@ func GeneratePassword() string {
 }
 
 const DefaultTag = "00000000+0000+0000+0000+000000000000"
-
 const maxFieldLength = 40
 
 func TruncateFieldForDisplay(fieldData string) string {
-	fieldData = strings.ReplaceAll(fieldData, "\n", "\\n")
-	fieldData = strings.ReplaceAll(fieldData, "\r", "\\r")
+	fieldData = strings.Replace(fieldData, "\n", "\\n", -1)
+	fieldData = strings.Replace(fieldData, "\r", "\\r", -1)
 
 	if len(fieldData) <= maxFieldLength {
 		return fieldData
@@ -618,5 +617,5 @@ func TruncateFieldForDisplay(fieldData string) string {
 
 func GenerateTag() string {
 	u := uuid.New()
-	return strings.ReplaceAll(u.String(), "-", "+")
+	return strings.Replace(u.String(), "-", "+", -1)
 }
