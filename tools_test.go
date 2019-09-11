@@ -613,3 +613,35 @@ func TestNonASCIIFingerprints(t *testing.T) {
 		t.Fatalf("Expected fingerprint to be 344C911D5CA6B681")
 	}
 }
+
+func TestTruncateFieldForDisplay(t *testing.T) {
+	nonTruncate := "Thats a test"
+	b := TruncateFieldForDisplay(nonTruncate)
+
+	if b != nonTruncate {
+		t.Errorf("Expected %s to be equal to %s.", b, nonTruncate)
+	}
+
+	lineBreaks := "A\nB\r\nC"
+	expectedLineBreaks := "A\\nB\\r\\nC"
+	b = TruncateFieldForDisplay(lineBreaks)
+	if b != expectedLineBreaks {
+		t.Errorf("Expected %s to be equal to %s.", b, expectedLineBreaks)
+	}
+
+	veryLongSentence := "12345678901234567890-34567890-234567890-=34567890-asdasuicnhwiaechaoiseosmehsexhoiuasxe,uiasxe123123123"
+	b = TruncateFieldForDisplay(veryLongSentence)
+	if len(b) > maxFieldLength+5 { // Some padding to truncate chars
+		t.Errorf("Expected %s to have length < %d got %d", b, maxFieldLength+5, len(b))
+	}
+}
+
+func TestGenerateTag(t *testing.T) {
+	tag := GenerateTag()
+	if strings.Index(tag, "-") > -1 {
+		t.Errorf("Expected generated tags to not have - sign")
+	}
+	if strings.Index(tag, "+") == -1 {
+		t.Errorf("Expected generated tags to have + sign")
+	}
+}

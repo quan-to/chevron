@@ -601,9 +601,11 @@ func GeneratePassword() string {
 	return string(b)
 }
 
+// DefaultTag represents a default tag to be used in logs
 const DefaultTag = "00000000+0000+0000+0000+000000000000"
 const maxFieldLength = 40
 
+// TruncateFieldForDisplay truncates the field to display in log files
 func TruncateFieldForDisplay(fieldData string) string {
 	fieldData = strings.Replace(fieldData, "\n", "\\n", -1)
 	fieldData = strings.Replace(fieldData, "\r", "\\r", -1)
@@ -615,6 +617,7 @@ func TruncateFieldForDisplay(fieldData string) string {
 	return fieldData[:maxFieldLength/2] + "..." + fieldData[len(fieldData)-maxFieldLength/2:]
 }
 
+// GenerateTag generates a new UUID tag with - replaced by +
 func GenerateTag() string {
 	u := uuid.New()
 	return strings.Replace(u.String(), "-", "+", -1)

@@ -53,6 +53,7 @@ type MemoryTokenManager struct {
 	log          slog.Instance
 }
 
+// MakeMemoryTokenManager creates an instance of TokenManager managed in memory
 func MakeMemoryTokenManager(logger slog.Instance) *MemoryTokenManager {
 	if logger == nil {
 		logger = slog.Scope("Memory-TM")

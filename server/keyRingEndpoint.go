@@ -18,6 +18,7 @@ type KeyRingEndpoint struct {
 	log slog.Instance
 }
 
+// MakeKeyRingEndpoint creates an instance of key ring management endpoints
 func MakeKeyRingEndpoint(log slog.Instance, sm etc.SMInterface, gpg etc.PGPInterface) *KeyRingEndpoint {
 	if log == nil {
 		log = slog.Scope("KeyRing")
@@ -40,7 +41,7 @@ func (kre *KeyRingEndpoint) AttachHandlers(r *mux.Router) {
 }
 
 func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
-	log := wrapLogWithRequestId(kre.log, r)
+	log := wrapLogWithRequestID(kre.log, r)
 	InitHTTPTimer(log, r)
 
 	defer func() {
@@ -67,7 +68,7 @@ func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 }
 
 func (kre *KeyRingEndpoint) getCachedKeys(w http.ResponseWriter, r *http.Request) {
-	log := wrapLogWithRequestId(kre.log, r)
+	log := wrapLogWithRequestID(kre.log, r)
 	InitHTTPTimer(log, r)
 
 	defer func() {
@@ -93,7 +94,7 @@ func (kre *KeyRingEndpoint) getCachedKeys(w http.ResponseWriter, r *http.Request
 }
 
 func (kre *KeyRingEndpoint) getLoadedPrivateKeys(w http.ResponseWriter, r *http.Request) {
-	log := wrapLogWithRequestId(kre.log, r)
+	log := wrapLogWithRequestID(kre.log, r)
 	InitHTTPTimer(log, r)
 
 	defer func() {
@@ -119,7 +120,7 @@ func (kre *KeyRingEndpoint) getLoadedPrivateKeys(w http.ResponseWriter, r *http.
 
 func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request) {
 	var data models.KeyRingAddPrivateKeyData
-	log := wrapLogWithRequestId(kre.log, r)
+	log := wrapLogWithRequestID(kre.log, r)
 	InitHTTPTimer(log, r)
 
 	defer func() {

@@ -28,6 +28,7 @@ type JSONAuthManager struct {
 	log   slog.Instance
 }
 
+// MakeJSONAuthManager creates an instance of AuthManager that uses JSON Storage
 func MakeJSONAuthManager(logger slog.Instance) *JSONAuthManager {
 	if logger == nil {
 		logger = slog.Scope("JSON-AM")

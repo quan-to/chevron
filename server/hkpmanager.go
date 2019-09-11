@@ -44,7 +44,7 @@ func operationVIndex(options, searchData string, machineReadable, noModification
 }
 
 func hkpLookup(log slog.Instance, w http.ResponseWriter, r *http.Request) {
-	log = wrapLogWithRequestId(log.SubScope("HKP"), r)
+	log = wrapLogWithRequestID(log.SubScope("HKP"), r)
 
 	InitHTTPTimer(log, r)
 	q := r.URL.Query()
@@ -117,7 +117,7 @@ func hkpLookup(log slog.Instance, w http.ResponseWriter, r *http.Request) {
 }
 
 func hkpAdd(log slog.Instance, w http.ResponseWriter, r *http.Request) {
-	log = wrapLogWithRequestId(log.SubScope("HKP"), r)
+	log = wrapLogWithRequestID(log.SubScope("HKP"), r)
 
 	InitHTTPTimer(log, r)
 	log.Await("Parsing Form Fields")
@@ -137,6 +137,7 @@ func hkpAdd(log slog.Instance, w http.ResponseWriter, r *http.Request) {
 	LogExit(log, r, http.StatusOK, len(result))
 }
 
+// AddHKPEndpoints attach the HKP /lookup and /add endpoints to the specified router with the specified log wrapped into the calls
 func AddHKPEndpoints(log slog.Instance, r *mux.Router) {
 	r.HandleFunc("/lookup", wrapWithLog(log, hkpLookup)).Methods("GET")
 	r.HandleFunc("/add", wrapWithLog(log, hkpAdd)).Methods("POST")

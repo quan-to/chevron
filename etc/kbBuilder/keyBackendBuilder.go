@@ -9,6 +9,7 @@ import (
 	"github.com/quan-to/slog"
 )
 
+// BuildKeyBackend returns a new instance of KeyBackend defined by environment variables VaultStorage, KeyPrefix, PrivateKeyFolder
 func BuildKeyBackend(log slog.Instance) keyBackend.Backend {
 	var kb keyBackend.Backend
 

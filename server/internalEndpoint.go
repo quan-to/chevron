@@ -15,6 +15,7 @@ type InternalEndpoint struct {
 	log slog.Instance
 }
 
+// MakeInternalEndpoint creates an instance to handle internal control endpoints such as key password data
 func MakeInternalEndpoint(log slog.Instance, sm etc.SMInterface, gpg etc.PGPInterface) *InternalEndpoint {
 	if log == nil {
 		log = slog.Scope("Internal")
@@ -36,7 +37,7 @@ func (ie *InternalEndpoint) AttachHandlers(r *mux.Router) {
 }
 
 func (ie *InternalEndpoint) triggerKeyUnlock(w http.ResponseWriter, r *http.Request) {
-	log := wrapLogWithRequestId(ie.log, r)
+	log := wrapLogWithRequestID(ie.log, r)
 	InitHTTPTimer(log, r)
 
 	defer func() {
@@ -54,7 +55,7 @@ func (ie *InternalEndpoint) triggerKeyUnlock(w http.ResponseWriter, r *http.Requ
 }
 
 func (ie *InternalEndpoint) getUnlockPasswords(w http.ResponseWriter, r *http.Request) {
-	log := wrapLogWithRequestId(ie.log, r)
+	log := wrapLogWithRequestID(ie.log, r)
 	InitHTTPTimer(log, r)
 
 	defer func() {
@@ -74,7 +75,7 @@ func (ie *InternalEndpoint) getUnlockPasswords(w http.ResponseWriter, r *http.Re
 }
 
 func (ie *InternalEndpoint) postUnlockPasswords(w http.ResponseWriter, r *http.Request) {
-	log := wrapLogWithRequestId(ie.log, r)
+	log := wrapLogWithRequestID(ie.log, r)
 	InitHTTPTimer(log, r)
 
 	var passwords map[string]string

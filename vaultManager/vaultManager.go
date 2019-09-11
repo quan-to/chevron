@@ -20,6 +20,7 @@ type VaultManager struct {
 	log    slog.Instance
 }
 
+// MakeVaultManager creates an instance of VaultManager
 func MakeVaultManager(log slog.Instance, prefix string) *VaultManager {
 	if log == nil {
 		log = slog.Scope("Vault")

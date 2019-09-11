@@ -14,6 +14,7 @@ type Disk struct {
 	log         slog.Instance
 }
 
+// MakeSaveToDiskBackend creates an instance of DiskBackend that stores keys in files
 func MakeSaveToDiskBackend(log slog.Instance, folder, prefix string) *Disk {
 	if log == nil {
 		log = slog.Scope("Disk")

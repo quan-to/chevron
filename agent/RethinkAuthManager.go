@@ -17,6 +17,7 @@ type RethinkAuthManager struct {
 	log slog.Instance
 }
 
+// MakeRethinkAuthManager creates an instance of Auth Manager that uses RethinkDB as storage
 func MakeRethinkAuthManager(logger slog.Instance) *RethinkAuthManager {
 	if logger == nil {
 		logger = slog.Scope("RQL-AM")

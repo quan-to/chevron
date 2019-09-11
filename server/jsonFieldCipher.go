@@ -38,7 +38,7 @@ func (jfc *JFCEndpoint) AttachHandlers(r *mux.Router) {
 }
 
 func (jfc *JFCEndpoint) cipher(w http.ResponseWriter, r *http.Request) {
-	log := wrapLogWithRequestId(jfc.log, r)
+	log := wrapLogWithRequestID(jfc.log, r)
 	InitHTTPTimer(log, r)
 
 	var data models.FieldCipherInput
@@ -87,7 +87,7 @@ func (jfc *JFCEndpoint) cipher(w http.ResponseWriter, r *http.Request) {
 }
 
 func (jfc *JFCEndpoint) decipher(w http.ResponseWriter, r *http.Request) {
-	log := wrapLogWithRequestId(jfc.log, r)
+	log := wrapLogWithRequestID(jfc.log, r)
 	InitHTTPTimer(log, r)
 
 	var data models.FieldDecipherInput

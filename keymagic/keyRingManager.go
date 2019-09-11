@@ -16,6 +16,7 @@ type KeyRingManager struct {
 	log          slog.Instance
 }
 
+// MakeKeyRingManager creates a new instance of KeyRingManager
 func MakeKeyRingManager(log slog.Instance) *KeyRingManager {
 	if log == nil {
 		log = slog.Scope("KRM")

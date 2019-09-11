@@ -21,6 +21,7 @@ type AgentAdmin struct {
 	log     slog.Instance
 }
 
+// MakeAgentAdmin creates an instance of Agent Administration endpoint
 func MakeAgentAdmin(log slog.Instance, tm etc.TokenManager, am etc.AuthManager) *AgentAdmin {
 	if log == nil {
 		log = slog.Scope("AgentAdmin")
@@ -92,7 +93,7 @@ func (gi *graphIntercept) WriteHeader(statusCode int) {
 }
 
 func (admin *AgentAdmin) handleGraphQL(w http.ResponseWriter, r *http.Request) {
-	log := wrapLogWithRequestId(admin.log, r)
+	log := wrapLogWithRequestID(admin.log, r)
 	InitHTTPTimer(log, r)
 
 	defer func() {

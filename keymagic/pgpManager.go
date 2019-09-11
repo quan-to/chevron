@@ -52,6 +52,7 @@ type PGPManager struct {
 	log                  slog.Instance
 }
 
+// MakePGPManagerWithKRM creates a new PGPInterface with the specified keyBackend, log and KeyRingManager
 func MakePGPManagerWithKRM(log slog.Instance, keyBackend keyBackend.Backend, krm etc.KRMInterface) etc.PGPInterface {
 	if log == nil {
 		log = slog.Scope("PGPMan")

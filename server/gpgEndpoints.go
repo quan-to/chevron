@@ -19,6 +19,7 @@ type GPGEndpoint struct {
 	log slog.Instance
 }
 
+// MakeGPGEndpoint Creates an instance of an endpoint that handles GPG Calls
 func MakeGPGEndpoint(log slog.Instance, sm etc.SMInterface, gpg etc.PGPInterface) *GPGEndpoint {
 	if log == nil {
 		log = slog.Scope("GPG (HTTP)")
@@ -45,7 +46,7 @@ func (ge *GPGEndpoint) AttachHandlers(r *mux.Router) {
 }
 
 func (ge *GPGEndpoint) decrypt(w http.ResponseWriter, r *http.Request) {
-	log := wrapLogWithRequestId(ge.log, r)
+	log := wrapLogWithRequestID(ge.log, r)
 	InitHTTPTimer(log, r)
 
 	var data models.GPGDecryptData
@@ -75,7 +76,7 @@ func (ge *GPGEndpoint) decrypt(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ge *GPGEndpoint) encrypt(w http.ResponseWriter, r *http.Request) {
-	log := wrapLogWithRequestId(ge.log, r)
+	log := wrapLogWithRequestID(ge.log, r)
 	InitHTTPTimer(log, r)
 	var data models.GPGEncryptData
 
@@ -110,7 +111,7 @@ func (ge *GPGEndpoint) encrypt(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ge *GPGEndpoint) verifySignature(w http.ResponseWriter, r *http.Request) {
-	log := wrapLogWithRequestId(ge.log, r)
+	log := wrapLogWithRequestID(ge.log, r)
 	InitHTTPTimer(log, r)
 	var data models.GPGVerifySignatureData
 
@@ -150,7 +151,7 @@ func (ge *GPGEndpoint) verifySignature(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ge *GPGEndpoint) verifySignatureQuanto(w http.ResponseWriter, r *http.Request) {
-	log := wrapLogWithRequestId(ge.log, r)
+	log := wrapLogWithRequestID(ge.log, r)
 	InitHTTPTimer(log, r)
 	var data models.GPGVerifySignatureData
 
@@ -191,7 +192,7 @@ func (ge *GPGEndpoint) verifySignatureQuanto(w http.ResponseWriter, r *http.Requ
 }
 
 func (ge *GPGEndpoint) sign(w http.ResponseWriter, r *http.Request) {
-	log := wrapLogWithRequestId(ge.log, r)
+	log := wrapLogWithRequestID(ge.log, r)
 	InitHTTPTimer(log, r)
 	var data models.GPGSignData
 
@@ -226,7 +227,7 @@ func (ge *GPGEndpoint) sign(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ge *GPGEndpoint) signQuanto(w http.ResponseWriter, r *http.Request) {
-	log := wrapLogWithRequestId(ge.log, r)
+	log := wrapLogWithRequestID(ge.log, r)
 	InitHTTPTimer(log, r)
 	var data models.GPGSignData
 
@@ -263,7 +264,7 @@ func (ge *GPGEndpoint) signQuanto(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ge *GPGEndpoint) unlockKey(w http.ResponseWriter, r *http.Request) {
-	log := wrapLogWithRequestId(ge.log, r)
+	log := wrapLogWithRequestID(ge.log, r)
 	InitHTTPTimer(log, r)
 	var data models.GPGUnlockKeyData
 
@@ -295,7 +296,7 @@ func (ge *GPGEndpoint) unlockKey(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ge *GPGEndpoint) generateKey(w http.ResponseWriter, r *http.Request) {
-	log := wrapLogWithRequestId(ge.log, r)
+	log := wrapLogWithRequestID(ge.log, r)
 	InitHTTPTimer(log, r)
 	var data models.GPGGenerateKeyData
 

@@ -22,6 +22,7 @@ type AgentProxy struct {
 	log       slog.Instance
 }
 
+// MakeAgentProxy creates an instance of agent proxy endpoint
 func MakeAgentProxy(log slog.Instance, gpg etc.PGPInterface, tm etc.TokenManager) *AgentProxy {
 	if log == nil {
 		log = slog.Scope("Agent")
@@ -41,7 +42,7 @@ func MakeAgentProxy(log slog.Instance, gpg etc.PGPInterface, tm etc.TokenManager
 }
 
 func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) {
-	log := wrapLogWithRequestId(proxy.log, r)
+	log := wrapLogWithRequestID(proxy.log, r)
 	InitHTTPTimer(log, r)
 
 	defer func() {

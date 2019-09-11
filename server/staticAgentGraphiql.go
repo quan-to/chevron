@@ -27,7 +27,7 @@ func MakeStaticGraphiQL(log slog.Instance) *StaticGraphiQL {
 }
 
 func (gql *StaticGraphiQL) displayFile(filename string, w http.ResponseWriter, r *http.Request) {
-	log := wrapLogWithRequestId(gql.log, r)
+	log := wrapLogWithRequestID(gql.log, r)
 	InitHTTPTimer(log, r)
 
 	defer func() {

@@ -25,6 +25,7 @@ type SecretsManager struct {
 	log                  slog.Instance
 }
 
+// MakeSecretsManager creates an instance of the backend secrets manager
 func MakeSecretsManager(log slog.Instance) *SecretsManager {
 	if log == nil {
 		log = slog.Scope("SM")

@@ -15,6 +15,7 @@ type TestsEndpoint struct {
 	log slog.Instance
 }
 
+// MakeTestsEndpoint creates an instance of healthcheck tests endpoint
 func MakeTestsEndpoint(log slog.Instance) *TestsEndpoint {
 	if log == nil {
 		log = slog.Scope("Tests")

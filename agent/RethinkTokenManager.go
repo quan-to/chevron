@@ -14,6 +14,7 @@ type RethinkTokenManager struct {
 	log slog.Instance
 }
 
+// MakeRethinkTokenManager creates an instance of TokenManager that stores data in RethinkDB
 func MakeRethinkTokenManager(logger slog.Instance) *RethinkTokenManager {
 	if logger == nil {
 		logger = slog.Scope("RQL-TM")

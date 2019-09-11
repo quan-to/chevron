@@ -11,6 +11,7 @@ import (
 	"github.com/quan-to/slog"
 )
 
+// MakePGP creates a new PGPInterface using environment variables VaultStorage, KeyPrefix, PrivateKeyFolder
 func MakePGP(log slog.Instance) etc.PGPInterface {
 	var kb keyBackend.Backend
 
@@ -23,6 +24,7 @@ func MakePGP(log slog.Instance) etc.PGPInterface {
 	return keymagic.MakePGPManagerWithKRM(log, kb, keymagic.MakeKeyRingManager(log))
 }
 
+// MakeVoidPGP creates a PGPInterface that does not store anything anywhere
 func MakeVoidPGP(log slog.Instance) etc.PGPInterface {
 	return keymagic.MakePGPManagerWithKRM(log, keyBackend.MakeVoidBackend(), keymagic.MakeKeyRingManager(log))
 }
