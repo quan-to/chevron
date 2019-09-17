@@ -54,7 +54,7 @@ func DbSetup() {
 func InitTables() {
 	if remote_signer.EnableRethinkSKS {
 		slog.UnsetTestMode()
-		dbLog.Await("Running InitTables")
+		dbLog.Await("Starting running InitTables")
 		dbs := GetDatabases()
 		conn := GetConnection()
 
