@@ -15,16 +15,16 @@ func TestAddKey(t *testing.T) {
 	remote_signer.PushVariables()
 	defer remote_signer.PopVariables()
 	remote_signer.MaxKeyRingCache = 10
-	krm := MakeKeyRingManager()
+	krm := MakeKeyRingManager(nil)
 	var kb keyBackend.Backend
 
 	if remote_signer.VaultStorage {
-		kb = vaultManager.MakeVaultManager(remote_signer.KeyPrefix)
+		kb = vaultManager.MakeVaultManager(nil, remote_signer.KeyPrefix)
 	} else {
-		kb = keyBackend.MakeSaveToDiskBackend(remote_signer.PrivateKeyFolder, remote_signer.KeyPrefix)
+		kb = keyBackend.MakeSaveToDiskBackend(nil, remote_signer.PrivateKeyFolder, remote_signer.KeyPrefix)
 	}
 
-	gpg := MakePGPManagerWithKRM(kb, krm)
+	gpg := MakePGPManagerWithKRM(nil, kb, krm)
 
 	str, err := gpg.GeneratePGPKey("", "", gpg.MinKeyBits())
 
@@ -130,7 +130,7 @@ func TestGetKeyExternal(t *testing.T) {
 	defer remote_signer.PopVariables()
 	// Test External SKS Fetch
 	remote_signer.SKSServer = "https://keyserver.ubuntu.com/"
-	krm := MakeKeyRingManager()
+	krm := MakeKeyRingManager(nil)
 	remote_signer.EnableRethinkSKS = false
 	e := krm.GetKey(rstest.ExternalKeyFingerprint)
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/QuantoError"
 	"github.com/quan-to/chevron/bootstrap"
 	"github.com/quan-to/chevron/etc/magicBuilder"
@@ -12,15 +13,19 @@ import (
 	"syscall"
 )
 
-var log = slog.Scope("RemoteSigner")
+var log = slog.Scope("QRS").Tag(remote_signer.DefaultTag)
 
 func main() {
+	if os.Getenv("SHOW_LINES") == "true" {
+		slog.SetShowLines(true)
+	}
+
 	QuantoError.EnableStackTrace()
 
 	bootstrap.RunBootstraps()
 
-	sm := magicBuilder.MakeSM()
-	gpg := magicBuilder.MakePGP()
+	sm := magicBuilder.MakeSM(log)
+	gpg := magicBuilder.MakePGP(log)
 
 	gpg.LoadKeys()
 

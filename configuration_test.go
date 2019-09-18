@@ -37,6 +37,7 @@ func testIntVar(v *int, envName string, localName string, t *testing.T) {
 	if *v != val {
 		t.Errorf("%s variable does not come from %s. Expected %d got %d", localName, envName, *v, val)
 	}
+
 	slog.UnsetTestMode()
 }
 

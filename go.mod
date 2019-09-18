@@ -11,6 +11,7 @@ require (
 	github.com/asticode/go-astilectron-bootstrap v0.0.0-20180616141213-b3211646d205
 	github.com/asticode/go-astilectron-bundler v0.0.0-20190406155441-5fc4c9f0c990 // indirect
 	github.com/asticode/go-bindata v0.0.0-20151023091102-a0ff2567cfb7 // indirect
+	github.com/bouk/monkey v1.0.1
 	github.com/cenkalti/backoff v2.1.1+incompatible // indirect
 	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
@@ -26,13 +27,13 @@ require (
 	github.com/hashicorp/vault v1.1.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/kr/pty v1.1.4 // indirect
-	github.com/logrusorgru/aurora v0.0.0-20181002194514-a7b3b318ed4e
+	github.com/logrusorgru/aurora v0.0.0-20190803045625-94edacc10f9b
 	github.com/mewkiz/pkg v0.0.0-20190317153131-e8616647c365
 	github.com/mitchellh/mapstructure v1.1.2 // indirect
 	github.com/opentracing/opentracing-go v1.1.0 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/pkg/errors v0.8.1
-	github.com/quan-to/slog v0.0.0-20190317205605-56a2b4159924
+	github.com/quan-to/slog v0.0.0-20190910164334-59ecc6f56510
 	github.com/ryanuber/go-glob v1.0.0 // indirect
 	github.com/sam-kamerer/go-plister v1.1.2 // indirect
 	github.com/sirupsen/logrus v1.4.1 // indirect

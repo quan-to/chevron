@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mewkiz/pkg/osutil"
+	"github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/models/KubernetesModels"
 	"github.com/quan-to/slog"
 	"io/ioutil"
@@ -17,7 +18,7 @@ var inKubernetes = false
 var currentNamespace = ""
 var currentHostname = ""
 var currentKubeToken = ""
-var kubeLog = slog.Scope("Kubernetes")
+var kubeLog = slog.Scope("Kubernetes").Tag(remote_signer.DefaultTag)
 var me *KubernetesModels.Pod
 
 func serviceURL() string {
@@ -34,15 +35,15 @@ func init() {
 
 func setup() {
 	var err error
-	kubeLog.Info("Checking if running in kubernetes")
+	kubeLog.Await("Checking if running in kubernetes")
 	inKubernetes = checkInKubernetes()
 
 	if !inKubernetes {
-		kubeLog.Info("Not running in kubernetes...")
+		kubeLog.Done("Not running in kubernetes...")
 		return
 	}
 
-	kubeLog.Info("In Kubernetes!")
+	kubeLog.Done("In Kubernetes!")
 	currentHostname, err = os.Hostname()
 	if err != nil {
 		kubeLog.Error("Error getting hostname: %s", err)

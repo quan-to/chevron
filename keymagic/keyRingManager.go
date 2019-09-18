@@ -8,20 +8,27 @@ import (
 	"sync"
 )
 
-var krmLog = slog.Scope("KeyRingManager")
-
 type KeyRingManager struct {
 	sync.Mutex
 	fingerPrints []string
 	entities     map[string]*openpgp.Entity
 	keyInfo      map[string]models.KeyInfo
+	log          slog.Instance
 }
 
-func MakeKeyRingManager() *KeyRingManager {
+// MakeKeyRingManager creates a new instance of KeyRingManager
+func MakeKeyRingManager(log slog.Instance) *KeyRingManager {
+	if log == nil {
+		log = slog.Scope("KRM")
+	} else {
+		log = log.SubScope("KRM")
+	}
+
 	return &KeyRingManager{
 		fingerPrints: make([]string, 0),
 		entities:     make(map[string]*openpgp.Entity),
 		keyInfo:      make(map[string]models.KeyInfo),
+		log:          log,
 	}
 }
 
@@ -51,23 +58,24 @@ func (krm *KeyRingManager) addFp(fp string) {
 }
 
 func (krm *KeyRingManager) AddKey(key *openpgp.Entity, nonErasable bool) {
+	krm.log.DebugNote("AddKey(---, %v)", nonErasable)
 	krm.Lock()
 	fp := remote_signer.ByteFingerPrint2FP16(key.PrimaryKey.Fingerprint[:])
 	if krm.containsFp(fp) {
-		krmLog.Debug("Key %s already in keyring", fp)
+		krm.log.Debug("Key %s already in keyring", fp)
 		krm.Unlock()
 		return
 	}
 	if !nonErasable {
 		if len(krm.fingerPrints)+1 > remote_signer.MaxKeyRingCache {
 			lastFp := krm.fingerPrints[0]
-			krmLog.Debug("	There are more cached keys than allowed. Removing first key %s", lastFp)
+			krm.log.Debug("	There are more cached keys than allowed. Removing first key %s", lastFp)
 			krm.removeFp(lastFp)
 		}
 		krm.addFp(fp)
 	}
 
-	krmLog.Info("Adding Public Key %s to the cache", fp)
+	krm.log.Info("Adding Public Key %s to the cache", fp)
 
 	krm.entities[fp] = key
 
@@ -86,12 +94,13 @@ func (krm *KeyRingManager) AddKey(key *openpgp.Entity, nonErasable bool) {
 	for _, sub := range key.Subkeys {
 		subfp := remote_signer.ByteFingerPrint2FP16(sub.PublicKey.Fingerprint[:])
 		subE := remote_signer.CreateEntityForSubKey(fp, sub.PublicKey, sub.PrivateKey)
-		krmLog.Debug("	Adding also subkey %s", subfp)
+		krm.log.Debug("	Adding also subkey %s", subfp)
 		krm.AddKey(subE, nonErasable)
 	}
 }
 
 func (krm *KeyRingManager) GetCachedKeys() []models.KeyInfo {
+	krm.log.DebugNote("GetCachedKeys()")
 	krm.Lock()
 	defer krm.Unlock()
 	arr := make([]models.KeyInfo, 0)
@@ -104,6 +113,7 @@ func (krm *KeyRingManager) GetCachedKeys() []models.KeyInfo {
 }
 
 func (krm *KeyRingManager) ContainsKey(fp string) bool {
+	krm.log.DebugNote("ContainsKey(%s)", fp)
 	krm.Lock()
 	defer krm.Unlock()
 
@@ -111,6 +121,7 @@ func (krm *KeyRingManager) ContainsKey(fp string) bool {
 }
 
 func (krm *KeyRingManager) GetKey(fp string) *openpgp.Entity {
+	krm.log.DebugNote("GetKey(%s)", fp)
 	krm.Lock()
 	ent := krm.entities[fp]
 	krm.Unlock()
@@ -120,22 +131,23 @@ func (krm *KeyRingManager) GetKey(fp string) *openpgp.Entity {
 	}
 
 	// Try fetch SKS
-	krmLog.Info("Key %s not found in local cache. Trying fetch KeyStore", fp)
+	krm.log.Await("Key %s not found in local cache. Trying fetch KeyStore", fp)
 
 	asciiArmored, err := PKSGetKey(fp)
 
 	if err != nil {
-		krmLog.Error("Error fetching from KeyStore: %s", err)
-		krmLog.Error(err)
+		krm.log.Error("Error fetching from KeyStore: %s", err)
+		krm.log.Error(err)
+		return nil
 	}
 
 	if len(asciiArmored) > 0 {
 		k, err := remote_signer.ReadKeyToEntity(asciiArmored)
 		if err != nil {
-			krmLog.Error("Invalid key received from PKS! Error: %s", err)
+			krm.log.Error("Invalid key received from PKS! Error: %s", err)
 			return nil
 		}
-		krmLog.Info("Key %s found in PKS. Adding to local cache", fp)
+		krm.log.Info("Key %s found in PKS. Adding to local cache", fp)
 		ent = k
 		krm.AddKey(k, false)
 	}
@@ -144,5 +156,6 @@ func (krm *KeyRingManager) GetKey(fp string) *openpgp.Entity {
 }
 
 func (krm *KeyRingManager) GetFingerPrints() []string {
+	krm.log.DebugNote("GetFingerPrints()")
 	return krm.fingerPrints
 }

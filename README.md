@@ -64,4 +64,4 @@ These are the Environment Variables that you can set to manage the webserver:
 *   `VAULT_NAMESPACE` => if a Hashicorp Vault Namespace to use (appended to backend, for example if namespace is `remote-signer` the keys are stored under `secret/remote-signer`)
 *   `HTTP_PORT` => HTTP Port that Remote Signer will run
 *   `READONLY_KEYPATH` => If the keypath is readonly. If `true` then it will create a temporary folder in `/tmp` and copy all keys to there so it can work over it. 
-
+*   `SHOW_LINES` => Show filename and lines in logs

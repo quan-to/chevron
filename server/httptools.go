@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/logrusorgru/aurora"
+	"github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/QuantoError"
 	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/slog"
@@ -17,18 +18,21 @@ import (
 
 const httpInternalTimestamp = "___HTTP_INTERNAL_TIMESTAMP___"
 
-var httpToolsLog = slog.Scope("HTTP Tools")
+// HTTPHandleFunc is a type for a HTTP Handler Function
+type HTTPHandleFunc = func(w http.ResponseWriter, r *http.Request)
 
-func WriteJSON(data interface{}, statusCode int, w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
+// HTTPHandleFuncWithLog is a type for a HTTP Handler Function with an slog instance argument
+type HTTPHandleFuncWithLog = func(log slog.Instance, w http.ResponseWriter, r *http.Request)
 
-	if logI == nil {
-		logI = httpToolsLog
-	}
+// WriteJSON returns a JSON Object to the specified http.ResponseWriter
+func WriteJSON(data interface{}, statusCode int, w http.ResponseWriter, r *http.Request, logI slog.Instance) {
 
 	b, err := json.Marshal(data)
 
 	if err != nil {
-		httpToolsLog.Error("Error serializing object: %s", err)
+		logI.WithFields(map[string]interface{}{
+			"data": data,
+		}).Error("Error serializing object: %s", err)
 		w.Header().Set("Content-Type", models.MimeText)
 		w.WriteHeader(500)
 		_, _ = w.Write([]byte("Internal Server Error"))
@@ -42,7 +46,8 @@ func WriteJSON(data interface{}, statusCode int, w http.ResponseWriter, r *http.
 	LogExit(logI, r, statusCode, n)
 }
 
-func UnmarshalBodyOrDie(outData interface{}, w http.ResponseWriter, r *http.Request, logI *slog.Instance) bool {
+// UnmarshalBodyOrDie tries to unmarshal the request body into the specified interface and returns InvalidFieldData to the client if something is wrong
+func UnmarshalBodyOrDie(outData interface{}, w http.ResponseWriter, r *http.Request, logI slog.Instance) bool {
 	body, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
@@ -64,35 +69,43 @@ func UnmarshalBodyOrDie(outData interface{}, w http.ResponseWriter, r *http.Requ
 	return true
 }
 
-func InvalidFieldData(field string, message string, w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
+// InvalidFieldData helper method to return an invalid field data error to http client
+func InvalidFieldData(field string, message string, w http.ResponseWriter, r *http.Request, logI slog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.InvalidFieldData, field, message, nil), 400, w, r, logI)
 }
 
-func PermissionDenied(field string, message string, w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
+// PermissionDenied helper method to return an permission denied error to http client
+func PermissionDenied(field string, message string, w http.ResponseWriter, r *http.Request, logI slog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.PermissionDenied, field, message, nil), 400, w, r, logI)
 }
 
-func NotFound(field string, message string, w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
+// NotFound helper method to return an not found error to http client
+func NotFound(field string, message string, w http.ResponseWriter, r *http.Request, logI slog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.NotFound, field, message, nil), 400, w, r, logI)
 }
 
-func NotImplemented(w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
+// NotImplemented helper method to return an not implemented error to http client
+func NotImplemented(w http.ResponseWriter, r *http.Request, logI slog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.NotImplemented, "server", "This call is not implemented", nil), 400, w, r, logI)
 }
 
-func CatchAllError(data interface{}, w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
+// CatchAllError helper method to return an internal server error error to http client in case of non expected errors
+func CatchAllError(data interface{}, w http.ResponseWriter, r *http.Request, logI slog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.InternalServerError, "server", "There was an internal server error.", data), 500, w, r, logI)
 }
 
-func CatchAllRouter(w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
+// CatchAllRouter helper method to return an not found error error to http client in case of non expected endpoints
+func CatchAllRouter(w http.ResponseWriter, r *http.Request, logI slog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.NotFound, "path", "The specified URL does not exists.", nil), 404, w, r, logI)
 }
 
-func InternalServerError(message string, data interface{}, w http.ResponseWriter, r *http.Request, logI *slog.Instance) {
+// InternalServerError helper method to return an internal server error to http client
+func InternalServerError(message string, data interface{}, w http.ResponseWriter, r *http.Request, logI slog.Instance) {
 	WriteJSON(QuantoError.New(QuantoError.InternalServerError, "server", message, data), 500, w, r, logI)
 }
 
-func LogExit(slog *slog.Instance, r *http.Request, statusCode int, bodyLength int) {
+// LogExit does the logging of the exit call inside a HTTP Request
+func LogExit(slog slog.Instance, r *http.Request, statusCode int, bodyLength int) {
 	method := aurora.Bold(r.Method).Cyan()
 	hts := r.Header.Get(httpInternalTimestamp)
 	ts := float64(0)
@@ -115,21 +128,46 @@ func LogExit(slog *slog.Instance, r *http.Request, statusCode int, bodyLength in
 	case 200:
 		statusCodeStr = aurora.Green(statusCodeStr).Inverse().Bold()
 	default:
-		statusCodeStr = aurora.Gray(statusCodeStr).Bold()
+		statusCodeStr = aurora.Gray(7, statusCodeStr).Bold()
 	}
 
 	host, _, _ := net.SplitHostPort(r.RemoteAddr)
 
-	remote := aurora.Gray(host)
+	remote := aurora.Gray(7, host)
 
 	if ts != 0 {
-		slog.LogNoFormat("%s (%8.2f ms) {%8d bytes} %-4s %s from %s", statusCodeStr, ts, bodyLength, method, aurora.Gray(r.URL.Path), remote)
+		slog.Done("%s (%8.2f ms) {%8d bytes} %-4s %s from %s", statusCodeStr, ts, bodyLength, method, aurora.Gray(7, r.URL.Path), remote)
 	} else {
-		slog.LogNoFormat("%s {%8d bytes}          %-4s %s from %s", statusCodeStr, bodyLength, method, aurora.Gray(r.URL.Path), remote)
+		slog.Done("%s {%8d bytes}          %-4s %s from %s", statusCodeStr, bodyLength, method, aurora.Gray(7, r.URL.Path), remote)
 	}
 }
 
-func InitHTTPTimer(r *http.Request) {
+// InitHTTPTimer initializes the HTTP Request timer and prints a log line representing a received HTTP Request
+func InitHTTPTimer(log slog.Instance, r *http.Request) {
+	method := aurora.Bold(r.Method).Cyan()
+	host, _, _ := net.SplitHostPort(r.RemoteAddr)
+
+	remote := aurora.Gray(7, host)
+
 	t := time.Now().UnixNano()
 	r.Header.Set(httpInternalTimestamp, fmt.Sprintf("%d", t))
+	log.Await("%s                                %-4s %s from %s", aurora.Yellow("[...]").Inverse().Bold(), method, aurora.Gray(7, r.URL.Path), remote)
+}
+
+func wrapWithLog(log slog.Instance, f HTTPHandleFuncWithLog) HTTPHandleFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		f(log, w, r)
+	}
+}
+
+func wrapLogWithRequestID(log slog.Instance, r *http.Request) slog.Instance {
+	id, ok := r.Header["X-Quanto-Request-Id"]
+	if ok && len(id) >= 1 {
+		// Tag the log
+		return log.Tag(id[0])
+	}
+
+	// Generate a Request ID
+
+	return log.Tag(remote_signer.GenerateTag())
 }
