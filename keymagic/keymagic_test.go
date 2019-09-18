@@ -57,15 +57,15 @@ func TestMain(m *testing.M) {
 	var kb keyBackend.Backend
 
 	if remote_signer.VaultStorage {
-		kb = vaultManager.MakeVaultManager(remote_signer.KeyPrefix)
+		kb = vaultManager.MakeVaultManager(nil, remote_signer.KeyPrefix)
 	} else {
-		kb = keyBackend.MakeSaveToDiskBackend(remote_signer.PrivateKeyFolder, remote_signer.KeyPrefix)
+		kb = keyBackend.MakeSaveToDiskBackend(nil, remote_signer.PrivateKeyFolder, remote_signer.KeyPrefix)
 	}
 
-	pgpMan = MakePGPManagerWithKRM(kb, MakeKeyRingManager()).(*PGPManager)
+	pgpMan = MakePGPManagerWithKRM(nil, kb, MakeKeyRingManager(nil)).(*PGPManager)
 	pgpMan.LoadKeys()
 
-	sm = MakeSecretsManager()
+	sm = MakeSecretsManager(nil)
 
 	err = pgpMan.UnlockKey(rstest.TestKeyFingerprint, rstest.TestKeyPassword)
 

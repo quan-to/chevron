@@ -12,17 +12,23 @@ import (
 	"net/http"
 )
 
-var jfcLog = slog.Scope("JFC Endpoint")
-
 type JFCEndpoint struct {
 	sm  etc.SMInterface
 	gpg etc.PGPInterface
+	log slog.Instance
 }
 
-func MakeJFCEndpoint(sm etc.SMInterface, gpg etc.PGPInterface) *JFCEndpoint {
+func MakeJFCEndpoint(log slog.Instance, sm etc.SMInterface, gpg etc.PGPInterface) *JFCEndpoint {
+	if log == nil {
+		log = slog.Scope("JFC")
+	} else {
+		log = log.SubScope("JFC")
+	}
+
 	return &JFCEndpoint{
 		sm:  sm,
 		gpg: gpg,
+		log: log,
 	}
 }
 
@@ -32,17 +38,18 @@ func (jfc *JFCEndpoint) AttachHandlers(r *mux.Router) {
 }
 
 func (jfc *JFCEndpoint) cipher(w http.ResponseWriter, r *http.Request) {
-	InitHTTPTimer(r)
+	log := wrapLogWithRequestID(jfc.log, r)
+	InitHTTPTimer(log, r)
 
 	var data models.FieldCipherInput
 
-	if !UnmarshalBodyOrDie(&data, w, r, sksLog) {
+	if !UnmarshalBodyOrDie(&data, w, r, log) {
 		return
 	}
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, sksLog)
+			CatchAllError(rec, w, r, log)
 		}
 	}()
 
@@ -51,14 +58,14 @@ func (jfc *JFCEndpoint) cipher(w http.ResponseWriter, r *http.Request) {
 	for i, v := range data.Keys {
 		k := jfc.gpg.GetPublicKeyEntity(v)
 		if k == nil {
-			NotFound(fmt.Sprintf("data.Keys[%d]", i), fmt.Sprintf("publickey for fingerPrint %s was not found", v), w, r, jfcLog)
+			NotFound(fmt.Sprintf("data.Keys[%d]", i), fmt.Sprintf("publickey for fingerPrint %s was not found", v), w, r, log)
 			return
 		}
 		keys = append(keys, k)
 	}
 
 	if len(keys) == 0 {
-		InvalidFieldData("data.Keys", "no keys specified", w, r, jfcLog)
+		InvalidFieldData("data.Keys", "no keys specified", w, r, log)
 		return
 	}
 
@@ -67,7 +74,7 @@ func (jfc *JFCEndpoint) cipher(w http.ResponseWriter, r *http.Request) {
 	packet, err := cipher.GenerateEncryptedPacket(data.JSON, data.SkipFields)
 
 	if err != nil {
-		InternalServerError(err.Error(), err, w, r, jfcLog)
+		InternalServerError(err.Error(), err, w, r, log)
 		return
 	}
 
@@ -76,35 +83,36 @@ func (jfc *JFCEndpoint) cipher(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
 	n, _ := w.Write([]byte(d))
-	LogExit(geLog, r, 200, n)
+	LogExit(log, r, 200, n)
 }
 
 func (jfc *JFCEndpoint) decipher(w http.ResponseWriter, r *http.Request) {
-	InitHTTPTimer(r)
+	log := wrapLogWithRequestID(jfc.log, r)
+	InitHTTPTimer(log, r)
 
 	var data models.FieldDecipherInput
 
-	if !UnmarshalBodyOrDie(&data, w, r, sksLog) {
+	if !UnmarshalBodyOrDie(&data, w, r, log) {
 		return
 	}
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, sksLog)
+			CatchAllError(rec, w, r, log)
 		}
 	}()
 
 	keys := jfc.gpg.GetPrivate(data.KeyFingerprint)
 	if len(keys) == 0 {
-		NotFound("keyFingerprint", fmt.Sprintf("There is no such key %s or its not decrypted.", data.KeyFingerprint), w, r, jfcLog)
+		NotFound("keyFingerprint", fmt.Sprintf("There is no such key %s or its not decrypted.", data.KeyFingerprint), w, r, log)
 		return
 	}
 
 	decipher, err := fieldcipher.MakeDecipher(keys)
 
 	if err != nil {
-		jfcLog.Error(err)
-		InternalServerError("Error processing your request. Please try again.", err, w, r, jfcLog)
+		log.Error(err)
+		InternalServerError("Error processing your request. Please try again.", err, w, r, log)
 		return
 	}
 
@@ -114,8 +122,8 @@ func (jfc *JFCEndpoint) decipher(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		jfcLog.Error(err)
-		InvalidFieldData("payload", err.Error(), w, r, jfcLog)
+		log.Error(err)
+		InvalidFieldData("payload", err.Error(), w, r, log)
 		return
 	}
 
@@ -124,5 +132,5 @@ func (jfc *JFCEndpoint) decipher(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
 	n, _ := w.Write([]byte(d))
-	LogExit(geLog, r, 200, n)
+	LogExit(log, r, 200, n)
 }

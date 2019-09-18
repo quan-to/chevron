@@ -48,7 +48,7 @@ func WaitDatabaseDrop(database string) {
 }
 
 func WaitDatabaseCreate(database string) {
-	dbLog.Info("Waiting for database create")
+	dbLog.Await("Waiting for database create")
 	nodes := NumNodes() * 4
 	for i := 0; i < nodes; i++ {
 		dbs := GetDatabases()
@@ -61,10 +61,11 @@ func WaitDatabaseCreate(database string) {
 	_ = r.DB(database).
 		Wait(r.WaitOpts{Timeout: 0}).
 		Exec(GetConnection())
+	dbLog.Done("Done waiting database create")
 }
 
 func WaitTableCreate(table string) {
-	dbLog.Info("Waiting for table create")
+	dbLog.Await("Waiting for table %s create", table)
 	nodes := NumNodes() * 4
 	for i := 0; i < nodes; i++ {
 		tables := GetTables()
@@ -78,10 +79,11 @@ func WaitTableCreate(table string) {
 		Table(table).
 		Wait(r.WaitOpts{Timeout: 0}).
 		Exec(GetConnection())
+	dbLog.Done("Done waiting table %s create", table)
 }
 
 func WaitTableIndexCreate(table, index string) {
-	dbLog.Info("Waiting for index create")
+	dbLog.Await("Waiting for index %s/%s create", table, index)
 	nodes := NumNodes() * 4
 	for i := 0; i < nodes; i++ {
 		indexes := GetTableIndexes(table)
@@ -90,4 +92,5 @@ func WaitTableIndexCreate(table, index string) {
 			indexes = GetTableIndexes(table)
 		}
 	}
+	dbLog.Done("Done waiting index %s/%s create", table, index)
 }

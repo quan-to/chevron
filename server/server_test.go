@@ -143,8 +143,8 @@ func TestMain(m *testing.M) {
 	remote_signer.MasterGPGKeyPath = "../tests/testkey_privateTestKey.gpg"
 	remote_signer.MasterGPGKeyPasswordPath = "../tests/testprivatekeyPassword.txt"
 
-	sm = magicBuilder.MakeSM()
-	gpg = magicBuilder.MakePGP()
+	sm = magicBuilder.MakeSM(nil)
+	gpg = magicBuilder.MakePGP(nil)
 	gpg.LoadKeys()
 
 	err = gpg.UnlockKey(testKeyFingerprint, testKeyPassword)

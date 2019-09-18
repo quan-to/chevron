@@ -10,18 +10,19 @@ import (
 	"net/http"
 )
 
-func GenRemoteSignerServerMux(slog *slog.Instance, sm etc.SMInterface, gpg etc.PGPInterface) *mux.Router {
-	ge := MakeGPGEndpoint(sm, gpg)
-	ie := MakeInternalEndpoint(sm, gpg)
-	te := MakeTestsEndpoint()
-	kre := MakeKeyRingEndpoint(sm, gpg)
-	sks := MakeSKSEndpoint(sm, gpg)
-	tm := agent.MakeTokenManager()
-	am := agent.MakeAuthManager()
-	ap := MakeAgentProxy(gpg, tm)
-	sGql := MakeStaticGraphiQL()
-	agentAdmin := MakeAgentAdmin(tm, am)
-	jfc := MakeJFCEndpoint(sm, gpg)
+func GenRemoteSignerServerMux(slog slog.Instance, sm etc.SMInterface, gpg etc.PGPInterface) *mux.Router {
+	log := slog.Scope("MUX")
+	ge := MakeGPGEndpoint(log, sm, gpg)
+	ie := MakeInternalEndpoint(log, sm, gpg)
+	te := MakeTestsEndpoint(log)
+	kre := MakeKeyRingEndpoint(log, sm, gpg)
+	sks := MakeSKSEndpoint(log, sm, gpg)
+	tm := agent.MakeTokenManager(log)
+	am := agent.MakeAuthManager(log)
+	ap := MakeAgentProxy(log, gpg, tm)
+	sGql := MakeStaticGraphiQL(log)
+	agentAdmin := MakeAgentAdmin(log, tm, am)
+	jfc := MakeJFCEndpoint(log, sm, gpg)
 
 	if ge == nil || ie == nil || te == nil || kre == nil || sks == nil || tm == nil || am == nil || ap == nil || agentAdmin == nil {
 		slog.Error("One or more services has not been initialized.")
@@ -39,7 +40,7 @@ func GenRemoteSignerServerMux(slog *slog.Instance, sm etc.SMInterface, gpg etc.P
 
 	r := mux.NewRouter()
 	// Add for /
-	AddHKPEndpoints(r.PathPrefix("/pks").Subrouter())
+	AddHKPEndpoints(log, r.PathPrefix("/pks").Subrouter())
 	ge.AttachHandlers(r.PathPrefix("/gpg").Subrouter())
 	ie.AttachHandlers(r.PathPrefix("/__internal").Subrouter())
 	te.AttachHandlers(r.PathPrefix("/tests").Subrouter())
@@ -48,7 +49,7 @@ func GenRemoteSignerServerMux(slog *slog.Instance, sm etc.SMInterface, gpg etc.P
 	jfc.AttachHandlers(r.PathPrefix("/fieldCipher").Subrouter())
 
 	// Add for /remoteSigner
-	AddHKPEndpoints(r.PathPrefix("/remoteSigner/pks").Subrouter())
+	AddHKPEndpoints(log, r.PathPrefix("/remoteSigner/pks").Subrouter())
 	ge.AttachHandlers(r.PathPrefix("/remoteSigner/gpg").Subrouter())
 	ie.AttachHandlers(r.PathPrefix("/remoteSigner/__internal").Subrouter())
 	te.AttachHandlers(r.PathPrefix("/remoteSigner/tests").Subrouter())
@@ -67,14 +68,14 @@ func GenRemoteSignerServerMux(slog *slog.Instance, sm etc.SMInterface, gpg etc.P
 
 	// Catch All for unhandled endpoints
 	r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		InitHTTPTimer(r)
-		CatchAllRouter(w, r, slog)
+		InitHTTPTimer(log, r)
+		CatchAllRouter(w, r, log)
 	})
 
 	return r
 }
 
-func RunRemoteSignerServer(slog *slog.Instance, sm etc.SMInterface, gpg etc.PGPInterface) chan bool {
+func RunRemoteSignerServer(slog slog.Instance, sm etc.SMInterface, gpg etc.PGPInterface) chan bool {
 
 	r := GenRemoteSignerServerMux(slog, sm, gpg)
 

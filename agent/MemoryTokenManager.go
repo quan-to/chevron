@@ -10,8 +10,6 @@ import (
 	"time"
 )
 
-var mtmLog = slog.Scope("Memory-TM")
-
 type MemoryUser struct {
 	username    string
 	fullname    string
@@ -52,13 +50,21 @@ func (mu *MemoryUser) GetExpiration() time.Time {
 type MemoryTokenManager struct {
 	storedTokens map[string]*MemoryUser
 	lock         sync.Mutex
+	log          slog.Instance
 }
 
-func MakeMemoryTokenManager() *MemoryTokenManager {
-	mtmLog.Info("Creating Memory Token Manager")
+// MakeMemoryTokenManager creates an instance of TokenManager managed in memory
+func MakeMemoryTokenManager(logger slog.Instance) *MemoryTokenManager {
+	if logger == nil {
+		logger = slog.Scope("Memory-TM")
+	} else {
+		logger = logger.SubScope("MTM")
+	}
+	logger.Info("Creating Memory Token Manager")
 	return &MemoryTokenManager{
 		lock:         sync.Mutex{},
 		storedTokens: map[string]*MemoryUser{},
+		log:          logger,
 	}
 }
 

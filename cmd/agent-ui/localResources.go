@@ -25,9 +25,9 @@ var (
 
 func Begin() {
 	_ = os.Mkdir("keys", os.ModePerm)
-	kb := keyBackend.MakeSaveToDiskBackend("keys", "key_")
-	krm = keymagic.MakeKeyRingManager()
-	pgp = keymagic.MakePGPManagerWithKRM(kb, krm)
+	kb := keyBackend.MakeSaveToDiskBackend(nil, "keys", "key_")
+	krm = keymagic.MakeKeyRingManager(nil)
+	pgp = keymagic.MakePGPManagerWithKRM(nil, kb, krm)
 	pgp.LoadKeys()
 }
 

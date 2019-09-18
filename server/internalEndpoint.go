@@ -9,17 +9,24 @@ import (
 	"net/http"
 )
 
-var intLog = slog.Scope("Internal Endpoint")
-
 type InternalEndpoint struct {
 	sm  etc.SMInterface
 	gpg etc.PGPInterface
+	log slog.Instance
 }
 
-func MakeInternalEndpoint(sm etc.SMInterface, gpg etc.PGPInterface) *InternalEndpoint {
+// MakeInternalEndpoint creates an instance to handle internal control endpoints such as key password data
+func MakeInternalEndpoint(log slog.Instance, sm etc.SMInterface, gpg etc.PGPInterface) *InternalEndpoint {
+	if log == nil {
+		log = slog.Scope("Internal")
+	} else {
+		log = log.SubScope("Internal")
+	}
+
 	return &InternalEndpoint{
 		sm:  sm,
 		gpg: gpg,
+		log: log,
 	}
 }
 
@@ -30,11 +37,12 @@ func (ie *InternalEndpoint) AttachHandlers(r *mux.Router) {
 }
 
 func (ie *InternalEndpoint) triggerKeyUnlock(w http.ResponseWriter, r *http.Request) {
-	InitHTTPTimer(r)
+	log := wrapLogWithRequestID(ie.log, r)
+	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, intLog)
+			CatchAllError(rec, w, r, log)
 		}
 	}()
 
@@ -43,15 +51,16 @@ func (ie *InternalEndpoint) triggerKeyUnlock(w http.ResponseWriter, r *http.Requ
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
 	n, _ := w.Write([]byte("OK"))
-	LogExit(geLog, r, 200, n)
+	LogExit(log, r, 200, n)
 }
 
 func (ie *InternalEndpoint) getUnlockPasswords(w http.ResponseWriter, r *http.Request) {
-	InitHTTPTimer(r)
+	log := wrapLogWithRequestID(ie.log, r)
+	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, geLog)
+			CatchAllError(rec, w, r, log)
 		}
 	}()
 
@@ -62,21 +71,22 @@ func (ie *InternalEndpoint) getUnlockPasswords(w http.ResponseWriter, r *http.Re
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
 	n, _ := w.Write(bodyData)
-	LogExit(geLog, r, 200, n)
+	LogExit(log, r, 200, n)
 }
 
 func (ie *InternalEndpoint) postUnlockPasswords(w http.ResponseWriter, r *http.Request) {
-	InitHTTPTimer(r)
+	log := wrapLogWithRequestID(ie.log, r)
+	InitHTTPTimer(log, r)
 
 	var passwords map[string]string
 
-	if !UnmarshalBodyOrDie(&passwords, w, r, intLog) {
+	if !UnmarshalBodyOrDie(&passwords, w, r, log) {
 		return
 	}
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			CatchAllError(rec, w, r, intLog)
+			CatchAllError(rec, w, r, log)
 		}
 	}()
 
@@ -87,5 +97,5 @@ func (ie *InternalEndpoint) postUnlockPasswords(w http.ResponseWriter, r *http.R
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
 	n, _ := w.Write([]byte("OK"))
-	LogExit(geLog, r, 200, n)
+	LogExit(log, r, 200, n)
 }

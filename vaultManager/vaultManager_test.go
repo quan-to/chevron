@@ -9,7 +9,7 @@ import (
 var vm *VaultManager
 
 func TestMain(m *testing.M) {
-	vm = MakeVaultManager("test_")
+	vm = MakeVaultManager(nil, "test_")
 
 	code := m.Run()
 
@@ -20,20 +20,20 @@ func TestVaultManager_Make(t *testing.T) {
 	remote_signer.PushVariables()
 	// Test Vault SkipVerify
 	remote_signer.VaultSkipVerify = true
-	tmpVm := MakeVaultManager("test_")
-	if tmpVm == nil {
+	tmpVM := MakeVaultManager(nil, "test_")
+	if tmpVM == nil {
 		t.Errorf("Expected to get a vaultManager instance, got nil")
 	}
 
 	// Test With Root Token
 	remote_signer.VaultUseUserpass = false
 	t.Logf("Root Token: %s", remote_signer.VaultRootToken)
-	tmpVm = MakeVaultManager("test_")
-	if tmpVm == nil {
+	tmpVM = MakeVaultManager(nil, "test_")
+	if tmpVM == nil {
 		t.Errorf("Expected to get a vaultManager instance, got nil")
 	}
 
-	_, err := tmpVm.List()
+	_, err := tmpVM.List()
 
 	if err != nil {
 		t.Errorf("Got error listing: %s", err)
@@ -82,6 +82,17 @@ func TestVaultManager_Read(t *testing.T) {
 	_, _, err = vm.Read("huebr123123012731923")
 	if err == nil {
 		t.Errorf("Expected error for unknown key")
+	}
+}
+func TestVaultManager_HeathStatus(t *testing.T) {
+	status, err := vm.HealthStatus()
+	if err != nil {
+		t.Errorf("Error loading status: %s", err)
+		t.FailNow()
+	}
+
+	if status.Initialized != true {
+		t.Errorf("Expected %t got %t", true, status.Initialized)
 	}
 }
 

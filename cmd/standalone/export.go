@@ -13,7 +13,7 @@ import (
 // ExportKey exports the specified public / secret key
 func ExportKey(name, password string, secret bool) {
 	var err error
-	pgpMan := magicBuilder.MakePGP()
+	pgpMan := magicBuilder.MakePGP(nil)
 	pgpMan.LoadKeys()
 
 	// First Search the key

@@ -7,7 +7,7 @@ import (
 
 // ListKeys list the Public / Private keys stored in the default backend
 func ListKeys() {
-	pgpMan := magicBuilder.MakePGP()
+	pgpMan := magicBuilder.MakePGP(nil)
 	pgpMan.LoadKeys()
 
 	keys := pgpMan.GetLoadedKeys()

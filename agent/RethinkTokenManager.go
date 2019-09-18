@@ -10,14 +10,21 @@ import (
 	"time"
 )
 
-var rtmLog = slog.Scope("RQL-TM")
-
 type RethinkTokenManager struct {
+	log slog.Instance
 }
 
-func MakeRethinkTokenManager() *RethinkTokenManager {
-	rtmLog.Info("Creating RethinkDB Token Manager")
-	return &RethinkTokenManager{}
+// MakeRethinkTokenManager creates an instance of TokenManager that stores data in RethinkDB
+func MakeRethinkTokenManager(logger slog.Instance) *RethinkTokenManager {
+	if logger == nil {
+		logger = slog.Scope("RQL-TM")
+	} else {
+		logger = logger.SubScope("RQL-TM")
+	}
+	logger.Info("Creating RethinkDB Token Manager")
+	return &RethinkTokenManager{
+		log: logger,
+	}
 }
 
 func (rtm *RethinkTokenManager) AddUserWithExpiration(user etc.UserData, expiration int) string {
@@ -57,15 +64,15 @@ func (rtm *RethinkTokenManager) AddUser(user etc.UserData) string {
 }
 
 func (rtm *RethinkTokenManager) invalidateTokens() {
-	rtmLog.Info("Checking for invalid tokens")
+	rtm.log.Await("Checking for invalid tokens")
 	conn := etc.GetConnection()
 	n, err := models.InvalidateUserTokens(conn)
 	if err != nil {
-		rtmLog.Error(err)
+		rtm.log.Error(err)
 		return
 	}
 
-	rtmLog.Warn("Cleaned %d invalid / expired tokens", n)
+	rtm.log.Done("Cleaned %d invalid / expired tokens", n)
 }
 
 func (rtm *RethinkTokenManager) Verify(token string) error {
