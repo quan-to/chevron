@@ -6,15 +6,22 @@ import (
 	"github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/agent"
 	"github.com/quan-to/chevron/etc"
+	"github.com/quan-to/chevron/vaultManager"
 	"github.com/quan-to/slog"
 	"net/http"
 )
 
 func GenRemoteSignerServerMux(slog slog.Instance, sm etc.SMInterface, gpg etc.PGPInterface) *mux.Router {
+	var vm *vaultManager.VaultManager
 	log := slog.Scope("MUX")
+
+	if remote_signer.VaultStorage {
+		vm = vaultManager.MakeVaultManager(log, remote_signer.KeyPrefix)
+	}
+
 	ge := MakeGPGEndpoint(log, sm, gpg)
 	ie := MakeInternalEndpoint(log, sm, gpg)
-	te := MakeTestsEndpoint(log)
+	te := MakeTestsEndpoint(log, vm)
 	kre := MakeKeyRingEndpoint(log, sm, gpg)
 	sks := MakeSKSEndpoint(log, sm, gpg)
 	tm := agent.MakeTokenManager(log)
