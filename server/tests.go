@@ -47,7 +47,7 @@ func (ge *TestsEndpoint) checkExternal() bool {
 		}
 	}
 
-	if remote_signer.VaultStorage {
+	if ge.vm != nil {
 		health, err := ge.vm.HealthStatus()
 
 		if err != nil {
