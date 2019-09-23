@@ -13,10 +13,11 @@ import (
 
 type TestsEndpoint struct {
 	log slog.Instance
+	vm *vaultManager.VaultManager
 }
 
 // MakeTestsEndpoint creates an instance of healthcheck tests endpoint
-func MakeTestsEndpoint(log slog.Instance) *TestsEndpoint {
+func MakeTestsEndpoint(log slog.Instance, vm *vaultManager.VaultManager) *TestsEndpoint {
 	if log == nil {
 		log = slog.Scope("Tests")
 	} else {
@@ -25,6 +26,7 @@ func MakeTestsEndpoint(log slog.Instance) *TestsEndpoint {
 
 	return &TestsEndpoint{
 		log: log,
+		vm: vm,
 	}
 }
 
@@ -45,18 +47,17 @@ func (ge *TestsEndpoint) checkExternal() bool {
 		}
 	}
 
-	if remote_signer.VaultStorage {
-		vm := vaultManager.MakeVaultManager(ge.log, remote_signer.KeyPrefix)
-		health, err := vm.HealthStatus()
+	if ge.vm != nil {
+		health, err := ge.vm.HealthStatus()
 
 		if err != nil {
 			ge.log.Error(err)
-			isHealthy = false
+			return false
 		}
 
-		if !health.Initialized || health.Sealed {
+		if health != nil && !health.Initialized || health.Sealed {
 			ge.log.Info("Vault initialized? %t, is sealed? %t", health.Initialized, health.Sealed)
-			isHealthy = false
+			return false
 		}
 	}
 
