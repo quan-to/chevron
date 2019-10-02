@@ -7,6 +7,14 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"math/rand"
+	"os"
+	"path"
+	"regexp"
+	"strings"
+
 	"github.com/google/uuid"
 	"github.com/mewkiz/pkg/osutil"
 	"github.com/pkg/errors"
@@ -15,13 +23,6 @@ import (
 	"github.com/quan-to/chevron/openpgp/armor"
 	"github.com/quan-to/chevron/openpgp/packet"
 	"github.com/quan-to/slog"
-	"io"
-	"io/ioutil"
-	"math/rand"
-	"os"
-	"path"
-	"regexp"
-	"strings"
 )
 
 var toolsLog = slog.Scope("Tools")
@@ -629,7 +630,7 @@ func GetRequestIDFromContext(ctx context.Context) string {
 	if ctxRequestID != nil {
 		requestID = ctxRequestID.(string)
 	} else {
-		requestID = ""
+		requestID = DefaultTag
 	}
 
 	return requestID

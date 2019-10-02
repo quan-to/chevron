@@ -2,18 +2,20 @@ package remote_signer
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"encoding/base64"
-	"github.com/quan-to/chevron/openpgp"
-	"github.com/quan-to/chevron/openpgp/armor"
-	"github.com/quan-to/chevron/openpgp/packet"
-	"github.com/quan-to/chevron/rstest"
 	"io/ioutil"
 	"path"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/quan-to/chevron/openpgp"
+	"github.com/quan-to/chevron/openpgp/armor"
+	"github.com/quan-to/chevron/openpgp/packet"
+	"github.com/quan-to/chevron/rstest"
 )
 
 func TestStringIndexOf(t *testing.T) {
@@ -643,5 +645,14 @@ func TestGenerateTag(t *testing.T) {
 	}
 	if strings.Index(tag, "+") == -1 {
 		t.Errorf("Expected generated tags to have + sign")
+	}
+}
+
+func TestGetRequestIDFromEmptyContext(t *testing.T) {
+	ctx := context.Background()
+	requestID := GetRequestIDFromContext(ctx)
+
+	if requestID != DefaultTag {
+		t.Errorf("Expected returns default tag")
 	}
 }
