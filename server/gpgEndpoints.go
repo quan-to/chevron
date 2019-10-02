@@ -5,12 +5,13 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/gorilla/mux"
-	"github.com/quan-to/chevron"
+	remote_signer "github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/etc"
 	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/slog"
-	"net/http"
 )
 
 type GPGEndpoint struct {
@@ -46,6 +47,7 @@ func (ge *GPGEndpoint) AttachHandlers(r *mux.Router) {
 }
 
 func (ge *GPGEndpoint) decrypt(w http.ResponseWriter, r *http.Request) {
+	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
 	InitHTTPTimer(log, r)
 
@@ -60,7 +62,7 @@ func (ge *GPGEndpoint) decrypt(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	decrypted, err := ge.gpg.Decrypt(data.AsciiArmoredData, data.DataOnly)
+	decrypted, err := ge.gpg.Decrypt(ctx, data.AsciiArmoredData, data.DataOnly)
 
 	if err != nil {
 		InvalidFieldData("Decryption", fmt.Sprintf("Error decrypting data: %s", err.Error()), w, r, log)
@@ -76,6 +78,7 @@ func (ge *GPGEndpoint) decrypt(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ge *GPGEndpoint) encrypt(w http.ResponseWriter, r *http.Request) {
+	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
 	InitHTTPTimer(log, r)
 	var data models.GPGEncryptData
@@ -97,7 +100,7 @@ func (ge *GPGEndpoint) encrypt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	encrypted, err := ge.gpg.Encrypt(data.Filename, data.FingerPrint, bytes, data.DataOnly)
+	encrypted, err := ge.gpg.Encrypt(ctx, data.Filename, data.FingerPrint, bytes, data.DataOnly)
 
 	if err != nil {
 		InvalidFieldData("Encryption", fmt.Sprintf("Error encrypting data: %s", err.Error()), w, r, log)
@@ -111,6 +114,7 @@ func (ge *GPGEndpoint) encrypt(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ge *GPGEndpoint) verifySignature(w http.ResponseWriter, r *http.Request) {
+	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
 	InitHTTPTimer(log, r)
 	var data models.GPGVerifySignatureData
@@ -132,7 +136,7 @@ func (ge *GPGEndpoint) verifySignature(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	valid, err := ge.gpg.VerifySignature(bytes, data.Signature)
+	valid, err := ge.gpg.VerifySignature(ctx, bytes, data.Signature)
 
 	if err != nil {
 		InvalidFieldData("Signature", err.Error(), w, r, log)
@@ -151,6 +155,7 @@ func (ge *GPGEndpoint) verifySignature(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ge *GPGEndpoint) verifySignatureQuanto(w http.ResponseWriter, r *http.Request) {
+	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
 	InitHTTPTimer(log, r)
 	var data models.GPGVerifySignatureData
@@ -173,7 +178,7 @@ func (ge *GPGEndpoint) verifySignatureQuanto(w http.ResponseWriter, r *http.Requ
 	}
 
 	signature := remote_signer.Quanto2GPG(data.Signature)
-	valid, err := ge.gpg.VerifySignature(bytes, signature)
+	valid, err := ge.gpg.VerifySignature(ctx, bytes, signature)
 
 	if err != nil {
 		InvalidFieldData("Signature", err.Error(), w, r, log)
@@ -192,6 +197,7 @@ func (ge *GPGEndpoint) verifySignatureQuanto(w http.ResponseWriter, r *http.Requ
 }
 
 func (ge *GPGEndpoint) sign(w http.ResponseWriter, r *http.Request) {
+	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
 	InitHTTPTimer(log, r)
 	var data models.GPGSignData
@@ -213,7 +219,7 @@ func (ge *GPGEndpoint) sign(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	signature, err := ge.gpg.SignData(data.FingerPrint, bytes, crypto.SHA512)
+	signature, err := ge.gpg.SignData(ctx, data.FingerPrint, bytes, crypto.SHA512)
 
 	if err != nil {
 		InvalidFieldData("Key", fmt.Sprintf("There was an error signing your data: %s", err.Error()), w, r, log)
@@ -227,6 +233,7 @@ func (ge *GPGEndpoint) sign(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ge *GPGEndpoint) signQuanto(w http.ResponseWriter, r *http.Request) {
+	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
 	InitHTTPTimer(log, r)
 	var data models.GPGSignData
@@ -248,7 +255,7 @@ func (ge *GPGEndpoint) signQuanto(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	signature, err := ge.gpg.SignData(data.FingerPrint, bytes, crypto.SHA512)
+	signature, err := ge.gpg.SignData(ctx, data.FingerPrint, bytes, crypto.SHA512)
 
 	if err != nil {
 		InvalidFieldData("Key", fmt.Sprintf("There was an error signing your data: %s", err.Error()), w, r, log)
@@ -264,6 +271,7 @@ func (ge *GPGEndpoint) signQuanto(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ge *GPGEndpoint) unlockKey(w http.ResponseWriter, r *http.Request) {
+	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
 	InitHTTPTimer(log, r)
 	var data models.GPGUnlockKeyData
@@ -278,7 +286,7 @@ func (ge *GPGEndpoint) unlockKey(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	err := ge.gpg.UnlockKey(data.FingerPrint, data.Password)
+	err := ge.gpg.UnlockKey(ctx, data.FingerPrint, data.Password)
 
 	if err != nil {
 		InvalidFieldData("Password/Key", fmt.Sprintf("There is no such key %s or the password is invalid.", data.FingerPrint), w, r, log)
@@ -287,7 +295,7 @@ func (ge *GPGEndpoint) unlockKey(w http.ResponseWriter, r *http.Request) {
 
 	fp := ge.gpg.FixFingerPrint(data.FingerPrint)
 
-	ge.sm.PutKeyPassword(fp, data.Password)
+	ge.sm.PutKeyPassword(ctx, fp, data.Password)
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
@@ -296,6 +304,7 @@ func (ge *GPGEndpoint) unlockKey(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ge *GPGEndpoint) generateKey(w http.ResponseWriter, r *http.Request) {
+	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
 	InitHTTPTimer(log, r)
 	var data models.GPGGenerateKeyData
@@ -320,7 +329,7 @@ func (ge *GPGEndpoint) generateKey(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	key, err := ge.gpg.GeneratePGPKey(data.Identifier, data.Password, data.Bits)
+	key, err := ge.gpg.GeneratePGPKey(ctx, data.Identifier, data.Password, data.Bits)
 
 	if err != nil {
 		InternalServerError("There was an error generating your key. Please try again.", err.Error(), w, r, log)
