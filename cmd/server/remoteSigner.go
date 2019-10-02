@@ -1,16 +1,18 @@
 package main
 
 import (
-	"github.com/quan-to/chevron"
+	"context"
+	"os"
+	"os/signal"
+	"syscall"
+
+	remote_signer "github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/QuantoError"
 	"github.com/quan-to/chevron/bootstrap"
 	"github.com/quan-to/chevron/etc/magicBuilder"
 	"github.com/quan-to/chevron/kubernetes"
 	"github.com/quan-to/chevron/server"
 	"github.com/quan-to/slog"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 var log = slog.Scope("QRS").Tag(remote_signer.DefaultTag)
@@ -24,10 +26,11 @@ func main() {
 
 	bootstrap.RunBootstraps()
 
+	ctx := context.Background()
 	sm := magicBuilder.MakeSM(log)
 	gpg := magicBuilder.MakePGP(log)
 
-	gpg.LoadKeys()
+	gpg.LoadKeys(ctx)
 
 	stop := server.RunRemoteSignerServer(log, sm, gpg)
 	localStop := make(chan bool)
