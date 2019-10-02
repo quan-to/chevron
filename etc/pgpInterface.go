@@ -1,36 +1,38 @@
 package etc
 
 import (
+	"context"
 	"crypto"
+
 	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/chevron/openpgp"
 	"github.com/quan-to/chevron/openpgp/packet"
 )
 
 type PGPInterface interface {
-	LoadKeys()
-	LoadKeyWithMetadata(armoredKey, metadata string) (error, int)
-	LoadKey(armoredKey string) (error, int)
+	LoadKeys(ctx context.Context)
+	LoadKeyWithMetadata(ctx context.Context, armoredKey, metadata string) (error, int)
+	LoadKey(ctx context.Context, armoredKey string) (error, int)
 	FixFingerPrint(fp string) string
 	IsKeyLocked(fp string) bool
-	UnlockKey(fp, password string) error
-	GetLoadedPrivateKeys() []models.KeyInfo
+	UnlockKey(ctx context.Context, fp, password string) error
+	GetLoadedPrivateKeys(ctx context.Context) []models.KeyInfo
 	GetLoadedKeys() []models.KeyInfo
 	SaveKey(fingerPrint, armoredData string, password interface{}) error
-	SignData(fingerPrint string, data []byte, hashAlgorithm crypto.Hash) (string, error)
-	GetPublicKeyEntity(fingerPrint string) *openpgp.Entity
-	GetPublicKey(fingerPrint string) *packet.PublicKey
-	GetPublicKeyAscii(fingerPrint string) (string, error)
-	GetPrivateKeyAscii(fingerPrint, password string) (string, error)
-	VerifySignatureStringData(data string, signature string) (bool, error)
-	VerifySignature(data []byte, signature string) (bool, error)
-	GeneratePGPKey(identifier, password string, numBits int) (string, error)
-	Encrypt(filename, fingerPrint string, data []byte, dataOnly bool) (string, error)
-	Decrypt(data string, dataOnly bool) (*models.GPGDecryptedData, error)
-	GetCachedKeys() []models.KeyInfo
+	SignData(ctx context.Context, fingerPrint string, data []byte, hashAlgorithm crypto.Hash) (string, error)
+	GetPublicKeyEntity(ctx context.Context, fingerPrint string) *openpgp.Entity
+	GetPublicKey(ctx context.Context, fingerPrint string) *packet.PublicKey
+	GetPublicKeyAscii(ctx context.Context, fingerPrint string) (string, error)
+	GetPrivateKeyAscii(ctx context.Context, fingerPrint, password string) (string, error)
+	VerifySignatureStringData(ctx context.Context, data string, signature string) (bool, error)
+	VerifySignature(ctx context.Context, data []byte, signature string) (bool, error)
+	GeneratePGPKey(ctx context.Context, identifier, password string, numBits int) (string, error)
+	Encrypt(ctx context.Context, filename, fingerPrint string, data []byte, dataOnly bool) (string, error)
+	Decrypt(ctx context.Context, data string, dataOnly bool) (*models.GPGDecryptedData, error)
+	GetCachedKeys(ctx context.Context) []models.KeyInfo
 	SetKeysBase64Encoded(bool)
 	MinKeyBits() int
 	GenerateTestKey() (string, error)
-	GetPrivate(fingerPrint string) openpgp.EntityList
-	GetPrivateKeyInfo(fingerPrint string) *models.KeyInfo
+	GetPrivate(ctx context.Context, fingerPrint string) openpgp.EntityList
+	GetPrivateKeyInfo(ctx context.Context, fingerPrint string) *models.KeyInfo
 }

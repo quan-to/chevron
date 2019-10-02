@@ -1,9 +1,11 @@
 package etc
 
+import "context"
+
 type SMInterface interface {
-	PutKeyPassword(fingerPrint, password string)
-	PutEncryptedPassword(fingerPrint, encryptedPassword string)
-	GetPasswords() map[string]string
-	UnlockLocalKeys(gpg PGPInterface)
-	GetMasterKeyFingerPrint() string
+	PutKeyPassword(ctx context.Context, fingerPrint, password string)
+	PutEncryptedPassword(ctx context.Context, fingerPrint, encryptedPassword string)
+	GetPasswords(ctx context.Context) map[string]string
+	UnlockLocalKeys(ctx context.Context, gpg PGPInterface)
+	GetMasterKeyFingerPrint(ctx context.Context) string
 }
