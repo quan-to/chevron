@@ -622,3 +622,15 @@ func GenerateTag() string {
 	u := uuid.New()
 	return strings.Replace(u.String(), "-", "+", -1)
 }
+
+func GetRequestIDFromContext(ctx context.Context) string {
+	var requestID string
+	ctxRequestID := ctx.Value("requestID")
+	if ctxRequestID != nil {
+		requestID = ctxRequestID.(string)
+	} else {
+		requestID = ""
+	}
+
+	return requestID
+}
