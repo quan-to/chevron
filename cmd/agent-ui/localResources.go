@@ -1,17 +1,19 @@
 package main
 
 import (
+	"context"
 	"crypto"
 	"fmt"
-	"github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/etc"
-	"github.com/quan-to/chevron/keyBackend"
-	"github.com/quan-to/chevron/keymagic"
-	"github.com/quan-to/chevron/models"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
+
+	remote_signer "github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/etc"
+	"github.com/quan-to/chevron/keyBackend"
+	"github.com/quan-to/chevron/keymagic"
+	"github.com/quan-to/chevron/models"
 )
 
 const (
@@ -23,16 +25,18 @@ var (
 	krm etc.KRMInterface
 )
 
+var ctx = context.Background()
+
 func Begin() {
 	_ = os.Mkdir("keys", os.ModePerm)
 	kb := keyBackend.MakeSaveToDiskBackend(nil, "keys", "key_")
 	krm = keymagic.MakeKeyRingManager(nil)
 	pgp = keymagic.MakePGPManagerWithKRM(nil, kb, krm)
-	pgp.LoadKeys()
+	pgp.LoadKeys(ctx)
 }
 
 func AddPrivateKey(privateKeyData string) (string, error) {
-	err, n := pgp.LoadKey(privateKeyData)
+	err, n := pgp.LoadKey(ctx, privateKeyData)
 	if err != nil {
 		return err.Error(), err
 	}
@@ -41,7 +45,7 @@ func AddPrivateKey(privateKeyData string) (string, error) {
 }
 
 func UnlockKey(fingerPrint, password string) (string, error) {
-	err := pgp.UnlockKey(fingerPrint, password)
+	err := pgp.UnlockKey(ctx, fingerPrint, password)
 	if err != nil {
 		log.Error("Error unlocking key %s: %s", fingerPrint, err)
 		return err.Error(), err
@@ -51,7 +55,7 @@ func UnlockKey(fingerPrint, password string) (string, error) {
 }
 
 func Sign(fingerPrint, data string) (string, error) {
-	key := pgp.GetPrivateKeyInfo(fingerPrint)
+	key := pgp.GetPrivateKeyInfo(ctx, fingerPrint)
 
 	if key == nil {
 		err := fmt.Errorf("key not found")
@@ -63,7 +67,7 @@ func Sign(fingerPrint, data string) (string, error) {
 		return err.Error(), err
 	}
 
-	signature, err := pgp.SignData(fingerPrint, []byte(data), crypto.SHA512)
+	signature, err := pgp.SignData(ctx, fingerPrint, []byte(data), crypto.SHA512)
 	if err != nil {
 		return err.Error(), err
 	}
@@ -72,7 +76,7 @@ func Sign(fingerPrint, data string) (string, error) {
 }
 
 func ListPrivateKeys() ([]models.KeyInfo, error) {
-	return pgp.GetLoadedPrivateKeys(), nil
+	return pgp.GetLoadedPrivateKeys(ctx), nil
 }
 
 func IsFile(name string) bool {
@@ -161,7 +165,7 @@ func AddKeys(files []string) (bool, []string) {
 			continue
 		}
 
-		pgp.LoadKeys()
+		pgp.LoadKeys(ctx)
 	}
 
 	return hasErrors, errors
