@@ -2,14 +2,16 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/QuantoError"
-	"github.com/quan-to/chevron/models"
 	"io/ioutil"
 	"net/http"
 	"testing"
+
+	remote_signer "github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/QuantoError"
+	"github.com/quan-to/chevron/models"
 )
 
 func TestSKSGetKey(t *testing.T) {
@@ -167,12 +169,13 @@ func TestSKSSearch(t *testing.T) {
 }
 
 func TestAddKey(t *testing.T) {
+	ctx := context.Background()
 	remote_signer.PushVariables()
 	defer remote_signer.PopVariables()
 
 	remote_signer.EnableRethinkSKS = true
 	// region Test Add Key
-	pubKey, _ := gpg.GetPublicKeyAscii(testKeyFingerprint)
+	pubKey, _ := gpg.GetPublicKeyAscii(ctx, testKeyFingerprint)
 
 	payload := models.SKSAddKey{
 		PublicKey: pubKey,

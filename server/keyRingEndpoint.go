@@ -3,13 +3,14 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/gorilla/mux"
-	"github.com/quan-to/chevron"
+	remote_signer "github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/etc"
 	"github.com/quan-to/chevron/keymagic"
 	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/slog"
-	"net/http"
 )
 
 type KeyRingEndpoint struct {
@@ -41,6 +42,7 @@ func (kre *KeyRingEndpoint) AttachHandlers(r *mux.Router) {
 }
 
 func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
+	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(kre.log, r)
 	InitHTTPTimer(log, r)
 
@@ -54,7 +56,7 @@ func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 
 	fingerPrint := q.Get("fingerPrint")
 
-	key, _ := kre.gpg.GetPublicKeyAscii(fingerPrint)
+	key, _ := kre.gpg.GetPublicKeyAscii(ctx, fingerPrint)
 
 	if key == "" {
 		NotFound("fingerPrint", fmt.Sprintf("Key with fingerPrint %s was not found", fingerPrint), w, r, log)
@@ -68,6 +70,7 @@ func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 }
 
 func (kre *KeyRingEndpoint) getCachedKeys(w http.ResponseWriter, r *http.Request) {
+	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(kre.log, r)
 	InitHTTPTimer(log, r)
 
@@ -77,7 +80,7 @@ func (kre *KeyRingEndpoint) getCachedKeys(w http.ResponseWriter, r *http.Request
 		}
 	}()
 
-	cachedKeys := kre.gpg.GetCachedKeys()
+	cachedKeys := kre.gpg.GetCachedKeys(ctx)
 
 	bodyData, err := json.Marshal(cachedKeys)
 
@@ -94,6 +97,7 @@ func (kre *KeyRingEndpoint) getCachedKeys(w http.ResponseWriter, r *http.Request
 }
 
 func (kre *KeyRingEndpoint) getLoadedPrivateKeys(w http.ResponseWriter, r *http.Request) {
+	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(kre.log, r)
 	InitHTTPTimer(log, r)
 
@@ -103,7 +107,7 @@ func (kre *KeyRingEndpoint) getLoadedPrivateKeys(w http.ResponseWriter, r *http.
 		}
 	}()
 
-	privateKeys := kre.gpg.GetLoadedPrivateKeys()
+	privateKeys := kre.gpg.GetLoadedPrivateKeys(ctx)
 
 	bodyData, err := json.Marshal(privateKeys)
 
@@ -120,6 +124,7 @@ func (kre *KeyRingEndpoint) getLoadedPrivateKeys(w http.ResponseWriter, r *http.
 
 func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request) {
 	var data models.KeyRingAddPrivateKeyData
+	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(kre.log, r)
 	InitHTTPTimer(log, r)
 
@@ -140,7 +145,7 @@ func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	_, n := kre.gpg.LoadKey(data.EncryptedPrivateKey) // Error never happens here due GetFingerPrintFromKey
+	_, n := kre.gpg.LoadKey(ctx, data.EncryptedPrivateKey) // Error never happens here due GetFingerPrintFromKey
 
 	if n == 0 {
 		NotFound("EncryptedPrivateKey", "No private keys found at specified payload", w, r, log)
@@ -151,17 +156,17 @@ func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request
 
 	if data.Password != nil {
 		pass := data.Password.(string)
-		err := kre.gpg.UnlockKey(fp, pass)
+		err := kre.gpg.UnlockKey(ctx, fp, pass)
 		if err != nil {
 			InvalidFieldData("Password", "Invalid password for the key provided", w, r, log)
 			return
 		}
 	}
 
-	pubKey, _ := kre.gpg.GetPublicKeyAscii(fp)
+	pubKey, _ := kre.gpg.GetPublicKeyAscii(ctx, fp)
 
 	log.Info("Adding public key for %s on PKS", fp)
-	res := keymagic.PKSAdd(pubKey)
+	res := keymagic.PKSAdd(ctx, pubKey)
 	log.Info("PKS Add Key: %s", res)
 
 	if data.SaveToDisk {
