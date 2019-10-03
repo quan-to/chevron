@@ -4,15 +4,16 @@ import (
 	"bytes"
 	"crypto"
 	"encoding/json"
-	"github.com/google/uuid"
-	"github.com/gorilla/mux"
-	"github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/etc"
-	"github.com/quan-to/slog"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/gorilla/mux"
+	remote_signer "github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/etc"
+	"github.com/quan-to/slog"
 )
 
 type AgentProxy struct {
@@ -42,6 +43,7 @@ func MakeAgentProxy(log slog.Instance, gpg etc.PGPInterface, tm etc.TokenManager
 }
 
 func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(proxy.log, r)
 	InitHTTPTimer(log, r)
 
@@ -126,7 +128,7 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	log.Await("Signing data with %s", fingerPrint)
-	signature, err := proxy.gpg.SignData(fingerPrint, bodyData, crypto.SHA512)
+	signature, err := proxy.gpg.SignData(ctx, fingerPrint, bodyData, crypto.SHA512)
 	log.Done("Data signed")
 
 	if err != nil {
