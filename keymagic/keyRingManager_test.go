@@ -1,17 +1,20 @@
 package keymagic
 
 import (
-	"github.com/quan-to/chevron"
+	"context"
+	"io/ioutil"
+	"testing"
+
+	remote_signer "github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/database"
 	"github.com/quan-to/chevron/keyBackend"
 	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/chevron/rstest"
 	"github.com/quan-to/chevron/vaultManager"
-	"io/ioutil"
-	"testing"
 )
 
 func TestAddKey(t *testing.T) {
+	ctx := context.Background()
 	remote_signer.PushVariables()
 	defer remote_signer.PopVariables()
 	remote_signer.MaxKeyRingCache = 10
@@ -26,7 +29,7 @@ func TestAddKey(t *testing.T) {
 
 	gpg := MakePGPManagerWithKRM(nil, kb, krm)
 
-	str, err := gpg.GeneratePGPKey("", "", gpg.MinKeyBits())
+	str, err := gpg.GeneratePGPKey(ctx, "", "", gpg.MinKeyBits())
 
 	if err != nil {
 		t.Errorf("Cannot generate test key: %s", err)
@@ -42,26 +45,26 @@ func TestAddKey(t *testing.T) {
 
 	fp := remote_signer.IssuerKeyIdToFP16(e.PrimaryKey.KeyId)
 
-	krm.AddKey(e, true)
+	krm.AddKey(ctx, e, true)
 
-	if !krm.ContainsKey(fp) {
+	if !krm.ContainsKey(ctx, fp) {
 		t.Error("Cannot find added key")
 	}
 
-	if krm.GetKey(fp) == nil {
+	if krm.GetKey(ctx, fp) == nil {
 		t.Error("Cannot find added key")
 	}
 
-	if remote_signer.StringIndexOf(fp, krm.GetFingerPrints()) != -1 {
+	if remote_signer.StringIndexOf(fp, krm.GetFingerPrints(ctx)) != -1 {
 		t.Error("Non Erasable Key should be on the fingerPrint list")
 	}
 
-	if len(krm.GetCachedKeys()) != 1 {
+	if len(krm.GetCachedKeys(ctx)) != 1 {
 		t.Error("The generated key is not cached")
 	}
 
 	// Test Ring Cache
-	str, err = gpg.GeneratePGPKey("", "", gpg.MinKeyBits())
+	str, err = gpg.GeneratePGPKey(ctx, "", "", gpg.MinKeyBits())
 
 	if err != nil {
 		t.Errorf("Cannot generate test key: %s", err)
@@ -75,7 +78,7 @@ func TestAddKey(t *testing.T) {
 		t.FailNow()
 	}
 
-	krm.AddKey(erasableKeyTest, false) // Add to pool
+	krm.AddKey(ctx, erasableKeyTest, false) // Add to pool
 	fpErasable := remote_signer.IssuerKeyIdToFP16(erasableKeyTest.PrimaryKey.KeyId)
 
 	// Rotate until MaxKeyRingCache -1, so erasableKeyTest should be still there
@@ -93,16 +96,16 @@ func TestAddKey(t *testing.T) {
 			t.Errorf("Error loading test key: %s", err)
 			t.FailNow()
 		}
-		krm.AddKey(e, false)
+		krm.AddKey(ctx, e, false)
 	}
 
 	// fpErasable should be still there
-	if !krm.ContainsKey(fpErasable) {
+	if !krm.ContainsKey(ctx, fpErasable) {
 		t.Errorf("For MaxRingCache - 1, fpErasable should be still stored")
 	}
 
 	// Generate one more, should be erased
-	str, err = gpg.GeneratePGPKey("", "", gpg.MinKeyBits())
+	str, err = gpg.GeneratePGPKey(ctx, "", "", gpg.MinKeyBits())
 
 	if err != nil {
 		t.Errorf("Cannot generate test key: %s", err)
@@ -115,24 +118,25 @@ func TestAddKey(t *testing.T) {
 		t.Errorf("Error loading test key: %s", err)
 		t.FailNow()
 	}
-	krm.AddKey(e, false)
+	krm.AddKey(ctx, e, false)
 
 	// fpErasable should not be there
-	if krm.ContainsKey(fpErasable) {
+	if krm.ContainsKey(ctx, fpErasable) {
 		t.Errorf("For MaxRingCache, fpErasable should not be still stored")
 	}
-	krm.AddKey(e, false)
-	krm.AddKey(e, false)
+	krm.AddKey(ctx, e, false)
+	krm.AddKey(ctx, e, false)
 }
 
 func TestGetKeyExternal(t *testing.T) {
+	ctx := context.Background()
 	remote_signer.PushVariables()
 	defer remote_signer.PopVariables()
 	// Test External SKS Fetch
 	remote_signer.SKSServer = "https://keyserver.ubuntu.com/"
 	krm := MakeKeyRingManager(nil)
 	remote_signer.EnableRethinkSKS = false
-	e := krm.GetKey(rstest.ExternalKeyFingerprint)
+	e := krm.GetKey(ctx, rstest.ExternalKeyFingerprint)
 
 	if e == nil {
 		t.Error("Expected External key to be fetch")
@@ -163,7 +167,7 @@ func TestGetKeyExternal(t *testing.T) {
 		t.FailNow()
 	}
 
-	e = krm.GetKey(gpgKey.FullFingerPrint)
+	e = krm.GetKey(ctx, gpgKey.FullFingerPrint)
 
 	if e == nil {
 		t.Error("Expected Internal key to be fetch")

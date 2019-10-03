@@ -1,18 +1,22 @@
 package keymagic
 
 import (
+	"context"
 	"fmt"
-	"github.com/quan-to/chevron"
+	"io/ioutil"
+	"testing"
+
+	remote_signer "github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/database"
 	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/chevron/rstest"
-	"io/ioutil"
-	"testing"
 )
 
 func TestPKSGetKey(t *testing.T) {
 	remote_signer.PushVariables()
 	defer remote_signer.PopVariables()
+
+	ctx := context.Background()
 
 	// Test Internal
 	c := database.GetConnection()
@@ -31,7 +35,7 @@ func TestPKSGetKey(t *testing.T) {
 		t.FailNow()
 	}
 
-	key, _ := PKSGetKey(gpgKey.FullFingerPrint)
+	key, _ := PKSGetKey(ctx, gpgKey.FullFingerPrint)
 
 	fp, err := remote_signer.GetFingerPrintFromKey(key)
 
@@ -48,7 +52,7 @@ func TestPKSGetKey(t *testing.T) {
 	remote_signer.EnableRethinkSKS = false
 	remote_signer.SKSServer = "https://keyserver.ubuntu.com/"
 
-	key, _ = PKSGetKey(rstest.ExternalKeyFingerprint)
+	key, _ = PKSGetKey(ctx, rstest.ExternalKeyFingerprint)
 
 	fp, err = remote_signer.GetFingerPrintFromKey(key)
 
@@ -111,6 +115,7 @@ func TestPKSAdd(t *testing.T) {
 	remote_signer.PushVariables()
 	defer remote_signer.PopVariables()
 	remote_signer.EnableRethinkSKS = true
+	ctx := context.Background()
 	// Test Internal
 	z, err := ioutil.ReadFile("../tests/testkey_privateTestKey.gpg")
 	if err != nil {
@@ -125,13 +130,13 @@ func TestPKSAdd(t *testing.T) {
 		t.FailNow()
 	}
 
-	o := PKSAdd(string(z))
+	o := PKSAdd(ctx, string(z))
 
 	if o != "OK" {
 		t.Errorf("Expected %s got %s", "OK", o)
 	}
 
-	p, _ := PKSGetKey(fp)
+	p, _ := PKSGetKey(ctx, fp)
 
 	if p == "" {
 		t.Errorf("Key was not found")

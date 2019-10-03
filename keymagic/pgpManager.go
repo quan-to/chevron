@@ -86,7 +86,7 @@ func (pm *PGPManager) MinKeyBits() int {
 func (pm *PGPManager) LoadKeys(ctx context.Context) {
 	requestID := remote_signer.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
-	log.DebugNote("LoadKeys()")
+	pm.log.DebugNote("LoadKeys()")
 	pm.Lock()
 	defer pm.Unlock()
 
@@ -372,8 +372,10 @@ func (pm *PGPManager) GetPrivateKeyInfo(ctx context.Context, fingerPrint string)
 	return nil
 }
 
-func (pm *PGPManager) GetLoadedPrivateKeys() []models.KeyInfo {
-	pm.log.DebugNote("GetLoadedPrivateKeys()")
+func (pm *PGPManager) GetLoadedPrivateKeys(ctx context.Context) []models.KeyInfo {
+	requestID := remote_signer.GetRequestIDFromContext(ctx)
+	log := pm.log.Tag(requestID)
+	log.DebugNote("GetLoadedPrivateKeys()")
 	keyInfos := make([]models.KeyInfo, 0)
 
 	for k, e := range pm.entities {
