@@ -3,11 +3,12 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/quan-to/chevron/etc/magicBuilder"
 	"io"
 	"io/ioutil"
 	"os"
 	"time"
+
+	"github.com/quan-to/chevron/etc/magicBuilder"
 )
 
 // EncryptFile encrypts a file / data from input for the specified recipient
@@ -15,9 +16,9 @@ func EncryptFile(input, output, recipient string) {
 	var err error
 	var data []byte
 	pgpMan := magicBuilder.MakePGP(nil)
-	pgpMan.LoadKeys()
+	pgpMan.LoadKeys(ctx)
 
-	ent := pgpMan.GetPublicKeyEntity(recipient)
+	ent := pgpMan.GetPublicKeyEntity(ctx, recipient)
 
 	if ent == nil {
 		panic(fmt.Sprintf("Cannot find key \"%s\"\n", recipient))
@@ -70,7 +71,7 @@ func EncryptFile(input, output, recipient string) {
 
 	var d string
 
-	d, err = pgpMan.Encrypt(filename, recipient, data, false)
+	d, err = pgpMan.Encrypt(ctx, filename, recipient, data, false)
 
 	if err != nil {
 		panic(err)
