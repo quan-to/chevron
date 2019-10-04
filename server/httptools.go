@@ -183,7 +183,5 @@ func wrapLogWithRequestID(log slog.Instance, r *http.Request) slog.Instance {
 		return log.Tag(id[0])
 	}
 
-	// Generate a Request ID
-
-	return log.Tag(remote_signer.GenerateTag())
+	return log.Tag(remote_signer.DefaultTag)
 }
