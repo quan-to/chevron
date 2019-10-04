@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/etc/magicBuilder"
-	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
 	"os"
 	"syscall"
+
+	remote_signer "github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/etc/magicBuilder"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // GenerateFlow generates a GPG Key with specified parameters
@@ -25,7 +26,7 @@ func GenerateFlow(password, output, identifier string, bits int) {
 
 	_, _ = fmt.Fprintln(os.Stderr, "Generating key. This might take a while...")
 
-	key, err := pgpMan.GeneratePGPKey(identifier, password, bits)
+	key, err := pgpMan.GeneratePGPKey(ctx, identifier, password, bits)
 
 	if err != nil {
 		panic(fmt.Sprintf("Error creating key: %s\n", err))

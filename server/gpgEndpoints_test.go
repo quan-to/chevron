@@ -2,20 +2,24 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/QuantoError"
-	"github.com/quan-to/chevron/models"
 	"io/ioutil"
 	"net/http"
 	"testing"
+
+	remote_signer "github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/QuantoError"
+	"github.com/quan-to/chevron/models"
 )
 
 // region GPG Endpoint Tests
 func TestGenerateKey(t *testing.T) {
 	InvalidPayloadTest("/gpg/generateKey", t)
+
+	ctx := context.Background()
 
 	// region Test Generate Key
 	genKeyBody := models.GPGGenerateKeyData{
@@ -46,11 +50,11 @@ func TestGenerateKey(t *testing.T) {
 
 	errorDie(err, t)
 
-	err, _ = gpg.LoadKey(key)
+	err, _ = gpg.LoadKey(ctx, key)
 
 	errorDie(err, t)
 
-	err = gpg.UnlockKey(fingerPrint, genKeyBody.Password)
+	err = gpg.UnlockKey(ctx, fingerPrint, genKeyBody.Password)
 
 	errorDie(err, t)
 	// endregion
@@ -141,6 +145,9 @@ func TestDecryptInvalidPayload(t *testing.T) {
 
 func TestEncryptData(t *testing.T) {
 	InvalidPayloadTest("/gpg/encrypt", t)
+
+	ctx := context.Background()
+
 	encryptBody := models.GPGEncryptData{
 		DataOnly:    true,
 		Base64Data:  base64.StdEncoding.EncodeToString([]byte(testSignatureData)),
@@ -171,7 +178,7 @@ func TestEncryptData(t *testing.T) {
 
 	encryptedData := string(d)
 
-	data, err := gpg.Decrypt(encryptedData, true)
+	data, err := gpg.Decrypt(ctx, encryptedData, true)
 
 	errorDie(err, t)
 

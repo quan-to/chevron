@@ -3,13 +3,14 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/quan-to/chevron/etc"
 	"github.com/quan-to/chevron/fieldcipher"
 	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/chevron/openpgp"
 	"github.com/quan-to/slog"
-	"net/http"
 )
 
 type JFCEndpoint struct {
@@ -38,6 +39,7 @@ func (jfc *JFCEndpoint) AttachHandlers(r *mux.Router) {
 }
 
 func (jfc *JFCEndpoint) cipher(w http.ResponseWriter, r *http.Request) {
+	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(jfc.log, r)
 	InitHTTPTimer(log, r)
 
@@ -56,7 +58,7 @@ func (jfc *JFCEndpoint) cipher(w http.ResponseWriter, r *http.Request) {
 	keys := make([]*openpgp.Entity, 0)
 
 	for i, v := range data.Keys {
-		k := jfc.gpg.GetPublicKeyEntity(v)
+		k := jfc.gpg.GetPublicKeyEntity(ctx, v)
 		if k == nil {
 			NotFound(fmt.Sprintf("data.Keys[%d]", i), fmt.Sprintf("publickey for fingerPrint %s was not found", v), w, r, log)
 			return
@@ -87,6 +89,7 @@ func (jfc *JFCEndpoint) cipher(w http.ResponseWriter, r *http.Request) {
 }
 
 func (jfc *JFCEndpoint) decipher(w http.ResponseWriter, r *http.Request) {
+	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(jfc.log, r)
 	InitHTTPTimer(log, r)
 
@@ -102,7 +105,7 @@ func (jfc *JFCEndpoint) decipher(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	keys := jfc.gpg.GetPrivate(data.KeyFingerprint)
+	keys := jfc.gpg.GetPrivate(ctx, data.KeyFingerprint)
 	if len(keys) == 0 {
 		NotFound("keyFingerprint", fmt.Sprintf("There is no such key %s or its not decrypted.", data.KeyFingerprint), w, r, log)
 		return

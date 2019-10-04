@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/quan-to/chevron/etc/magicBuilder"
 	"runtime"
 	"time"
+
+	"github.com/quan-to/chevron/etc/magicBuilder"
 )
 
 // BenchmarkGeneration benchmarks the key generation
@@ -16,7 +17,7 @@ func BenchmarkGeneration(runs, bits int) {
 
 	startTime := time.Now()
 	for i := 0; i < runs; i++ {
-		_, _ = pgpMan.GeneratePGPKey("", "", bits)
+		_, _ = pgpMan.GeneratePGPKey(ctx, "", "", bits)
 	}
 	delta := time.Since(startTime)
 	keyTime := delta.Seconds() / float64(runs)

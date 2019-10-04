@@ -7,6 +7,14 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"math/rand"
+	"os"
+	"path"
+	"regexp"
+	"strings"
+
 	"github.com/google/uuid"
 	"github.com/mewkiz/pkg/osutil"
 	"github.com/pkg/errors"
@@ -15,17 +23,16 @@ import (
 	"github.com/quan-to/chevron/openpgp/armor"
 	"github.com/quan-to/chevron/openpgp/packet"
 	"github.com/quan-to/slog"
-	"io"
-	"io/ioutil"
-	"math/rand"
-	"os"
-	"path"
-	"regexp"
-	"strings"
 )
 
 var toolsLog = slog.Scope("Tools")
 var pgpsig = regexp.MustCompile("(?s)-----BEGIN PGP SIGNATURE-----\n(.*)-----END PGP SIGNATURE-----")
+
+type ContextField string
+
+const (
+	CtxRequestID ContextField = "requestID"
+)
 
 func StringIndexOf(v string, a []string) int {
 	for i, vo := range a {
@@ -621,4 +628,16 @@ func TruncateFieldForDisplay(fieldData string) string {
 func GenerateTag() string {
 	u := uuid.New()
 	return strings.Replace(u.String(), "-", "+", -1)
+}
+
+func GetRequestIDFromContext(ctx context.Context) string {
+	var requestID string
+	ctxRequestID := ctx.Value(CtxRequestID)
+	if ctxRequestID != nil {
+		requestID = ctxRequestID.(string)
+	} else {
+		requestID = DefaultTag
+	}
+
+	return requestID
 }

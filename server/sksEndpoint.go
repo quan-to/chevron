@@ -3,13 +3,14 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strconv"
+
 	"github.com/gorilla/mux"
 	"github.com/quan-to/chevron/etc"
 	"github.com/quan-to/chevron/keymagic"
 	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/slog"
-	"net/http"
-	"strconv"
 )
 
 type SKSEndpoint struct {
@@ -42,6 +43,7 @@ func (sks *SKSEndpoint) AttachHandlers(r *mux.Router) {
 }
 
 func (sks *SKSEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
+	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(sks.log, r)
 	InitHTTPTimer(log, r)
 
@@ -54,7 +56,7 @@ func (sks *SKSEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 
 	fingerPrint := q.Get("fingerPrint")
-	key, _ := sks.gpg.GetPublicKeyAscii(fingerPrint)
+	key, _ := sks.gpg.GetPublicKeyAscii(ctx, fingerPrint)
 
 	if key == "" {
 		NotFound("fingerPrint", fmt.Sprintf("Key with fingerPrint %s was not found", fingerPrint), w, r, log)
@@ -268,6 +270,7 @@ func (sks *SKSEndpoint) search(w http.ResponseWriter, r *http.Request) {
 }
 
 func (sks *SKSEndpoint) addKey(w http.ResponseWriter, r *http.Request) {
+	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(sks.log, r)
 	InitHTTPTimer(log, r)
 
@@ -283,7 +286,7 @@ func (sks *SKSEndpoint) addKey(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	status := keymagic.PKSAdd(data.PublicKey)
+	status := keymagic.PKSAdd(ctx, data.PublicKey)
 
 	if status != "OK" {
 		InvalidFieldData("PublicKey", "Invalid Public Key specified. Check if its in ASCII Armored Format", w, r, log)

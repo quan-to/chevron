@@ -1,17 +1,19 @@
 package keymagic
 
 import (
+	"context"
 	"fmt"
-	"github.com/quan-to/chevron"
+	"os"
+	"os/exec"
+	"testing"
+
+	remote_signer "github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/QuantoError"
 	"github.com/quan-to/chevron/etc"
 	"github.com/quan-to/chevron/keyBackend"
 	"github.com/quan-to/chevron/rstest"
 	"github.com/quan-to/chevron/vaultManager"
 	"github.com/quan-to/slog"
-	"os"
-	"os/exec"
-	"testing"
 )
 
 var testData = []byte(rstest.TestSignatureData)
@@ -62,12 +64,13 @@ func TestMain(m *testing.M) {
 		kb = keyBackend.MakeSaveToDiskBackend(nil, remote_signer.PrivateKeyFolder, remote_signer.KeyPrefix)
 	}
 
+	ctx := context.Background()
 	pgpMan = MakePGPManagerWithKRM(nil, kb, MakeKeyRingManager(nil)).(*PGPManager)
-	pgpMan.LoadKeys()
+	pgpMan.LoadKeys(ctx)
 
 	sm = MakeSecretsManager(nil)
 
-	err = pgpMan.UnlockKey(rstest.TestKeyFingerprint, rstest.TestKeyPassword)
+	err = pgpMan.UnlockKey(ctx, rstest.TestKeyFingerprint, rstest.TestKeyPassword)
 
 	if err != nil {
 		slog.SetError(true)

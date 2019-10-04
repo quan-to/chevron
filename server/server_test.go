@@ -2,16 +2,9 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/QuantoError"
-	"github.com/quan-to/chevron/etc"
-	"github.com/quan-to/chevron/etc/magicBuilder"
-	"github.com/quan-to/chevron/keymagic"
-	"github.com/quan-to/chevron/rstest"
-	"github.com/quan-to/slog"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -20,6 +13,15 @@ import (
 	"os/exec"
 	"runtime/debug"
 	"testing"
+
+	"github.com/gorilla/mux"
+	remote_signer "github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/QuantoError"
+	"github.com/quan-to/chevron/etc"
+	"github.com/quan-to/chevron/etc/magicBuilder"
+	"github.com/quan-to/chevron/keymagic"
+	"github.com/quan-to/chevron/rstest"
+	"github.com/quan-to/slog"
 )
 
 const testKeyFingerprint = "0016A9CA870AFA59"
@@ -143,11 +145,12 @@ func TestMain(m *testing.M) {
 	remote_signer.MasterGPGKeyPath = "../tests/testkey_privateTestKey.gpg"
 	remote_signer.MasterGPGKeyPasswordPath = "../tests/testprivatekeyPassword.txt"
 
+	ctx := context.Background()
 	sm = magicBuilder.MakeSM(nil)
 	gpg = magicBuilder.MakePGP(nil)
-	gpg.LoadKeys()
+	gpg.LoadKeys(ctx)
 
-	err = gpg.UnlockKey(testKeyFingerprint, testKeyPassword)
+	err = gpg.UnlockKey(ctx, testKeyFingerprint, testKeyPassword)
 
 	if err != nil {
 		slog.UnsetTestMode()
@@ -157,8 +160,8 @@ func TestMain(m *testing.M) {
 
 	remote_signer.EnableRethinkSKS = true
 	log.Info("Adding key %s to SKS Database", testKeyFingerprint)
-	pubKey, _ := gpg.GetPublicKeyAscii(testKeyFingerprint)
-	log.Info("Result: %s", keymagic.PKSAdd(pubKey))
+	pubKey, _ := gpg.GetPublicKeyAscii(ctx, testKeyFingerprint)
+	log.Info("Result: %s", keymagic.PKSAdd(ctx, pubKey))
 	remote_signer.EnableRethinkSKS = false
 
 	router = GenRemoteSignerServerMux(log, sm, gpg)

@@ -1,8 +1,10 @@
 package keymagic
 
 import (
+	"context"
 	"fmt"
-	"github.com/quan-to/chevron"
+
+	remote_signer "github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/database"
 	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/slog"
@@ -10,8 +12,10 @@ import (
 
 var pksLog = slog.Scope("PKS")
 
-func PKSGetKey(fingerPrint string) (string, error) {
-	pksLog.DebugNote("PKSGetKey(%s)", fingerPrint)
+func PKSGetKey(ctx context.Context, fingerPrint string) (string, error) {
+	requestID := remote_signer.GetRequestIDFromContext(ctx)
+	log := pksLog.Tag(requestID)
+	log.DebugNote("PKSGetKey(%s)", fingerPrint)
 	if !remote_signer.EnableRethinkSKS {
 		return GetSKSKey(fingerPrint)
 	}
@@ -62,33 +66,35 @@ func PKSSearch(value string, pageStart, pageEnd int) ([]models.GPGKey, error) {
 	return nil, fmt.Errorf("the server does not have RethinkDB enabled so it cannot serve search")
 }
 
-func PKSAdd(pubKey string) string {
-	pksLog.DebugNote("PKSAdd(---)")
+func PKSAdd(ctx context.Context, pubKey string) string {
+	requestID := remote_signer.GetRequestIDFromContext(ctx)
+	log := pksLog.Tag(requestID)
+	log.DebugNote("PKSAdd(---)")
 	if remote_signer.EnableRethinkSKS {
 		conn := database.GetConnection()
 		key, err := models.AsciiArmored2GPGKey(pubKey)
 		if err != nil {
-			pksLog.Debug("PKSAdd Error: %s", err)
+			log.Debug("PKSAdd Error: %s", err)
 			return "NOK"
 		}
 
 		keys, err := models.SearchGPGKeyByFingerPrint(conn, key.FullFingerPrint, 0, 1)
 
 		if err != nil {
-			pksLog.Debug("PKSAdd Error: %s", err)
+			log.Debug("PKSAdd Error: %s", err)
 			return "NOK"
 		}
 
 		if len(keys) > 0 {
-			pksLog.Info("Tried to add key %s to PKS but already exists.", key.GetShortFingerPrint())
+			log.Info("Tried to add key %s to PKS but already exists.", key.GetShortFingerPrint())
 			return "OK"
 		}
 
-		pksLog.Info("Adding public key %s to PKS", key.GetShortFingerPrint())
+		log.Info("Adding public key %s to PKS", key.GetShortFingerPrint())
 		_, _, err = models.AddGPGKey(conn, key)
 
 		if err != nil {
-			pksLog.Debug("PKSAdd Error: %s", err)
+			log.Debug("PKSAdd Error: %s", err)
 			return "NOK"
 		}
 
@@ -98,7 +104,7 @@ func PKSAdd(pubKey string) string {
 	res, err := PutSKSKey(pubKey)
 
 	if err != nil {
-		pksLog.Debug("PKSAdd Error: %s", err)
+		log.Debug("PKSAdd Error: %s", err)
 	}
 
 	if res {

@@ -1,19 +1,21 @@
 package server
 
 import (
+	"context"
 	"errors"
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/quan-to/chevron/keymagic"
 	"github.com/quan-to/chevron/models/HKP"
 	"github.com/quan-to/slog"
-	"net/http"
 )
 
 /// HKP Server based on https://tools.ietf.org/html/draft-shaw-openpgp-hkp-00
 
-func operationGet(options, searchData string, machineReadable, noModification bool) (error, string) {
+func operationGet(ctx context.Context, options, searchData string, machineReadable, noModification bool) (error, string) {
 	if searchData[:2] == "0x" {
-		k, _ := keymagic.PKSGetKey(searchData[2:])
+		k, _ := keymagic.PKSGetKey(ctx, searchData[2:])
 		if k == "" {
 			return errors.New("not found"), ""
 		}
@@ -44,6 +46,7 @@ func operationVIndex(options, searchData string, machineReadable, noModification
 }
 
 func hkpLookup(log slog.Instance, w http.ResponseWriter, r *http.Request) {
+	ctx := wrapContextWithRequestID(r)
 	log = wrapLogWithRequestID(log.SubScope("HKP"), r)
 
 	InitHTTPTimer(log, r)
@@ -67,7 +70,7 @@ func hkpLookup(log slog.Instance, w http.ResponseWriter, r *http.Request) {
 			"mr":      mr,
 			"nm":      nm,
 		}).Await("Running operation GET")
-		err, result = operationGet(options, search, mr, nm)
+		err, result = operationGet(ctx, options, search, mr, nm)
 	case HKP.OperationIndex:
 		log.WithFields(map[string]interface{}{
 			"options":     options,
@@ -117,6 +120,7 @@ func hkpLookup(log slog.Instance, w http.ResponseWriter, r *http.Request) {
 }
 
 func hkpAdd(log slog.Instance, w http.ResponseWriter, r *http.Request) {
+	ctx := wrapContextWithRequestID(r)
 	log = wrapLogWithRequestID(log.SubScope("HKP"), r)
 
 	InitHTTPTimer(log, r)
@@ -130,7 +134,7 @@ func hkpAdd(log slog.Instance, w http.ResponseWriter, r *http.Request) {
 
 	key := r.Form.Get("keytext")
 	log.Await("Adding key")
-	result := keymagic.PKSAdd(key)
+	result := keymagic.PKSAdd(ctx, key)
 	log.Done("Key add result: %s", result)
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte(result))

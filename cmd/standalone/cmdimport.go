@@ -3,19 +3,20 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/etc/magicBuilder"
 	"io"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	remote_signer "github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/etc/magicBuilder"
 )
 
 func ImportKey(filename, keyPassword string, keyPasswordFd int) {
 	var data []byte
 	var err error
 	pgpMan := magicBuilder.MakePGP(nil)
-	pgpMan.LoadKeys()
+	pgpMan.LoadKeys(ctx)
 
 	if filename == "-" {
 		// Read from stdin
@@ -42,7 +43,7 @@ func ImportKey(filename, keyPassword string, keyPasswordFd int) {
 		}
 	}
 
-	err, n := pgpMan.LoadKey(string(data))
+	err, n := pgpMan.LoadKey(ctx, string(data))
 
 	if err != nil {
 		panic(fmt.Sprintf("Error loading file %s: %s\n", filename, err))
@@ -66,7 +67,7 @@ func ImportKey(filename, keyPassword string, keyPasswordFd int) {
 	for _, v := range fps {
 		if keyPassword != "" {
 			// Try get a private key
-			private, err := pgpMan.GetPrivateKeyAscii(v, keyPassword)
+			private, err := pgpMan.GetPrivateKeyAscii(ctx, v, keyPassword)
 
 			if err == nil {
 				err = pgpMan.SaveKey(v, private, keyPassword)
@@ -81,7 +82,7 @@ func ImportKey(filename, keyPassword string, keyPasswordFd int) {
 			fmt.Fprintf(os.Stderr, "File contains private key, but no password supplied. Skipping saving private key.\n")
 		}
 		// Try public if no private
-		public, err := pgpMan.GetPublicKeyAscii(v)
+		public, err := pgpMan.GetPublicKeyAscii(ctx, v)
 		if err == nil {
 			err = pgpMan.SaveKey(v, public, nil)
 			if err == nil {

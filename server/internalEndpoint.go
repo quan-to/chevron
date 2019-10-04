@@ -2,11 +2,12 @@ package server
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/quan-to/chevron/etc"
 	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/slog"
-	"net/http"
 )
 
 type InternalEndpoint struct {
@@ -37,6 +38,7 @@ func (ie *InternalEndpoint) AttachHandlers(r *mux.Router) {
 }
 
 func (ie *InternalEndpoint) triggerKeyUnlock(w http.ResponseWriter, r *http.Request) {
+	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ie.log, r)
 	InitHTTPTimer(log, r)
 
@@ -46,7 +48,7 @@ func (ie *InternalEndpoint) triggerKeyUnlock(w http.ResponseWriter, r *http.Requ
 		}
 	}()
 
-	ie.sm.UnlockLocalKeys(ie.gpg)
+	ie.sm.UnlockLocalKeys(ctx, ie.gpg)
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
@@ -55,6 +57,7 @@ func (ie *InternalEndpoint) triggerKeyUnlock(w http.ResponseWriter, r *http.Requ
 }
 
 func (ie *InternalEndpoint) getUnlockPasswords(w http.ResponseWriter, r *http.Request) {
+	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ie.log, r)
 	InitHTTPTimer(log, r)
 
@@ -64,7 +67,7 @@ func (ie *InternalEndpoint) getUnlockPasswords(w http.ResponseWriter, r *http.Re
 		}
 	}()
 
-	passwords := ie.sm.GetPasswords()
+	passwords := ie.sm.GetPasswords(ctx)
 
 	bodyData, _ := json.Marshal(passwords)
 
@@ -75,6 +78,7 @@ func (ie *InternalEndpoint) getUnlockPasswords(w http.ResponseWriter, r *http.Re
 }
 
 func (ie *InternalEndpoint) postUnlockPasswords(w http.ResponseWriter, r *http.Request) {
+	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ie.log, r)
 	InitHTTPTimer(log, r)
 
@@ -91,7 +95,7 @@ func (ie *InternalEndpoint) postUnlockPasswords(w http.ResponseWriter, r *http.R
 	}()
 
 	for k, v := range passwords {
-		ie.sm.PutEncryptedPassword(k, v)
+		ie.sm.PutEncryptedPassword(ctx, k, v)
 	}
 
 	w.Header().Set("Content-Type", models.MimeText)

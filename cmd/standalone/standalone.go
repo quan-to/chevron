@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
+	"os"
+
 	"github.com/quan-to/slog"
 	"gopkg.in/alecthomas/kingpin.v2"
-	"os"
 )
+
+var ctx = context.Background()
 
 func main() {
 	debugMode := kingpin.Flag("debug", "Enable debug mode").Bool()

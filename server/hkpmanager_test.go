@@ -1,19 +1,22 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/QuantoError"
-	"github.com/quan-to/chevron/keymagic"
-	"github.com/quan-to/chevron/models/HKP"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"testing"
+
+	remote_signer "github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/QuantoError"
+	"github.com/quan-to/chevron/keymagic"
+	"github.com/quan-to/chevron/models/HKP"
 )
 
 func TestHKPAdd(t *testing.T) {
+	ctx := context.Background()
 	remote_signer.PushVariables()
 	defer remote_signer.PopVariables()
 	remote_signer.EnableRethinkSKS = true
@@ -44,7 +47,7 @@ func TestHKPAdd(t *testing.T) {
 		errorDie(fmt.Errorf("expected OK got %s", string(d)), t)
 	}
 
-	pubKey := gpg.GetPublicKey(testPublicKey2FingerPrint)
+	pubKey := gpg.GetPublicKey(ctx, testPublicKey2FingerPrint)
 
 	if pubKey == nil {
 		errorDie(fmt.Errorf("expected to find key %s", testPublicKey2FingerPrint), t)
@@ -107,13 +110,14 @@ func MakeHKPLookup(op, mr, nm, fingerprint, exact, search string) (output string
 }
 
 func TestLookup(t *testing.T) {
+	ctx := context.Background()
 	remote_signer.PushVariables()
 	defer remote_signer.PopVariables()
 	remote_signer.EnableRethinkSKS = true
 	//log.UnsetTestMode()
 	// Ensure key is in SKS
-	key, _ := gpg.GetPublicKeyAscii(testKeyFingerprint)
-	_ = keymagic.PKSAdd(key)
+	key, _ := gpg.GetPublicKeyAscii(ctx, testKeyFingerprint)
+	_ = keymagic.PKSAdd(ctx, key)
 
 	// region Operation GET
 	output, errObj, err := MakeHKPLookup(HKP.OperationGet, "true", "true", "on", "true", "0x"+testKeyFingerprint)

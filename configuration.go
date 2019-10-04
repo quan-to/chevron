@@ -45,6 +45,7 @@ var AgentTokenExpiration int
 var AgentKeyFingerPrint string
 var AgentBypassLogin bool
 var OnDemandKeyLoad bool
+var RequestIDHeader string
 
 var RethinkTokenManager bool
 var RethinkAuthManager bool
@@ -150,6 +151,7 @@ func Setup() {
 		slog.Fatal("Rethink Auth / Token Manager requires Rethink SKS")
 	}
 
+	RequestIDHeader = os.Getenv("REQUESTID_HEADER")
 	AgentExternalURL = os.Getenv("AGENT_EXTERNAL_URL")
 	AgentAdminExternalURL = os.Getenv("AGENTADMIN_EXTERNAL_URL")
 

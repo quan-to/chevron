@@ -1,19 +1,21 @@
 package server
 
 import (
+	"context"
+	"net/http"
+
 	"github.com/gorilla/mux"
-	"github.com/quan-to/chevron"
+	remote_signer "github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/database"
 	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/chevron/vaultManager"
 	"github.com/quan-to/slog"
 	r "gopkg.in/rethinkdb/rethinkdb-go.v5"
-	"net/http"
 )
 
 type TestsEndpoint struct {
 	log slog.Instance
-	vm *vaultManager.VaultManager
+	vm  *vaultManager.VaultManager
 }
 
 // MakeTestsEndpoint creates an instance of healthcheck tests endpoint
@@ -26,7 +28,7 @@ func MakeTestsEndpoint(log slog.Instance, vm *vaultManager.VaultManager) *TestsE
 
 	return &TestsEndpoint{
 		log: log,
-		vm: vm,
+		vm:  vm,
 	}
 }
 
@@ -34,7 +36,9 @@ func (ge *TestsEndpoint) AttachHandlers(r *mux.Router) {
 	r.HandleFunc("/ping", ge.ping)
 }
 
-func (ge *TestsEndpoint) checkExternal() bool {
+func (ge *TestsEndpoint) checkExternal(ctx context.Context) bool {
+	requestID := remote_signer.GetRequestIDFromContext(ctx)
+	log := ge.log.Tag(requestID)
 	isHealthy := true
 
 	if remote_signer.EnableRethinkSKS {
@@ -42,7 +46,7 @@ func (ge *TestsEndpoint) checkExternal() bool {
 
 		_, err := r.Expr(1).Run(conn)
 		if err != nil {
-			ge.log.Error(err)
+			log.Error(err)
 			isHealthy = false
 		}
 	}
@@ -51,12 +55,12 @@ func (ge *TestsEndpoint) checkExternal() bool {
 		health, err := ge.vm.HealthStatus()
 
 		if err != nil {
-			ge.log.Error(err)
+			log.Error(err)
 			return false
 		}
 
 		if health != nil && !health.Initialized || health.Sealed {
-			ge.log.Info("Vault initialized? %t, is sealed? %t", health.Initialized, health.Sealed)
+			log.Info("Vault initialized? %t, is sealed? %t", health.Initialized, health.Sealed)
 			return false
 		}
 	}
@@ -65,7 +69,8 @@ func (ge *TestsEndpoint) checkExternal() bool {
 }
 
 func (ge *TestsEndpoint) ping(w http.ResponseWriter, r *http.Request) {
-	isHealthy := ge.checkExternal()
+	ctx := wrapContextWithRequestID(r)
+	isHealthy := ge.checkExternal(ctx)
 
 	// Do not log here. This call will flood the log
 	w.Header().Set("Content-Type", models.MimeText)

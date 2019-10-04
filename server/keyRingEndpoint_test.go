@@ -2,13 +2,15 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/quan-to/chevron/QuantoError"
-	"github.com/quan-to/chevron/models"
 	"io/ioutil"
 	"net/http"
 	"testing"
+
+	"github.com/quan-to/chevron/QuantoError"
+	"github.com/quan-to/chevron/models"
 )
 
 func TestKREGetKey(t *testing.T) {
@@ -133,6 +135,7 @@ func TestKREGetLoadedPrivateKeys(t *testing.T) {
 }
 
 func TestKREAddPrivateKey(t *testing.T) {
+	ctx := context.Background()
 	key, err := gpg.GenerateTestKey()
 	errorDie(err, t)
 
@@ -195,7 +198,7 @@ func TestKREAddPrivateKey(t *testing.T) {
 	// endregion
 	// region Test Add Public Key as private
 	payload.Password = ""
-	payload.EncryptedPrivateKey, _ = gpg.GetPublicKeyAscii(testKeyFingerprint)
+	payload.EncryptedPrivateKey, _ = gpg.GetPublicKeyAscii(ctx, testKeyFingerprint)
 
 	body, _ = json.Marshal(payload)
 

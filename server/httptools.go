@@ -1,19 +1,21 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/logrusorgru/aurora"
-	"github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/QuantoError"
-	"github.com/quan-to/chevron/models"
-	"github.com/quan-to/slog"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/logrusorgru/aurora"
+	remote_signer "github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/QuantoError"
+	"github.com/quan-to/chevron/models"
+	"github.com/quan-to/slog"
 )
 
 const httpInternalTimestamp = "___HTTP_INTERNAL_TIMESTAMP___"
@@ -160,14 +162,26 @@ func wrapWithLog(log slog.Instance, f HTTPHandleFuncWithLog) HTTPHandleFunc {
 	}
 }
 
+func wrapContextWithRequestID(r *http.Request) context.Context {
+	var requestID string
+
+	id, ok := r.Header[remote_signer.RequestIDHeader]
+	if ok && len(id) >= 1 {
+		// Tag the log
+		requestID = id[0]
+	} else {
+		requestID = remote_signer.DefaultTag
+	}
+
+	return context.WithValue(r.Context(), remote_signer.CtxRequestID, requestID)
+}
+
 func wrapLogWithRequestID(log slog.Instance, r *http.Request) slog.Instance {
-	id, ok := r.Header["X-Quanto-Request-Id"]
+	id, ok := r.Header[remote_signer.RequestIDHeader]
 	if ok && len(id) >= 1 {
 		// Tag the log
 		return log.Tag(id[0])
 	}
 
-	// Generate a Request ID
-
-	return log.Tag(remote_signer.GenerateTag())
+	return log.Tag(remote_signer.DefaultTag)
 }
