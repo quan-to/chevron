@@ -28,6 +28,12 @@ import (
 var toolsLog = slog.Scope("Tools")
 var pgpsig = regexp.MustCompile("(?s)-----BEGIN PGP SIGNATURE-----\n(.*)-----END PGP SIGNATURE-----")
 
+type ContextField string
+
+const (
+	CtxRequestID ContextField = "requestID"
+)
+
 func StringIndexOf(v string, a []string) int {
 	for i, vo := range a {
 		if vo == v {
@@ -626,7 +632,7 @@ func GenerateTag() string {
 
 func GetRequestIDFromContext(ctx context.Context) string {
 	var requestID string
-	ctxRequestID := ctx.Value("requestID")
+	ctxRequestID := ctx.Value(CtxRequestID)
 	if ctxRequestID != nil {
 		requestID = ctxRequestID.(string)
 	} else {

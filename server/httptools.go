@@ -173,7 +173,7 @@ func wrapContextWithRequestID(r *http.Request) context.Context {
 		requestID = remote_signer.DefaultTag
 	}
 
-	return context.WithValue(r.Context(), "requestID", requestID)
+	return context.WithValue(r.Context(), remote_signer.CtxRequestID, requestID)
 }
 
 func wrapLogWithRequestID(log slog.Instance, r *http.Request) slog.Instance {
