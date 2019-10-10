@@ -3,59 +3,55 @@ env:
   global:
   - COMMIT=${TRAVIS_COMMIT::8}
   - GO111MODULE=on
-
+  - secure: tN/ZizPDjqWLY91QG07XlZraNMMC78Tpru1aEPOXaORC6j7oFVsGHENDFmcl4Cc4F9ATxEeqMTSmQFKAbma55NRDzu17x8EyCAmmk7tj4idVZXvH/B6Ad6hMFPom8NIlkZrb6ReDjxpeOMwrv36oFFZTh4ivhO/pkzAVCxhD9R/ZfD6jY0STRfiGSjwQa/9sXksMh4vgAlMyq10soQdmUX9JKqDvr/+C0zXno4aZtJAno2OYLdAcbmWZibpYQT+mDh6/HpHUqX3oCbS//+lJ8Mq9tJxO5kjRLknPNheD08weno8uIPqsPo+Qt4m3rLrAx9zNKdXf0J1OHx1E6Y47jeXOpd8SJ4F3pV1zx+XlePxQnR645wTF0pMU1drxi6MtLfEos6u0maYCIUbdMkHgoVP/akENJAJBa+U5WuAMKXGI9wKHgCXAk6e76TNAMaKQk8bY8VGgM+tt0B7wZeqpF3VX8JjvI/5amRFjDMLcRmE5BLeccPJO6vWSfYU5RGv8ePPODbnsTSxseGn1TAGdB0nKbErXc9oG26I7njOLrHViS/ld9MqyDsnFOuQ6QiVfsW/xGr/KFSE+LBsTNrMmhJn8aEiv29I/4XV20sKWv4SY5LTE209xS5KS77GFKSR1cHEnce19qmaZEEZRn/kjWB2mWqEMDXqXmHJdO9UKBQQ=
 language: go
-
 go:
 - 1.11.x
-
 git:
   depth: 1
-
 before_install:
-  - GO111MODULE=off go get github.com/mattn/goveralls
-  - echo "deb http://download.rethinkdb.com/apt xenial main" | sudo tee /etc/apt/sources.list.d/rethinkdb.list
-  - wget -qO- https://download.rethinkdb.com/apt/pubkey.gpg | sudo apt-key add -
-  - sudo apt-get -qq update && sudo apt-get install -y rethinkdb
-  - wget https://releases.hashicorp.com/vault/1.0.2/vault_1.0.2_linux_amd64.zip
-  - unzip vault_1.0.2_linux_amd64.zip
-  - sudo cp vault /usr/bin
-  - cd cmd/agent-ui
-  - ./placeholders.sh
-  - cd ../..
-
+- GO111MODULE=off go get github.com/mattn/goveralls
+- echo "deb http://download.rethinkdb.com/apt xenial main" | sudo tee /etc/apt/sources.list.d/rethinkdb.list
+- wget -qO- https://download.rethinkdb.com/apt/pubkey.gpg | sudo apt-key add -
+- sudo apt-get -qq update && sudo apt-get install -y rethinkdb
+- wget https://releases.hashicorp.com/vault/1.0.2/vault_1.0.2_linux_amd64.zip
+- unzip vault_1.0.2_linux_amd64.zip
+- sudo cp vault /usr/bin
+- cd cmd/agent-ui
+- "./placeholders.sh"
+- cd ../..
 script:
-  - echo "Starting Vault"
-  - export VAULT_ADDR='http://127.0.0.1:8200'
-  - export VAULT_DEV_ROOT_TOKEN_ID="123456"
-  - export VAULT_ROOT_TOKEN=$VAULT_DEV_ROOT_TOKEN_ID
-  - export VAULT_ADDRESS="$VAULT_ADDR"
-  - export VAULT_USE_USERPASS="true"
-  - export VAULT_USERNAME="remotesigner"
-  - export VAULT_PASSWORD="123456"
-  - export DATABASE_NAME="qrs_test"
-  - export DO_START_RETHINK="true"
-  - vault server -dev & echo $! > $HOME/vault.pid
-  - echo "Waiting vault settle" & sleep 2
-  - echo "Vault started with PID `cat $HOME/vault.pid`"
-  - vault auth enable userpass
-  - vault policy write test-policy ./test-policy.hcl
-  - vault write auth/userpass/users/${VAULT_USERNAME} password=${VAULT_PASSWORD} policies=test-policy
-  - export
-  - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin v1.15.0
-  - golangci-lint run
-  - go test -v -race ./... -coverprofile=qrs.coverprofile
-  - goveralls -coverprofile=qrs.coverprofile -service travis-ci
-  - echo "Closing Vault"
-  - sudo kill -9 `cat ~/vault.pid`
-  - echo "Calling travis-binary-build.sh"
-  - ./scripts/travis-binary-build.sh
-  - echo "Done"
-
+- echo "Starting Vault"
+- export VAULT_ADDR='http://127.0.0.1:8200'
+- export VAULT_DEV_ROOT_TOKEN_ID="123456"
+- export VAULT_ROOT_TOKEN=$VAULT_DEV_ROOT_TOKEN_ID
+- export VAULT_ADDRESS="$VAULT_ADDR"
+- export VAULT_USE_USERPASS="true"
+- export VAULT_USERNAME="remotesigner"
+- export VAULT_PASSWORD="123456"
+- export DATABASE_NAME="qrs_test"
+- export DO_START_RETHINK="true"
+- vault server -dev & echo $! > $HOME/vault.pid
+- echo "Waiting vault settle" & sleep 2
+- echo "Vault started with PID `cat $HOME/vault.pid`"
+- vault auth enable userpass
+- vault policy write test-policy ./test-policy.hcl
+- vault write auth/userpass/users/${VAULT_USERNAME} password=${VAULT_PASSWORD} policies=test-policy
+- export
+- curl https://deepsource.io/cli | sh
+- curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh |
+  bash -s -- -b $GOPATH/bin v1.15.0
+- golangci-lint run
+- go test -v -race ./... -coverprofile=qrs.coverprofile
+- goveralls -coverprofile=qrs.coverprofile -service travis-ci
+- echo "Closing Vault"
+- sudo kill -9 `cat ~/vault.pid`
+- echo "Calling travis-binary-build.sh"
+- "./scripts/travis-binary-build.sh"
+- echo "Done"
 after_success:
-  - mv qrs.coverprofile coverage.txt
-  - bash <(curl -s https://codecov.io/bash)
-
+- mv qrs.coverprofile coverage.txt
+- bash <(curl -s https://codecov.io/bash)
 deploy:
   provider: releases
   file_glob: true
