@@ -11,3 +11,7 @@ enabled = true
   [analyzers.meta]
   import_path = "github.com/quan-to/chevron"
 
+
+[[analyzers]]
+name = "test-coverage"
+enabled = true
