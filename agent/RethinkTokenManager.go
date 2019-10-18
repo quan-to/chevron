@@ -101,3 +101,14 @@ func (rtm *RethinkTokenManager) GetUserData(token string) etc.UserData {
 	udata, _ := models.GetUserToken(conn, token)
 	return udata
 }
+
+func (rtm *RethinkTokenManager) InvalidateToken(token string) error {
+	conn := etc.GetConnection()
+	u, _ := models.GetUserToken(conn, token)
+
+	if u == nil {
+		return fmt.Errorf("not exists")
+	}
+
+	return models.RemoveUserToken(conn, token)
+}
