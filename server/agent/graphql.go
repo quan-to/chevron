@@ -99,6 +99,16 @@ var RootManagementMutation = graphql.NewObject(graphql.ObjectConfig{
 			},
 			Resolve: resolveGenerateToken,
 		},
+		"InvalidateToken": &graphql.Field{
+			Type: graphql.String,
+			Args: graphql.FieldConfigArgument{
+				"token": &graphql.ArgumentConfig{
+					Type:        graphql.NewNonNull(graphql.String),
+					Description: "The token to be invalidated",
+				},
+			},
+			Resolve: resolveInvalidateToken,
+		},
 	},
 })
 
@@ -285,4 +295,16 @@ func resolveGenerateToken(p graphql.ResolveParams) (i interface{}, e error) {
 		Expiration:            exp.UnixNano() / 1e6, // ms
 		ExpirationDateTimeISO: exp.Format(time.RFC3339),
 	}, nil
+}
+
+func resolveInvalidateToken(p graphql.ResolveParams) (i interface{}, e error) {
+	tm := p.Context.Value(TokenManagerKey).(etc.TokenManager)
+	token := p.Args["token"].(string)
+
+	err := tm.InvalidateToken(token)
+	if err != nil {
+		return "NOK", err
+	}
+
+	return "OK", nil
 }
