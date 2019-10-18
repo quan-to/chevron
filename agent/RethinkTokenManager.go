@@ -102,6 +102,7 @@ func (rtm *RethinkTokenManager) GetUserData(token string) etc.UserData {
 	return udata
 }
 
+// InvalidateToken removes a token from the database making it unusable in the future
 func (rtm *RethinkTokenManager) InvalidateToken(token string) error {
 	conn := etc.GetConnection()
 	u, _ := models.GetUserToken(conn, token)

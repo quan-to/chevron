@@ -123,6 +123,7 @@ func (mtm *MemoryTokenManager) Verify(token string) error {
 	return nil
 }
 
+// InvalidateToken removes a token from the internal memory making it unusable in the future
 func (mtm *MemoryTokenManager) InvalidateToken(token string) error {
 	mtm.lock.Lock()
 	defer mtm.lock.Unlock()
