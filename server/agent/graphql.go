@@ -280,7 +280,7 @@ func resolveGenerateToken(p graphql.ResolveParams) (i interface{}, e error) {
 		Value:                 token,
 		UserName:              username,
 		UserFullName:          fullname,
-		Expiration:            exp.UnixNano() / 1e6, // ms
+		Expiration:            exp.UnixNano() / 1e9, // ms
 		ExpirationDateTimeISO: exp.Format(time.RFC3339),
 	}, nil
 }
