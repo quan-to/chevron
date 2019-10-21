@@ -270,17 +270,19 @@ func resolveGenerateToken(p graphql.ResolveParams) (i interface{}, e error) {
 		CreatedAt:   time.Now(),
 	}
 
+	exp := bu.GetCreatedAt().Add(time.Duration(expiration) * time.Second)
+
+	amGqlLog.Await("Creating Token for key %s with expiration at %s", fingerPrint, exp.Format(time.RFC3339))
+
 	token := tm.AddUserWithExpiration(&bu, expiration)
 
-	exp := time.Now().Add(time.Duration(expiration) * time.Second)
-
-	amGqlLog.Info("Generated Token for %s (%s)", fullname, username)
+	amGqlLog.Done("Generated Token for %s (%s)", fullname, username)
 
 	return mgql.Token{
 		Value:                 token,
 		UserName:              username,
 		UserFullName:          fullname,
-		Expiration:            exp.UnixNano() / 1e9, // ms
+		Expiration:            exp.UnixNano() / 1e6, // ms
 		ExpirationDateTimeISO: exp.Format(time.RFC3339),
 	}, nil
 }
