@@ -43,6 +43,10 @@ func MakeAgentProxy(log slog.Instance, gpg etc.PGPInterface, tm etc.TokenManager
 }
 
 func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) {
+	var res *http.Response
+	var req *http.Request
+	var err error
+
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(proxy.log, r)
 	InitHTTPTimer(log, r)
@@ -55,22 +59,22 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 
 	h := r.Header
 
+	targetUrl := remote_signer.AgentTargetURL
+
+	if h.Get("serverUrl") != "" {
+		targetUrl = h.Get("serverUrl")
+	}
+
+	log = log.WithFields(map[string]interface{}{
+		"targetUrl": targetUrl,
+	})
+
+	client := &http.Client{
+		Transport: proxy.transport,
+	}
+
 	if r.Method == http.MethodOptions {
-		targetUrl := remote_signer.AgentTargetURL
-
-		if h.Get("serverUrl") != "" {
-			targetUrl = h.Get("serverUrl")
-		}
-
-		log = log.WithFields(map[string]interface{}{
-			"targetUrl": targetUrl,
-		})
-
-		client := &http.Client{
-			Transport: proxy.transport,
-		}
-
-		req, err := http.NewRequest(r.Method, targetUrl, nil)
+		req, err = http.NewRequest(r.Method, targetUrl, nil)
 
 		if err != nil {
 			InternalServerError("There was an error processing your request", err.Error(), w, r, log)
@@ -78,50 +82,7 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 		}
 
 		req.Header.Add("X-Powered-By", "RemoteSigner Agent")
-
-		for k, v := range r.Header {
-			if len(v) > 1 {
-				for _, t := range v {
-					req.Header.Add(k, t)
-				}
-			} else {
-				req.Header.Set(k, v[0])
-			}
-		}
-
-		log.Await("Sending request to %s", targetUrl)
-		res, err := client.Do(req)
-		log.Done("Received response")
-
-		if err != nil {
-			InternalServerError("There was an error processing your request", err.Error(), w, r, log)
-			return
-		}
-
-		for k, v := range res.Header {
-			if len(v) > 1 {
-				for _, t := range v {
-					w.Header().Add(k, t)
-				}
-			} else {
-				w.Header().Set(k, v[0])
-			}
-		}
-
-		log.Info("Sending response")
-		n, _ := io.Copy(w, res.Body)
-		LogExit(log, r, res.StatusCode, int(n))
 	} else {
-		targetUrl := remote_signer.AgentTargetURL
-
-		if h.Get("serverUrl") != "" {
-			targetUrl = h.Get("serverUrl")
-		}
-
-		log = log.WithFields(map[string]interface{}{
-			"targetUrl": targetUrl,
-		})
-
 		token := ""
 
 		if !remote_signer.AgentBypassLogin {
@@ -134,17 +95,13 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 			h.Del("proxyToken")
 
 			log.Await("Verifying user token")
-			err := proxy.tm.Verify(token)
+			err = proxy.tm.Verify(token)
 			log.Done("Token verified")
 
 			if err != nil {
 				PermissionDenied("proxyToken", "Please check if your proxyToken is valid", w, r, log)
 				return
 			}
-		}
-
-		client := &http.Client{
-			Transport: proxy.transport,
 		}
 
 		fingerPrint := remote_signer.AgentKeyFingerPrint
@@ -177,7 +134,7 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 
 		bodyData, _ = json.Marshal(jsondata)
 
-		req, err := http.NewRequest(r.Method, targetUrl, bytes.NewBuffer(bodyData))
+		req, err = http.NewRequest(r.Method, targetUrl, bytes.NewBuffer(bodyData))
 
 		if err != nil {
 			InternalServerError("There was an error processing your request", err.Error(), w, r, log)
@@ -197,40 +154,40 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 
 		req.Header.Add("signature", quantoSig)
 		req.Header.Add("X-Powered-By", "RemoteSigner Agent")
-
-		for k, v := range r.Header {
-			if len(v) > 1 {
-				for _, t := range v {
-					req.Header.Add(k, t)
-				}
-			} else {
-				req.Header.Set(k, v[0])
-			}
-		}
-
-		log.Await("Sending request to %s", targetUrl)
-		res, err := client.Do(req)
-		log.Done("Received response")
-
-		if err != nil {
-			InternalServerError("There was an error processing your request", err.Error(), w, r, log)
-			return
-		}
-
-		for k, v := range res.Header {
-			if len(v) > 1 {
-				for _, t := range v {
-					w.Header().Add(k, t)
-				}
-			} else {
-				w.Header().Set(k, v[0])
-			}
-		}
-
-		log.Info("Sending response")
-		n, _ := io.Copy(w, res.Body)
-		LogExit(log, r, res.StatusCode, int(n))
 	}
+
+	for k, v := range r.Header {
+		if len(v) > 1 {
+			for _, t := range v {
+				req.Header.Add(k, t)
+			}
+		} else {
+			req.Header.Set(k, v[0])
+		}
+	}
+
+	log.Await("Sending request to %s", targetUrl)
+	res, err = client.Do(req)
+	log.Done("Received response")
+
+	if err != nil {
+		InternalServerError("There was an error processing your request", err.Error(), w, r, log)
+		return
+	}
+
+	for k, v := range res.Header {
+		if len(v) > 1 {
+			for _, t := range v {
+				w.Header().Add(k, t)
+			}
+		} else {
+			w.Header().Set(k, v[0])
+		}
+	}
+
+	log.Info("Sending response")
+	n, _ := io.Copy(w, res.Body)
+	LogExit(log, r, res.StatusCode, int(n))
 }
 
 func (proxy *AgentProxy) AddHandlers(r *mux.Router) {
