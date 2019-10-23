@@ -5,4 +5,5 @@ type TokenManager interface {
 	AddUserWithExpiration(user UserData, expiration int) string
 	Verify(token string) error
 	GetUserData(token string) UserData
+	InvalidateToken(token string) error
 }

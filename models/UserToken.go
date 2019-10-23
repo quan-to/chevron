@@ -60,6 +60,21 @@ func AddUserToken(conn *r.Session, ut *UserToken) (string, error) {
 	return wr.GeneratedKeys[0], err
 }
 
+// RemoveUserToken removes a user token from the database
+func RemoveUserToken(conn *r.Session, token string) (err error) {
+	_, err = r.Table(UserTokenTableInit.TableName).
+		GetAllByIndex("Token", token).
+		Limit(1).
+		Delete().
+		Run(conn)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func GetUserToken(conn *r.Session, token string) (ut *UserToken, err error) {
 	var res *r.Cursor
 	res, err = r.Table(UserTokenTableInit.TableName).
