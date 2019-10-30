@@ -24,8 +24,8 @@ Advanced Usage
 * [Cluster Mode](https://github.com/quan-to/chevron/wiki/Cluster-Mode)
 * [Vault Backend](https://github.com/quan-to/chevron/wiki/Hashicorp-Vault-Key-Backend)
 * [Quanto Agent](https://github.com/quan-to/chevron/wiki/Quanto-Agent)
-* Binary Builds
-* Docker
+* [Binary Builds](https://github.com/quan-to/chevron/wiki/Binary-Builds)
+* [Docker](https://github.com/quan-to/chevron/wiki/Docker)
 * [Building](https://github.com/quan-to/chevron/wiki/Building)
 
 
