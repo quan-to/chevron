@@ -92,14 +92,14 @@ func GetUser(conn *r.Session, username string) (um *UserModel, err error) {
 
 func UpdateUser(conn *r.Session, um *UserModel) error {
 	res, err := r.Table(UserModelTableInit.TableName).
-		Get(um.id).
+		GetAllByIndex("Username", um.Username).
 		Update(um).
 		RunWrite(conn)
 
 	if err != nil {
 		return err
 	}
-
+	
 	if res.Replaced == 0 {
 		return fmt.Errorf("not found")
 	}

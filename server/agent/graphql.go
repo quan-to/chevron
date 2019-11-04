@@ -220,6 +220,7 @@ func resolveChangePassword(p graphql.ResolveParams) (i interface{}, e error) {
 	err := am.ChangePassword(lu.GetUsername(), password)
 
 	if err != nil {
+		amGqlLog.Error("Error changing user %s password: %s", lu.GetUsername(), err)
 		e := QuantoError.New(QuantoError.InternalServerError, "server", "There was an error changing your password. Please try again.", err.Error())
 		return "NOK", e.ToFormattedError()
 	}
