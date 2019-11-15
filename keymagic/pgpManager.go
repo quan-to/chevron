@@ -249,7 +249,7 @@ func (pm *PGPManager) IsKeyLocked(fp string) bool {
 	defer pm.Unlock()
 
 	fp = pm.sanitizeFingerprint(fp)
-	return pm.decryptedPrivateKeys[fp] != nil
+	return pm.decryptedPrivateKeys[fp] == nil
 }
 
 func (pm *PGPManager) unlockKey(ctx context.Context, fp, password string) error {
