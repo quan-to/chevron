@@ -39,7 +39,7 @@ func (kre *KeyRingEndpoint) AttachHandlers(r *mux.Router) {
 	r.HandleFunc("/cachedKeys", kre.getCachedKeys).Methods("GET")
 	r.HandleFunc("/privateKeys", kre.getLoadedPrivateKeys).Methods("GET")
 	r.HandleFunc("/addPrivateKey", kre.addPrivateKey).Methods("POST")
-	r.HandleFunc("/deletePrivateKey", kre.deletePrivateKey).Methods("DELETE")
+	r.HandleFunc("/deletePrivateKey", kre.deletePrivateKey).Methods("POST")
 }
 
 func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
