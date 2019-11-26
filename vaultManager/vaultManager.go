@@ -99,6 +99,22 @@ func (vm *VaultManager) putSecret(key string, data map[string]string) error {
 	return err
 }
 
+func (vm *VaultManager) deleteSecret(key string) error {
+	vm.log.DebugAwait("Deleting %s from %s", key, vm.vaultPath(VaultData, key))
+	_, err := vm.client.Logical().Read(vm.vaultPath(VaultData, key))
+	if err != nil {
+		vm.log.ErrorDone("Error reading to %s: %s, file not exist to delete", vm.vaultPath(VaultData, key), err)
+		return err
+	}
+
+	_, err = vm.client.Logical().Delete(vm.vaultPath(VaultData, key))
+	if err != nil {
+		vm.log.ErrorDone("Error deleting from %s: %s", vm.vaultPath(VaultData, key), err)
+	}
+
+	return err
+}
+
 func (vm *VaultManager) getSecret(key string) (string, string, error) {
 	//vm.log.Debug("getSecret(%s)", key)
 	s, err := vm.client.Logical().Read(vm.vaultPath(VaultData, key))
@@ -141,6 +157,11 @@ func (vm *VaultManager) SaveWithMetadata(key, data, metadata string) error {
 		"data":     data,
 		"metadata": metadata,
 	})
+}
+
+func (vm *VaultManager) Delete(key string) error {
+	vm.log.DebugAwait("Deleting %s", key)
+	return vm.deleteSecret(vm.prefix+key)
 }
 
 func (vm *VaultManager) Read(key string) (data string, metadata string, err error) {
