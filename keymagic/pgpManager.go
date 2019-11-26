@@ -453,6 +453,23 @@ func (pm *PGPManager) SaveKey(fingerPrint, armoredData string, password interfac
 	return nil
 }
 
+func (pm *PGPManager) DeleteKey(fingerPrint string) error {
+	pm.log.DebugAwait("Deleting key %s from KeeyBackend", fingerPrint)
+
+	_, _, err := pm.kbkend.Read(fingerPrint)
+	if err != nil {
+		pm.log.ErrorDone("Error reading key %s from KeyBackend, key not exist", fingerPrint)
+		return nil
+	}
+
+	err = pm.kbkend.Delete(fingerPrint)
+	if err != nil {
+		pm.log.ErrorDone("Error deleting key %s from KeyBackend", fingerPrint)
+	}
+
+	return nil
+}
+
 func (pm *PGPManager) SignData(ctx context.Context, fingerPrint string, data []byte, hashAlgorithm crypto.Hash) (string, error) {
 	requestID := remote_signer.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)

@@ -32,6 +32,11 @@ func (d *Void) SaveWithMetadata(key, data, metadata string) error {
 	return nil
 }
 
+// Delete a key from the backend
+func (d* Void) Delete(key string) error {
+	return nil
+}
+
 // Read reads a key from the backend
 func (d *Void) Read(key string) (data string, metadata string, err error) {
 	return "", "", fmt.Errorf("nothing to read")

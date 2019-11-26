@@ -5,6 +5,7 @@ import (
 	"github.com/quan-to/slog"
 	"io/ioutil"
 	"path"
+	"os"
 )
 
 type Disk struct {
@@ -87,6 +88,22 @@ func (d *Disk) SaveWithMetadata(key, data, metadata string) error {
 
 	if err != nil {
 		d.log.ErrorDone("Error saving to %s: %s", path.Join(d.folder, d.prefix+key), err)
+	}
+
+	return err
+}
+
+func (d *Disk) Delete(key string) error {
+	d.log.DebugAwait("Deleting %s", path.Join(d.folder, d.prefix+key))
+	_, err := ioutil.ReadFile(path.Join(d.folder, d.prefix+key))
+	if err != nil {
+		d.log.ErrorDone("Error reading to %s: %s, file not exist to delete", path.Join(d.folder, d.prefix+key), err)
+		return err
+	}
+
+	err = os.Remove(path.Join(d.folder, d.prefix+key))
+	if err != nil {
+		d.log.ErrorDone("Error deleting from %s: %s", path.Join(d.folder, d.prefix+key), err)
 	}
 
 	return err

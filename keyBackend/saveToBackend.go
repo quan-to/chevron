@@ -6,6 +6,8 @@ type Backend interface {
 	Save(key, data string) error
 	// SaveWithMetadata saves a key to backend storing some metadata with it
 	SaveWithMetadata(key, data, metadata string) error
+	// Delete delete a key from backend
+	Delete(key string) error
 	// Read reads a key from the backend
 	Read(key string) (data string, metadata string, err error)
 	// List lists the stored keys

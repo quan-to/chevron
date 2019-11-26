@@ -39,6 +39,7 @@ func (kre *KeyRingEndpoint) AttachHandlers(r *mux.Router) {
 	r.HandleFunc("/cachedKeys", kre.getCachedKeys).Methods("GET")
 	r.HandleFunc("/privateKeys", kre.getLoadedPrivateKeys).Methods("GET")
 	r.HandleFunc("/addPrivateKey", kre.addPrivateKey).Methods("POST")
+	r.HandleFunc("/deletePrivateKey", kre.deletePrivateKey).Methods("DELETE")
 }
 
 func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
@@ -119,6 +120,66 @@ func (kre *KeyRingEndpoint) getLoadedPrivateKeys(w http.ResponseWriter, r *http.
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
 	n, _ := w.Write(bodyData)
+	LogExit(log, r, 200, n)
+}
+
+func (kre *KeyRingEndpoint) deletePrivateKey(w http.ResponseWriter, r *http.Request) {
+	var data models.KeyRingDeletePrivateKeyData
+	ctx := wrapContextWithRequestID(r)
+	log := wrapLogWithRequestID(kre.log, r)
+	InitHTTPTimer(log, r)
+
+	defer func() {
+		if rec := recover(); rec != nil {
+			CatchAllError(rec, w, r, log)
+		}
+	}()
+
+	if !UnmarshalBodyOrDie(&data, w, r, log) {
+		return
+	}
+	
+	fp, err := remote_signer.GetFingerPrintFromKey(data.EncryptedPrivateKey)
+
+	if err != nil {
+		InvalidFieldData("EncryptedPrivateKey", "Invalid key provided. Check if its in ASCII Armored Format. Cannot read fingerprint", w, r, log)
+		return
+	}
+
+	_, n := kre.gpg.LoadKey(ctx, data.EncryptedPrivateKey) // Error never happens here due GetFingerPrintFromKey
+
+	if n == 0 {
+		NotFound("EncryptedPrivateKey", "No private keys found at specified payload", w, r, log)
+		return
+	}
+
+	fingerPrint, _ := remote_signer.GetFingerPrintFromKey(data.EncryptedPrivateKey)
+
+	if data.Password != nil {
+		pass := data.Password.(string)
+		err := kre.gpg.UnlockKey(ctx, fp, pass)
+		if err != nil {
+			InvalidFieldData("Password", "Invalid password for the key provided", w, r, log)
+			return
+		}
+	}
+
+		err = kre.gpg.DeleteKey(fingerPrint)
+		if err != nil {
+			log.Error("Error deleting key: %s", err)
+			InternalServerError("There was an error deleting your key from the disk.", data, w, r, log)
+			return
+		}
+	
+	ret := models.GPGDeletePrivateKeyReturn {
+		Status: "OK",
+	}
+
+	d, _ := json.Marshal(ret)
+
+	w.Header().Set("Content-Type", models.MimeText)
+	w.WriteHeader(200)
+	n, _ = w.Write(d)
 	LogExit(log, r, 200, n)
 }
 
