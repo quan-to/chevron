@@ -106,6 +106,8 @@ func (d *Disk) Delete(key string) error {
 		d.log.ErrorDone("Error deleting from %s: %s", path.Join(d.folder, d.prefix+key), err)
 	}
 
+	_ = os.Remove(path.Join(d.folder, "metadata-"+d.prefix+key))
+
 	return err
 }
 
