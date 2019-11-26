@@ -93,6 +93,7 @@ func (d *Disk) SaveWithMetadata(key, data, metadata string) error {
 	return err
 }
 
+// Delete deletes a file key and metadata from the disk
 func (d *Disk) Delete(key string) error {
 	d.log.DebugAwait("Deleting %s", path.Join(d.folder, d.prefix+key))
 	_, err := ioutil.ReadFile(path.Join(d.folder, d.prefix+key))
