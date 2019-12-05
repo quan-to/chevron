@@ -191,7 +191,7 @@ func (sm *SecretsManager) UnlockLocalKeys(ctx context.Context, gpg etc.PGPInterf
 	sm.Unlock()
 
 	for fp, pass := range passwords {
-		if gpg.IsKeyLocked(fp) {
+		if !gpg.IsKeyLocked(fp) {
 			continue
 		}
 
