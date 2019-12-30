@@ -44,5 +44,5 @@ require (
 	golang.org/x/sys v0.0.0-20190405154228-4b34438f7a67 // indirect
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
-	gopkg.in/rethinkdb/rethinkdb-go.v5 v5.0.1
+	gopkg.in/rethinkdb/rethinkdb-go.v6 v6.0.0
 )
