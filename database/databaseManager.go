@@ -5,7 +5,7 @@ import (
 	"github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/slog"
-	r "gopkg.in/rethinkdb/rethinkdb-go.v5"
+	r "gopkg.in/rethinkdb/rethinkdb-go.v6"
 	"strings"
 	"time"
 )

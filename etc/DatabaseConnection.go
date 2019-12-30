@@ -2,7 +2,7 @@ package etc
 
 import (
 	"github.com/quan-to/chevron/database"
-	"gopkg.in/rethinkdb/rethinkdb-go.v5"
+	"gopkg.in/rethinkdb/rethinkdb-go.v6"
 )
 
 func GetConnection() *rethinkdb.Session {

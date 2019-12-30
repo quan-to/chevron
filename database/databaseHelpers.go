@@ -1,7 +1,7 @@
 package database
 
 import (
-	r "gopkg.in/rethinkdb/rethinkdb-go.v5"
+	r "gopkg.in/rethinkdb/rethinkdb-go.v6"
 )
 
 func GetTableIndexes(tableName string) []string {

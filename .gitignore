@@ -62,3 +62,5 @@ tests/metadata-*
 vault.log
 keymagic/rethinkdb_data
 server/rethinkdb_data
+cmd/server/RemoteSigner_Server
+cmd/server/server
