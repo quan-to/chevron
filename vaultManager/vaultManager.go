@@ -162,7 +162,7 @@ func (vm *VaultManager) SaveWithMetadata(key, data, metadata string) error {
 // Delete deletes a key from the vault
 func (vm *VaultManager) Delete(key string) error {
 	vm.log.DebugAwait("Deleting %s", key)
-	return vm.deleteSecret(vm.prefix+key)
+	return vm.deleteSecret(vm.prefix + key)
 }
 
 func (vm *VaultManager) Read(key string) (data string, metadata string, err error) {

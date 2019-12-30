@@ -13,6 +13,8 @@ func GetTableIndexes(tableName string) []string {
 		panic(err)
 	}
 
+	defer c.Close()
+
 	z, err := c.Interface()
 
 	if err != nil {
@@ -38,6 +40,8 @@ func GetDatabases() []string {
 		panic(err)
 	}
 
+	defer c.Close()
+
 	z, err := c.Interface()
 
 	if err != nil {
@@ -62,6 +66,8 @@ func GetTables() []string {
 	if err != nil {
 		panic(err)
 	}
+
+	defer c.Close()
 
 	z, err := c.Interface()
 

@@ -58,6 +58,8 @@ func AddGPGKey(conn *r.Session, data GPGKey) (string, bool, error) {
 		return "", false, err
 	}
 
+	defer existing.Close()
+
 	var gpgKey GPGKey
 
 	if existing.Next(gpgKey) {
@@ -95,6 +97,8 @@ func FetchKeysWithoutSubKeys(conn *r.Session) ([]GPGKey, error) {
 		return nil, err
 	}
 
+	defer res.Close()
+
 	results := make([]GPGKey, 0)
 	var gpgKey GPGKey
 
@@ -118,6 +122,8 @@ func GetGPGKeyByFingerPrint(conn *r.Session, fingerPrint string) (*GPGKey, error
 	if err != nil {
 		return nil, err
 	}
+
+	defer res.Close()
 
 	var gpgKey GPGKey
 
@@ -154,6 +160,8 @@ func SearchGPGKeyByEmail(conn *r.Session, email string, pageStart, pageEnd int) 
 	if err != nil {
 		return nil, err
 	}
+
+	defer res.Close()
 	results := make([]GPGKey, 0)
 	var gpgKey GPGKey
 
@@ -185,6 +193,8 @@ func SearchGPGKeyByFingerPrint(conn *r.Session, fingerPrint string, pageStart, p
 	if err != nil {
 		return nil, err
 	}
+
+	defer res.Close()
 	results := make([]GPGKey, 0)
 	var gpgKey GPGKey
 
@@ -226,6 +236,9 @@ func SearchGPGKeyByValue(conn *r.Session, value string, pageStart, pageEnd int) 
 	if err != nil {
 		return nil, err
 	}
+
+	defer res.Close()
+
 	results := make([]GPGKey, 0)
 	var gpgKey GPGKey
 
@@ -262,6 +275,8 @@ func SearchGPGKeyByName(conn *r.Session, name string, pageStart, pageEnd int) ([
 	if err != nil {
 		return nil, err
 	}
+
+	defer res.Close()
 
 	results := make([]GPGKey, 0)
 	var gpgKey GPGKey
