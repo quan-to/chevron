@@ -2,7 +2,7 @@ package database
 
 import (
 	"github.com/quan-to/chevron"
-	r "gopkg.in/rethinkdb/rethinkdb-go.v5"
+	r "gopkg.in/rethinkdb/rethinkdb-go.v6"
 	"time"
 )
 
