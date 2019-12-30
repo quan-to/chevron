@@ -33,7 +33,7 @@ func (d *Void) SaveWithMetadata(key, data, metadata string) error {
 }
 
 // Delete a key from the backend
-func (d* Void) Delete(key string) error {
+func (d *Void) Delete(key string) error {
 	return nil
 }
 

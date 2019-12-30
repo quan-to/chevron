@@ -54,6 +54,8 @@ func AddUser(conn *r.Session, um *UserModel) (string, error) {
 		return "", err
 	}
 
+	defer existing.Close()
+
 	if !existing.IsNil() {
 		return "", fmt.Errorf("already exists")
 	}
@@ -83,6 +85,8 @@ func GetUser(conn *r.Session, username string) (um *UserModel, err error) {
 		return nil, err
 	}
 
+	defer res.Close()
+
 	if res.Next(&um) {
 		return um, nil
 	}
@@ -99,7 +103,7 @@ func UpdateUser(conn *r.Session, um *UserModel) error {
 	if err != nil {
 		return err
 	}
-	
+
 	if res.Replaced == 0 {
 		return fmt.Errorf("not found")
 	}

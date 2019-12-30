@@ -4,8 +4,8 @@ import (
 	"github.com/quan-to/chevron"
 	"github.com/quan-to/slog"
 	"io/ioutil"
-	"path"
 	"os"
+	"path"
 )
 
 type Disk struct {

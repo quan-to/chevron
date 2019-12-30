@@ -66,7 +66,7 @@ func RemoveUserToken(conn *r.Session, token string) (err error) {
 		GetAllByIndex("Token", token).
 		Limit(1).
 		Delete().
-		Run(conn)
+		RunWrite(conn)
 
 	if err != nil {
 		return err
@@ -86,6 +86,8 @@ func GetUserToken(conn *r.Session, token string) (ut *UserToken, err error) {
 	if err != nil {
 		return nil, err
 	}
+
+	defer res.Close()
 
 	if res.Next(&ut) {
 		return ut, nil

@@ -144,8 +144,8 @@ func (kre *KeyRingEndpoint) deletePrivateKey(w http.ResponseWriter, r *http.Requ
 		InternalServerError("There was an error deleting your key from the disk.", data, w, r, log)
 		return
 	}
-	
-	ret := models.GPGDeletePrivateKeyReturn {
+
+	ret := models.GPGDeletePrivateKeyReturn{
 		Status: "OK",
 	}
 
