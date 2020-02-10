@@ -54,6 +54,7 @@ var Environment string
 var AgentExternalURL string
 var AgentAdminExternalURL string
 var ShowLines bool
+var LogFormat slog.Format
 
 func Setup() {
 	// Pre init
@@ -71,6 +72,7 @@ func Setup() {
 	SKSServer = os.Getenv("SKS_SERVER")
 	KeyPrefix = os.Getenv("KEY_PREFIX")
 	ShowLines = os.Getenv("SHOW_LINES") == "true"
+	LogFormat = slog.ToFormat(os.Getenv("LOG_FORMAT"))
 
 	if ShowLines {
 		slog.SetShowLines(true)

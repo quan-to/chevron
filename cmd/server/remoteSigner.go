@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	_ "github.com/quan-to/chevron/cmd/server/init"
 	"os"
 	"os/signal"
 	"syscall"
