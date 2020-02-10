@@ -54,6 +54,8 @@ var Environment string
 var AgentExternalURL string
 var AgentAdminExternalURL string
 var ShowLines bool
+
+// LogFormat allows to configure the output log format
 var LogFormat slog.Format
 
 func Setup() {
