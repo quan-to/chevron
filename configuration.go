@@ -55,6 +55,9 @@ var AgentExternalURL string
 var AgentAdminExternalURL string
 var ShowLines bool
 
+// LogFormat allows to configure the output log format
+var LogFormat slog.Format
+
 func Setup() {
 	// Pre init
 	MaxKeyRingCache = -1
@@ -71,6 +74,7 @@ func Setup() {
 	SKSServer = os.Getenv("SKS_SERVER")
 	KeyPrefix = os.Getenv("KEY_PREFIX")
 	ShowLines = os.Getenv("SHOW_LINES") == "true"
+	LogFormat = slog.ToFormat(os.Getenv("LOG_FORMAT"))
 
 	if ShowLines {
 		slog.SetShowLines(true)

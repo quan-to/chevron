@@ -66,3 +66,4 @@ These are the Environment Variables that you can set to manage the webserver:
 *   `READONLY_KEYPATH` => If the keypath is readonly. If `true` then it will create a temporary folder in `/tmp` and copy all keys to there so it can work over it. 
 *   `SHOW_LINES` => Show filename and lines in logs
 *   `RequestIDHeader` => Header field to get request ID
+*   `LOG_FORMAT` => Change log format (default is pipe delimited, provide the value `json` to log in JSON format)

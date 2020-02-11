@@ -33,7 +33,7 @@ require (
 	github.com/opentracing/opentracing-go v1.1.0 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/pkg/errors v0.8.1
-	github.com/quan-to/slog v0.0.0-20190910164334-59ecc6f56510
+	github.com/quan-to/slog v0.1.0
 	github.com/ryanuber/go-glob v1.0.0 // indirect
 	github.com/sam-kamerer/go-plister v1.1.2 // indirect
 	github.com/sirupsen/logrus v1.4.1 // indirect
