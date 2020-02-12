@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/logrusorgru/aurora"
 	remote_signer "github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/QuantoError"
 	"github.com/quan-to/chevron/models"
@@ -108,7 +107,6 @@ func InternalServerError(message string, data interface{}, w http.ResponseWriter
 
 // LogExit does the logging of the exit call inside a HTTP Request
 func LogExit(slog slog.Instance, r *http.Request, statusCode int, bodyLength int) {
-	method := aurora.Bold(r.Method).Cyan()
 	hts := r.Header.Get(httpInternalTimestamp)
 	ts := float64(0)
 
@@ -119,41 +117,23 @@ func LogExit(slog slog.Instance, r *http.Request, statusCode int, bodyLength int
 		}
 	}
 
-	statusCodeStr := aurora.Black(fmt.Sprintf("[%d]", statusCode))
-	switch statusCode {
-	case 400:
-		statusCodeStr = aurora.Red(statusCodeStr).Inverse().Bold()
-	case 404:
-		statusCodeStr = aurora.Red(statusCodeStr).Inverse().Bold()
-	case 500:
-		statusCodeStr = aurora.Red(statusCodeStr).Inverse().Bold()
-	case 200:
-		statusCodeStr = aurora.Green(statusCodeStr).Inverse().Bold()
-	default:
-		statusCodeStr = aurora.Gray(7, statusCodeStr).Bold()
-	}
+	statusCodeStr := fmt.Sprintf("[%d]", statusCode)
 
 	host, _, _ := net.SplitHostPort(r.RemoteAddr)
 
-	remote := aurora.Gray(7, host)
-
 	if ts != 0 {
-		slog.Done("%s (%8.2f ms) {%8d bytes} %-4s %s from %s", statusCodeStr, ts, bodyLength, method, aurora.Gray(7, r.URL.Path), remote)
+		slog.Done("%s (%.2f ms) {%d bytes} %s %s from %s", statusCodeStr, ts, bodyLength, r.Method, r.URL.Path, host)
 	} else {
-		slog.Done("%s {%8d bytes}          %-4s %s from %s", statusCodeStr, bodyLength, method, aurora.Gray(7, r.URL.Path), remote)
+		slog.Done("%s {%d bytes} %s %s from %s", statusCodeStr, bodyLength, r.Method, r.URL.Path, host)
 	}
 }
 
 // InitHTTPTimer initializes the HTTP Request timer and prints a log line representing a received HTTP Request
 func InitHTTPTimer(log slog.Instance, r *http.Request) {
-	method := aurora.Bold(r.Method).Cyan()
 	host, _, _ := net.SplitHostPort(r.RemoteAddr)
-
-	remote := aurora.Gray(7, host)
-
 	t := time.Now().UnixNano()
 	r.Header.Set(httpInternalTimestamp, fmt.Sprintf("%d", t))
-	log.Await("%s                                %-4s %s from %s", aurora.Yellow("[...]").Inverse().Bold(), method, aurora.Gray(7, r.URL.Path), remote)
+	log.Await("%s %s from %s", r.Method, r.URL.Path, host)
 }
 
 func wrapWithLog(log slog.Instance, f HTTPHandleFuncWithLog) HTTPHandleFunc {
