@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"github.com/hashicorp/vault/api"
+	"github.com/opentracing/opentracing-go/log"
 	"github.com/quan-to/chevron"
 	"github.com/quan-to/slog"
 	"net/http"
@@ -47,26 +48,6 @@ func MakeVaultManager(log slog.Instance, prefix string) *VaultManager {
 		log.Error(err)
 		return nil
 	}
-	if !remote_signer.VaultUseUserpass {
-		log.Info("Token Mode enabled.")
-		client.SetToken(remote_signer.VaultRootToken)
-	} else {
-		// to pass the password
-		options := map[string]interface{}{
-			"password": remote_signer.VaultPassword,
-		}
-		log.Info("Userpass mode enabled. Logging with %s", remote_signer.VaultUsername)
-		// PUT call to get a token
-		secret, err := client.Logical().Write(fmt.Sprintf("auth/userpass/login/%s", remote_signer.VaultUsername), options)
-
-		if err != nil {
-			log.Error(err)
-			return nil
-		}
-
-		log.Info("Logged in successfully.")
-		client.SetToken(secret.Auth.ClientToken)
-	}
 
 	return &VaultManager{
 		client: client,
@@ -82,13 +63,46 @@ func baseVaultPath(dataType string) string {
 	return fmt.Sprintf("%s/%s/%s", remote_signer.VaultBackend, dataType, remote_signer.VaultNamespace)
 }
 
+func (vm *VaultManager) getClient() *api.Client {
+
+	options := map[string]interface{}{
+		"token": vm.client.Token(),
+	}
+
+	_, err := vm.client.Logical().Write("/auth/token/lookup", options)
+
+	if err != nil {
+		if !remote_signer.VaultUseUserpass {
+			vm.log.Info("Token Mode enabled.")
+			vm.client.SetToken(remote_signer.VaultRootToken)
+		} else {
+			options := map[string]interface{}{
+				"password": remote_signer.VaultPassword,
+			}
+			vm.log.Info("Userpass mode enabled. Logging with %s", remote_signer.VaultUsername)
+			// PUT call to get a token
+			secret, err := vm.client.Logical().Write(fmt.Sprintf("auth/userpass/login/%s", remote_signer.VaultUsername), options)
+
+			if err != nil {
+				log.Error(err)
+				return nil
+			}
+
+			vm.log.Info("Logged in successfully.")
+			vm.client.SetToken(secret.Auth.ClientToken)
+		}
+	}
+
+	return vm.client
+}
+
 func (vm *VaultManager) vaultPath(dataType, key string) string {
 	return fmt.Sprintf("%s/%s", baseVaultPath(dataType), key)
 }
 
 func (vm *VaultManager) putSecret(key string, data map[string]string) error {
 	vm.log.DebugAwait("Saving %s to %s", key, vm.vaultPath(VaultData, key))
-	_, err := vm.client.Logical().Write(vm.vaultPath(VaultData, key), map[string]interface{}{
+	_, err := vm.getClient().Logical().Write(vm.vaultPath(VaultData, key), map[string]interface{}{
 		"data": data,
 	})
 
@@ -101,13 +115,13 @@ func (vm *VaultManager) putSecret(key string, data map[string]string) error {
 
 func (vm *VaultManager) deleteSecret(key string) error {
 	vm.log.DebugAwait("Deleting %s from %s", key, vm.vaultPath(VaultData, key))
-	_, err := vm.client.Logical().Read(vm.vaultPath(VaultData, key))
+	_, err := vm.getClient().Logical().Read(vm.vaultPath(VaultData, key))
 	if err != nil {
 		vm.log.ErrorDone("Error reading to %s: %s, file not exist to delete", vm.vaultPath(VaultData, key), err)
 		return err
 	}
 
-	_, err = vm.client.Logical().Delete(vm.vaultPath(VaultData, key))
+	_, err = vm.getClient().Logical().Delete(vm.vaultPath(VaultData, key))
 	if err != nil {
 		vm.log.ErrorDone("Error deleting from %s: %s", vm.vaultPath(VaultData, key), err)
 	}
@@ -117,7 +131,7 @@ func (vm *VaultManager) deleteSecret(key string) error {
 
 func (vm *VaultManager) getSecret(key string) (string, string, error) {
 	//vm.log.Debug("getSecret(%s)", key)
-	s, err := vm.client.Logical().Read(vm.vaultPath(VaultData, key))
+	s, err := vm.getClient().Logical().Read(vm.vaultPath(VaultData, key))
 	if err != nil {
 		return "", "", err
 	}
@@ -142,7 +156,7 @@ func (vm *VaultManager) getSecret(key string) (string, string, error) {
 }
 
 func (vm *VaultManager) HealthStatus() (*api.HealthResponse, error) {
-	return vm.client.Sys().Health()
+	return vm.getClient().Sys().Health()
 }
 
 func (vm *VaultManager) Save(key, data string) error {
@@ -177,7 +191,7 @@ func (vm *VaultManager) Read(key string) (data string, metadata string, err erro
 
 func (vm *VaultManager) List() ([]string, error) {
 	vm.log.Debug("Listing keys on %s", baseVaultPath(VaultMetadata))
-	s, err := vm.client.Logical().List(baseVaultPath(VaultMetadata))
+	s, err := vm.getClient().Logical().List(baseVaultPath(VaultMetadata))
 	if err != nil {
 		return nil, err
 	}
