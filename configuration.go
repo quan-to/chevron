@@ -40,6 +40,7 @@ var VaultPassword string
 var VaultNamespace string
 var VaultBackend string
 var VaultSkipDataType bool
+var VaultTokenTTL string
 var AgentTargetURL string
 var AgentTokenExpiration int
 var AgentKeyFingerPrint string
@@ -145,6 +146,7 @@ func Setup() {
 	VaultNamespace = os.Getenv("VAULT_NAMESPACE")
 	VaultBackend = os.Getenv("VAULT_BACKEND")
 	VaultSkipDataType = os.Getenv("VAULT_SKIP_DATA_TYPE") == "true"
+	VaultTokenTTL = os.Getenv("VAULT_TOKEN_TTL")
 	AgentTargetURL = os.Getenv("AGENT_TARGET_URL")
 	AgentKeyFingerPrint = os.Getenv("AGENT_KEY_FINGERPRINT")
 	AgentBypassLogin = os.Getenv("AGENT_BYPASS_LOGIN") == "true"

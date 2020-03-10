@@ -6,19 +6,25 @@ import (
 	"crypto/tls"
 	"fmt"
 	"github.com/hashicorp/vault/api"
-	"github.com/opentracing/opentracing-go/log"
 	"github.com/quan-to/chevron"
 	"github.com/quan-to/slog"
 	"net/http"
+	"time"
 )
 
 const VaultData = "data"
 const VaultMetadata = "metadata"
 
+type VaultToken struct {
+	ttl time.Duration
+	getTime *time.Time
+}
+
 type VaultManager struct {
 	client *api.Client
 	prefix string
 	log    slog.Instance
+	token	*VaultToken
 }
 
 // MakeVaultManager creates an instance of VaultManager
@@ -49,11 +55,41 @@ func MakeVaultManager(log slog.Instance, prefix string) *VaultManager {
 		return nil
 	}
 
-	return &VaultManager{
+	vaultTTL, err := time.ParseDuration(remote_signer.VaultTokenTTL)
+
+	if err != nil {
+		log.Error(err)
+		defaultTokenTTL := "768h" // Vault default token duration 32d -> 32*24 h
+
+		log.Info("Setting default vault token duration %s", defaultTokenTTL)
+		vaultTTL, _ = time.ParseDuration(defaultTokenTTL)
+	}
+
+	vm := &VaultManager{
 		client: client,
 		prefix: prefix,
 		log:    slog.Scope(fmt.Sprintf("Vault (%s)", prefix)),
+		token: &VaultToken{
+			ttl: vaultTTL,
+			getTime: nil,
+		},
 	}
+
+	if !remote_signer.VaultUseUserpass {
+		vm.log.Info("Token Mode enabled.")
+		vm.client.SetToken(remote_signer.VaultRootToken)
+
+		return vm
+	}
+
+	err = vm.getToken()
+
+	if err != nil {
+		log.Error(err)
+		return nil
+	}
+
+	return vm
 }
 
 func baseVaultPath(dataType string) string {
@@ -63,34 +99,58 @@ func baseVaultPath(dataType string) string {
 	return fmt.Sprintf("%s/%s/%s", remote_signer.VaultBackend, dataType, remote_signer.VaultNamespace)
 }
 
-func (vm *VaultManager) getClient() *api.Client {
+func (vm *VaultManager) validTokenTTL() bool {
+	if vm.token.getTime != nil {
+		var now = time.Now().Unix()
+		var timeWithTTL = vm.token.getTime.Unix() + int64(vm.token.ttl.Seconds())
 
-	options := map[string]interface{}{
-		"token": vm.client.Token(),
+		if now >= timeWithTTL {
+			return false
+		}
+		return true
+	}
+	return false
+}
+
+func (vm *VaultManager) getToken() error {
+	if remote_signer.VaultUseUserpass {
+		if vm.validTokenTTL() {
+			return nil
+		}
+
+		if vm.token.getTime != nil {
+			vm.log.Info("Token has expired, generate new for: %s", remote_signer.VaultUsername)
+		}
+
+		options := map[string]interface{}{
+			"password": remote_signer.VaultPassword,
+		}
+
+		vm.log.Info("Userpass mode enabled. Logging with %s", remote_signer.VaultUsername)
+		// PUT call to get a token
+		secret, err := vm.client.Logical().Write(fmt.Sprintf("auth/userpass/login/%s", remote_signer.VaultUsername), options)
+
+		if err != nil {
+			vm.log.Error(err)
+			return err
+		}
+
+		vm.log.Info("Logged in successfully.")
+		vm.client.SetToken(secret.Auth.ClientToken)
+
+		var nowTime = time.Now()
+		vm.token.getTime = &nowTime
 	}
 
-	_, err := vm.client.Logical().Write("/auth/token/lookup", options)
+	return nil
+}
+
+func (vm *VaultManager) getClient() *api.Client {
+	err := vm.getToken()
 
 	if err != nil {
-		if !remote_signer.VaultUseUserpass {
-			vm.log.Info("Token Mode enabled.")
-			vm.client.SetToken(remote_signer.VaultRootToken)
-		} else {
-			options := map[string]interface{}{
-				"password": remote_signer.VaultPassword,
-			}
-			vm.log.Info("Userpass mode enabled. Logging with %s", remote_signer.VaultUsername)
-			// PUT call to get a token
-			secret, err := vm.client.Logical().Write(fmt.Sprintf("auth/userpass/login/%s", remote_signer.VaultUsername), options)
-
-			if err != nil {
-				log.Error(err)
-				return nil
-			}
-
-			vm.log.Info("Logged in successfully.")
-			vm.client.SetToken(secret.Auth.ClientToken)
-		}
+		vm.log.Error(err)
+		return nil
 	}
 
 	return vm.client
