@@ -42,6 +42,15 @@ func TestVaultManager_Make(t *testing.T) {
 	remote_signer.PopVariables()
 }
 
+func TestVaultGetToken(t *testing.T) {
+	err := vm.getToken()
+
+	if err != nil {
+		t.Errorf("Error to update token %s", err)
+		t.FailNow()
+	}
+}
+
 func TestVaultManager_List(t *testing.T) {
 	_ = vm.Save("__list__", "")
 	entries, err := vm.List()

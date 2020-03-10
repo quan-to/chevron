@@ -59,6 +59,7 @@ These are the Environment Variables that you can set to manage the webserver:
 *   `VAULT_ADDRESS` => Hashicorp Vault URL
 *   `VAULT_SKIP_VERIFY` => Hashicorp Vault Skip Verify SSL Certs on Connection
 *   `VAULT_ROOT_TOKEN` => Hashicorp Vault Root Token
+*   `VAULT_TOKEN_TTL` => Hashicorp Vault Token TTL (for example `24h`, default is `768h`. For more information see https://golang.org/pkg/time/#ParseDuration)
 *   `VAULT_BACKEND` => Hashicorp Vault Backend (for example `secret`)
 *   `VAULT_STORAGE` => If a Hashicorp Vault should be used to store private keys instead of the disk
 *   `VAULT_NAMESPACE` => if a Hashicorp Vault Namespace to use (appended to backend, for example if namespace is `remote-signer` the keys are stored under `secret/remote-signer`)
