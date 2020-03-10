@@ -102,7 +102,7 @@ func baseVaultPath(dataType string) string {
 func (vm *VaultManager) validTokenTTL() bool {
 	if vm.token.getTime != nil {
 		var now = time.Now().Unix()
-		var timeWithTTL = vm.token.getTime.Unix() + int64(vm.token.ttl.Seconds())
+		var timeWithTTL = vm.token.getTime.Add(vm.token.ttl).Add(time.Minute*-1).Unix()
 
 		return now <= timeWithTTL
 	}
