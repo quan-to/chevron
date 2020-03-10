@@ -104,10 +104,7 @@ func (vm *VaultManager) validTokenTTL() bool {
 		var now = time.Now().Unix()
 		var timeWithTTL = vm.token.getTime.Unix() + int64(vm.token.ttl.Seconds())
 
-		if now >= timeWithTTL {
-			return false
-		}
-		return true
+		return now <= timeWithTTL
 	}
 	return false
 }
