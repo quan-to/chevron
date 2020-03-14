@@ -3,8 +3,8 @@ package keymagic
 import (
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"os"
-	"os/exec"
 	"testing"
 
 	remote_signer "github.com/quan-to/chevron"
@@ -23,19 +23,12 @@ var sm *SecretsManager
 
 func TestMain(m *testing.M) {
 	slog.UnsetTestMode()
-	var rql *exec.Cmd
 	var err error
-	var port int
-	rql, port, err = rstest.RQLStart()
-	if err != nil {
-		slog.Error(err)
-		os.Exit(1)
-	}
 
 	QuantoError.EnableStackTrace()
 	slog.SetTestMode()
-
-	remote_signer.DatabaseName = "qrs_test"
+	u, _ := uuid.NewRandom()
+	remote_signer.DatabaseName = "qrs_test_" + u.String()
 	remote_signer.PrivateKeyFolder = "../tests/"
 	remote_signer.KeyPrefix = "testkey_"
 	remote_signer.KeysBase64Encoded = false
@@ -47,7 +40,6 @@ func TestMain(m *testing.M) {
 	remote_signer.HttpPort = 40000
 	remote_signer.SKSServer = fmt.Sprintf("http://localhost:%d/sks/", remote_signer.HttpPort)
 	remote_signer.EnableRethinkSKS = true
-	remote_signer.RethinkDBPort = port
 	remote_signer.PushVariables()
 
 	slog.UnsetTestMode()
@@ -75,7 +67,6 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		slog.SetError(true)
 		slog.Error(err)
-		rstest.RQLStop(rql)
 		os.Exit(1)
 	}
 
@@ -83,6 +74,5 @@ func TestMain(m *testing.M) {
 	etc.ResetDatabase()
 	slog.UnsetTestMode()
 	etc.Cleanup()
-	rstest.RQLStop(rql)
 	os.Exit(code)
 }

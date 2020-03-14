@@ -37,6 +37,9 @@ script:
 - vault auth enable userpass
 - vault policy write test-policy ./test-policy.hcl
 - vault write auth/userpass/users/${VAULT_USERNAME} password=${VAULT_PASSWORD} policies=test-policy
+- echo "Starting RethinkDB"
+- rethinkdb --no-http-admin --bind 127.0.0.1 & echo $! > $HOME/rethinkdb.pid
+- echo "RethinkDB started with PID `cat $HOME/rethinkdb.pid`"
 - curl https://deepsource.io/cli | sh
 - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh |
   bash -s -- -b $GOPATH/bin v1.15.0
@@ -46,6 +49,8 @@ script:
 - ./bin/deepsource report --analyzer test-coverage --key go --value-file ./qrs.coverprofile
 - echo "Closing Vault"
 - sudo kill -9 `cat ~/vault.pid`
+- echo "Closing RethinkDB"
+- sudo kill -9 `cat ~/rethinkdb.pid`
 - echo "Calling travis-binary-build.sh"
 - "./scripts/travis-binary-build.sh"
 - echo "Done"

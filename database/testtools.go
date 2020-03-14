@@ -22,6 +22,8 @@ func NumNodes() int {
 		return 1
 	}
 
+	defer c.Close()
+
 	z, err := c.Interface()
 
 	if err != nil {

@@ -16,7 +16,7 @@ const VaultData = "data"
 const VaultMetadata = "metadata"
 
 type VaultToken struct {
-	ttl time.Duration
+	ttl     time.Duration
 	getTime *time.Time
 }
 
@@ -24,7 +24,7 @@ type VaultManager struct {
 	client *api.Client
 	prefix string
 	log    slog.Instance
-	token	*VaultToken
+	token  *VaultToken
 }
 
 // MakeVaultManager creates an instance of VaultManager
@@ -58,7 +58,7 @@ func MakeVaultManager(log slog.Instance, prefix string) *VaultManager {
 	vaultTTL, err := time.ParseDuration(remote_signer.VaultTokenTTL)
 
 	if err != nil {
-		log.Error(err)
+		log.Error("Error parsing VaultTokenTTL: %s", err)
 		defaultTokenTTL := "768h" // Vault default token duration 32d -> 32*24 h
 
 		log.Info("Setting default vault token duration %s", defaultTokenTTL)
@@ -70,7 +70,7 @@ func MakeVaultManager(log slog.Instance, prefix string) *VaultManager {
 		prefix: prefix,
 		log:    slog.Scope(fmt.Sprintf("Vault (%s)", prefix)),
 		token: &VaultToken{
-			ttl: vaultTTL,
+			ttl:     vaultTTL,
 			getTime: nil,
 		},
 	}
@@ -102,7 +102,7 @@ func baseVaultPath(dataType string) string {
 func (vm *VaultManager) validTokenTTL() bool {
 	if vm.token.getTime != nil {
 		var now = time.Now().Unix()
-		var timeWithTTL = vm.token.getTime.Add(vm.token.ttl).Add(time.Minute*-1).Unix()
+		var timeWithTTL = vm.token.getTime.Add(vm.token.ttl).Add(time.Minute * -1).Unix()
 
 		return now <= timeWithTTL
 	}

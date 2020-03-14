@@ -5,12 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"os/exec"
 	"runtime/debug"
 	"testing"
 
@@ -20,7 +20,6 @@ import (
 	"github.com/quan-to/chevron/etc"
 	"github.com/quan-to/chevron/etc/magicBuilder"
 	"github.com/quan-to/chevron/keymagic"
-	"github.com/quan-to/chevron/rstest"
 	"github.com/quan-to/slog"
 )
 
@@ -114,24 +113,18 @@ func executeRequest(req *http.Request) *httptest.ResponseRecorder {
 
 func TestMain(m *testing.M) {
 	slog.UnsetTestMode()
-	var rql *exec.Cmd
 	var err error
-	var port int
-	rql, port, err = rstest.RQLStart()
-	if err != nil {
-		slog.Error(err)
-		os.Exit(1)
-	}
 
 	QuantoError.EnableStackTrace()
 
-	remote_signer.DatabaseName = "qrs_test"
+	u, _ := uuid.NewRandom()
+
+	remote_signer.DatabaseName = "qrs_test_" + u.String()
 	remote_signer.PrivateKeyFolder = "../tests"
 	remote_signer.KeyPrefix = "testkey_"
 	remote_signer.KeysBase64Encoded = false
 	remote_signer.EnableRethinkSKS = true
 	remote_signer.RethinkDBPoolSize = 1
-	remote_signer.RethinkDBPort = port
 
 	slog.UnsetTestMode()
 	etc.DbSetup()
@@ -171,7 +164,6 @@ func TestMain(m *testing.M) {
 	slog.UnsetTestMode()
 	etc.Cleanup()
 	slog.Warn("STOPPING RETHINKDB")
-	rstest.RQLStop(rql)
 	os.Exit(code)
 }
 

@@ -130,7 +130,8 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 		}
 
 		jsondata["_timestamp"] = time.Now().Unix() * 1000
-		jsondata["_timeUniqueId"] = uuid.New().String()
+		u, _ := uuid.NewRandom()
+		jsondata["_timeUniqueId"] = u.String()
 
 		bodyData, _ = json.Marshal(jsondata)
 
