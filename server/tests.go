@@ -44,11 +44,12 @@ func (ge *TestsEndpoint) checkExternal(ctx context.Context) bool {
 	if remote_signer.EnableRethinkSKS {
 		conn := database.GetConnection()
 
-		_, err := r.Expr(1).Run(conn)
+		d, err := r.Expr(1).Run(conn)
 		if err != nil {
 			log.Error(err)
 			isHealthy = false
 		}
+		_ = d.Close()
 	}
 
 	if ge.vm != nil {

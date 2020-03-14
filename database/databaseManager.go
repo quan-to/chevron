@@ -118,7 +118,9 @@ func InitTables() {
 
 func Cleanup() {
 	if RthState.connection != nil {
-		err := RthState.connection.Close()
+		err := RthState.connection.Close(r.CloseOpts{
+			NoReplyWait: false,
+		})
 
 		if err != nil {
 			slog.Fatal(err)

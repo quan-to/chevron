@@ -58,7 +58,7 @@ func MakeVaultManager(log slog.Instance, prefix string) *VaultManager {
 	vaultTTL, err := time.ParseDuration(remote_signer.VaultTokenTTL)
 
 	if err != nil {
-		log.Error(err)
+		log.Error("Error parsing VaultTokenTTL: %s", err)
 		defaultTokenTTL := "768h" // Vault default token duration 32d -> 32*24 h
 
 		log.Info("Setting default vault token duration %s", defaultTokenTTL)

@@ -200,6 +200,10 @@ func Setup() {
 		RethinkDBHost = "127.0.0.1"
 	}
 
+	if VaultTokenTTL == "" {
+		VaultTokenTTL = "768h"
+	}
+
 	if RethinkDBUsername == "" {
 		RethinkDBUsername = "admin"
 	}

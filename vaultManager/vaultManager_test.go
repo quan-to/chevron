@@ -52,7 +52,10 @@ func TestVaultGetToken(t *testing.T) {
 }
 
 func TestVaultManager_List(t *testing.T) {
-	_ = vm.Save("__list__", "")
+	err := vm.Save("__list__", "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	entries, err := vm.List()
 	if err != nil {
 		t.Errorf("Error listing entries: %s", err)
