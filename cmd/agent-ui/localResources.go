@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path"
+	"path/filepath"
 	"strings"
 
 	remote_signer "github.com/quan-to/chevron"
@@ -21,15 +23,23 @@ const (
 )
 
 var (
-	pgp etc.PGPInterface
-	krm etc.KRMInterface
+	pgp              etc.PGPInterface
+	krm              etc.KRMInterface
+	executableFolder string
+	keysFolder       string
 )
 
 var ctx = context.Background()
 
+func init() {
+	ex, _ := os.Executable()
+	executableFolder = filepath.Dir(ex)
+	keysFolder = path.Join(executableFolder, "keys")
+}
+
 func Begin() {
-	_ = os.Mkdir("keys", os.ModePerm)
-	kb := keyBackend.MakeSaveToDiskBackend(nil, "keys", "key_")
+	_ = os.Mkdir(keysFolder, os.ModePerm)
+	kb := keyBackend.MakeSaveToDiskBackend(nil, keysFolder, "key_")
 	krm = keymagic.MakeKeyRingManager(nil)
 	pgp = keymagic.MakePGPManagerWithKRM(nil, kb, krm)
 	pgp.LoadKeys(ctx)
@@ -172,13 +182,14 @@ func AddKeys(files []string) (bool, []string) {
 }
 
 func Migrate() {
-	if remote_signer.FolderExists("store") { // Old key store
+	storeFolder := path.Join(executableFolder, "keys")
+	if remote_signer.FolderExists(storeFolder) { // Old key store
 		log.Warn("Found \"store\" folder. Migrating keys...")
-		err := remote_signer.CopyFiles("store", "keys")
+		err := remote_signer.CopyFiles(storeFolder, keysFolder)
 		if err != nil {
 			log.Error("Error moving files from store to keys: %s", err)
 		} else {
-			err = os.RemoveAll("store")
+			err = os.RemoveAll(storeFolder)
 			if err != nil {
 				log.Error("Error removing folder store: %s", err)
 			}

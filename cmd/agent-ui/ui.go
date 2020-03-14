@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/asticode/go-astikit"
 	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
 )
@@ -17,20 +18,20 @@ func Run() {
 		Debug: *debug,
 		MenuOptions: []*astilectron.MenuItemOptions{
 			{
-				Label: astilectron.PtrStr("File"),
+				Label: astikit.StrPtr("File"),
 				SubMenu: []*astilectron.MenuItemOptions{
 					{Role: astilectron.MenuItemRoleClose},
 				},
 			},
 			{
-				Label: astilectron.PtrStr("Tools"),
+				Label: astikit.StrPtr("Tools"),
 				SubMenu: []*astilectron.MenuItemOptions{
 					{
 						Accelerator: astilectron.NewAccelerator("Alt", "CommandOrControl", "I"),
 						Role:        astilectron.MenuItemRoleToggleDevTools,
 					},
 					{
-						Label: astilectron.PtrStr("Add Private Key"),
+						Label: astikit.StrPtr("Add Private Key"),
 						OnClick: func(e astilectron.Event) (deleteListener bool) {
 							_ = w.SendMessage(bootstrap.MessageOut{
 								Name: messageLoadPrivateKey,
@@ -52,10 +53,10 @@ func Run() {
 			Homepage:       "index.html",
 			MessageHandler: handleMessages,
 			Options: &astilectron.WindowOptions{
-				BackgroundColor: astilectron.PtrStr("#333"),
-				Center:          astilectron.PtrBool(true),
-				Height:          astilectron.PtrInt(900),
-				Width:           astilectron.PtrInt(1600),
+				BackgroundColor: astikit.StrPtr("#333"),
+				Center:          astikit.BoolPtr(true),
+				Height:          astikit.IntPtr(900),
+				Width:           astikit.IntPtr(1600),
 			},
 		}},
 	}

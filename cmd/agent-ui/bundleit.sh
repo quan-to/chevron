@@ -21,4 +21,4 @@ func RestoreAssets(dir, name string) error {
 }
 EOF
 
-astilectron-bundler -logger-app-name=AgentUI -d -w -l
+astilectron-bundler -d -w -l
