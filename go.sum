@@ -55,14 +55,20 @@ github.com/asticode/go-astilectron v0.8.0 h1:OuLahP7CKcQNyXrFMWRzvK4Mymltd94Orp6
 github.com/asticode/go-astilectron v0.8.0/go.mod h1:XN7r4w/s0Eu7D5TgmXuPN07sO8CmYHg95kw2EuW15nE=
 github.com/asticode/go-astilectron v0.12.4 h1:hmKFhefTlWJnXx8arymGZXjpF7RA38QbIJk/BEoumlE=
 github.com/asticode/go-astilectron v0.12.4/go.mod h1:D5O16BpDty8+HDSLzOslGU7g8VOhbLd4+Rx1NDH4qi4=
+github.com/asticode/go-astilectron v0.13.1 h1:vlU0T8lYDv7dfOHr6cwpghtSjzWYu73SZXy6pakg60w=
+github.com/asticode/go-astilectron v0.13.1/go.mod h1:D5O16BpDty8+HDSLzOslGU7g8VOhbLd4+Rx1NDH4qi4=
 github.com/asticode/go-astilectron-bootstrap v0.0.0-20180616141213-b3211646d205 h1:rCYoIm4F11K8tNUEB0TbNT4QsVx9MBgI09thWJ075S4=
 github.com/asticode/go-astilectron-bootstrap v0.0.0-20180616141213-b3211646d205/go.mod h1:SRaKevdZAZLWX+GCK49MNPYnHGjcNEP4XN3swtIWC3Q=
 github.com/asticode/go-astilectron-bootstrap v0.3.2 h1:hLGuIYQsNApbk3XQhXHhlwMsq1CpRjePv8jgnTcPhQo=
 github.com/asticode/go-astilectron-bootstrap v0.3.2/go.mod h1:85BKjP87M7egA/8K1vEnUBq966mBOlovxp37FImtJqE=
+github.com/asticode/go-astilectron-bootstrap v0.3.4 h1:Ncxw90ChHN60lPQ1h9o7QcubUTFX9vz4VeUkxKVJK0Y=
+github.com/asticode/go-astilectron-bootstrap v0.3.4/go.mod h1:Ctnhn8jH8Q8cP3BnLfoHbwRD+RlyUBF1JoIAdz/Xoa4=
 github.com/asticode/go-astilectron-bundler v0.0.0-20190406155441-5fc4c9f0c990 h1:zqGOFT/wWhicuZJXoxgWOMey1R5DO1r04I4YdFYHycI=
 github.com/asticode/go-astilectron-bundler v0.0.0-20190406155441-5fc4c9f0c990/go.mod h1:7iR/tJj8CDwh3dlELvVf/GzgPzRoj+5t4zqiAPLOZfI=
 github.com/asticode/go-astilectron-bundler v0.4.3 h1:S1FGjtS2Fcs0oBpkpjjPM8oXTgm2aW4/4iY3xYf5JH0=
 github.com/asticode/go-astilectron-bundler v0.4.3/go.mod h1:c1fqhzmHR2vxsjsOqAZLkyYYpowOK5mZwER+jNosHEs=
+github.com/asticode/go-astilectron-bundler v0.5.2 h1:JC4UBDr28vVY8gk4A/wag8BW0gvAd6z4MGUM/D7NXw4=
+github.com/asticode/go-astilectron-bundler v0.5.2/go.mod h1:V1VInmdndq/Kd+45cOh4fa9fARNZSCpXqxDznbh+lO0=
 github.com/asticode/go-astilog v1.0.0 h1:l9tek0K7KoQCmhZ7cvBTtVu0NsKpS9hB6jBLtQyxWYk=
 github.com/asticode/go-astilog v1.0.0/go.mod h1:Vg6SGUYb3tVyFeGQe0Mqmh0RMygpwy+huFKcyL92EVc=
 github.com/asticode/go-astitools v1.0.0 h1:B5l3sI+hgQJsUNyLgd6pHrhH75GAtFzZVIirso7oFeg=
@@ -261,6 +267,8 @@ github.com/hashicorp/go-syslog v1.0.0/go.mod h1:qPfqrKkXGihmCqbJM2mZgkZGvKG1dFdv
 github.com/hashicorp/go-uuid v1.0.0/go.mod h1:6SBZvOh/SIDV7/2o3Jml5SYk/TvGqwFJ/bN7x4byOro=
 github.com/hashicorp/go-uuid v1.0.1/go.mod h1:6SBZvOh/SIDV7/2o3Jml5SYk/TvGqwFJ/bN7x4byOro=
 github.com/hashicorp/go-uuid v1.0.2-0.20191001231223-f32f5fe8d6a8/go.mod h1:6SBZvOh/SIDV7/2o3Jml5SYk/TvGqwFJ/bN7x4byOro=
+github.com/hashicorp/go-version v1.0.0 h1:21MVWPKDphxa7ineQQTrCU5brh7OuVVAzGOCnnCPtE8=
+github.com/hashicorp/go-version v1.0.0/go.mod h1:fltr4n8CU8Ke44wwGCBoEymUuxUHl09ZGVZPK5anwXA=
 github.com/hashicorp/go-version v1.1.0/go.mod h1:fltr4n8CU8Ke44wwGCBoEymUuxUHl09ZGVZPK5anwXA=
 github.com/hashicorp/go-version v1.2.0/go.mod h1:fltr4n8CU8Ke44wwGCBoEymUuxUHl09ZGVZPK5anwXA=
 github.com/hashicorp/go.net v0.0.1/go.mod h1:hjKkEWcCURg++eb33jQU7oqQcI9XDCnUzHA0oac0k90=
@@ -389,7 +397,10 @@ github.com/mitchellh/go-testing-interface v0.0.0-20171004221916-a61a99592b77/go.
 github.com/mitchellh/go-testing-interface v1.0.0/go.mod h1:kRemZodwjscx+RGhAo8eIhFbs2+BFgRtFPeD/KE+zxI=
 github.com/mitchellh/go-wordwrap v1.0.0/go.mod h1:ZXFpozHsX6DPmq2I0TCekCxypsnAUbP2oI0UX1GXzOo=
 github.com/mitchellh/gox v0.4.0/go.mod h1:Sd9lOJ0+aimLBi73mGofS1ycjY8lL3uZM3JPS42BGNg=
+github.com/mitchellh/gox v1.0.1 h1:x0jD3dcHk9a9xPSDN6YEL4xL6Qz0dvNYm8yZqui5chI=
+github.com/mitchellh/gox v1.0.1/go.mod h1:ED6BioOGXMswlXa2zxfh/xdd5QhwYliBFn9V18Ap4z4=
 github.com/mitchellh/hashstructure v1.0.0/go.mod h1:QjSHrPWS+BGUVBYkbTZWEnOh3G1DutKwClXU/ABz6AQ=
+github.com/mitchellh/iochan v1.0.0 h1:C+X3KsSTLFVBr/tK1eYN/vs4rJcvsiLU338UhYPJWeY=
 github.com/mitchellh/iochan v1.0.0/go.mod h1:JwYml1nuB7xOzsp52dPpHFffvOCDupsG0QubkSMEySY=
 github.com/mitchellh/mapstructure v0.0.0-20160808181253-ca63d7c062ee/go.mod h1:FVVH3fgwuzCH5S8UJGiWEs2h04kUh9fWfEaFds41c1Y=
 github.com/mitchellh/mapstructure v1.1.2 h1:fmNYVwqnSfB9mZU6OS2O6GsXM+wcskZDuKQzvN1EDeE=
@@ -488,6 +499,7 @@ github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4/go.mod h1:qsXQc7+bwAM3Q
 github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24/go.mod h1:M+9NzErvs504Cn4c5DxATwIqPbtswREoFCre64PpcG4=
 github.com/sirupsen/logrus v1.0.5/go.mod h1:pMByvHTf9Beacp5x1UXfOR9xyW/9antXMhjMPG0dEzc=
 github.com/sirupsen/logrus v1.0.6/go.mod h1:pMByvHTf9Beacp5x1UXfOR9xyW/9antXMhjMPG0dEzc=
+github.com/sirupsen/logrus v1.2.0 h1:juTguoYk5qI21pwyTXY3B3Y5cOTH3ZUyZCg1v/mihuo=
 github.com/sirupsen/logrus v1.2.0/go.mod h1:LxeOpSwHxABJmUn/MG1IvRgCAasNZTLOkJPxbbu5VWo=
 github.com/sirupsen/logrus v1.4.1 h1:GL2rEmy6nsikmW0r8opw9JIRScdMF5hA8cOYLH7In1k=
 github.com/sirupsen/logrus v1.4.1/go.mod h1:ni0Sbl8bgC9z8RoU9G6nDWqqs/fq4eDPysMBDgk/93Q=
@@ -547,6 +559,7 @@ golang.org/x/crypto v0.0.0-20190404164418-38d8ce5564a5 h1:bselrhR0Or1vomJZC8ZIjW
 golang.org/x/crypto v0.0.0-20190404164418-38d8ce5564a5/go.mod h1:WFFai1msRO1wXaEeE5yQxYXgSfI8pQAWXbQop6sCtWE=
 golang.org/x/crypto v0.0.0-20190513172903-22d7a77e9e5f/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
 golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
+golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073 h1:xMPOj6Pz6UipU1wXLkrtqpHbR0AVFnyPEQq/wRWz9lM=
 golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/crypto v0.0.0-20200311171314-f7b00557c8c4 h1:QmwruyY+bKbDDL0BaglrbZABEali68eoMFhTZpCjYVA=
 golang.org/x/crypto v0.0.0-20200311171314-f7b00557c8c4/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
@@ -622,6 +635,7 @@ golang.org/x/sys v0.0.0-20190523142557-0e01d883c5c5/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20190730183949-1393eb018365/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20190813064441-fde4db37ae7a/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20191120155948-bd437916bb0e h1:N7DeIrjYszNmSW409R3frPPwglRwMkXSBzwVbkOjLLA=
 golang.org/x/sys v0.0.0-20191120155948-bd437916bb0e/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20200302150141-5c8b2ff67527 h1:uYVVQ9WP/Ds2ROhcaGPeIdVq0RIXVLwsHlnvJ+cT1So=
 golang.org/x/sys v0.0.0-20200302150141-5c8b2ff67527/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
