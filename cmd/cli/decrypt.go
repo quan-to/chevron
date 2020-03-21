@@ -59,7 +59,7 @@ func Decrypt(input, output string) {
 	} else {
 		f, err := os.Create(output)
 		if err != nil {
-
+			panic(err)
 		}
 		out = bufio.NewWriter(f)
 	}
@@ -72,6 +72,6 @@ func Decrypt(input, output string) {
 		panic(err)
 	}
 
-	out.Flush()
-	f.Close()
+	_ = out.Flush()
+	_ = f.Close()
 }
