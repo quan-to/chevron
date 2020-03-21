@@ -9,8 +9,8 @@ require (
 	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
 	github.com/asticode/go-astiamqp v1.0.0 // indirect
 	github.com/asticode/go-astikit v0.5.0
-	github.com/asticode/go-astilectron v0.12.4
-	github.com/asticode/go-astilectron-bootstrap v0.3.2
+	github.com/asticode/go-astilectron v0.13.1
+	github.com/asticode/go-astilectron-bootstrap v0.3.4
 	github.com/bitly/go-hostpool v0.1.0 // indirect
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/bouk/monkey v1.0.1
@@ -20,6 +20,7 @@ require (
 	github.com/gorilla/mux v1.7.1
 	github.com/graphql-go/graphql v0.7.8
 	github.com/graphql-go/handler v0.2.3
+	github.com/hashicorp/go-retryablehttp v0.6.4 // indirect
 	github.com/hashicorp/go-rootcerts v1.0.0 // indirect
 	github.com/hashicorp/go-sockaddr v1.0.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -28,6 +29,7 @@ require (
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/logrusorgru/aurora v0.0.0-20200102142835-e9ef32dff381 // indirect
 	github.com/mewkiz/pkg v0.0.0-20200212014339-e3282939ac6c
+	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.1.2 // indirect
 	github.com/opentracing/opentracing-go v1.1.0 // indirect
 	github.com/pierrec/lz4 v2.4.1+incompatible // indirect
