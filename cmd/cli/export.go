@@ -23,7 +23,7 @@ func ExportKey(name, password string, secret bool) {
 	var kInfo *models.KeyInfo
 
 	for _, v := range keys {
-		if strings.Index(v.FingerPrint, strings.ToUpper(name)) > -1 || strings.Index(strings.ToLower(v.Identifier), strings.ToLower(name)) > -1 {
+		if strings.Contains(v.FingerPrint, strings.ToUpper(name)) || strings.Contains(strings.ToLower(v.Identifier), strings.ToLower(name)) {
 			// Thats our key!
 			kInfo = &v
 			break
@@ -53,7 +53,7 @@ func ExportKey(name, password string, secret bool) {
 
 		k, err = pgpMan.GetPrivateKeyAscii(ctx, kInfo.FingerPrint, password)
 		if err != nil {
-			if strings.Index(err.Error(), "checksum failure") > -1 {
+			if strings.Contains(err.Error(), "checksum failure") {
 				panic("Invalid key password")
 			}
 			panic(err)

@@ -64,7 +64,7 @@ func EncryptFile(input, output, recipient string) {
 	} else {
 		f, err := os.Create(output)
 		if err != nil {
-
+			panic(err)
 		}
 		out = bufio.NewWriter(f)
 	}
@@ -85,6 +85,6 @@ func EncryptFile(input, output, recipient string) {
 		panic(err)
 	}
 
-	out.Flush()
-	f.Close()
+	_ = out.Flush()
+	_ = f.Close()
 }
