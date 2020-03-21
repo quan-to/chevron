@@ -38,9 +38,9 @@ then
         done
         mkdir -p out
         echo "Building for Linux / ${BUILD_LINUX_ARCH}"
-        gox -output "out/remoteSigner-{{.Dir}}-{{.OS}}-{{.Arch}}" -arch="${BUILD_LINUX_ARCH}" -os="linux"
+        gox -output "out/chevron-{{.Dir}}-{{.OS}}-{{.Arch}}" -arch="${BUILD_LINUX_ARCH}" -os="linux"
         echo "Building for Others / ${BUILD_OTHER_ARCH}"
-        gox -output "out/remoteSigner-{{.Dir}}-{{.OS}}-{{.Arch}}" -arch="${BUILD_OTHER_ARCH}" -os="${BUILD_OS}"
+        gox -output "out/chevron-{{.Dir}}-{{.OS}}-{{.Arch}}" -arch="${BUILD_OTHER_ARCH}" -os="${BUILD_OS}"
         echo "Compressing builds"
         cd out
         for o in *

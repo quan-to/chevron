@@ -40,7 +40,7 @@ Thumbs.db
 *.dotCover
 *.idea
 .vs
-cmd/standalone/standalone
+cmd/cli/standalone
 coverage.html
 test.gpg
 c.out
@@ -50,13 +50,13 @@ tmp
 qrs.coverprofile
 cmd/server/users.json
 cmd/server/out
-cmd/standalone/out
+cmd/cli/out
 bins
 zips
 server/users.json
 cmd/server/remoteSigner-linux*
 cmd/server/remoteSigner-macosx*
-cmd/standalone/keys
+cmd/cli/keys
 tests/metadata-*
 
 vault.log
