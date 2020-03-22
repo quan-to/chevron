@@ -75,3 +75,53 @@ jobs:
       with:
         name: chevronlib-win64
         path: cmd/lib/chevron.dll
+  buildnodejs:
+    needs:
+      - buildmacosx
+      - buildnixwin
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup node
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12
+    - name: Download ChevronLib Win32
+      uses: actions/download-artifact@v1
+      with:
+        name: chevronlib-win32
+        path: cmd/lib/
+    - name: Download ChevronLib Win64
+      uses: actions/download-artifact@v1
+      with:
+        name: chevronlib-win64
+        path: cmd/lib/
+    - name: Download ChevronLib Linux
+      uses: actions/download-artifact@v1
+      with:
+        name: chevronlib-linux
+        path: cmd/lib/
+    - name: Download ChevronLib MacOSX
+      uses: actions/download-artifact@v1
+      with:
+        name: chevronlib-darwin
+        path: cmd/lib/
+    - name: Build NPM Package
+      run: |
+        cd cmd/lib/wraps/nodejs
+        echo "Installing / Building dependencies"
+        npm install
+        npm -g install typescript
+        echo "Building Typescript"
+        tsc
+        cp ../../chevron.so dist
+        cp ../../chevron32.dll dist
+        cp ../../chevron.dll dist
+        cp ../../chevron.dylib dist
+        rm -fr build
+        zip -r ../../chevronlib.zip .
+    - uses: actions/upload-artifact@v1
+      name: "Upload chevronlib.zip artifacts"
+      with:
+        name: chevronlib-npm.zip
+        path: cmd/lib/chevronlib.zip
