@@ -1,5 +1,3 @@
-const os = require('os');
-
 const lib = require('bindings')('chevron');
 
 // Ensure that the library has been loaded
@@ -9,7 +7,7 @@ const getKeyFingerprints = (keyData: string) => lib.getKeyFingerprints(keyData).
 
 const loadKey = async function(data: string) {
     return new Promise((resolve, reject) => {
-        lib.loadKey(data, (error: string|void, result: any|void) => {
+        lib.loadKey(data, (error: string|void) => {
             if (error) {
                 reject(error);
             } else {
