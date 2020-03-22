@@ -1,0 +1,37 @@
+{
+  "name": "@contaquanto/chevronlib",
+  "version": "0.0.1",
+  "description": "Chevron GPG Library Wrapper for Node.JS",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "npm run clear && tsc",
+    "clear": "rimraf ./dist/*",
+    "lint": "eslint src/**",
+    "repl": "nodemon --config ./repl/nodemon.json ./repl.js --exec babel-node",
+    "test": "jest --coverage --forceExit --runInBand",
+    "test:watch": "jest --watch --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quan-to/chevron.git"
+  },
+  "keywords": [
+    "GPG",
+    "PGP",
+    "Chevron",
+    "Remote",
+    "Signer",
+    "Quanto"
+  ],
+  "author": "Quanto",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/quan-to/chevron/issues"
+  },
+  "homepage": "https://github.com/quan-to/chevron#readme",
+  "dependencies": {
+    "@types/node": "^13.9.2",
+    "bindings": "^1.5.0",
+    "node-addon-api": "^2.0.0"
+  }
+}
