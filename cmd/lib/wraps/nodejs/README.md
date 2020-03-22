@@ -1,13 +1,10 @@
-ChevronLib Node.JS Wrapper
-==========================
-
+# ChevronLib Node.JS Wrapper
 
 ## Installation
 
 ```bash
 npm i @contaquanto/chevronlib
 ```
-
 
 ## Usage
 

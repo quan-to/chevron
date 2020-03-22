@@ -1,5 +1,4 @@
-Chevron Shared Library
-======================
+# Chevron Shared Library
 
 ## Build Linux
 
