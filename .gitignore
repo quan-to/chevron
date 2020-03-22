@@ -64,3 +64,8 @@ keymagic/rethinkdb_data
 server/rethinkdb_data
 cmd/server/RemoteSigner_Server
 cmd/server/server
+
+cmd/lib/*.dylib
+cmd/lib/*.so
+cmd/lib/*.dll
+cmd/lib/chevron.h
