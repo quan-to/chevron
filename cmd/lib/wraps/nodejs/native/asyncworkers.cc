@@ -4,11 +4,12 @@
 
 class GenerateKeyAsyncWorker : public Napi::AsyncWorker {
  public:
-  GenerateKeyAsyncWorker(Napi::Function& callback, std::string password, std::string identifier, int bits) :
+  GenerateKeyAsyncWorker(Napi::Function& callback, const std::string& password, const std::string& identifier, int bits) :
     Napi::AsyncWorker(callback),
     password(password),
     identifier(identifier),
-    bits(bits) {}
+    bits(bits),
+    resultVal(ERROR) {}
   ~GenerateKeyAsyncWorker() {}
 
   // Executed inside the worker-thread.
@@ -45,9 +46,10 @@ class GenerateKeyAsyncWorker : public Napi::AsyncWorker {
 
 class LoadKeyAsyncWorker : public Napi::AsyncWorker {
  public:
-  LoadKeyAsyncWorker(Napi::Function& callback, std::string keyData) :
+  LoadKeyAsyncWorker(Napi::Function& callback, const std::string& keyData) :
     Napi::AsyncWorker(callback),
-    keyData(keyData) {}
+    keyData(keyData),
+    resultVal(ERROR) {}
   ~LoadKeyAsyncWorker() {}
 
   // Executed inside the worker-thread.
@@ -83,10 +85,11 @@ class LoadKeyAsyncWorker : public Napi::AsyncWorker {
 
 class UnlockKeyAsyncWorker : public Napi::AsyncWorker {
  public:
-  UnlockKeyAsyncWorker(Napi::Function& callback, std::string fingerprint, std::string password) :
+  UnlockKeyAsyncWorker(Napi::Function& callback, const std::string& fingerprint, const std::string& password) :
     Napi::AsyncWorker(callback),
     fingerprint(fingerprint),
-    password(password) {}
+    password(password),
+    resultVal(ERROR) {}
   ~UnlockKeyAsyncWorker() {}
 
   // Executed inside the worker-thread.
@@ -123,10 +126,11 @@ class UnlockKeyAsyncWorker : public Napi::AsyncWorker {
 
 class VerifySignatureAsyncWorker : public Napi::AsyncWorker {
  public:
-  VerifySignatureAsyncWorker(Napi::Function& callback, std::string b64data, std::string signature) :
+  VerifySignatureAsyncWorker(Napi::Function& callback, const std::string& b64data, const std::string& signature) :
     Napi::AsyncWorker(callback),
     b64data(b64data),
-    signature(signature) {}
+    signature(signature),
+    resultVal(ERROR) {}
   ~VerifySignatureAsyncWorker() {}
 
   // Executed inside the worker-thread.
@@ -162,10 +166,11 @@ class VerifySignatureAsyncWorker : public Napi::AsyncWorker {
 
 class SignDataAsyncWorker : public Napi::AsyncWorker {
  public:
-  SignDataAsyncWorker(Napi::Function& callback, std::string b64data, std::string fingerprint) :
+  SignDataAsyncWorker(Napi::Function& callback, const std::string& b64data, const std::string& fingerprint) :
     Napi::AsyncWorker(callback),
     b64data(b64data),
-    fingerprint(fingerprint) {}
+    fingerprint(fingerprint),
+    resultVal(ERROR) {}
   ~SignDataAsyncWorker() {}
 
   // Executed inside the worker-thread.
@@ -201,11 +206,12 @@ class SignDataAsyncWorker : public Napi::AsyncWorker {
 
 class ChangeKeyPasswordAsyncWorker : public Napi::AsyncWorker {
  public:
-  ChangeKeyPasswordAsyncWorker(Napi::Function& callback, std::string keyData, std::string currentPassword, std::string newPassword) :
+  ChangeKeyPasswordAsyncWorker(Napi::Function& callback, const std::string& keyData, const std::string& currentPassword, const std::string& newPassword) :
     Napi::AsyncWorker(callback),
     keyData(keyData),
     currentPassword(currentPassword),
-    newPassword(newPassword) {}
+    newPassword(newPassword),
+    resultVal(ERROR) {}
   ~ChangeKeyPasswordAsyncWorker() {}
 
   // Executed inside the worker-thread.
