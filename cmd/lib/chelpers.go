@@ -6,9 +6,16 @@ import (
 	"unsafe"
 )
 
+// TRUE is a C Int with value 1
 const TRUE = C.int(1)
+
+// FALSE is a C Int with value 0
 const FALSE = C.int(0)
+
+// ERROR is a C Int with value -1
 const ERROR = C.int(-1)
+
+// OK is a C Int with value 1
 const OK = TRUE
 
 func copyStringToC(dst *C.char, src []byte, n int) {
