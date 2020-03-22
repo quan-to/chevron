@@ -71,10 +71,10 @@ const generateKey = async function(password: string, identifier: string, bits: n
 };
 
 export {
-	verifySignature,
-	signData,
-	getKeyFingerprints,
-	loadKey,
-	unlockKey,
+    verifySignature,
+    signData,
+    getKeyFingerprints,
+    loadKey,
+    unlockKey,
     generateKey,
 };
