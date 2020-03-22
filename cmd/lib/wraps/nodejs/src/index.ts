@@ -36,7 +36,11 @@ const verifySignature = async function(data: string, signature: string) : Promis
     return new Promise((resolve, reject) => {
         lib.verifySignature(data, signature, (error: string|void, result: boolean|void) => {
             if (error) {
-                reject(error);
+                if (error.indexOf('invalid signature') > -1) {
+                    resolve(false);
+                } else {
+                    reject(error);
+                }
             } else {
                 resolve(result);
             }
@@ -56,10 +60,23 @@ const unlockKey = async function(fingerprint: string, password: string) {
     });
 }
 
+const generateKey = async function(password: string, identifier: string, bits: number) : Promise<string|void> {
+    return new Promise((resolve, reject) => {
+        lib.generateKey(password, identifier, bits, (error: string|void, result: string|void) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(result);
+            }
+        });
+    });
+};
+
 export {
 	verifySignature,
 	signData,
 	getKeyFingerprints,
 	loadKey,
 	unlockKey,
+    generateKey,
 };
