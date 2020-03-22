@@ -1,0 +1,77 @@
+# This is a basic workflow to help you get started with Actions
+
+name: "ChevronLib Artifacts"
+
+# Controls when the action will run. Triggers the workflow on push or pull request 
+# events but only for the master branch
+on: [ 'pull_request' ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  buildmacosx:
+    runs-on: macos-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+
+    # Install Go 1.13
+    - name: Set up Go 1.13
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
+    - name: Build ChevronLib
+      run: |
+        cd cmd/lib/
+        echo "Building linux chevron.dylib"
+        go build -o chevron.dylib -buildmode=c-shared
+    - uses: actions/upload-artifact@v1
+      name: "Upload chevron.dylib artifacts"
+      with:
+        name: chevronlib-darwin
+        path: cmd/lib/chevron.dylib
+
+  buildnixwin:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+
+    # Install Go 1.13
+    - name: Set up Go 1.13
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
+    - name: Install Mingw
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install mingw-w64 mingw-w64-i686-dev mingw-w64-x86-64-dev mingw-w64-tools build-essential
+    # Runs a set of commands using the runners shell
+    - name: Build ChevronLib
+      run: |
+        cd cmd/lib/
+        echo "Building linux chevron.so"
+        go build -o chevron.so -buildmode=c-shared
+        echo "Building chevron32.dll"
+        CC=i686-w64-mingw32-gcc GOOS=windows GOARCH=386 CGO_ENABLED=1 go build -o chevron32.dll -buildmode=c-shared
+        echo "Building chevron.dll"
+        CC=x86_64-w64-mingw32-gcc GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build -o chevron.dll -buildmode=c-shared
+    - uses: actions/upload-artifact@v1
+      name: "Upload chevron.so artifacts"
+      with:
+        name: chevronlib-linux
+        path: cmd/lib/chevron.so
+    - uses: actions/upload-artifact@v1
+      name: "Upload chevron32.dll artifacts"
+      with:
+        name: chevronlib-win32
+        path: cmd/lib/chevron32.dll
+    - uses: actions/upload-artifact@v1
+      name: "Upload chevron.dll artifacts"
+      with:
+        name: chevronlib-win64
+        path: cmd/lib/chevron.dll
