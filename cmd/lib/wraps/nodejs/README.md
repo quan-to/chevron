@@ -3,13 +3,13 @@
 ## Installation
 
 ```bash
-npm i @contaquanto/chevronlib
+npm i @quan-to/chevronlib
 ```
 
 ## Usage
 
 ```javascript
-const chevron = require('chevronlib');
+const chevron = require('@quan-to/chevronlib');
 
 const payloadToSign = "HUEBR";
 
