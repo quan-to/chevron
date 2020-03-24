@@ -263,6 +263,27 @@ func TestGetPublicKey(t *testing.T) {
 	}
 }
 
+func TestChangeKeyPassword(t *testing.T) {
+	const tmpPass = "anei1he9m298em1xh"
+	key, _ := GenerateKey(tmpPass, "ACD123", 2048)
+
+	newKey, err := ChangeKeyPassword(key, tmpPass, testKeyPassword)
+
+	if err != nil {
+		t.Fatalf("Unexpected error changing key password %q", err)
+	}
+
+	fps, _ := GetKeyFingerprints(newKey)
+
+	_, _ = LoadKey(newKey)
+
+	err = UnlockKey(fps[0], testKeyPassword)
+
+	if err != nil {
+		t.Fatalf("Unexpected error when unlocking key with new password: %q", err)
+	}
+}
+
 const payloadToSign = "HUEBR"
 
 const testSignature = `-----BEGIN PGP SIGNATURE-----

@@ -125,6 +125,7 @@ func (kre *KeyRingEndpoint) getLoadedPrivateKeys(w http.ResponseWriter, r *http.
 
 func (kre *KeyRingEndpoint) deletePrivateKey(w http.ResponseWriter, r *http.Request) {
 	var data models.KeyRingDeletePrivateKeyData
+	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(kre.log, r)
 	InitHTTPTimer(log, r)
 
@@ -138,7 +139,7 @@ func (kre *KeyRingEndpoint) deletePrivateKey(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	err := kre.gpg.DeleteKey(data.FingerPrint)
+	err := kre.gpg.DeleteKey(ctx, data.FingerPrint)
 	if err != nil {
 		log.Error("Error deleting key: %s", err)
 		InternalServerError("There was an error deleting your key from the disk.", data, w, r, log)

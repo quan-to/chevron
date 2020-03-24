@@ -2,6 +2,7 @@ package keymagic
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	remote_signer "github.com/quan-to/chevron"
@@ -101,6 +102,20 @@ func (krm *KeyRingManager) AddKey(ctx context.Context, key *openpgp.Entity, nonE
 		log.Debug("	Adding also subkey %s", subfp)
 		krm.AddKey(ctx, subE, nonErasable)
 	}
+}
+
+func (krm *KeyRingManager) DeleteKey(ctx context.Context, fp string) error {
+	requestID := remote_signer.GetRequestIDFromContext(ctx)
+	log := krm.log.Tag(requestID)
+	log.DebugNote("DeleteKey(%s)", fp)
+	krm.Lock()
+	if _, ok := krm.entities[fp]; ok {
+		log.Info("Deleting key %s from memory", fp)
+		delete(krm.entities, fp)
+	}
+	krm.Unlock()
+
+	return fmt.Errorf("key %s not found", fp)
 }
 
 func (krm *KeyRingManager) GetCachedKeys(ctx context.Context) []models.KeyInfo {

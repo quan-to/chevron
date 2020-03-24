@@ -253,3 +253,23 @@ test('sign quanto invalid key', async() => {
 
     return chevron.quantoSignData(toBase64(payloadToSign), "DEADBEEF1234").catch((res: string) => expect(typeof res).toBe('string'));
 });
+
+
+test('change key password', async() => {
+    expect.assertions(1);
+    const tmpPass = '0912345aseuahse';
+    const key = await chevron.generateKey(tmpPass, tmpPass, 2048);
+
+    const newKey = await chevron.changeKeyPassword(key, tmpPass, testKeyPassword);
+    const fp = await chevron.loadKey(newKey);
+
+    return chevron.unlockKey(fp, testKeyPassword).then((res: string|void) => expect(typeof res).toBe("string"));
+});
+
+test('change key password invalid', async() => {
+    expect.assertions(1);
+    const tmpPass = '0912345aseuahse';
+    const key = await chevron.generateKey(tmpPass, tmpPass, 2048);
+
+    return chevron.changeKeyPassword(key, testKeyPassword, tmpPass).catch((res: string) => expect(typeof res).toBe("string"));
+});
