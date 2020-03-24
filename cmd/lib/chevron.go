@@ -61,6 +61,30 @@ func VerifySignature(data *C.char, dataLen C.int, signature *C.char, result *C.c
 	return FALSE
 }
 
+// QuantoVerifySignature verifies a signature in Quanto Signature Format using a already loaded public key
+//export QuantoVerifySignature
+func QuantoVerifySignature(data *C.char, dataLen C.int, signature *C.char, result *C.char, resultLen C.int) C.int {
+	goData := make([]byte, int(dataLen))
+	copyFromCToGo(goData, data, int(dataLen))
+	goSignature := C.GoString(signature)
+
+	rLen := int(resultLen)
+
+	r, e := chevronlib.QuantoVerifySignature(goData, goSignature)
+
+	if e != nil { // Error
+		copyStringToC(result, []byte(e.Error()), rLen)
+		return ERROR
+	}
+
+	if r { // Signature Valid
+		return TRUE
+	}
+
+	// Signature Invalid
+	return FALSE
+}
+
 // VerifyBase64DataSignature verifies a signature using a already loaded public key. The b64data is a raw binary data encoded in base64 string
 //export VerifyBase64DataSignature
 func VerifyBase64DataSignature(b64data, signature *C.char, result *C.char, resultLen C.int) C.int {
@@ -68,6 +92,28 @@ func VerifyBase64DataSignature(b64data, signature *C.char, result *C.char, resul
 	goSignature := C.GoString(signature)
 	rLen := int(resultLen)
 	r, e := chevronlib.VerifyBase64DataSignature(goB64Data, goSignature)
+
+	if e != nil { // Error
+		copyStringToC(result, []byte(e.Error()), rLen)
+		return ERROR
+	}
+
+	if r { // Signature Valid
+		return TRUE
+	}
+
+	// Signature Invalid
+	return FALSE
+}
+
+// QuantoVerifyBase64DataSignature verifies a signature in Quanto Signature Format using a already loaded public key.
+// The b64data is a raw binary data encoded in base64 string
+//export QuantoVerifyBase64DataSignature
+func QuantoVerifyBase64DataSignature(b64data, signature *C.char, result *C.char, resultLen C.int) C.int {
+	goB64Data := C.GoString(b64data)
+	goSignature := C.GoString(signature)
+	rLen := int(resultLen)
+	r, e := chevronlib.QuantoVerifyBase64DataSignature(goB64Data, goSignature)
 
 	if e != nil { // Error
 		copyStringToC(result, []byte(e.Error()), rLen)
@@ -102,12 +148,53 @@ func SignData(data *C.char, dataLen C.int, fingerprint *C.char, result *C.char, 
 	return OK
 }
 
-// SignBase64Data signs data using a already loaded and unlocked private key. The b64data is a raw binary data encoded in base64 string
+// QuantoSignData signs data using a already loaded and unlocked private key and returns in Quanto Signature Format
+//export QuantoSignData
+func QuantoSignData(data *C.char, dataLen C.int, fingerprint *C.char, result *C.char, resultLen C.int) C.int {
+	goData := make([]byte, int(dataLen))
+	copyFromCToGo(goData, data, int(dataLen))
+	goFingerprint := C.GoString(fingerprint)
+
+	rLen := int(resultLen)
+
+	r, e := chevronlib.QuantoSignData(goData, goFingerprint)
+	if e != nil {
+		copyStringToC(result, []byte(e.Error()), rLen)
+		return ERROR
+	}
+
+	copyStringToC(result, []byte(r), rLen)
+
+	return OK
+}
+
+// SignBase64Data signs data using a already loaded and unlocked private key.
+// The b64data is a raw binary data encoded in base64 string
 //export SignBase64Data
 func SignBase64Data(b64data, fingerprint *C.char, result *C.char, resultLen C.int) C.int {
 	goB64Data := C.GoString(b64data)
 	goFingerprint := C.GoString(fingerprint)
 	r, e := chevronlib.SignBase64Data(goB64Data, goFingerprint)
+
+	rLen := int(resultLen)
+
+	if e != nil {
+		copyStringToC(result, []byte(e.Error()), rLen)
+		return ERROR
+	}
+
+	copyStringToC(result, []byte(r), rLen)
+
+	return OK
+}
+
+// SignBase64Data signs data using a already loaded and unlocked private key. Returns in Quanto Signature Format
+// The b64data is a raw binary data encoded in base64 string
+//export QuantoSignBase64Data
+func QuantoSignBase64Data(b64data, fingerprint *C.char, result *C.char, resultLen C.int) C.int {
+	goB64Data := C.GoString(b64data)
+	goFingerprint := C.GoString(fingerprint)
+	r, e := chevronlib.QuantoSignBase64Data(goB64Data, goFingerprint)
 
 	rLen := int(resultLen)
 
