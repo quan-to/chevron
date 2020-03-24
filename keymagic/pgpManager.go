@@ -453,8 +453,18 @@ func (pm *PGPManager) SaveKey(fingerPrint, armoredData string, password interfac
 	return nil
 }
 
-func (pm *PGPManager) DeleteKey(fingerPrint string) error {
-	pm.log.DebugAwait("Deleting key %s from KeeyBackend", fingerPrint)
+func (pm *PGPManager) DeleteKey(ctx context.Context, fingerPrint string) error {
+	pm.log.DebugAwait("Deleting key %s from KeyBackend", fingerPrint)
+	fingerPrint = pm.sanitizeFingerprint(fingerPrint)
+
+	pm.Lock()
+	if _, ok := pm.decryptedPrivateKeys[fingerPrint]; ok {
+		pm.log.Info("Erasing private key %s from memory", fingerPrint)
+		delete(pm.decryptedPrivateKeys, fingerPrint)
+	}
+	pm.Unlock()
+
+	pm.krm.DeleteKey(ctx, fingerPrint)
 
 	_, _, err := pm.kbkend.Read(fingerPrint)
 	if err != nil {
@@ -727,7 +737,7 @@ func (pm *PGPManager) GetPublicKeyAscii(ctx context.Context, fingerPrint string)
 	return key, nil
 }
 
-func (pm *PGPManager) GetPrivateKeyAscii(ctx context.Context, fingerPrint, password string) (string, error) {
+func (pm *PGPManager) GetPrivateKeyAsciiReencrypt(ctx context.Context, fingerPrint, currentPassword, newPassword string) (string, error) {
 	requestID := remote_signer.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	log.DebugNote("GetPrivateKeyAscii(%s, ---)", fingerPrint)
@@ -736,13 +746,13 @@ func (pm *PGPManager) GetPrivateKeyAscii(ctx context.Context, fingerPrint, passw
 
 	if ent != nil && ent.PrivateKey != nil { // Try get full entity first
 		// Decrypt / Encrypt to initialize Signer
-		err := ent.PrivateKey.Decrypt([]byte(password))
+		err := ent.PrivateKey.Decrypt([]byte(currentPassword))
 
 		if err != nil {
 			return "", err
 		}
 
-		_ = ent.PrivateKey.Encrypt([]byte(password))
+		_ = ent.PrivateKey.Encrypt([]byte(newPassword))
 
 		serializedEntity := bytes.NewBuffer(nil)
 		err = ent.SerializePrivate(serializedEntity, &packet.Config{
@@ -777,6 +787,10 @@ func (pm *PGPManager) GetPrivateKeyAscii(ctx context.Context, fingerPrint, passw
 	}
 
 	return key, nil
+}
+
+func (pm *PGPManager) GetPrivateKeyAscii(ctx context.Context, fingerPrint, password string) (string, error) {
+	return pm.GetPrivateKeyAsciiReencrypt(ctx, fingerPrint, password, password)
 }
 
 func (pm *PGPManager) VerifySignatureStringData(ctx context.Context, data string, signature string) (bool, error) {

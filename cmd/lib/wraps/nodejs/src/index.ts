@@ -206,6 +206,26 @@ const quantoVerifySignature = async function(data: string, signature: string) : 
     });
 };
 
+/**
+ * Changes a private key password
+ *
+ * @param {string} keyData - The private key
+ * @param {string} currentPassword - The current password of the key
+ * @param {string} newPassword - The new password for the key
+ * @returns {Promise<string>>} the same private key encrypted with the newPassword
+ */
+const changeKeyPassword = async function(keyData: string, currentPassword: string, newPassword: string): Promise<string|void> {
+    return new Promise((resolve, reject) => {
+        lib.changeKeyPassword(keyData, currentPassword, newPassword, (error: string|void, result: string|void) => {
+            if (error) {
+                return reject(error);
+            }
+
+            return resolve(result);
+        });
+    });
+};
+
 export {
     verifySignature,
     signData,
@@ -216,5 +236,6 @@ export {
     getPublicKey,
     isBase64,
     quantoSignData,
-    quantoVerifySignature
+    quantoVerifySignature,
+    changeKeyPassword,
 };
