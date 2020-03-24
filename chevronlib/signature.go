@@ -88,7 +88,7 @@ func SignBase64Data(b64data, fingerprint string) (result string, err error) {
 	return SignData(data, fingerprint)
 }
 
-// QuantoSignData signs the data using a already loaded and unlocked private key and returning in Quanto Signature format.
+// QuantoSignBase64Data signs the data using a already loaded and unlocked private key and returning in Quanto Signature format.
 //  The b64data is a raw binary data encoded in base64 string
 func QuantoSignBase64Data(b64data, fingerprint string) (result string, err error) {
 	var data []byte
