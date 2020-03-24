@@ -46,8 +46,9 @@ func ChangeKeyPassword(keyData, currentPassword, newPassword string) (newKeyData
 	if err != nil {
 		return
 	}
+	newKeyData, err = pgpBackend.GetPrivateKeyAsciiReencrypt(ctx, fp, currentPassword, newPassword)
 
-	newKeyData, err = pgpBackend.GetPrivateKeyAscii(ctx, fp, newPassword)
+	_ = pgpBackend.DeleteKey(ctx, fp) // Clean key after changing password
 	return
 }
 

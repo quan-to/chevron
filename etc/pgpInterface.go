@@ -19,12 +19,13 @@ type PGPInterface interface {
 	GetLoadedPrivateKeys(ctx context.Context) []models.KeyInfo
 	GetLoadedKeys() []models.KeyInfo
 	SaveKey(fingerPrint, armoredData string, password interface{}) error
-	DeleteKey(fingerPrint string) error
+	DeleteKey(ctx context.Context, fingerPrint string) error
 	SignData(ctx context.Context, fingerPrint string, data []byte, hashAlgorithm crypto.Hash) (string, error)
 	GetPublicKeyEntity(ctx context.Context, fingerPrint string) *openpgp.Entity
 	GetPublicKey(ctx context.Context, fingerPrint string) *packet.PublicKey
 	GetPublicKeyAscii(ctx context.Context, fingerPrint string) (string, error)
 	GetPrivateKeyAscii(ctx context.Context, fingerPrint, password string) (string, error)
+	GetPrivateKeyAsciiReencrypt(ctx context.Context, fingerPrint, currentPassword, newPassword string) (string, error)
 	VerifySignatureStringData(ctx context.Context, data string, signature string) (bool, error)
 	VerifySignature(ctx context.Context, data []byte, signature string) (bool, error)
 	GeneratePGPKey(ctx context.Context, identifier, password string, numBits int) (string, error)
