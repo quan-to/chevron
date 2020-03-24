@@ -1,6 +1,6 @@
 {
   "name": "@quan-to/chevronlib",
-  "version": "1.3.0a",
+  "version": "1.3.1",
   "description": "Chevron GPG Library Wrapper for Node.JS",
   "main": "dist/index.js",
   "scripts": {

@@ -40,17 +40,21 @@ typedef int                     GetKeyFingerprints_t(char* keyData, char* result
 typedef int                     ChangeKeyPassword_t(char* keyData, char* currentPassword, char* newPassword, char* result, int resultLen);
 typedef int                     GetPublicKey_t(char* fingerprint, char* result, int resultLen);
 typedef int                     GenerateKey_t(char* password, char* identifier, int bits, char* result, int resultLen);
+typedef int                     QuantoVerifyBase64DataSignature_t(char* b64data, char* signature, char* result, int resultLen);
+typedef int                     QuantoSignBase64Data_t(char* b64data, char* fingerprint, char* result, int resultLen);
 
-extern UnlockKey_t                      *chevronlib_unlockkey;
-extern LoadKey_t                        *chevronlib_loadkey;
-extern VerifySignature_t                *chevronlib_verifysignature;
-extern VerifyBase64DataSignature_t      *chevronlib_verifybase64datasignature;
-extern SignData_t                       *chevronlib_signdata;
-extern SignBase64Data_t                 *chevronlib_signbase64data;
-extern GetKeyFingerprints_t             *chevronlib_getkeyfingerprints;
-extern ChangeKeyPassword_t              *chevronlib_changekeypassword;
-extern GetPublicKey_t                   *chevronlib_getpublickey;
-extern GenerateKey_t                    *chevronlib_generatekey;
+extern UnlockKey_t                          *chevronlib_unlockkey;
+extern LoadKey_t                        	*chevronlib_loadkey;
+extern VerifySignature_t                	*chevronlib_verifysignature;
+extern VerifyBase64DataSignature_t      	*chevronlib_verifybase64datasignature;
+extern SignData_t                       	*chevronlib_signdata;
+extern SignBase64Data_t                 	*chevronlib_signbase64data;
+extern GetKeyFingerprints_t             	*chevronlib_getkeyfingerprints;
+extern ChangeKeyPassword_t              	*chevronlib_changekeypassword;
+extern GetPublicKey_t                   	*chevronlib_getpublickey;
+extern GenerateKey_t                    	*chevronlib_generatekey;
+extern QuantoVerifyBase64DataSignature_t    *chevronlib_quantoverifybase64datasignature;
+extern QuantoSignBase64Data_t               *chevronlib_quantosignbase64data;
 
 int loadChevron(const char *path);
 
