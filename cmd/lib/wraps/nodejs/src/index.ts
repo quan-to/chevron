@@ -151,6 +151,61 @@ const generateKey = async function(password: string, identifier: string, bits: n
  */
 const getPublicKey = (fingerprint: string) : string => lib.getPublicKey(fingerprint);
 
+
+/**
+ * Signs the specified data using a pre-loaded and pre-unlocked key specified by fingerprint
+ * and returns in Quanto Signature Format
+ *
+ * The key should be previously loaded with loadKey and unlocked with unlockKey
+ * The data should be always encoded as base64
+ *
+ * @param {string} data - Base64 Encoded Data to be signed
+ * @param {string} fingerprint - Fingerprint of the key used to sign data
+ * @returns {Promise<string>} - The ASCII Armored PGP Signature
+ */
+const quantoSignData = async function(data: string, fingerprint: string) : Promise<string> {
+    return new Promise((resolve, reject) => {
+        if (!isBase64(data)) {
+            return reject('Expected a base64 encoded data');
+        }
+        lib.quantoSignData(data, fingerprint, (error: string|void, result: any|void) => {
+            if (error) {
+                return reject(error);
+            }
+
+            return resolve(result);
+        });
+    });
+};
+
+/**
+ * Verifies the signature in Quanto Signature Format of a payload and returns true if it's valid.
+ *
+ * The data should be always encoded as base64
+ * The signature field can be in ASCII Armored Format or base64 encoded binary PGP Signature
+ *
+ * @param {string} data - Base64 Encoded Data to be signed
+ * @param {string} signature - A ASCII Armored Format or Base64 Encoded Binary PGP Signature
+ * @returns {Promise<boolean>}
+ */
+const quantoVerifySignature = async function(data: string, signature: string) : Promise<boolean|void> {
+    return new Promise((resolve, reject) => {
+        if (!isBase64(data)) {
+            return reject('Expected a base64 encoded data');
+        }
+        lib.quantoVerifySignature(data, signature, (error: string|void, result: boolean|void) => {
+            if (error) {
+                if (error.indexOf('invalid signature') > -1) {
+                    return resolve(false);
+                }
+                return reject(error);
+            }
+
+            return resolve(result);
+        });
+    });
+};
+
 export {
     verifySignature,
     signData,
@@ -160,4 +215,6 @@ export {
     generateKey,
     getPublicKey,
     isBase64,
+    quantoSignData,
+    quantoVerifySignature
 };
