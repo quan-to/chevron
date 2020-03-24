@@ -53,8 +53,8 @@ func MakeSecretsManager(log slog.Instance) *SecretsManager {
 	masterKeyBytes, err := ioutil.ReadFile(remote_signer.MasterGPGKeyPath)
 
 	if err != nil {
-		sm.log.Error("Error loading master key from %s: %s", remote_signer.MasterGPGKeyPath, err)
-		sm.log.Error("I'm useless :(")
+		sm.log.Warn("Error loading master key from %s: %s", remote_signer.MasterGPGKeyPath, err)
+		sm.log.Warn("Secrets Manager cannot load a master key. Cluster mode will not work.")
 		sm.amIUseless = true
 		return sm
 	}
@@ -62,8 +62,8 @@ func MakeSecretsManager(log slog.Instance) *SecretsManager {
 	if remote_signer.MasterGPGKeyBase64Encoded {
 		masterKeyBytes, err = base64.StdEncoding.DecodeString(string(masterKeyBytes))
 		if err != nil {
-			sm.log.Error("Error loading master key from %s: %s", remote_signer.MasterGPGKeyPath, err)
-			sm.log.Error("I'm useless :(")
+			sm.log.Warn("Error loading master key from %s: %s", remote_signer.MasterGPGKeyPath, err)
+			sm.log.Warn("Secrets Manager cannot load a master key. Cluster mode will not work.")
 			sm.amIUseless = true
 			return sm
 		}
@@ -72,8 +72,8 @@ func MakeSecretsManager(log slog.Instance) *SecretsManager {
 	masterKeyFp, err := remote_signer.GetFingerPrintFromKey(string(masterKeyBytes))
 
 	if err != nil {
-		sm.log.Error("Error loading master key from %s: %s", remote_signer.MasterGPGKeyPath, err)
-		sm.log.Error("I'm useless :(")
+		sm.log.Warn("Error loading master key from %s: %s", remote_signer.MasterGPGKeyPath, err)
+		sm.log.Warn("Secrets Manager cannot load a master key. Cluster mode will not work.")
 		sm.amIUseless = true
 		return sm
 	}
