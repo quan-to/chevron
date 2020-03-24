@@ -164,6 +164,46 @@ class VerifySignatureAsyncWorker : public Napi::AsyncWorker {
     std::string result;
 };
 
+class QuantoVerifySignatureAsyncWorker : public Napi::AsyncWorker {
+ public:
+  QuantoVerifySignatureAsyncWorker(Napi::Function& callback, const std::string& b64data, const std::string& signature) :
+    Napi::AsyncWorker(callback),
+    b64data(b64data),
+    signature(signature),
+    resultVal(ERROR) {}
+  ~QuantoVerifySignatureAsyncWorker() {}
+
+  // Executed inside the worker-thread.
+  // It is not safe to access JS engine data structure
+  // here, so everything we need for input and output
+  // should go on `this`.
+  void Execute() {
+    char resultArray[_CHEVRON_BUFFER_SIZE];
+    memset(resultArray, 0x00, _CHEVRON_BUFFER_SIZE);
+
+    resultVal = chevronlib_quantoverifybase64datasignature((char *)b64data.c_str(), (char *)signature.c_str(), resultArray, _CHEVRON_BUFFER_SIZE);
+    result = std::string(resultArray);
+  }
+
+  // Executed when the async work is complete
+  // this function will be run inside the main event loop
+  // so it is safe to use JS engine data again
+  void OnOK() {
+    Napi::HandleScope scope(Env());
+    if (resultVal == ERROR) { // Error
+        Callback().Call({Napi::String::New(Env(), result), Env().Undefined()});
+    } else {
+        Callback().Call({Env().Undefined(), Napi::Boolean::New(Env(), resultVal == TRUE)});
+      }
+  }
+
+ private:
+    std::string b64data;
+    std::string signature;
+    int resultVal;
+    std::string result;
+};
+
 class SignDataAsyncWorker : public Napi::AsyncWorker {
  public:
   SignDataAsyncWorker(Napi::Function& callback, const std::string& b64data, const std::string& fingerprint) :
@@ -203,6 +243,47 @@ class SignDataAsyncWorker : public Napi::AsyncWorker {
   int resultVal;
     std::string result;
 };
+
+class QuantoSignDataAsyncWorker : public Napi::AsyncWorker {
+ public:
+  QuantoSignDataAsyncWorker(Napi::Function& callback, const std::string& b64data, const std::string& fingerprint) :
+    Napi::AsyncWorker(callback),
+    b64data(b64data),
+    fingerprint(fingerprint),
+    resultVal(ERROR) {}
+  ~QuantoSignDataAsyncWorker() {}
+
+  // Executed inside the worker-thread.
+  // It is not safe to access JS engine data structure
+  // here, so everything we need for input and output
+  // should go on `this`.
+  void Execute() {
+    char resultArray[_CHEVRON_BUFFER_SIZE];
+    memset(resultArray, 0x00, _CHEVRON_BUFFER_SIZE);
+
+    resultVal = chevronlib_quantosignbase64data((char *)b64data.c_str(), (char *)fingerprint.c_str(), resultArray, _CHEVRON_BUFFER_SIZE);
+    result = std::string(resultArray);
+  }
+
+  // Executed when the async work is complete
+  // this function will be run inside the main event loop
+  // so it is safe to use JS engine data again
+  void OnOK() {
+    Napi::HandleScope scope(Env());
+    if (resultVal == ERROR) { // Error
+        Callback().Call({Napi::String::New(Env(), result), Env().Undefined()});
+    } else {
+        Callback().Call({Env().Undefined(), Napi::String::New(Env(), result)});
+      }
+  }
+
+ private:
+    std::string b64data;
+    std::string fingerprint;
+  int resultVal;
+    std::string result;
+};
+
 
 class ChangeKeyPasswordAsyncWorker : public Napi::AsyncWorker {
  public:
@@ -331,31 +412,58 @@ Napi::Value UnlockKeyAsync(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value VerifySignatureAsync(const Napi::CallbackInfo& info) {
-    Napi::Env env = info.Env();
+     Napi::Env env = info.Env();
 
-    if (info.Length() < 3) {
-        Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
-        return Napi::String::New(env, "");
-    }
+     if (info.Length() < 3) {
+         Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
+         return Napi::String::New(env, "");
+     }
 
-    if (!info[0].IsString()) {
-        Napi::TypeError::New(env, "Expected first argument \"b64data\" to be string.").ThrowAsJavaScriptException();
-        return Napi::String::New(env, "");
-    }
+     if (!info[0].IsString()) {
+         Napi::TypeError::New(env, "Expected first argument \"b64data\" to be string.").ThrowAsJavaScriptException();
+         return Napi::String::New(env, "");
+     }
 
-    if (!info[1].IsString()) {
-        Napi::TypeError::New(env, "Expected first argument \"signature\" to be string.").ThrowAsJavaScriptException();
-        return Napi::String::New(env, "");
-    }
+     if (!info[1].IsString()) {
+         Napi::TypeError::New(env, "Expected first argument \"signature\" to be string.").ThrowAsJavaScriptException();
+         return Napi::String::New(env, "");
+     }
 
-    std::string b64data = info[0].As<Napi::String>().Utf8Value();
-    std::string signature = info[1].As<Napi::String>().Utf8Value();
-    Napi::Function callback = info[2].As<Napi::Function>();
+     std::string b64data = info[0].As<Napi::String>().Utf8Value();
+     std::string signature = info[1].As<Napi::String>().Utf8Value();
+     Napi::Function callback = info[2].As<Napi::Function>();
 
-    VerifySignatureAsyncWorker* asyncWorker = new VerifySignatureAsyncWorker(callback, b64data, signature);
-    asyncWorker->Queue();
-    return info.Env().Undefined();
-}
+     VerifySignatureAsyncWorker* asyncWorker = new VerifySignatureAsyncWorker(callback, b64data, signature);
+     asyncWorker->Queue();
+     return info.Env().Undefined();
+ }
+
+ Napi::Value QuantoVerifySignatureAsync(const Napi::CallbackInfo& info) {
+     Napi::Env env = info.Env();
+
+     if (info.Length() < 3) {
+         Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
+         return Napi::String::New(env, "");
+     }
+
+     if (!info[0].IsString()) {
+         Napi::TypeError::New(env, "Expected first argument \"b64data\" to be string.").ThrowAsJavaScriptException();
+         return Napi::String::New(env, "");
+     }
+
+     if (!info[1].IsString()) {
+         Napi::TypeError::New(env, "Expected first argument \"signature\" to be string.").ThrowAsJavaScriptException();
+         return Napi::String::New(env, "");
+     }
+
+     std::string b64data = info[0].As<Napi::String>().Utf8Value();
+     std::string signature = info[1].As<Napi::String>().Utf8Value();
+     Napi::Function callback = info[2].As<Napi::Function>();
+
+     QuantoVerifySignatureAsyncWorker* asyncWorker = new QuantoVerifySignatureAsyncWorker(callback, b64data, signature);
+     asyncWorker->Queue();
+     return info.Env().Undefined();
+ }
 
 Napi::Value SignDataAsync(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
@@ -381,6 +489,34 @@ Napi::Value SignDataAsync(const Napi::CallbackInfo& info) {
     Napi::Function callback = info[2].As<Napi::Function>();
 
     SignDataAsyncWorker* asyncWorker = new SignDataAsyncWorker(callback, b64data, fingerprint);
+    asyncWorker->Queue();
+    return info.Env().Undefined();
+}
+
+Napi::Value QuantoSignDataAsync(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    if (info.Length() < 3) {
+        Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
+        return Napi::String::New(env, "");
+    }
+
+    if (!info[0].IsString()) {
+        Napi::TypeError::New(env, "Expected first argument \"b64data\" to be string.").ThrowAsJavaScriptException();
+        return Napi::String::New(env, "");
+    }
+
+    if (!info[1].IsString()) {
+        Napi::TypeError::New(env, "Expected first argument \"fingerprint\" to be string.").ThrowAsJavaScriptException();
+        return Napi::String::New(env, "");
+    }
+
+
+    std::string b64data = info[0].As<Napi::String>().Utf8Value();
+    std::string fingerprint = info[1].As<Napi::String>().Utf8Value();
+    Napi::Function callback = info[2].As<Napi::Function>();
+
+    QuantoSignDataAsyncWorker* asyncWorker = new QuantoSignDataAsyncWorker(callback, b64data, fingerprint);
     asyncWorker->Queue();
     return info.Env().Undefined();
 }
@@ -417,6 +553,3 @@ Napi::Value ChangeKeyPasswordAsync(const Napi::CallbackInfo& info) {
     asyncWorker->Queue();
     return info.Env().Undefined();
 }
-
-
-

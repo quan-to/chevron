@@ -76,6 +76,8 @@ h72Ll0XnpYkiiSvwz7UtfeveDSNFUSfeoOKdGsM/8rrZIexHWSJVdUc0I53ITQY=
 =K6nc
 -----END PGP SIGNATURE-----`;
 
+const testQuantoSignature = `CE4503B2947E2202_SHA512_wsBcBAABCgAQBQJeenXbCRDORQOylH4iAgAAXkIIAC55fwFNQRWTrbTuSId9jsgR/BEyCHYnvb9EpEOzBJT1kRpH1wjzv8tkY1aqChoGO5vta9ksw9eu+iLd3i0jJA7WnqxXfmhmz2gx7sCUlxI+wLvbKEOQbvPljBV+3kgZv7MedHwnfvCTu249HtvWgckOvKMdvFFP8Tmx/LyD+xinl6ikZ9SLY+Jzi51oBKYvCI2ie8okU8qCzl/EJwUJ3T5U2GOL9TgErwJLuIurCTXJbGeC2/A8+XddDFdBzJbdL72o9BVC2/CLunDDuqRNwTHqHxfcGEvgITZup4LG95gOFefyFZL+QIrCEvUUhaFpvQCYvA+oJw5KTASiL25vTEo==uzle`;
+
 const payloadToSign = "HUEBR";
 
 function toBase64(data: string) : string {
@@ -190,3 +192,64 @@ test('get public key not exists', async() => {
   expect(getKey).toThrow();
 });
 
+test('verify signature quanto', async() => {
+    expect.assertions(1);
+    await chevron.loadKey(testKey); // Load test key to have public key
+    await chevron.unlockKey(testKeyFingerprint, testKeyPassword); // Unlock key
+
+    const verification = await chevron.quantoVerifySignature(toBase64(payloadToSign), testQuantoSignature);
+    expect(verification).toBe(true);
+});
+
+test('verify signature quanto invalid base64', async() => {
+    expect.assertions(1);
+    await chevron.loadKey(testKey); // Load test key to have public key
+    await chevron.unlockKey(testKeyFingerprint, testKeyPassword); // Unlock key
+
+    return chevron.quantoVerifySignature(payloadToSign, testQuantoSignature).catch((res: string) => expect(res).toBe('Expected a base64 encoded data'));
+});
+
+test('verify signature quanto invalid payload', async() => {
+    expect.assertions(1);
+    await chevron.loadKey(testKey); // Load test key to have public key
+    await chevron.unlockKey(testKeyFingerprint, testKeyPassword); // Unlock key
+
+    return chevron.quantoVerifySignature(toBase64(payloadToSign+"ABCD"), testQuantoSignature).then((res: boolean|void) => expect(res).toBe(false))
+});
+
+test('verify signature quanto invalid signature', async() => {
+    expect.assertions(1);
+    await chevron.loadKey(testKey); // Load test key to have public key
+    await chevron.unlockKey(testKeyFingerprint, testKeyPassword); // Unlock key
+
+    return chevron.quantoVerifySignature(toBase64(payloadToSign), "ABCD").catch((res: string|void) => expect(typeof res).toBe('string'));
+});
+
+test('sign quanto', async() => {
+    expect.assertions(4);
+    await chevron.loadKey(testKey); // Load test key to have public key
+    await chevron.unlockKey(testKeyFingerprint, testKeyPassword); // Unlock key
+
+    const signature = await chevron.quantoSignData(toBase64(payloadToSign), testKeyFingerprint);
+
+    expect(typeof signature).toBe('string');
+    expect(signature.indexOf('PGP SIGNATURE')).toBe(-1);
+    expect(signature.indexOf(testKeyFingerprint)).toBeGreaterThan(-1);
+
+    const verification = await chevron.quantoVerifySignature(toBase64(payloadToSign), signature);
+    expect(verification).toBe(true);
+});
+
+test('sign quanto', async() => {
+    expect.assertions(1);
+    await chevron.loadKey(testKey); // Load test key to have public key
+    await chevron.unlockKey(testKeyFingerprint, testKeyPassword); // Unlock key
+
+    chevron.quantoSignData(payloadToSign, testKeyFingerprint).catch((res: string) => expect(res).toBe('Expected a base64 encoded data'));
+});
+
+test('sign quanto invalid key', async() => {
+    expect.assertions(1);
+
+    return chevron.quantoSignData(toBase64(payloadToSign), "DEADBEEF1234").catch((res: string) => expect(typeof res).toBe('string'));
+});
