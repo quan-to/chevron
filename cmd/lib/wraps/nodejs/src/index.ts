@@ -3,49 +3,106 @@ const lib = require('bindings')('chevron');
 // Ensure that the library has been loaded
 lib.__loadnative(__dirname );
 
-const getKeyFingerprints = (keyData: string) => lib.getKeyFingerprints(keyData).split(",");
+/**
+ * Checks if the data string is a base64 encoded payload
+ *
+ * @param {string} data - A string to be tested
+ * @returns {boolean} - True if the string is a valid base64 format
+ */
+const isBase64 = (data: string) : boolean => {
+  const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
+  return base64regex.test(data);
+};
 
-const loadKey = async function(data: string) {
+/**
+ * Returns all fingerprints contained in the specified key
+ * @param {string} asciiArmoredKey - The private / public key you want the fingerprints in ASCII Armored Format
+ * @returns {string[]} the fingerprints in the specified keys
+ */
+const getKeyFingerprints = (asciiArmoredKey: string) => lib.getKeyFingerprints(asciiArmoredKey).split(",");
+
+/**
+ * Loads the specified key into memory store for later use
+ *
+ * Both public and private keys can be loaded using loadKey
+ * @param {string} asciiArmoredKey - The private / public key you want the fingerprints in ASCII Armored Format
+ * @returns {Promise<string>} the first fingerprint of the loaded key
+ */
+const loadKey = async function(asciiArmoredKey: string) {
     return new Promise((resolve, reject) => {
-        lib.loadKey(data, (error: string|void) => {
+        lib.loadKey(asciiArmoredKey, (error: string|void) => {
             if (error) {
                 reject(error);
             } else {
-                const fps = getKeyFingerprints(data);
+                const fps = getKeyFingerprints(asciiArmoredKey);
                 resolve(fps[0]);
-            }
-        });
-    });
-}
-
-const signData = async function(data: string, fingerprint: string) : Promise<string> {
-    return new Promise((resolve, reject) => {
-        lib.signData(data, fingerprint, (error: string|void, result: any|void) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve(result);
-            }
-        });
-    });
-}
-
-const verifySignature = async function(data: string, signature: string) : Promise<boolean|void> {
-    return new Promise((resolve, reject) => {
-        lib.verifySignature(data, signature, (error: string|void, result: boolean|void) => {
-            if (error) {
-                if (error.indexOf('invalid signature') > -1) {
-                    resolve(false);
-                } else {
-                    reject(error);
-                }
-            } else {
-                resolve(result);
             }
         });
     });
 };
 
+/**
+ * Signs the specified data using a pre-loaded and pre-unlocked key specified by fingerprint
+ *
+ * The key should be previously loaded with loadKey and unlocked with unlockKey
+ * The data should be always encoded as base64
+ *
+ * @param {string} data - Base64 Encoded Data to be signed
+ * @param {string} fingerprint - Fingerprint of the key used to sign data
+ * @returns {Promise<string>} - The ASCII Armored PGP Signature
+ */
+const signData = async function(data: string, fingerprint: string) : Promise<string> {
+    return new Promise((resolve, reject) => {
+        if (!isBase64(data)) {
+            return reject('Expected a base64 encoded data');
+        }
+        lib.signData(data, fingerprint, (error: string|void, result: any|void) => {
+            if (error) {
+                return reject(error);
+            }
+
+            return resolve(result);
+        });
+    });
+};
+
+/**
+ * Verifies the signature of a payload and returns true if it's valid.
+ *
+ * The data should be always encoded as base64
+ * The signature field can be in ASCII Armored Format or base64 encoded binary PGP Signature
+ *
+ * @param {string} data - Base64 Encoded Data to be signed
+ * @param {string} signature - A ASCII Armored Format or Base64 Encoded Binary PGP Signature
+ * @returns {Promise<boolean>}
+ */
+const verifySignature = async function(data: string, signature: string) : Promise<boolean|void> {
+    return new Promise((resolve, reject) => {
+        if (!isBase64(data)) {
+            return reject('Expected a base64 encoded data');
+        }
+        lib.verifySignature(data, signature, (error: string|void, result: boolean|void) => {
+            if (error) {
+                if (error.indexOf('invalid signature') > -1) {
+                    return resolve(false);
+                }
+                return reject(error);
+            }
+
+            return resolve(result);
+        });
+    });
+};
+
+/**
+ * Unlocks a pre-loaded private key with the specified password
+ *
+ * The private key should be pre-loaded with loadKey function
+ *
+ * @param {string} fingerprint - Fingerprint of the private key that should be unlocked for use
+ * @param {string} password - Password of the private key
+ * @returns {Promise}
+ */
 const unlockKey = async function(fingerprint: string, password: string) {
     return new Promise((resolve, reject) => {
         lib.unlockKey(fingerprint, password, (error: string|void, result: any|void) => {
@@ -56,8 +113,22 @@ const unlockKey = async function(fingerprint: string, password: string) {
             }
         });
     });
-}
+};
 
+/**
+ * Generates a new PGP Private Key by the specified password, identifier and bits (key-length)
+ *
+ * The Identifier should be in one of the following formats:
+ *  - "Name"
+ *  - "Name <email>"
+ * The key-length (bits parameter) should not be less than 2048
+ * The key is not automatically loaded into memory after generation
+ *
+ * @param {string} password - The password to encrypt the private key
+ * @param {string} identifier - The identifier of the key
+ * @param {number} bits - Number of bits of the RSA Key (recommended 3072)
+ * @returns {Promise<string>} - The generated private key
+ */
 const generateKey = async function(password: string, identifier: string, bits: number) : Promise<string|void> {
     return new Promise((resolve, reject) => {
         lib.generateKey(password, identifier, bits, (error: string|void, result: string|void) => {
@@ -70,6 +141,16 @@ const generateKey = async function(password: string, identifier: string, bits: n
     });
 };
 
+/**
+ * Returns a ASCII Armored public key of a pre-loaded key
+ *
+ * The public/private key should be pre-loaded with loadKey
+ *
+ * @param {string} fingerprint - Fingerprint to fetch the public key
+ * @returns {string} - The public key
+ */
+const getPublicKey = (fingerprint: string) : string => lib.getPublicKey(fingerprint);
+
 export {
     verifySignature,
     signData,
@@ -77,4 +158,6 @@ export {
     loadKey,
     unlockKey,
     generateKey,
+    getPublicKey,
+    isBase64,
 };
