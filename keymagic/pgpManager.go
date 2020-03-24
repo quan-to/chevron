@@ -464,7 +464,7 @@ func (pm *PGPManager) DeleteKey(ctx context.Context, fingerPrint string) error {
 	}
 	pm.Unlock()
 
-	pm.krm.DeleteKey(ctx, fingerPrint)
+	_ = pm.krm.DeleteKey(ctx, fingerPrint)
 
 	_, _, err := pm.kbkend.Read(fingerPrint)
 	if err != nil {
