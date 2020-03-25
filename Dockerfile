@@ -14,7 +14,7 @@ RUN go get -v
 RUN CGO_ENABLED=0 GOOS=linux go build -o ../../remote-signer
 
 # Compile Standalone
-WORKDIR /go/src/github.com/quan-to/chevron/cmd/standalone
+WORKDIR /go/src/github.com/quan-to/chevron/cmd/cli
 RUN go get -v
 RUN CGO_ENABLED=0 GOOS=linux go build -o ../../standalone
 
