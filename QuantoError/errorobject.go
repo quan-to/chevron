@@ -17,6 +17,7 @@ func DisableStackTrace() {
 	stackEnabled = false
 }
 
+//Flag to define if a stack trace is returned in response or not
 func ShowStackTrace() bool {
 	return stackEnabled
 }
