@@ -17,6 +17,10 @@ func DisableStackTrace() {
 	stackEnabled = false
 }
 
+func ShowStackTrace() bool {
+	return stackEnabled
+}
+
 type ErrorObject struct {
 	ErrorCode  string      `json:"errorCode"`
 	ErrorField string      `json:"errorField"`
