@@ -27,8 +27,15 @@ type HTTPHandleFuncWithLog = func(log slog.Instance, w http.ResponseWriter, r *h
 
 // WriteJSON returns a JSON Object to the specified http.ResponseWriter
 func WriteJSON(data interface{}, statusCode int, w http.ResponseWriter, r *http.Request, logI slog.Instance) {
+	var b []byte
+	var err error
 
-	b, err := json.Marshal(data)
+	if qErr, ok := data.(*QuantoError.ErrorObject); ok && !QuantoError.ShowStackTrace(){
+		qErr.StackTrace = ""
+		b, err = json.Marshal(qErr)
+	} else {
+		b, err = json.Marshal(data)
+	}
 
 	if err != nil {
 		logI.WithFields(map[string]interface{}{

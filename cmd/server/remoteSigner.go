@@ -8,7 +8,6 @@ import (
 	"syscall"
 
 	remote_signer "github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/QuantoError"
 	"github.com/quan-to/chevron/bootstrap"
 	"github.com/quan-to/chevron/etc/magicBuilder"
 	"github.com/quan-to/chevron/kubernetes"
@@ -22,8 +21,6 @@ func main() {
 	if os.Getenv("SHOW_LINES") == "true" {
 		slog.SetShowLines(true)
 	}
-
-	QuantoError.EnableStackTrace()
 
 	bootstrap.RunBootstraps()
 
