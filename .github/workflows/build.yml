@@ -1,0 +1,138 @@
+# This is a basic workflow to help you get started with Actions
+
+name: "Chevron Tests"
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on: [ 'pull_request' ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  test:
+    env:
+        VAULT_ADDR: "http://127.0.0.1:8200"
+        VAULT_DEV_ROOT_TOKEN_ID: "123456"
+        VAULT_ROOT_TOKEN: "123456"
+        VAULT_ADDRESS: "http://127.0.0.1:8200"
+        VAULT_USE_USERPASS: "true"
+        VAULT_USERNAME: "remotesigner"
+        VAULT_PASSWORD: "123456"
+        DATABASE_NAME: "qrs_test"
+        DO_START_RETHINK: "true"
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+
+    # Install Go 1.13
+    - name: Set up Go 1.13
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
+
+    - name: Install Dependencies
+      run: |
+        echo "Installing RethinkDB"
+        echo "deb http://download.rethinkdb.com/apt bionic main" | sudo tee /etc/apt/sources.list.d/rethinkdb.list
+        wget -qO- https://download.rethinkdb.com/apt/pubkey.gpg | sudo apt-key add -
+        sudo apt-get -qq update && sudo apt-get install -y rethinkdb
+        echo "Installing vault"
+        wget https://releases.hashicorp.com/vault/1.0.2/vault_1.0.2_linux_amd64.zip
+        unzip vault_1.0.2_linux_amd64.zip
+        sudo cp vault /usr/bin
+        echo "Installing DeepSource"
+        curl https://deepsource.io/cli | sh
+        echo "Installing GolangCI Lint"
+        curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sudo bash -s -- -b $GOPATH/bin v1.15.0
+    - name: Run Tests
+      id: tests
+      run: |
+        echo "Checking code format"
+        LINES_FORMATTED=`go fmt ./...`
+        NUM_LINES_FORMATTED=`echo "${LINES_FORMATTED}" | wc -l | tr -d '[:space:]'`
+        LINES_FORMATTED="${LINES_FORMATTED//'%'/'%25'}"
+        LINES_FORMATTED="${LINES_FORMATTED//$'\n'/'%0A'}"
+        LINES_FORMATTED="${LINES_FORMATTED//$'\r'/'%0D'}"
+        if [ $NUM_LINES_FORMATTED -eq 0 ]
+        then
+          echo "::set-output name=result_format::No unformatted files! :1st_place_medal:"
+          FORMAT_OK=0
+        else
+          echo "::set-output name=result_format::There are some unformatted files. Please run \`go fmt ./...\` before commiting! :-1: : %0A%0A $LINES_FORMATTED"
+          FORMAT_OK=1
+        fi
+
+        cd cmd/agent-ui && ./placeholders.sh && cd ../..
+
+        echo "Starting vault"
+        vault server -dev & echo $! > $HOME/vault.pid
+        echo "Waiting vault settle" & sleep 2
+        echo "Vault started with PID `cat $HOME/vault.pid`"
+        vault auth enable userpass
+        vault policy write test-policy ./test-policy.hcl
+        vault write auth/userpass/users/${VAULT_USERNAME} password=${VAULT_PASSWORD} policies=test-policy
+
+        echo "Starting RethinkDB"
+        rethinkdb --no-http-admin --bind 127.0.0.1 & echo $! > $HOME/rethinkdb.pid
+        echo "RethinkDB started with PID `cat $HOME/rethinkdb.pid`"
+
+        echo "Running GolangCI Lint"
+        golangci-lint run | gawk '{ if(match($0, /([^\:]+):([0-9]*):([0-9]*):(.*)/, m)) print "* **" m[1] "** on line " m[2] ": `" m[4] "`"  }' 2>&1 > lintresult.tmp || true
+        results=$(cat lintresult.tmp)
+        results="${results//'%'/'%25'}"
+        results="${results//$'\n'/'%0A'}"
+        results="${results//$'\r'/'%0D'}"
+        if [ -z "$results" ]
+        then
+          echo "::set-output name=result::No lint issues files! :1st_place_medal:"
+          LINT_OK=0
+        else
+          echo "::set-output name=result::There are some lint issues in your files :-1: : %0A%0A $results"
+          LINT_OK=1
+        fi
+
+        echo "Running race-condition / coverage tests"
+        go test -v -race ./... -coverprofile=qrs.coverprofile
+        echo "Closing Vault"
+        sudo kill -9 `cat ~/vault.pid`
+        echo "Closing RethinkDB"
+        sudo kill -9 `cat ~/rethinkdb.pid`
+
+        if [ $LINT_OK == 1 ] || [ $FORMAT_OK == 1 ]
+        then
+          echo "Either Lint or Format went wrong"
+          exit 1
+        fi
+
+    - name: comment PR
+      uses: quan-to/comment-on-pr@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        msg: |
+          ### GolangCI Lint results:
+          ${{ steps.tests.outputs.result }}
+
+          ### File Format results:
+          ${{ steps.tests.outputs.result_format }}
+
+    - name: Send coverage to Coveralls
+      uses: quan-to/actions-goveralls@v1
+      with:
+        path-to-profile: qrs.coverprofile
+        parallel: true
+
+  finish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: quan-to/actions-goveralls@v1
+        with:
+          parallel-finished: true
+
+
+
+
