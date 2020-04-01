@@ -30,7 +30,7 @@ func WriteJSON(data interface{}, statusCode int, w http.ResponseWriter, r *http.
 	var b []byte
 	var err error
 
-	if qErr, ok := data.(*QuantoError.ErrorObject); ok && !QuantoError.ShowStackTrace(){
+	if qErr, ok := data.(*QuantoError.ErrorObject); ok && !QuantoError.ShowStackTrace() {
 		qErr.StackTrace = ""
 		b, err = json.Marshal(qErr)
 	} else {

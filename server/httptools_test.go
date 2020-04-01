@@ -16,7 +16,7 @@ func TestWriteJSON(test *testing.T) {
 
 	testCases := []struct {
 		description          string
-		call				 func(w http.ResponseWriter)
+		call                 func(w http.ResponseWriter)
 		statusCodeExpected   int
 		responseBodyExpected string
 	}{
@@ -24,7 +24,7 @@ func TestWriteJSON(test *testing.T) {
 			"Test Internal Server Error Response",
 			func(w http.ResponseWriter) {
 				QuantoError.DisableStackTrace()
-				InternalServerError("server is down!","FAILURE", w, req, log)
+				InternalServerError("server is down!", "FAILURE", w, req, log)
 			},
 			500,
 			"{\"errorCode\":\"INTERNAL_SERVER_ERROR\",\"errorField\":\"server\",\"message\":\"server is down!\",\"errorData\":\"FAILURE\",\"stackTrace\":\"\"}",
@@ -107,6 +107,5 @@ func TestWriteJSON(test *testing.T) {
 			}
 		})
 	}
-
 
 }
