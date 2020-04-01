@@ -59,10 +59,10 @@ jobs:
         if [ $NUM_LINES_FORMATTED -eq 0 ]
         then
           echo "::set-output name=result_format::No unformatted files! :1st_place_medal:"
-          FORMAT_OK=0
+          echo "::set-output name=format_ok::0"
         else
           echo "::set-output name=result_format::There are some unformatted files. Please run \`go fmt ./...\` before commiting! :-1: : %0A%0A $LINES_FORMATTED"
-          FORMAT_OK=1
+          echo "::set-output name=format_ok::1"
         fi
 
         cd cmd/agent-ui && ./placeholders.sh && cd ../..
@@ -88,10 +88,10 @@ jobs:
         if [ -z "$results" ]
         then
           echo "::set-output name=result::No lint issues files! :1st_place_medal:"
-          LINT_OK=0
+          echo "::set-output name=lint_ok::0"
         else
           echo "::set-output name=result::There are some lint issues in your files :-1: : %0A%0A $results"
-          LINT_OK=1
+          echo "::set-output name=lint_ok::1"
         fi
 
         echo "Running race-condition / coverage tests"
@@ -118,6 +118,23 @@ jobs:
 
           ### File Format results:
           ${{ steps.tests.outputs.result_format }}
+
+    - name: Check results
+      run: |
+        FORMAT_OK="${{ steps.tests.outputs.format_ok }}"
+        LINT_OK="${{ steps.tests.outputs.lint_ok }}"
+
+        if [ $FORMAT_OK -eq "1" ]
+        then
+          echo "Code format is not OK!"
+          exit 1
+        fi
+
+        if [ $LINT_OK -eq "1" ]
+        then
+          echo "Code format is not OK!"
+          exit 1
+        fi
 
     - name: Send coverage to Coveralls
       uses: quan-to/actions-goveralls@v1
