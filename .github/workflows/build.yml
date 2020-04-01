@@ -56,7 +56,8 @@ jobs:
         LINES_FORMATTED="${LINES_FORMATTED//'%'/'%25'}"
         LINES_FORMATTED="${LINES_FORMATTED//$'\n'/'%0A'}"
         LINES_FORMATTED="${LINES_FORMATTED//$'\r'/'%0D'}"
-        if [ $NUM_LINES_FORMATTED -eq 0 ]
+
+        if [ $NUM_LINES_FORMATTED -eq 1 ]
         then
           echo "::set-output name=result_format::No unformatted files! :1st_place_medal:"
           echo "::set-output name=format_ok::0"
