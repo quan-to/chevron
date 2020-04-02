@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/asticode/go-astilectron"
+	remote_signer "github.com/quan-to/chevron"
 	"github.com/quan-to/slog"
 )
 
@@ -12,7 +13,7 @@ var (
 	BuiltAt string
 	debug   = flag.Bool("d", false, "enables the debug mode")
 	w       *astilectron.Window
-	log     = slog.Scope("AgentUI")
+	log     = slog.Scope("AgentUI").Tag(remote_signer.DefaultTag)
 )
 
 func main() {
