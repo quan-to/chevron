@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
+	remote_signer "github.com/quan-to/chevron"
 	"github.com/quan-to/slog"
 	"strings"
 )
@@ -22,7 +23,7 @@ const (
 	messageLoadPrivateKeyResult = "loadPrivateKeyResult"
 )
 
-var electronLog = slog.Scope("Electron")
+var electronLog = slog.Scope("Electron").Tag(remote_signer.DefaultTag)
 
 // handleMessages handles messages
 func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload interface{}, err error) {
