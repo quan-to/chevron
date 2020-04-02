@@ -182,7 +182,7 @@ func AddKeys(files []string) (bool, []string) {
 }
 
 func Migrate() {
-	storeFolder := path.Join(executableFolder, "keys")
+	storeFolder := path.Join(executableFolder, "store")
 	if remote_signer.FolderExists(storeFolder) { // Old key store
 		log.Warn("Found \"store\" folder. Migrating keys...")
 		err := remote_signer.CopyFiles(storeFolder, keysFolder)
