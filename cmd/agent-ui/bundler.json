@@ -2,5 +2,23 @@
   "app_name": "AgentUI",
   "icon_path_darwin": "resources/icon.icns",
   "icon_path_linux": "resources/icon.png",
-  "icon_path_windows": "resources/icon.ico"
+  "icon_path_windows": "resources/icon.ico",
+  "environments": [
+    {"arch": "amd64", "os": "darwin"},
+    {"arch": "amd64", "os": "linux"},
+    {"arch": "amd64", "os": "windows"}
+  ],
+  "info_plist": {
+    "CFBundlePackageType": "APPL",
+    "CFBundleInfoDictionaryVersion": "6.0",
+    "CFBundleIconFile": "icon.icns",
+    "CFBundleDisplayName": "Chevron Agent UI",
+    "LSUIElement": "NO",
+    "NSHighResolutionCapable": true,
+    "NSAppTransportSecurity": {
+      "NSAllowsArbitraryLoads": true
+    }
+  },
+  "version_electron": "7.1.10",
+  "version_astilectron": "0.37.0"
 }
