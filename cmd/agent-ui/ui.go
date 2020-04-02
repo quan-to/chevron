@@ -42,6 +42,44 @@ func Run() {
 					},
 				},
 			},
+			{
+				Label: astikit.StrPtr("Edit"),
+				SubMenu: []*astilectron.MenuItemOptions{
+					{
+						Label:       astikit.StrPtr("Undo"),
+						Accelerator: astilectron.NewAccelerator("CmdOrCtrl", "Z"),
+						Role:        astikit.StrPtr("undo:"),
+					},
+					{
+						Label:       astikit.StrPtr("Redo"),
+						Accelerator: astilectron.NewAccelerator("Shift", "CmdOrCtrl", "Z"),
+						Role:        astikit.StrPtr("redo"),
+					},
+					{
+						Type: astikit.StrPtr("separator"),
+					},
+					{
+						Label:       astikit.StrPtr("Cut"),
+						Accelerator: astilectron.NewAccelerator("CmdOrCtrl", "X"),
+						Role:        astikit.StrPtr("cut"),
+					},
+					{
+						Label:       astikit.StrPtr("Copy"),
+						Accelerator: astilectron.NewAccelerator("CmdOrCtrl", "C"),
+						Role:        astikit.StrPtr("copy"),
+					},
+					{
+						Label:       astikit.StrPtr("Paste"),
+						Accelerator: astilectron.NewAccelerator("CmdOrCtrl", "V"),
+						Role:        astikit.StrPtr("paste"),
+					},
+					{
+						Label:       astikit.StrPtr("Select All"),
+						Accelerator: astilectron.NewAccelerator("CmdOrCtrl", "A"),
+						Role:        astikit.StrPtr("selectAll"),
+					},
+				},
+			},
 		},
 		OnWait: func(_ *astilectron.Astilectron, ws []*astilectron.Window, _ *astilectron.Menu, _ *astilectron.Tray, _ *astilectron.Menu) error {
 			log.Info("Astilectron backend is ready")

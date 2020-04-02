@@ -8,9 +8,10 @@ require (
 	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc // indirect
 	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
 	github.com/asticode/go-astiamqp v1.0.0 // indirect
-	github.com/asticode/go-astikit v0.5.0
+	github.com/asticode/go-astikit v0.4.0
 	github.com/asticode/go-astilectron v0.13.1
 	github.com/asticode/go-astilectron-bootstrap v0.3.4
+	github.com/asticode/go-astilectron-bundler v0.5.2
 	github.com/bitly/go-hostpool v0.1.0 // indirect
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/bouk/monkey v1.0.1
