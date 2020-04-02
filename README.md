@@ -68,3 +68,18 @@ These are the Environment Variables that you can set to manage the webserver:
 *   `SHOW_LINES` => Show filename and lines in logs
 *   `RequestIDHeader` => Header field to get request ID
 *   `LOG_FORMAT` => Change log format (default is pipe delimited, provide the value `json` to log in JSON format)
+
+Agent UI Development
+====================
+
+The graphql-playground fork for AgentUI is hosted at [https://github.com/quan-to/graphql-playground](https://github.com/quan-to/graphql-playground)
+
+Top update agent-ui playground:
+
+1. Clone Repository https://github.com/quan-to/graphql-playground
+2. `yarn`
+3. Edit the package `packages/graphql-playground-react`
+4. `yarn build`
+5. Copy `build/*` to `cmd/agent-ui/resources/app/`
+6. Change `/static/` to `./static/` in `cmd/agent-ui/resources/app/index.html`
+7. Run `astilectron-bundler` in `cmd/agent-ui`

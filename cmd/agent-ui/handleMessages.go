@@ -6,6 +6,7 @@ import (
 	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/quan-to/slog"
+	"strings"
 )
 
 const (
@@ -25,6 +26,7 @@ var electronLog = slog.Scope("Electron")
 
 // handleMessages handles messages
 func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload interface{}, err error) {
+	log.DebugNote("Received message %s", m.Name)
 	switch m.Name {
 	case messageLoadPrivateKey:
 		var paths []string
@@ -32,6 +34,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 			payload = err.Error()
 			return
 		}
+		log.Info("Loading keys from %s", strings.Join(paths, ", "))
 		hasErrors, errs := AddKeys(paths)
 		if hasErrors {
 			for i, v := range errs {
