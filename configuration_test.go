@@ -133,7 +133,7 @@ func TestConfiguration(t *testing.T) {
 	testStringVar(&VaultAddress, "VAULT_ADDRESS", "VaultAddress", "http://localhost:8200", t)
 	testStringVar(&VaultNamespace, "VAULT_NAMESPACE", "VaultNamespace", "remote-signer", t)
 	testStringVar(&VaultBackend, "VAULT_BACKEND", "VaultBackend", "secret", t)
-	testStringVar(&AgentTargetURL, "AGENT_TARGET_URL", "AgentTargetURL", "https://api.dev.contaquanto.net/all", t)
+	testStringVar(&AgentTargetURL, "AGENT_TARGET_URL", "AgentTargetURL", "https://api.sandbox.contaquanto.com/all", t)
 	testStringVar(&Environment, "Environment", "Environment", "development", t)
 	testStringVar(&AgentExternalURL, "AGENT_EXTERNAL_URL", "AgentExternalURL", "/agent", t)
 	testStringVar(&AgentAdminExternalURL, "AGENTADMIN_EXTERNAL_URL", "AgentAdminExternalURL", "/agentAdmin", t)
