@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 	remote_signer "github.com/quan-to/chevron"
@@ -181,6 +182,10 @@ func (ge *GPGEndpoint) verifySignatureQuanto(w http.ResponseWriter, r *http.Requ
 	valid, err := ge.gpg.VerifySignature(ctx, bytes, signature)
 
 	if err != nil {
+		if strings.Contains(err.Error(), "cannot find public key to verify signature") {
+			NotFound("publicKey", err.Error(), w, r, log)
+			return
+		}
 		InvalidFieldData("Signature", err.Error(), w, r, log)
 		return
 	}

@@ -806,7 +806,7 @@ func (pm *PGPManager) VerifySignature(ctx context.Context, data []byte, signatur
 	log.DebugNote("VerifySignature(---, %s)", remote_signer.TruncateFieldForDisplay(signature))
 	var issuerKeyId uint64
 	var publicKey *packet.PublicKey
-	var fingerPrint string
+	var fingerprint string
 
 	signature = remote_signer.SignatureFix(signature)
 	b := bytes.NewReader([]byte(signature))
@@ -820,11 +820,18 @@ func (pm *PGPManager) VerifySignature(ctx context.Context, data []byte, signatur
 	}
 
 	reader := packet.NewReader(block.Body)
+	publicKey = nil
+	foundSignatureFingerprints := make([]string, 0)
+
 	for {
 		pkt, err := reader.Next()
 
 		if err != nil {
-			return false, err
+			if len(foundSignatureFingerprints) > 0 {
+				break // We found signatures just not public keys
+			} else {
+				return false, err
+			}
 		}
 
 		switch sig := pkt.(type) {
@@ -833,16 +840,16 @@ func (pm *PGPManager) VerifySignature(ctx context.Context, data []byte, signatur
 				return false, errors.New("signature doesn't have an issuer")
 			}
 			issuerKeyId = *sig.IssuerKeyId
-			fingerPrint = remote_signer.IssuerKeyIdToFP16(issuerKeyId)
+			fingerprint = remote_signer.IssuerKeyIdToFP16(issuerKeyId)
+			foundSignatureFingerprints = append(foundSignatureFingerprints, fingerprint)
 		case *packet.SignatureV3:
 			issuerKeyId = sig.IssuerKeyId
-			fingerPrint = remote_signer.IssuerKeyIdToFP16(issuerKeyId)
-		default:
-			return false, errors.New("non signature packet found")
+			fingerprint = remote_signer.IssuerKeyIdToFP16(issuerKeyId)
+			foundSignatureFingerprints = append(foundSignatureFingerprints, fingerprint)
 		}
 
-		if len(fingerPrint) == 16 {
-			publicKey = pm.GetPublicKey(ctx, fingerPrint)
+		if len(fingerprint) == 16 {
+			publicKey = pm.GetPublicKey(ctx, fingerprint)
 			if publicKey != nil {
 				break
 			}
@@ -850,11 +857,11 @@ func (pm *PGPManager) VerifySignature(ctx context.Context, data []byte, signatur
 	}
 
 	if publicKey == nil {
-		return false, errors.New("cannot find public key to verify signature")
+		return false, fmt.Errorf("cannot find public key for any of these signatures: %s", strings.Join(foundSignatureFingerprints, ", "))
 	}
 
 	keyRing := make(openpgp.EntityList, 1)
-	keyRing[0] = pm.entities[fingerPrint]
+	keyRing[0] = pm.entities[fingerprint]
 
 	dr := bytes.NewReader(data)
 	sr := strings.NewReader(signature)
