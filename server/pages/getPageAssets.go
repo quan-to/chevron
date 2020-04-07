@@ -21,6 +21,7 @@ func displayFile(filename string, w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(fileData))
 }
 
+// AddHandlers attach handlers for all page assets into the specified router
 func AddHandlers(r *mux.Router) {
 	files := AssetNames()
 

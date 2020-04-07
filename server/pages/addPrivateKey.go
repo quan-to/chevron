@@ -154,8 +154,8 @@ const addPrivateKeyHTML = `
 
 var addPrivateKeyTemplate = template.Must(template.New("addPrivateKey").Parse(addPrivateKeyHTML))
 
+// ServeAddPrivateKey serves the AddPrivateKey HTML Page Template
 func ServeAddPrivateKey(w http.ResponseWriter, _ *http.Request) {
-
 	w.Header().Set("Content-Type", models.MimeHTML)
 	w.WriteHeader(200)
 	_ = addPrivateKeyTemplate.Execute(w, nil)
