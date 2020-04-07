@@ -47,19 +47,17 @@ func MakeAgentProxy(log slog.Instance, gpg etc.PGPInterface, tm etc.TokenManager
 
 func generateUUID(log slog.Instance) (string, error) {
 	uniqueString := ""
-	tries := 0
 
-	for len(uniqueString) == 0 && tries < maxUUIDTries {
+	for tries := 0; tries < maxUUIDTries; tries++ {
 		u, err := uuid.NewRandom()
-		if err != nil {
-			log.Warn("Error generating UUID: %q. Trying again", err)
-			tries++
-			continue
+		if err == nil {
+			uniqueString = u.String()
+			break
 		}
-		uniqueString = u.String()
+		log.Warn("Error generating UUID: %q. Trying again", err)
 	}
 
-	if tries == maxUUIDTries || len(uniqueString) == 0 {
+	if len(uniqueString) == 0 {
 		return "", fmt.Errorf("cannot generate uuid. max tries reached")
 	}
 
