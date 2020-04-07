@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -44,9 +45,10 @@ func MakeAgentProxy(log slog.Instance, gpg etc.PGPInterface, tm etc.TokenManager
 	}
 }
 
-func injectUniquenessFields(log slog.Instance, json map[string]interface{}) {
+func generateUUID(log slog.Instance) (string, error) {
 	uniqueString := ""
 	tries := 0
+
 	for len(uniqueString) == 0 && tries < maxUUIDTries {
 		u, err := uuid.NewRandom()
 		if err != nil {
@@ -57,14 +59,25 @@ func injectUniquenessFields(log slog.Instance, json map[string]interface{}) {
 		uniqueString = u.String()
 	}
 
-	if len(uniqueString) == 0 {
+	if tries == maxUUIDTries || len(uniqueString) == 0 {
+		return "", fmt.Errorf("cannot generate uuid. max tries reached")
+	}
+
+	return uniqueString, nil
+}
+
+func injectUniquenessFields(log slog.Instance, json map[string]interface{}) error {
+	uniqueString, err := generateUUID(log)
+	if err != nil {
 		log.Error("Error generating a random number for UUID. Cannot continue request.")
-		panic("cannot generate a random number")
+		return err
 	}
 
 	json["_timeUniqueId"] = uniqueString
 	json["_timestamp"] = time.Now().UnixNano() / 1e6
 	log.DebugNote("Request UUID: %q - RequestTimestamp: %d", json["_timeUniqueId"], json["_timestamp"])
+
+	return nil
 }
 
 func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) {
@@ -154,7 +167,12 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 
-		injectUniquenessFields(log, jsondata)
+		err = injectUniquenessFields(log, jsondata)
+
+		if err != nil {
+			InternalServerError("There was an error ensuring request uniqueness", err.Error(), w, r, log)
+			return
+		}
 
 		bodyData, _ = json.Marshal(jsondata)
 
