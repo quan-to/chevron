@@ -45,7 +45,6 @@ func MakeAgentProxy(log slog.Instance, gpg etc.PGPInterface, tm etc.TokenManager
 }
 
 func injectUniquenessFields(log slog.Instance, json map[string]interface{}) {
-	json["_timestamp"] = time.Now().UnixNano() / 1e6
 	uniqueString := ""
 	tries := 0
 	for len(uniqueString) == 0 && tries < MaxUUIDTries {
@@ -64,6 +63,8 @@ func injectUniquenessFields(log slog.Instance, json map[string]interface{}) {
 	}
 
 	json["_timeUniqueId"] = uniqueString
+	json["_timestamp"] = time.Now().UnixNano() / 1e6
+	log.DebugNote("Request UUID: %q - RequestTimestamp: %d", json["_timeUniqueId"], json["_timestamp"])
 }
 
 func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) {
