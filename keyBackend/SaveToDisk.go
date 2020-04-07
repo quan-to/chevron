@@ -15,6 +15,8 @@ type Disk struct {
 	log         slog.Instance
 }
 
+const metadataPrefix = "metadata-"
+
 // MakeSaveToDiskBackend creates an instance of DiskBackend that stores keys in files
 func MakeSaveToDiskBackend(log slog.Instance, folder, prefix string) *Disk {
 	if log == nil {
@@ -84,7 +86,7 @@ func (d *Disk) SaveWithMetadata(key, data, metadata string) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(path.Join(d.folder, "metadata-"+d.prefix+key), []byte(metadata), 0600)
+	err = ioutil.WriteFile(path.Join(d.folder, metadataPrefix+d.prefix+key), []byte(metadata), 0600)
 
 	if err != nil {
 		d.log.ErrorDone("Error saving to %s: %s", path.Join(d.folder, d.prefix+key), err)
@@ -107,7 +109,7 @@ func (d *Disk) Delete(key string) error {
 		d.log.ErrorDone("Error deleting from %s: %s", path.Join(d.folder, d.prefix+key), err)
 	}
 
-	_ = os.Remove(path.Join(d.folder, "metadata-"+d.prefix+key))
+	_ = os.Remove(path.Join(d.folder, metadataPrefix+d.prefix+key))
 
 	return err
 }
@@ -120,7 +122,7 @@ func (d *Disk) Read(key string) (data string, metadata string, err error) {
 		return "", "", err
 	}
 
-	mdata, err := ioutil.ReadFile(path.Join(d.folder, "metadata-"+d.prefix+key))
+	mdata, err := ioutil.ReadFile(path.Join(d.folder, metadataPrefix+d.prefix+key))
 	if err != nil {
 		return string(sdata), "", nil
 	}
@@ -138,7 +140,17 @@ func (d *Disk) List() ([]string, error) {
 
 	for _, file := range files {
 		fileName := file.Name()
-		if !file.IsDir() && len(fileName) > len(d.prefix) && fileName[:len(d.prefix)] == d.prefix {
+		// Skip folders
+		if file.IsDir() {
+			continue
+		}
+
+		// Skip Metadata
+		if len(fileName) > len(metadataPrefix) && fileName[:len(metadataPrefix)] == metadataPrefix {
+			continue
+		}
+
+		if len(fileName) > len(d.prefix) && fileName[:len(d.prefix)] == d.prefix {
 			keys = append(keys, fileName[len(d.prefix):])
 		}
 	}
