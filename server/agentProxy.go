@@ -16,6 +16,8 @@ import (
 	"github.com/quan-to/slog"
 )
 
+const MaxUUIDTries = 5
+
 type AgentProxy struct {
 	gpg       etc.PGPInterface
 	transport *http.Transport
@@ -40,6 +42,28 @@ func MakeAgentProxy(log slog.Instance, gpg etc.PGPInterface, tm etc.TokenManager
 		tm:  tm,
 		log: log,
 	}
+}
+
+func injectUniquenessFields(log slog.Instance, json map[string]interface{}) {
+	json["_timestamp"] = time.Now().UnixNano() / 1e6
+	uniqueString := ""
+	tries := 0
+	for len(uniqueString) == 0 && tries < MaxUUIDTries {
+		u, err := uuid.NewRandom()
+		if err != nil {
+			log.Warn("Error generating UUID: %q. Trying again", err)
+			tries++
+			continue
+		}
+		uniqueString = u.String()
+	}
+
+	if len(uniqueString) == 0 {
+		log.Error("Error generating a random number for UUID. Cannot continue request.")
+		panic("cannot generate a random number")
+	}
+
+	json["_timeUniqueId"] = uniqueString
 }
 
 func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) {
@@ -129,9 +153,7 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 
-		jsondata["_timestamp"] = time.Now().Unix() * 1000
-		u, _ := uuid.NewRandom()
-		jsondata["_timeUniqueId"] = u.String()
+		injectUniquenessFields(log, jsondata)
 
 		bodyData, _ = json.Marshal(jsondata)
 
