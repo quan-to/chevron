@@ -2,8 +2,7 @@ package main
 
 import (
 	"fmt"
-
-	"github.com/quan-to/chevron/etc/magicBuilder"
+	"github.com/quan-to/chevron/internal/etc/magicBuilder"
 )
 
 // ListKeys list the Public / Private keys stored in the default backend

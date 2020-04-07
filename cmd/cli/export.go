@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
+	"github.com/quan-to/chevron/internal/etc/magicBuilder"
+	"github.com/quan-to/chevron/internal/models"
 	"os"
 	"strings"
 	"syscall"
 
-	"github.com/quan-to/chevron/etc/magicBuilder"
-	"github.com/quan-to/chevron/models"
 	"golang.org/x/crypto/ssh/terminal"
 )
 

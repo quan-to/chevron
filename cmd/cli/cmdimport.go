@@ -3,13 +3,12 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/quan-to/chevron/internal/etc/magicBuilder"
+	"github.com/quan-to/chevron/internal/tools"
 	"io"
 	"io/ioutil"
 	"os"
 	"strings"
-
-	remote_signer "github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/etc/magicBuilder"
 )
 
 func ImportKey(filename, keyPassword string, keyPasswordFd int) {
@@ -20,7 +19,7 @@ func ImportKey(filename, keyPassword string, keyPasswordFd int) {
 
 	if filename == "-" {
 		// Read from stdin
-		fmt.Fprintf(os.Stderr, "Reading from stdin:\n")
+		_, _ = fmt.Fprintf(os.Stderr, "Reading from stdin:\n")
 		fio := bufio.NewReader(os.Stdin)
 		chunk := make([]byte, 4096)
 		data = make([]byte, 0)
@@ -51,7 +50,7 @@ func ImportKey(filename, keyPassword string, keyPasswordFd int) {
 
 	if keyPasswordFd != -1 {
 		// Load from FD
-		fmt.Fprintf(os.Stderr, "Reading key password from FD %d\n", keyPasswordFd)
+		_, _ = fmt.Fprintf(os.Stderr, "Reading key password from FD %d\n", keyPasswordFd)
 
 		f := os.NewFile(uintptr(keyPasswordFd), "kp")
 		d, err := ioutil.ReadAll(f)
@@ -62,7 +61,7 @@ func ImportKey(filename, keyPassword string, keyPasswordFd int) {
 		keyPassword = strings.Trim(string(d), "\n\r")
 	}
 
-	fps, _ := remote_signer.GetFingerPrintsFromKey(string(data))
+	fps, _ := tools.GetFingerPrintsFromKey(string(data))
 
 	for _, v := range fps {
 		if keyPassword != "" {
@@ -72,25 +71,25 @@ func ImportKey(filename, keyPassword string, keyPasswordFd int) {
 			if err == nil {
 				err = pgpMan.SaveKey(v, private, keyPassword)
 				if err == nil {
-					fmt.Fprintf(os.Stderr, "Imported private key %s\n", v)
+					_, _ = fmt.Fprintf(os.Stderr, "Imported private key %s\n", v)
 					continue
 				}
 			}
 
-			fmt.Fprintf(os.Stderr, "Cannot import private key %s with supplied password: %s\n", v, err)
+			_, _ = fmt.Fprintf(os.Stderr, "Cannot import private key %s with supplied password: %s\n", v, err)
 		} else if n > 0 {
-			fmt.Fprintf(os.Stderr, "File contains private key, but no password supplied. Skipping saving private key.\n")
+			_, _ = fmt.Fprintf(os.Stderr, "File contains private key, but no password supplied. Skipping saving private key.\n")
 		}
 		// Try public if no private
 		public, err := pgpMan.GetPublicKeyAscii(ctx, v)
 		if err == nil {
 			err = pgpMan.SaveKey(v, public, nil)
 			if err == nil {
-				fmt.Fprintf(os.Stderr, "Imported public key %s\n", v)
+				_, _ = fmt.Fprintf(os.Stderr, "Imported public key %s\n", v)
 				continue
 			}
 		}
 
-		fmt.Fprintf(os.Stderr, "Cannot import public key %s: %s\n", v, err)
+		_, _ = fmt.Fprintf(os.Stderr, "Cannot import public key %s: %s\n", v, err)
 	}
 }

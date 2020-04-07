@@ -2,10 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/quan-to/chevron/internal/etc/magicBuilder"
 	"runtime"
 	"time"
-
-	"github.com/quan-to/chevron/etc/magicBuilder"
 )
 
 // BenchmarkGeneration benchmarks the key generation

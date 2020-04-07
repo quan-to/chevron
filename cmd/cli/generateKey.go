@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
+	"github.com/quan-to/chevron/internal/etc/magicBuilder"
+	"github.com/quan-to/chevron/internal/tools"
 	"io/ioutil"
 	"os"
 	"syscall"
 
-	remote_signer "github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/etc/magicBuilder"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
@@ -32,7 +32,7 @@ func GenerateFlow(password, output, identifier string, bits int) {
 		panic(fmt.Sprintf("Error creating key: %s\n", err))
 	}
 
-	fingerPrint, _ := remote_signer.GetFingerPrintFromKey(key)
+	fingerPrint, _ := tools.GetFingerPrintFromKey(key)
 
 	_, _ = fmt.Fprintf(os.Stderr, "Generated key fingerprint: %s\n", fingerPrint)
 
