@@ -6,6 +6,7 @@ import (
 	"github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/agent"
 	"github.com/quan-to/chevron/etc"
+	"github.com/quan-to/chevron/server/pages"
 	"github.com/quan-to/chevron/vaultManager"
 	"github.com/quan-to/slog"
 	"net/http"
@@ -72,6 +73,8 @@ func GenRemoteSignerServerMux(slog slog.Instance, sm etc.SMInterface, gpg etc.PG
 
 	// Static GraphiQL
 	sGql.AttachHandlers(r.PathPrefix("/graphiql").Subrouter())
+
+	pages.AddHandlers(r.PathPrefix("/assets").Subrouter())
 
 	// Catch All for unhandled endpoints
 	r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

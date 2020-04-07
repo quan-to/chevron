@@ -233,7 +233,7 @@ func Setup() {
 	}
 
 	if AgentTargetURL == "" {
-		AgentTargetURL = "https://api.dev.contaquanto.net/all"
+		AgentTargetURL = "https://api.sandbox.contaquanto.com/all"
 	}
 
 	if AgentTokenExpiration == -1 {
