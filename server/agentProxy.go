@@ -16,7 +16,7 @@ import (
 	"github.com/quan-to/slog"
 )
 
-const MaxUUIDTries = 5
+const maxUUIDTries = 5
 
 type AgentProxy struct {
 	gpg       etc.PGPInterface
@@ -47,7 +47,7 @@ func MakeAgentProxy(log slog.Instance, gpg etc.PGPInterface, tm etc.TokenManager
 func injectUniquenessFields(log slog.Instance, json map[string]interface{}) {
 	uniqueString := ""
 	tries := 0
-	for len(uniqueString) == 0 && tries < MaxUUIDTries {
+	for len(uniqueString) == 0 && tries < maxUUIDTries {
 		u, err := uuid.NewRandom()
 		if err != nil {
 			log.Warn("Error generating UUID: %q. Trying again", err)
