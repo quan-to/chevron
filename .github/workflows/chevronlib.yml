@@ -114,13 +114,13 @@ jobs:
         npm -g install typescript
         echo "Building Typescript"
         tsc
-        cp ../../chevron.so dist
-        cp ../../chevron32.dll dist
-        cp ../../chevron.dll dist
-        cp ../../chevron.dylib dist
+        cp ../chevron.so dist
+        cp ../chevron32.dll dist
+        cp ../chevron.dll dist
+        cp ../chevron.dylib dist
         rm -fr build
         rm -fr node_modules
-        zip -r ../../chevronlib.zip .
+        zip -r ../chevronlib.zip .
     - uses: actions/upload-artifact@v1
       name: "Upload chevronlib.zip artifacts"
       with:

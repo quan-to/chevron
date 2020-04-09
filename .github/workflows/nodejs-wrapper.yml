@@ -38,8 +38,8 @@ jobs:
         npm -g install typescript
         echo "Building Typescript"
         tsc
-        cp ../../chevron.so dist
-        cp ../../chevron.so src
+        cp ../chevron.so dist
+        cp ../chevron.so src
     - name: Run Jest
       run: |
         echo "Running jest"
