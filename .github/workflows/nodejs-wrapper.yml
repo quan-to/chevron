@@ -29,10 +29,10 @@ jobs:
     # Runs a set of commands using the runners shell
     - name: Build ChevronLib
       run: |
-        cd cmd/lib/
+        cd wrappers/
         echo "Building linux chevron.so"
         go build -o chevron.so -buildmode=c-shared
-        cd wraps/nodejs
+        cd nodejs
         echo "Installing dependencies"
         npm install
         npm -g install typescript
@@ -43,5 +43,5 @@ jobs:
     - name: Run Jest
       run: |
         echo "Running jest"
-        cd cmd/lib/wraps/nodejs
+        cd wrappers/nodejs
         npm test

@@ -23,14 +23,14 @@ jobs:
         go-version: 1.13
     - name: Build ChevronLib
       run: |
-        cd cmd/lib/
+        cd wrappers
         echo "Building linux chevron.dylib"
         go build -o chevron.dylib -buildmode=c-shared
     - uses: actions/upload-artifact@v1
       name: "Upload chevron.dylib artifacts"
       with:
         name: chevronlib-darwin
-        path: cmd/lib/chevron.dylib
+        path: wrappers/chevron.dylib
 
   buildnixwin:
     # The type of runner that the job will run on
@@ -53,7 +53,7 @@ jobs:
     # Runs a set of commands using the runners shell
     - name: Build ChevronLib
       run: |
-        cd cmd/lib/
+        cd wrappers
         echo "Building linux chevron.so"
         go build -o chevron.so -buildmode=c-shared
         echo "Building chevron32.dll"
@@ -64,17 +64,17 @@ jobs:
       name: "Upload chevron.so artifacts"
       with:
         name: chevronlib-linux
-        path: cmd/lib/chevron.so
+        path: wrappers/chevron.so
     - uses: actions/upload-artifact@v1
       name: "Upload chevron32.dll artifacts"
       with:
         name: chevronlib-win32
-        path: cmd/lib/chevron32.dll
+        path: wrappers/chevron32.dll
     - uses: actions/upload-artifact@v1
       name: "Upload chevron.dll artifacts"
       with:
         name: chevronlib-win64
-        path: cmd/lib/chevron.dll
+        path: wrappers/chevron.dll
   buildnodejs:
     needs:
       - buildmacosx
@@ -90,25 +90,25 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         name: chevronlib-win32
-        path: cmd/lib/
+        path: wrappers/
     - name: Download ChevronLib Win64
       uses: actions/download-artifact@v1
       with:
         name: chevronlib-win64
-        path: cmd/lib/
+        path: wrappers/
     - name: Download ChevronLib Linux
       uses: actions/download-artifact@v1
       with:
         name: chevronlib-linux
-        path: cmd/lib/
+        path: wrappers/
     - name: Download ChevronLib MacOSX
       uses: actions/download-artifact@v1
       with:
         name: chevronlib-darwin
-        path: cmd/lib/
+        path: wrappers/
     - name: Build NPM Package
       run: |
-        cd cmd/lib/wraps/nodejs
+        cd wrappers/nodejs
         echo "Installing / Building dependencies"
         npm install
         npm -g install typescript
@@ -125,4 +125,4 @@ jobs:
       name: "Upload chevronlib.zip artifacts"
       with:
         name: chevronlib-npm.zip
-        path: cmd/lib/chevronlib.zip
+        path: wrappers/chevronlib.zip
