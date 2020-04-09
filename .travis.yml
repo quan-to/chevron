@@ -35,7 +35,7 @@ script:
 - echo "Waiting vault settle" & sleep 2
 - echo "Vault started with PID `cat $HOME/vault.pid`"
 - vault auth enable userpass
-- vault policy write test-policy ./test-policy.hcl
+- vault policy write test-policy ./config/vault/test-policy.hcl
 - vault write auth/userpass/users/${VAULT_USERNAME} password=${VAULT_PASSWORD} policies=test-policy
 - echo "Starting RethinkDB"
 - rethinkdb --no-http-admin --bind 127.0.0.1 & echo $! > $HOME/rethinkdb.pid
