@@ -2,22 +2,22 @@ package server
 
 import (
 	"encoding/json"
+	"github.com/quan-to/chevron/internal/models"
+	"github.com/quan-to/chevron/pkg/interfaces"
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/quan-to/chevron/etc"
-	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/slog"
 )
 
 type InternalEndpoint struct {
-	sm  etc.SMInterface
-	gpg etc.PGPInterface
+	sm  interfaces.SMInterface
+	gpg interfaces.PGPInterface
 	log slog.Instance
 }
 
 // MakeInternalEndpoint creates an instance to handle internal control endpoints such as key password data
-func MakeInternalEndpoint(log slog.Instance, sm etc.SMInterface, gpg etc.PGPInterface) *InternalEndpoint {
+func MakeInternalEndpoint(log slog.Instance, sm interfaces.SMInterface, gpg interfaces.PGPInterface) *InternalEndpoint {
 	if log == nil {
 		log = slog.Scope("Internal")
 	} else {

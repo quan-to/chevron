@@ -1,6 +1,6 @@
 package interfaces
 
-import "github.com/quan-to/chevron/models"
+import "github.com/quan-to/chevron/internal/models"
 
 type PKSInterface interface {
 	PKSGetKey(fingerPrint string) string

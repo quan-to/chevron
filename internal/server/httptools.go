@@ -4,6 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/quan-to/chevron/internal/config"
+	"github.com/quan-to/chevron/internal/models"
+	"github.com/quan-to/chevron/internal/tools"
+	"github.com/quan-to/chevron/pkg/QuantoError"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -11,9 +15,6 @@ import (
 	"strings"
 	"time"
 
-	remote_signer "github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/QuantoError"
-	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/slog"
 )
 
@@ -152,23 +153,23 @@ func wrapWithLog(log slog.Instance, f HTTPHandleFuncWithLog) HTTPHandleFunc {
 func wrapContextWithRequestID(r *http.Request) context.Context {
 	var requestID string
 
-	id, ok := r.Header[remote_signer.RequestIDHeader]
+	id, ok := r.Header[config.RequestIDHeader]
 	if ok && len(id) >= 1 {
 		// Tag the log
 		requestID = id[0]
 	} else {
-		requestID = remote_signer.DefaultTag
+		requestID = tools.DefaultTag
 	}
 
-	return context.WithValue(r.Context(), remote_signer.CtxRequestID, requestID)
+	return context.WithValue(r.Context(), tools.CtxRequestID, requestID)
 }
 
 func wrapLogWithRequestID(log slog.Instance, r *http.Request) slog.Instance {
-	id, ok := r.Header[remote_signer.RequestIDHeader]
+	id, ok := r.Header[config.RequestIDHeader]
 	if ok && len(id) >= 1 {
 		// Tag the log
 		return log.Tag(id[0])
 	}
 
-	return log.Tag(remote_signer.DefaultTag)
+	return log.Tag(tools.DefaultTag)
 }

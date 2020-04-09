@@ -4,8 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/models/KubernetesModels"
+	"github.com/quan-to/chevron/internal/config"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -59,12 +58,12 @@ func kubeFunc() {
 		if pod.Metadata.UID == myId {
 			continue
 		}
-		if pod.Status.Phase != KubernetesModels.Running {
+		if pod.Status.Phase != Running {
 			continue
 		}
 
-		getUrl := fmt.Sprintf("http://%s:%d/remoteSigner/__internal/__getUnlockPasswords", pod.Status.PodIP, remote_signer.HttpPort)
-		postUrl := fmt.Sprintf("http://localhost:%d/remoteSigner/__internal/__postEncryptedPasswords", remote_signer.HttpPort)
+		getUrl := fmt.Sprintf("http://%s:%d/remoteSigner/__internal/__getUnlockPasswords", pod.Status.PodIP, config.HttpPort)
+		postUrl := fmt.Sprintf("http://localhost:%d/remoteSigner/__internal/__postEncryptedPasswords", config.HttpPort)
 
 		res, err := http.Get(getUrl)
 		if err != nil {
@@ -118,5 +117,5 @@ func kubeFunc() {
 	}
 
 	kubeLog.Info("Received %d passwords from %d pods. Triggering Local Unlock", passwordCount, len(pods))
-	_, _ = http.Get(fmt.Sprintf("http://localhost:%d/remoteSigner/__internal/__triggerKeyUnlock", remote_signer.HttpPort))
+	_, _ = http.Get(fmt.Sprintf("http://localhost:%d/remoteSigner/__internal/__triggerKeyUnlock", config.HttpPort))
 }

@@ -2,8 +2,8 @@ package interfaces
 
 import (
 	"context"
+	"github.com/quan-to/chevron/internal/models"
 
-	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/chevron/pkg/openpgp"
 )
 

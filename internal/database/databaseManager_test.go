@@ -3,8 +3,8 @@ package database
 import (
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/QuantoError"
+	config "github.com/quan-to/chevron/internal/config"
+	"github.com/quan-to/chevron/pkg/QuantoError"
 	"github.com/quan-to/slog"
 	"os"
 	"testing"
@@ -15,19 +15,19 @@ func TestMain(m *testing.M) {
 
 	QuantoError.EnableStackTrace()
 
-	remote_signer.PrivateKeyFolder = ".."
-	remote_signer.KeyPrefix = "testkey_"
-	remote_signer.KeysBase64Encoded = false
-	remote_signer.RethinkDBPoolSize = 1
+	config.PrivateKeyFolder = ".."
+	config.KeyPrefix = "testkey_"
+	config.KeysBase64Encoded = false
+	config.RethinkDBPoolSize = 1
 
-	remote_signer.MasterGPGKeyBase64Encoded = false
-	remote_signer.MasterGPGKeyPath = "../testkey_privateTestKey.gpg"
-	remote_signer.MasterGPGKeyPasswordPath = "../testprivatekeyPassword.txt"
+	config.MasterGPGKeyBase64Encoded = false
+	config.MasterGPGKeyPath = "../testkey_privateTestKey.gpg"
+	config.MasterGPGKeyPasswordPath = "../testprivatekeyPassword.txt"
 	u, _ := uuid.NewRandom()
-	remote_signer.DatabaseName = "qrs_test_" + u.String()
-	remote_signer.HttpPort = 40000
-	remote_signer.SKSServer = fmt.Sprintf("http://localhost:%d/sks/", remote_signer.HttpPort)
-	remote_signer.EnableRethinkSKS = true
+	config.DatabaseName = "qrs_test_" + u.String()
+	config.HttpPort = 40000
+	config.SKSServer = fmt.Sprintf("http://localhost:%d/sks/", config.HttpPort)
+	config.EnableRethinkSKS = true
 	DbSetup()
 
 	slog.SetTestMode()

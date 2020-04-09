@@ -3,11 +3,11 @@ package server
 import (
 	"context"
 	"errors"
+	"github.com/quan-to/chevron/internal/keymagic"
+	"github.com/quan-to/chevron/internal/models/HKP"
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/quan-to/chevron/keymagic"
-	"github.com/quan-to/chevron/models/HKP"
 	"github.com/quan-to/slog"
 )
 

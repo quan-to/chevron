@@ -2,8 +2,8 @@ package server
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/server/agent"
+	"github.com/quan-to/chevron/internal/config"
+	"github.com/quan-to/chevron/internal/server/agent"
 	"github.com/quan-to/slog"
 	"net/http"
 	"path"
@@ -41,9 +41,9 @@ func (gql *StaticGraphiQL) displayFile(filename string, w http.ResponseWriter, r
 	if strings.Index(filename, "index.htm") > -1 {
 		// Add server URL
 		f := string(fileData)
-		f = strings.Replace(f, "{SERVER_URL}", remote_signer.AgentTargetURL, -1)
-		f = strings.Replace(f, "{AGENT_URL}", remote_signer.AgentExternalURL, -1)
-		f = strings.Replace(f, "{AGENT_ADMIN_URL}", remote_signer.AgentAdminExternalURL, -1)
+		f = strings.Replace(f, "{SERVER_URL}", config.AgentTargetURL, -1)
+		f = strings.Replace(f, "{AGENT_URL}", config.AgentExternalURL, -1)
+		f = strings.Replace(f, "{AGENT_ADMIN_URL}", config.AgentAdminExternalURL, -1)
 		fileData = []byte(f)
 	}
 

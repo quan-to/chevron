@@ -2,7 +2,7 @@ package main
 
 import "C"
 import (
-	"github.com/quan-to/chevron/chevronlib"
+	"github.com/quan-to/chevron/pkg/chevronlib"
 	"strings"
 )
 

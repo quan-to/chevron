@@ -3,23 +3,23 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/quan-to/chevron/internal/keymagic"
+	"github.com/quan-to/chevron/internal/models"
+	"github.com/quan-to/chevron/pkg/interfaces"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/quan-to/chevron/etc"
-	"github.com/quan-to/chevron/keymagic"
-	"github.com/quan-to/chevron/models"
 	"github.com/quan-to/slog"
 )
 
 type SKSEndpoint struct {
-	sm  etc.SMInterface
-	gpg etc.PGPInterface
+	sm  interfaces.SMInterface
+	gpg interfaces.PGPInterface
 	log slog.Instance
 }
 
-func MakeSKSEndpoint(log slog.Instance, sm etc.SMInterface, gpg etc.PGPInterface) *SKSEndpoint {
+func MakeSKSEndpoint(log slog.Instance, sm interfaces.SMInterface, gpg interfaces.PGPInterface) *SKSEndpoint {
 	if log == nil {
 		log = slog.Scope("SKS")
 	} else {
