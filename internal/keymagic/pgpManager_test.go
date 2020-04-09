@@ -74,7 +74,7 @@ func TestDecrypt(t *testing.T) {
 
 func TestDecryptRaw(t *testing.T) {
 	ctx := context.Background()
-	b, err := ioutil.ReadFile("../tests/testraw.gpg")
+	b, err := ioutil.ReadFile("../../testdata/testraw.gpg")
 
 	if err != nil {
 		t.Error(err)

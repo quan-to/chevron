@@ -8,13 +8,13 @@ import (
 
 func TestDecipher_DecipherPacket(t *testing.T) {
 
-	keyData, err := ioutil.ReadFile("../tests/testkey_privateTestKey.gpg")
+	keyData, err := ioutil.ReadFile("../../testdata/testkey_privateTestKey.gpg")
 
 	if err != nil {
 		t.Fatalf("Error reading private key: %s", err)
 	}
 
-	keyPass, err := ioutil.ReadFile("../tests/testprivatekeyPassword.txt")
+	keyPass, err := ioutil.ReadFile("../../testdata/testprivatekeyPassword.txt")
 
 	if err != nil {
 		t.Fatalf("Error reading private key password: %s", err)

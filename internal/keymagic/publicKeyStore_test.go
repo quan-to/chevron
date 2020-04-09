@@ -21,7 +21,7 @@ func TestPKSGetKey(t *testing.T) {
 	// Test Internal
 	c := database.GetConnection()
 
-	z, err := ioutil.ReadFile("../tests/testkey_privateTestKey.gpg")
+	z, err := ioutil.ReadFile("../../testdata/testkey_privateTestKey.gpg")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -117,7 +117,7 @@ func TestPKSAdd(t *testing.T) {
 	config.EnableRethinkSKS = true
 	ctx := context.Background()
 	// Test Internal
-	z, err := ioutil.ReadFile("../tests/testkey_privateTestKey.gpg")
+	z, err := ioutil.ReadFile("../../testdata/testkey_privateTestKey.gpg")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

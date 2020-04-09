@@ -57,7 +57,7 @@ func TestMain(m *testing.M) {
 	u, _ := uuid.NewRandom()
 
 	config.DatabaseName = "qrs_test_" + u.String()
-	config.PrivateKeyFolder = "../tests"
+	config.PrivateKeyFolder = "../../testdata"
 	config.KeyPrefix = "testkey_"
 	config.KeysBase64Encoded = false
 	config.EnableRethinkSKS = true
@@ -72,8 +72,8 @@ func TestMain(m *testing.M) {
 	config.EnableRethinkSKS = false
 
 	config.MasterGPGKeyBase64Encoded = false
-	config.MasterGPGKeyPath = "../tests/testkey_privateTestKey.gpg"
-	config.MasterGPGKeyPasswordPath = "../tests/testprivatekeyPassword.txt"
+	config.MasterGPGKeyPath = "../../testdata/testkey_privateTestKey.gpg"
+	config.MasterGPGKeyPasswordPath = "../../testdata/testprivatekeyPassword.txt"
 
 	ctx := context.Background()
 	sm = magicBuilder.MakeSM(nil)

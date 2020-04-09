@@ -88,7 +88,7 @@ func TestGPG2Quanto(t *testing.T) {
 }
 
 func TestGetFingerPrintFromKey(t *testing.T) {
-	z, err := ioutil.ReadFile("./tests/testkey_privateTestKey.gpg")
+	z, err := ioutil.ReadFile("../../testdata/testkey_privateTestKey.gpg")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -204,7 +204,7 @@ func TestGetFingerPrintsFromEncryptedMessageRaw(t *testing.T) {
 }
 
 func TestReadKeyToEntity(t *testing.T) {
-	z, err := ioutil.ReadFile("./tests/testkey_privateTestKey.gpg")
+	z, err := ioutil.ReadFile("../../testdata/testkey_privateTestKey.gpg")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -547,9 +547,9 @@ func TestGetFingerPrintsFromKey(t *testing.T) {
 }
 
 func TestFolderExists(t *testing.T) {
-	v := FolderExists("tests")
+	v := FolderExists("../../testdata")
 	if !v {
-		t.Errorf("expected FolderExists(\"tests\") == true")
+		t.Errorf("expected FolderExists(\"../../testdata\") == true")
 	}
 
 	v = FolderExists("__heuerbabsueaius31i2u3n13ubae___")
@@ -577,7 +577,7 @@ func TestGeneratePassword(t *testing.T) {
 }
 
 func TestIsASCIIArmored(t *testing.T) {
-	b, err := ioutil.ReadFile("tests/nonasciiencrypted.gpg")
+	b, err := ioutil.ReadFile("../../testdata/nonasciiencrypted.gpg")
 	if err != nil {
 		t.Errorf("Error loading file: %s", err)
 	}
@@ -585,7 +585,7 @@ func TestIsASCIIArmored(t *testing.T) {
 	nonascii := string(b)
 
 	if IsASCIIArmored(nonascii) != false {
-		t.Errorf("Expected NONASCII from tests/nonasciiencrypted.gpg")
+		t.Errorf("Expected NONASCII from ../../testdata/nonasciiencrypted.gpg")
 	}
 
 	if IsASCIIArmored(sigConvertGPG) != true {
@@ -594,7 +594,7 @@ func TestIsASCIIArmored(t *testing.T) {
 }
 
 func TestNonASCIIFingerprints(t *testing.T) {
-	b, err := ioutil.ReadFile("tests/nonasciiencrypted.gpg")
+	b, err := ioutil.ReadFile("../../testdata/nonasciiencrypted.gpg")
 	if err != nil {
 		t.Errorf("Error loading file: %s", err)
 	}

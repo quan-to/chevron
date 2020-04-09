@@ -115,7 +115,7 @@ func (c *Cipher) encryptJsonField(data map[string]interface{}, baseKey []byte, c
 		nodePath := currentLevel + base64.StdEncoding.EncodeToString([]byte(k)) + "/"
 
 		// Check if its in skip
-		if remote_signer.StringIndexOf(nodePath, skipFields) > -1 {
+		if tools.StringIndexOf(nodePath, skipFields) > -1 {
 			encData[k] = v
 			continue
 		}
@@ -175,7 +175,7 @@ func (c *Cipher) encryptArray(obj []interface{}, baseKey []byte, currentLevel st
 	for i, v := range obj {
 		nodePath := currentLevel + base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%d", i))) + "/"
 		err = nil
-		if remote_signer.StringIndexOf(nodePath, skipFields) > -1 {
+		if tools.StringIndexOf(nodePath, skipFields) > -1 {
 			out[i] = v
 			continue
 		}

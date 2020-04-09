@@ -2,15 +2,16 @@ package keymagic
 
 import (
 	"context"
+	remote_signer "github.com/quan-to/chevron/internal/config"
+	"github.com/quan-to/chevron/internal/database"
+	"github.com/quan-to/chevron/internal/keyBackend"
+	"github.com/quan-to/chevron/internal/models"
+	"github.com/quan-to/chevron/internal/tools"
+	"github.com/quan-to/chevron/internal/vaultManager"
+	"github.com/quan-to/chevron/pkg/interfaces"
+	"github.com/quan-to/chevron/testdata"
 	"io/ioutil"
 	"testing"
-
-	remote_signer "github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/database"
-	"github.com/quan-to/chevron/keyBackend"
-	"github.com/quan-to/chevron/models"
-	"github.com/quan-to/chevron/rstest"
-	"github.com/quan-to/chevron/vaultManager"
 )
 
 func TestAddKey(t *testing.T) {
@@ -19,7 +20,7 @@ func TestAddKey(t *testing.T) {
 	defer remote_signer.PopVariables()
 	remote_signer.MaxKeyRingCache = 10
 	krm := MakeKeyRingManager(nil)
-	var kb keyBackend.Backend
+	var kb interfaces.Backend
 
 	if remote_signer.VaultStorage {
 		kb = vaultManager.MakeVaultManager(nil, remote_signer.KeyPrefix)
@@ -36,14 +37,14 @@ func TestAddKey(t *testing.T) {
 		t.FailNow()
 	}
 
-	e, err := remote_signer.ReadKeyToEntity(str)
+	e, err := tools.ReadKeyToEntity(str)
 
 	if err != nil {
 		t.Errorf("Error loading test key: %s", err)
 		t.FailNow()
 	}
 
-	fp := remote_signer.IssuerKeyIdToFP16(e.PrimaryKey.KeyId)
+	fp := tools.IssuerKeyIdToFP16(e.PrimaryKey.KeyId)
 
 	krm.AddKey(ctx, e, true)
 
@@ -55,7 +56,7 @@ func TestAddKey(t *testing.T) {
 		t.Error("Cannot find added key")
 	}
 
-	if remote_signer.StringIndexOf(fp, krm.GetFingerPrints(ctx)) != -1 {
+	if tools.StringIndexOf(fp, krm.GetFingerPrints(ctx)) != -1 {
 		t.Error("Non Erasable Key should be on the fingerPrint list")
 	}
 
@@ -71,7 +72,7 @@ func TestAddKey(t *testing.T) {
 		t.FailNow()
 	}
 
-	erasableKeyTest, err := remote_signer.ReadKeyToEntity(str)
+	erasableKeyTest, err := tools.ReadKeyToEntity(str)
 
 	if err != nil {
 		t.Errorf("Error loading test key: %s", err)
@@ -79,7 +80,7 @@ func TestAddKey(t *testing.T) {
 	}
 
 	krm.AddKey(ctx, erasableKeyTest, false) // Add to pool
-	fpErasable := remote_signer.IssuerKeyIdToFP16(erasableKeyTest.PrimaryKey.KeyId)
+	fpErasable := tools.IssuerKeyIdToFP16(erasableKeyTest.PrimaryKey.KeyId)
 
 	// Rotate until MaxKeyRingCache -1, so erasableKeyTest should be still there
 	for i := 0; i < remote_signer.MaxKeyRingCache-1; i++ {
@@ -90,7 +91,7 @@ func TestAddKey(t *testing.T) {
 			t.FailNow()
 		}
 
-		e, err := remote_signer.ReadKeyToEntity(str)
+		e, err := tools.ReadKeyToEntity(str)
 
 		if err != nil {
 			t.Errorf("Error loading test key: %s", err)
@@ -112,7 +113,7 @@ func TestAddKey(t *testing.T) {
 		t.FailNow()
 	}
 
-	e, err = remote_signer.ReadKeyToEntity(str)
+	e, err = tools.ReadKeyToEntity(str)
 
 	if err != nil {
 		t.Errorf("Error loading test key: %s", err)
@@ -136,24 +137,24 @@ func TestGetKeyExternal(t *testing.T) {
 	remote_signer.SKSServer = "https://keyserver.ubuntu.com/"
 	krm := MakeKeyRingManager(nil)
 	remote_signer.EnableRethinkSKS = false
-	e := krm.GetKey(ctx, rstest.ExternalKeyFingerprint)
+	e := krm.GetKey(ctx, testdata.ExternalKeyFingerprint)
 
 	if e == nil {
 		t.Error("Expected External key to be fetch")
 		t.FailNow()
 	}
 
-	fp := remote_signer.IssuerKeyIdToFP16(e.PrimaryKey.KeyId)
+	fp := tools.IssuerKeyIdToFP16(e.PrimaryKey.KeyId)
 
-	if fp != rstest.ExternalKeyFingerprint {
-		t.Errorf("Expected key %s got %s", rstest.ExternalKeyFingerprint, fp)
+	if fp != testdata.ExternalKeyFingerprint {
+		t.Errorf("Expected key %s got %s", testdata.ExternalKeyFingerprint, fp)
 	}
 
 	// Test SKS Internal
 	remote_signer.EnableRethinkSKS = true
 	c := database.GetConnection()
 
-	z, err := ioutil.ReadFile("../tests/testkey_privateTestKey.gpg")
+	z, err := ioutil.ReadFile("../../testdata/testkey_privateTestKey.gpg")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -174,9 +175,9 @@ func TestGetKeyExternal(t *testing.T) {
 		t.FailNow()
 	}
 
-	fp = remote_signer.IssuerKeyIdToFP16(e.PrimaryKey.KeyId)
+	fp = tools.IssuerKeyIdToFP16(e.PrimaryKey.KeyId)
 
-	if !remote_signer.CompareFingerPrint(fp, gpgKey.FullFingerPrint) {
+	if !tools.CompareFingerPrint(fp, gpgKey.FullFingerPrint) {
 		t.Errorf("Expected %s == %s", fp, gpgKey.FullFingerPrint)
 	}
 

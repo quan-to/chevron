@@ -1,7 +1,7 @@
 package vaultManager
 
 import (
-	"github.com/quan-to/chevron"
+	"github.com/quan-to/chevron/internal/config"
 	"os"
 	"testing"
 )
@@ -17,17 +17,17 @@ func TestMain(m *testing.M) {
 }
 
 func TestVaultManager_Make(t *testing.T) {
-	remote_signer.PushVariables()
+	config.PushVariables()
 	// Test Vault SkipVerify
-	remote_signer.VaultSkipVerify = true
+	config.VaultSkipVerify = true
 	tmpVM := MakeVaultManager(nil, "test_")
 	if tmpVM == nil {
 		t.Errorf("Expected to get a vaultManager instance, got nil")
 	}
 
 	// Test With Root Token
-	remote_signer.VaultUseUserpass = false
-	t.Logf("Root Token: %s", remote_signer.VaultRootToken)
+	config.VaultUseUserpass = false
+	t.Logf("Root Token: %s", config.VaultRootToken)
 	tmpVM = MakeVaultManager(nil, "test_")
 	if tmpVM == nil {
 		t.Errorf("Expected to get a vaultManager instance, got nil")
@@ -39,7 +39,7 @@ func TestVaultManager_Make(t *testing.T) {
 		t.Errorf("Got error listing: %s", err)
 	}
 
-	remote_signer.PopVariables()
+	config.PopVariables()
 }
 
 func TestVaultGetToken(t *testing.T) {
