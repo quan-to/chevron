@@ -11,8 +11,8 @@ import (
 
 type PGPManager interface {
 	LoadKeys(ctx context.Context)
-	LoadKeyWithMetadata(ctx context.Context, armoredKey, metadata string) (error, int)
-	LoadKey(ctx context.Context, armoredKey string) (error, int)
+	LoadKeyWithMetadata(ctx context.Context, armoredKey, metadata string) (int, error)
+	LoadKey(ctx context.Context, armoredKey string) (int, error)
 	FixFingerPrint(fp string) string
 	IsKeyLocked(fp string) bool
 	UnlockKey(ctx context.Context, fp, password string) error

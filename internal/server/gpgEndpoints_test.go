@@ -50,7 +50,7 @@ func TestGenerateKey(t *testing.T) {
 
 	errorDie(err, t)
 
-	err, _ = gpg.LoadKey(ctx, key)
+	_, err = gpg.LoadKey(ctx, key)
 
 	errorDie(err, t)
 

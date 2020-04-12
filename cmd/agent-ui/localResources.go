@@ -45,7 +45,7 @@ func Begin() {
 }
 
 func AddPrivateKey(privateKeyData string) (string, error) {
-	err, n := pgp.LoadKey(ctx, privateKeyData)
+	n, err := pgp.LoadKey(ctx, privateKeyData)
 	if err != nil {
 		return err.Error(), err
 	}

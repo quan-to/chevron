@@ -86,7 +86,7 @@ func MakeSecretsManager(log slog.Instance) interfaces.SecretsManager {
 	sm.gpg = MakePGPManagerWithKRM(log, kb, MakeKeyRingManager(log))
 	sm.gpg.SetKeysBase64Encoded(config.MasterGPGKeyBase64Encoded)
 
-	err, n := sm.gpg.LoadKey(ctx, string(masterKeyBytes))
+	n, err := sm.gpg.LoadKey(ctx, string(masterKeyBytes))
 
 	if err != nil {
 		sm.log.Fatal("Error loading private master key: %s", err)

@@ -62,7 +62,7 @@ func InitTables() {
 		if tools.StringIndexOf(config.DatabaseName, dbs) == -1 {
 			dbLog.Note("Database %s does not exists. Creating it...", config.DatabaseName)
 			err := r.DBCreate(config.DatabaseName).Exec(conn)
-			if err != nil && strings.Index(err.Error(), " already exists") == -1 {
+			if err != nil && !strings.Contains(err.Error(), " already exists") {
 				dbLog.Fatal(err)
 			}
 		} else {

@@ -150,7 +150,7 @@ func TestGenerateKey(t *testing.T) {
 	}
 
 	// Load key
-	err, _ = pgpMan.LoadKey(ctx, key)
+	_, err = pgpMan.LoadKey(ctx, key)
 	if err != nil {
 		t.Error(err)
 	}

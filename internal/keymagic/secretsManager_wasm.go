@@ -1,11 +1,12 @@
 package keymagic
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	remote_signer "github.com/quan-to/chevron/internal/config"
-	"github.com/quan-to/chevron/internal/etc"
 	"github.com/quan-to/chevron/internal/keybackend"
+	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/interfaces"
 	"github.com/quan-to/slog"
 	"io/ioutil"
@@ -18,15 +19,23 @@ var smLog = slog.Scope("secretsManager")
 type secretsManager struct {
 	sync.Mutex
 	encryptedPasswords   map[string]string
-	gpg                  etc.PGPInterface
+	gpg                  interfaces.PGPManager
 	masterKeyFingerPrint string
 	amIUseless           bool
+	log                  slog.Instance
 }
 
 func MakeSecretsManager(log slog.Instance) interfaces.SecretsManager {
 	var kb interfaces.StorageBackend
+	if log == nil {
+		log = slog.Scope("SM")
+	} else {
+		log = log.SubScope("SM")
+	}
 
-	kb = keybackend.MakeSaveToDiskBackend(path.Dir(remote_signer.MasterGPGKeyPath), "__master__")
+	ctx := context.Background()
+
+	kb = keybackend.MakeSaveToDiskBackend(log, path.Dir(remote_signer.MasterGPGKeyPath), "__master__")
 
 	var sm = &secretsManager{
 		amIUseless:         false,
@@ -53,7 +62,7 @@ func MakeSecretsManager(log slog.Instance) interfaces.SecretsManager {
 		}
 	}
 
-	masterKeyFp, err := remote_signer.GetFingerPrintFromKey(string(masterKeyBytes))
+	masterKeyFp, err := tools.GetFingerPrintFromKey(string(masterKeyBytes))
 
 	if err != nil {
 		smLog.Warn("Error loading master key from %s: %s", remote_signer.MasterGPGKeyPath, err)
@@ -66,10 +75,10 @@ func MakeSecretsManager(log slog.Instance) interfaces.SecretsManager {
 
 	sm.masterKeyFingerPrint = masterKeyFp
 
-	sm.gpg = MakePGPManagerWithKRM(kb, MakeKeyRingManager())
+	sm.gpg = MakePGPManagerWithKRM(log, kb, MakeKeyRingManager(log))
 	sm.gpg.SetKeysBase64Encoded(remote_signer.MasterGPGKeyBase64Encoded)
 
-	err, n := sm.gpg.LoadKey(string(masterKeyBytes))
+	n, err := sm.gpg.LoadKey(ctx, string(masterKeyBytes))
 
 	if err != nil {
 		smLog.Fatal("Error loading private master key: %s", err)
@@ -79,7 +88,7 @@ func MakeSecretsManager(log slog.Instance) interfaces.SecretsManager {
 		smLog.Fatal("The specified key doesnt have any private keys inside.")
 	}
 
-	sm.gpg.LoadKeys()
+	sm.gpg.LoadKeys(ctx)
 
 	masterKeyPassBytes, err := ioutil.ReadFile(remote_signer.MasterGPGKeyPasswordPath)
 
@@ -87,7 +96,7 @@ func MakeSecretsManager(log slog.Instance) interfaces.SecretsManager {
 		smLog.Fatal("Error loading key password from %s: %s", remote_signer.MasterGPGKeyPasswordPath, err)
 	}
 
-	err = sm.gpg.UnlockKey(masterKeyFp, string(masterKeyPassBytes))
+	err = sm.gpg.UnlockKey(context.Background(), masterKeyFp, string(masterKeyPassBytes))
 
 	if err != nil {
 		smLog.Fatal("Error unlocking master key: %s", err)
@@ -103,7 +112,7 @@ func MakeSecretsManager(log slog.Instance) interfaces.SecretsManager {
 }
 
 // PutKeyPassword stores the password for the specified key fingerprint in the key backend encrypted with the master key
-func (sm *secretsManager) PutKeyPassword(fingerPrint, password string) {
+func (sm *secretsManager) PutKeyPassword(ctx context.Context, fingerPrint, password string) {
 	if sm.amIUseless {
 		smLog.Warn("Not saving password. Master Key not loaded")
 		return
@@ -116,7 +125,7 @@ func (sm *secretsManager) PutKeyPassword(fingerPrint, password string) {
 
 	filename := fmt.Sprintf("key-password-utf8-%s.txt", fingerPrint)
 
-	encPass, err := sm.gpg.Encrypt(filename, sm.masterKeyFingerPrint, []byte(password), remote_signer.SMEncryptedDataOnly)
+	encPass, err := sm.gpg.Encrypt(ctx, filename, sm.masterKeyFingerPrint, []byte(password), remote_signer.SMEncryptedDataOnly)
 
 	if err != nil {
 		smLog.Error("Error saving key %s password: %s", fingerPrint, err)
@@ -127,7 +136,7 @@ func (sm *secretsManager) PutKeyPassword(fingerPrint, password string) {
 }
 
 // PutEncryptedPassword stores in memory a master key encrypted password for the specified fingerprint
-func (sm *secretsManager) PutEncryptedPassword(fingerPrint, encryptedPassword string) {
+func (sm *secretsManager) PutEncryptedPassword(ctx context.Context, fingerPrint, encryptedPassword string) {
 	if sm.amIUseless {
 		smLog.Warn("Not saving password. Master Key not loaded")
 	}
@@ -139,7 +148,7 @@ func (sm *secretsManager) PutEncryptedPassword(fingerPrint, encryptedPassword st
 }
 
 // GetPasswords returns a list of master key encrypted passwords stored in memory
-func (sm *secretsManager) GetPasswords() map[string]string {
+func (sm *secretsManager) GetPasswords(ctx context.Context) map[string]string {
 	pss := make(map[string]string) // Force copy
 
 	for fp, pass := range sm.encryptedPasswords {
@@ -150,13 +159,13 @@ func (sm *secretsManager) GetPasswords() map[string]string {
 }
 
 // UnlockLocalKeys unlocks the local private keys using memory stored master key encrypted passwords
-func (sm *secretsManager) UnlockLocalKeys(gpg etc.PGPInterface) {
+func (sm *secretsManager) UnlockLocalKeys(ctx context.Context, gpg interfaces.PGPManager) {
 	if sm.amIUseless {
 		smLog.Warn("Not saving password. Master Key not loaded")
 	}
 
 	sm.Lock()
-	passwords := sm.GetPasswords()
+	passwords := sm.GetPasswords(ctx)
 	sm.Unlock()
 
 	for fp, pass := range passwords {
@@ -165,7 +174,7 @@ func (sm *secretsManager) UnlockLocalKeys(gpg etc.PGPInterface) {
 		}
 
 		smLog.Info("Unlocking key %s", fp)
-		g, err := sm.gpg.Decrypt(pass, remote_signer.SMEncryptedDataOnly)
+		g, err := sm.gpg.Decrypt(ctx, pass, remote_signer.SMEncryptedDataOnly)
 
 		if err != nil {
 			smLog.Error("Error decrypting password for key %s: %s", fp, err)
@@ -179,7 +188,7 @@ func (sm *secretsManager) UnlockLocalKeys(gpg etc.PGPInterface) {
 			smLog.Error("Error decoding decrypted data: %s", err)
 		}
 
-		err = gpg.UnlockKey(fp, string(pass))
+		err = gpg.UnlockKey(ctx, fp, string(pass))
 		if err != nil {
 			smLog.Error("Error unlocking key %s: %s", fp, err)
 		}
@@ -187,6 +196,6 @@ func (sm *secretsManager) UnlockLocalKeys(gpg etc.PGPInterface) {
 }
 
 // GetMasterKeyFingerPrint returns the fingerprint of the master key
-func (sm *secretsManager) GetMasterKeyFingerPrint() string {
+func (sm *secretsManager) GetMasterKeyFingerPrint(ctx context.Context) string {
 	return sm.masterKeyFingerPrint
 }

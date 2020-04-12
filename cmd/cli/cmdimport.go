@@ -42,7 +42,7 @@ func ImportKey(filename, keyPassword string, keyPasswordFd int) {
 		}
 	}
 
-	err, n := pgpMan.LoadKey(ctx, string(data))
+	n, err := pgpMan.LoadKey(ctx, string(data))
 
 	if err != nil {
 		panic(fmt.Sprintf("Error loading file %s: %s\n", filename, err))

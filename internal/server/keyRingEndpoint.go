@@ -182,7 +182,7 @@ func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	_, n := kre.gpg.LoadKey(ctx, data.EncryptedPrivateKey) // Error never happens here due GetFingerPrintFromKey
+	n, _ := kre.gpg.LoadKey(ctx, data.EncryptedPrivateKey) // Error never happens here due GetFingerPrintFromKey
 
 	if n == 0 {
 		NotFound("EncryptedPrivateKey", "No private keys found at specified payload", w, r, log)

@@ -27,7 +27,7 @@ func GetKeyFingerprints(keyData string) (fps []string, err error) {
 
 // ChangeKeyPassword re-encrypts the input key using newPassword
 func ChangeKeyPassword(keyData, currentPassword, newPassword string) (newKeyData string, err error) {
-	e, n := pgpBackend.LoadKey(ctx, keyData)
+	n, e := pgpBackend.LoadKey(ctx, keyData)
 
 	if e != nil {
 		err = e

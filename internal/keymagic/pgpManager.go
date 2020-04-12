@@ -120,7 +120,7 @@ func (pm *pgpManager) LoadKeys(ctx context.Context) {
 				keyData = string(b)
 			}
 
-			err, kl := pm.LoadKeyWithMetadata(ctx, keyData, m)
+			kl, err := pm.LoadKeyWithMetadata(ctx, keyData, m)
 			if err != nil {
 				log.Error("Error decoding key %s: %s", file, err)
 				continue
@@ -133,44 +133,44 @@ func (pm *pgpManager) LoadKeys(ctx context.Context) {
 	}
 }
 
-func (pm *pgpManager) LoadKeyWithMetadata(ctx context.Context, armoredKey, metadata string) (error, int) {
+func (pm *pgpManager) LoadKeyWithMetadata(ctx context.Context, armoredKey, metadata string) (int, error) {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	log.DebugNote("LoadKeyWithMetadata(---, ---)")
-	err, n := pm.LoadKey(ctx, armoredKey)
+	n, err := pm.LoadKey(ctx, armoredKey)
 
 	if err != nil {
-		return err, n
+		return n, err
 	}
 
 	fp, err := tools.GetFingerPrintFromKey(armoredKey)
 	if err != nil {
 		log.Error("Cannot get fingerprint from key: %s", err)
-		return nil, n
+		return n, nil
 	}
 
 	if metadata != "" {
 		var meta map[string]string
 		err = json.Unmarshal([]byte(metadata), &meta)
 		if err != nil {
-			log.Error("Error decoding metadata: %s", err)
-			return nil, n
+			log.Warn("Error decoding metadata: %s", err)
+			return n, nil
 		}
 
 		if meta["password"] != "" {
 			err = pm.unlockKey(ctx, fp, meta["password"])
 			if err != nil {
 				log.Error("Cannot unlock key %s using metadata: %s", fp, err)
-				return nil, n
+				return n, nil
 			}
 			log.Debug("Key %s unlocked using metadata.", fp)
-			return nil, n
+			return n, nil
 		}
 	}
 
 	log.Debug("No metadata for key %s. Skipping unlock...", fp)
 
-	return nil, n
+	return n, nil
 }
 
 func (pm *pgpManager) SetKeysBase64Encoded(k bool) {
@@ -178,7 +178,7 @@ func (pm *pgpManager) SetKeysBase64Encoded(k bool) {
 	pm.KeysBase64Encoded = k
 }
 
-func (pm *pgpManager) LoadKey(ctx context.Context, armoredKey string) (error, int) {
+func (pm *pgpManager) LoadKey(ctx context.Context, armoredKey string) (int, error) {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	log.DebugNote("LoadKey(---)")
@@ -186,7 +186,7 @@ func (pm *pgpManager) LoadKey(ctx context.Context, armoredKey string) (error, in
 	kr := strings.NewReader(armoredKey)
 	keys, err := openpgp.ReadArmoredKeyRing(kr)
 	if err != nil {
-		return err, 0
+		return 0, err
 	}
 
 	for _, key := range keys {
@@ -220,7 +220,7 @@ func (pm *pgpManager) LoadKey(ctx context.Context, armoredKey string) (error, in
 		}
 	}
 
-	return nil, keysLoaded
+	return keysLoaded, err
 }
 
 func (pm *pgpManager) sanitizeFingerprint(fp string) string {
@@ -340,7 +340,7 @@ func (pm *pgpManager) LoadKeyFromKB(ctx context.Context, fingerPrint string) err
 		keyData = string(b)
 	}
 
-	err, _ = pm.LoadKeyWithMetadata(ctx, keyData, m)
+	_, err = pm.LoadKeyWithMetadata(ctx, keyData, m)
 	if err != nil {
 		return err
 	}

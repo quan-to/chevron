@@ -9,8 +9,7 @@ import (
 // LoadKey loads a private or public key into the memory keyring
 // export LoadKey
 func LoadKey(keyData string) (loadedPrivateKeys int, err error) {
-	err, loadedPrivateKeys = pgpBackend.LoadKey(ctx, keyData)
-	return
+	return pgpBackend.LoadKey(ctx, keyData)
 }
 
 // UnlockKey unlocks a private key to be used
