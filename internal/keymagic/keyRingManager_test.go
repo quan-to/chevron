@@ -4,7 +4,7 @@ import (
 	"context"
 	remote_signer "github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/database"
-	"github.com/quan-to/chevron/internal/keyBackend"
+	"github.com/quan-to/chevron/internal/keybackend"
 	"github.com/quan-to/chevron/internal/models"
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/internal/vaultManager"
@@ -25,7 +25,7 @@ func TestAddKey(t *testing.T) {
 	if remote_signer.VaultStorage {
 		kb = vaultManager.MakeVaultManager(nil, remote_signer.KeyPrefix)
 	} else {
-		kb = keyBackend.MakeSaveToDiskBackend(nil, remote_signer.PrivateKeyFolder, remote_signer.KeyPrefix)
+		kb = keybackend.MakeSaveToDiskBackend(nil, remote_signer.PrivateKeyFolder, remote_signer.KeyPrefix)
 	}
 
 	gpg := MakePGPManagerWithKRM(nil, kb, krm)

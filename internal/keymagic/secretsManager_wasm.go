@@ -5,7 +5,7 @@ import (
 	"fmt"
 	remote_signer "github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/etc"
-	"github.com/quan-to/chevron/internal/keyBackend"
+	"github.com/quan-to/chevron/internal/keybackend"
 	"github.com/quan-to/chevron/pkg/interfaces"
 	"github.com/quan-to/slog"
 	"io/ioutil"
@@ -13,9 +13,9 @@ import (
 	"sync"
 )
 
-var smLog = slog.Scope("SecretsManager")
+var smLog = slog.Scope("secretsManager")
 
-type SecretsManager struct {
+type secretsManager struct {
 	sync.Mutex
 	encryptedPasswords   map[string]string
 	gpg                  etc.PGPInterface
@@ -23,12 +23,12 @@ type SecretsManager struct {
 	amIUseless           bool
 }
 
-func MakeSecretsManager(log slog.Instance) *SecretsManager {
+func MakeSecretsManager(log slog.Instance) interfaces.SMInterface {
 	var kb interfaces.Backend
 
-	kb = keyBackend.MakeSaveToDiskBackend(path.Dir(remote_signer.MasterGPGKeyPath), "__master__")
+	kb = keybackend.MakeSaveToDiskBackend(path.Dir(remote_signer.MasterGPGKeyPath), "__master__")
 
-	var sm = &SecretsManager{
+	var sm = &secretsManager{
 		amIUseless:         false,
 		encryptedPasswords: map[string]string{},
 	}
@@ -102,7 +102,8 @@ func MakeSecretsManager(log slog.Instance) *SecretsManager {
 	return sm
 }
 
-func (sm *SecretsManager) PutKeyPassword(fingerPrint, password string) {
+// PutKeyPassword stores the password for the specified key fingerprint in the key backend encrypted with the master key
+func (sm *secretsManager) PutKeyPassword(fingerPrint, password string) {
 	if sm.amIUseless {
 		smLog.Warn("Not saving password. Master Key not loaded")
 		return
@@ -125,7 +126,8 @@ func (sm *SecretsManager) PutKeyPassword(fingerPrint, password string) {
 	sm.encryptedPasswords[fingerPrint] = encPass
 }
 
-func (sm *SecretsManager) PutEncryptedPassword(fingerPrint, encryptedPassword string) {
+// PutEncryptedPassword stores in memory a master key encrypted password for the specified fingerprint
+func (sm *secretsManager) PutEncryptedPassword(fingerPrint, encryptedPassword string) {
 	if sm.amIUseless {
 		smLog.Warn("Not saving password. Master Key not loaded")
 	}
@@ -136,7 +138,8 @@ func (sm *SecretsManager) PutEncryptedPassword(fingerPrint, encryptedPassword st
 	sm.encryptedPasswords[fingerPrint] = encryptedPassword
 }
 
-func (sm *SecretsManager) GetPasswords() map[string]string {
+// GetPasswords returns a list of master key encrypted passwords stored in memory
+func (sm *secretsManager) GetPasswords() map[string]string {
 	pss := make(map[string]string) // Force copy
 
 	for fp, pass := range sm.encryptedPasswords {
@@ -146,7 +149,8 @@ func (sm *SecretsManager) GetPasswords() map[string]string {
 	return pss
 }
 
-func (sm *SecretsManager) UnlockLocalKeys(gpg etc.PGPInterface) {
+// UnlockLocalKeys unlocks the local private keys using memory stored master key encrypted passwords
+func (sm *secretsManager) UnlockLocalKeys(gpg etc.PGPInterface) {
 	if sm.amIUseless {
 		smLog.Warn("Not saving password. Master Key not loaded")
 	}
@@ -182,6 +186,7 @@ func (sm *SecretsManager) UnlockLocalKeys(gpg etc.PGPInterface) {
 	}
 }
 
-func (sm *SecretsManager) GetMasterKeyFingerPrint() string {
+// GetMasterKeyFingerPrint returns the fingerprint of the master key
+func (sm *secretsManager) GetMasterKeyFingerPrint() string {
 	return sm.masterKeyFingerPrint
 }

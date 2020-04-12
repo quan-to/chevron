@@ -4,7 +4,7 @@ package kbBuilder
 
 import (
 	"github.com/quan-to/chevron/internal/config"
-	"github.com/quan-to/chevron/internal/keyBackend"
+	"github.com/quan-to/chevron/internal/keybackend"
 	"github.com/quan-to/chevron/internal/vaultManager"
 	"github.com/quan-to/chevron/pkg/interfaces"
 	"github.com/quan-to/slog"
@@ -17,7 +17,7 @@ func BuildKeyBackend(log slog.Instance) interfaces.Backend {
 	if config.VaultStorage {
 		kb = vaultManager.MakeVaultManager(log, config.KeyPrefix)
 	} else {
-		kb = keyBackend.MakeSaveToDiskBackend(log, config.PrivateKeyFolder, config.KeyPrefix)
+		kb = keybackend.MakeSaveToDiskBackend(log, config.PrivateKeyFolder, config.KeyPrefix)
 	}
 
 	return kb

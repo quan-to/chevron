@@ -4,7 +4,7 @@ import (
 	"context"
 	_ "github.com/quan-to/chevron/cmd/server/init"
 	"github.com/quan-to/chevron/internal/bootstrap"
-	"github.com/quan-to/chevron/internal/etc/magicBuilder"
+	"github.com/quan-to/chevron/internal/etc/magicbuilder"
 	"github.com/quan-to/chevron/internal/kubernetes"
 	"github.com/quan-to/chevron/internal/server"
 	"github.com/quan-to/chevron/internal/tools"
@@ -24,8 +24,8 @@ func main() {
 	bootstrap.RunBootstraps()
 
 	ctx := context.Background()
-	sm := magicBuilder.MakeSM(log)
-	gpg := magicBuilder.MakePGP(log)
+	sm := magicbuilder.MakeSM(log)
+	gpg := magicbuilder.MakePGP(log)
 
 	gpg.LoadKeys(ctx)
 

@@ -1,4 +1,4 @@
-package keyBackend
+package keybackend
 
 import (
 	"github.com/quan-to/chevron/internal/config"

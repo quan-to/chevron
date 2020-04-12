@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto"
 	"fmt"
-	"github.com/quan-to/chevron/internal/keyBackend"
+	"github.com/quan-to/chevron/internal/keybackend"
 	"github.com/quan-to/chevron/internal/keymagic"
 	"github.com/quan-to/chevron/internal/models"
 	"github.com/quan-to/chevron/internal/tools"
@@ -38,7 +38,7 @@ func init() {
 
 func Begin() {
 	_ = os.Mkdir(keysFolder, os.ModePerm)
-	kb := keyBackend.MakeSaveToDiskBackend(nil, keysFolder, "key_")
+	kb := keybackend.MakeSaveToDiskBackend(nil, keysFolder, "key_")
 	krm = keymagic.MakeKeyRingManager(nil)
 	pgp = keymagic.MakePGPManagerWithKRM(nil, kb, krm)
 	pgp.LoadKeys(ctx)

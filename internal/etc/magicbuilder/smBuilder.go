@@ -1,4 +1,4 @@
-package magicBuilder
+package magicbuilder
 
 import (
 	"github.com/quan-to/chevron/internal/keymagic"

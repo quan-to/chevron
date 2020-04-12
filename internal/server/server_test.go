@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/etc"
-	"github.com/quan-to/chevron/internal/etc/magicBuilder"
+	"github.com/quan-to/chevron/internal/etc/magicbuilder"
 	"github.com/quan-to/chevron/internal/keymagic"
 	"github.com/quan-to/chevron/pkg/QuantoError"
 	"github.com/quan-to/chevron/pkg/interfaces"
@@ -76,8 +76,8 @@ func TestMain(m *testing.M) {
 	config.MasterGPGKeyPasswordPath = "../../testdata/testprivatekeyPassword.txt"
 
 	ctx := context.Background()
-	sm = magicBuilder.MakeSM(nil)
-	gpg = magicBuilder.MakePGP(nil)
+	sm = magicbuilder.MakeSM(nil)
+	gpg = magicbuilder.MakePGP(nil)
 	gpg.LoadKeys(ctx)
 
 	err = gpg.UnlockKey(ctx, testdata.TestKeyFingerprint, testdata.TestKeyPassword)

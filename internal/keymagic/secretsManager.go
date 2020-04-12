@@ -7,7 +7,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	config "github.com/quan-to/chevron/internal/config"
-	"github.com/quan-to/chevron/internal/keyBackend"
+	"github.com/quan-to/chevron/internal/keybackend"
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/internal/vaultManager"
 	"github.com/quan-to/chevron/pkg/interfaces"
@@ -19,7 +19,7 @@ import (
 	"github.com/quan-to/slog"
 )
 
-type SecretsManager struct {
+type secretsManager struct {
 	sync.Mutex
 	encryptedPasswords   map[string]string
 	gpg                  interfaces.PGPInterface
@@ -29,7 +29,7 @@ type SecretsManager struct {
 }
 
 // MakeSecretsManager creates an instance of the backend secrets manager
-func MakeSecretsManager(log slog.Instance) *SecretsManager {
+func MakeSecretsManager(log slog.Instance) interfaces.SMInterface {
 	if log == nil {
 		log = slog.Scope("SM")
 	} else {
@@ -43,10 +43,10 @@ func MakeSecretsManager(log slog.Instance) *SecretsManager {
 	if config.VaultStorage {
 		kb = vaultManager.MakeVaultManager(log, "__master__")
 	} else {
-		kb = keyBackend.MakeSaveToDiskBackend(log, path.Dir(config.MasterGPGKeyPath), "__master__")
+		kb = keybackend.MakeSaveToDiskBackend(log, path.Dir(config.MasterGPGKeyPath), "__master__")
 	}
 
-	var sm = &SecretsManager{
+	var sm = &secretsManager{
 		amIUseless:         false,
 		encryptedPasswords: map[string]string{},
 		log:                log,
@@ -126,10 +126,11 @@ func MakeSecretsManager(log slog.Instance) *SecretsManager {
 	return sm
 }
 
-func (sm *SecretsManager) PutKeyPassword(ctx context.Context, fingerPrint, password string) {
+// PutKeyPassword stores the password for the specified key fingerprint in the key backend encrypted with the master key
+func (sm *secretsManager) PutKeyPassword(ctx context.Context, fingerprint, password string) {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pksLog.Tag(requestID)
-	log.DebugNote("PutKeyPassword(%s, ---)", fingerPrint)
+	log.DebugNote("PutKeyPassword(%s, ---)", fingerprint)
 	if sm.amIUseless {
 		sm.log.Warn("Not saving password. Master Key not loaded")
 		return
@@ -138,24 +139,25 @@ func (sm *SecretsManager) PutKeyPassword(ctx context.Context, fingerPrint, passw
 	sm.Lock()
 	defer sm.Unlock()
 
-	sm.log.Info("Saving password for key %s", fingerPrint)
+	sm.log.Info("Saving password for key %s", fingerprint)
 
-	filename := fmt.Sprintf("key-password-utf8-%s.txt", fingerPrint)
+	filename := fmt.Sprintf("key-password-utf8-%s.txt", fingerprint)
 
 	encPass, err := sm.gpg.Encrypt(ctx, filename, sm.masterKeyFingerPrint, []byte(password), config.SMEncryptedDataOnly)
 
 	if err != nil {
-		sm.log.Error("Error saving key %s password: %s", fingerPrint, err)
+		sm.log.Error("Error saving key %s password: %s", fingerprint, err)
 		return
 	}
 
-	sm.encryptedPasswords[fingerPrint] = encPass
+	sm.encryptedPasswords[fingerprint] = encPass
 }
 
-func (sm *SecretsManager) PutEncryptedPassword(ctx context.Context, fingerPrint, encryptedPassword string) {
+// PutEncryptedPassword stores in memory a master key encrypted password for the specified fingerprint
+func (sm *secretsManager) PutEncryptedPassword(ctx context.Context, fingerprint, encryptedPassword string) {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pksLog.Tag(requestID)
-	log.DebugNote("PutEncryptedPassword(%s, ---)", fingerPrint)
+	log.DebugNote("PutEncryptedPassword(%s, ---)", fingerprint)
 	if sm.amIUseless {
 		log.Warn("Not saving password. Master Key not loaded")
 	}
@@ -163,10 +165,11 @@ func (sm *SecretsManager) PutEncryptedPassword(ctx context.Context, fingerPrint,
 	sm.Lock()
 	defer sm.Unlock()
 
-	sm.encryptedPasswords[fingerPrint] = encryptedPassword
+	sm.encryptedPasswords[fingerprint] = encryptedPassword
 }
 
-func (sm *SecretsManager) GetPasswords(ctx context.Context) map[string]string {
+// GetPasswords returns a list of master key encrypted passwords stored in memory
+func (sm *secretsManager) GetPasswords(ctx context.Context) map[string]string {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pksLog.Tag(requestID)
 	log.DebugNote("GetPasswords()")
@@ -179,7 +182,8 @@ func (sm *SecretsManager) GetPasswords(ctx context.Context) map[string]string {
 	return pss
 }
 
-func (sm *SecretsManager) UnlockLocalKeys(ctx context.Context, gpg interfaces.PGPInterface) {
+// UnlockLocalKeys unlocks the local private keys using memory stored master key encrypted passwords
+func (sm *secretsManager) UnlockLocalKeys(ctx context.Context, gpg interfaces.PGPInterface) {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pksLog.Tag(requestID)
 	log.DebugNote("UnlockLocalKeys(---)")
@@ -218,7 +222,8 @@ func (sm *SecretsManager) UnlockLocalKeys(ctx context.Context, gpg interfaces.PG
 	}
 }
 
-func (sm *SecretsManager) GetMasterKeyFingerPrint(ctx context.Context) string {
+// GetMasterKeyFingerPrint returns the fingerprint of the master key
+func (sm *secretsManager) GetMasterKeyFingerPrint(ctx context.Context) string {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pksLog.Tag(requestID)
 	log.DebugNote("GetMasterKeyFingerPrint()")

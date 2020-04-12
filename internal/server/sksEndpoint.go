@@ -19,6 +19,7 @@ type SKSEndpoint struct {
 	log slog.Instance
 }
 
+// MakeSKSEndpoint creates a handler for SKS Server Endpoint
 func MakeSKSEndpoint(log slog.Instance, sm interfaces.SMInterface, gpg interfaces.PGPInterface) *SKSEndpoint {
 	if log == nil {
 		log = slog.Scope("SKS")

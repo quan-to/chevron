@@ -96,14 +96,14 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 
 	h := r.Header
 
-	targetUrl := config.AgentTargetURL
+	targetURL := config.AgentTargetURL
 
 	if h.Get("serverUrl") != "" {
-		targetUrl = h.Get("serverUrl")
+		targetURL = h.Get("serverUrl")
 	}
 
 	log = log.WithFields(map[string]interface{}{
-		"targetUrl": targetUrl,
+		"targetURL": targetURL,
 	})
 
 	client := &http.Client{
@@ -111,7 +111,7 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if r.Method == http.MethodOptions {
-		req, err = http.NewRequest(r.Method, targetUrl, nil)
+		req, err = http.NewRequest(r.Method, targetURL, nil)
 
 		if err != nil {
 			InternalServerError("There was an error processing your request", err.Error(), w, r, log)
@@ -175,7 +175,7 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 
 		bodyData, _ = json.Marshal(jsondata)
 
-		req, err = http.NewRequest(r.Method, targetUrl, bytes.NewBuffer(bodyData))
+		req, err = http.NewRequest(r.Method, targetURL, bytes.NewBuffer(bodyData))
 
 		if err != nil {
 			InternalServerError("There was an error processing your request", err.Error(), w, r, log)
@@ -207,7 +207,7 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	log.Await("Sending request to %s", targetUrl)
+	log.Await("Sending request to %s", targetURL)
 	res, err = client.Do(req)
 	log.Done("Received response")
 

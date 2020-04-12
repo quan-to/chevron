@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-type RethinkAuthManager struct {
+type rethinkAuthManager struct {
 	sync.Mutex
 	log slog.Instance
 }
@@ -27,7 +27,7 @@ func MakeRethinkAuthManager(logger slog.Instance) interfaces.AuthManager {
 	}
 
 	logger.Info("Creating RethinkDB Auth Manager")
-	ram := &RethinkAuthManager{
+	ram := &rethinkAuthManager{
 		log: logger,
 	}
 
@@ -39,7 +39,7 @@ func MakeRethinkAuthManager(logger slog.Instance) interfaces.AuthManager {
 	return ram
 }
 
-func (ram *RethinkAuthManager) addDefaultAdmin() {
+func (ram *rethinkAuthManager) addDefaultAdmin() {
 	err := ram.LoginAdd("admin", "admin", "Administrator", cofig.AgentKeyFingerPrint)
 
 	if err != nil {
@@ -47,7 +47,8 @@ func (ram *RethinkAuthManager) addDefaultAdmin() {
 	}
 }
 
-func (ram *RethinkAuthManager) UserExists(username string) bool {
+// UserExists checks if a user with specified username exists in AuthManager
+func (ram *rethinkAuthManager) UserExists(username string) bool {
 	ram.Lock()
 	defer ram.Unlock()
 
@@ -62,7 +63,8 @@ func (ram *RethinkAuthManager) UserExists(username string) bool {
 	return true
 }
 
-func (ram *RethinkAuthManager) LoginAuth(username, password string) (fingerPrint, fullname string, err error) {
+// LoginAuth performs a login with the specified username and password
+func (ram *rethinkAuthManager) LoginAuth(username, password string) (fingerPrint, fullname string, err error) {
 	ram.Lock()
 	defer ram.Unlock()
 
@@ -88,7 +90,8 @@ func (ram *RethinkAuthManager) LoginAuth(username, password string) (fingerPrint
 	return um.FingerPrint, um.Fullname, nil
 }
 
-func (ram *RethinkAuthManager) LoginAdd(username, password, fullname, fingerprint string) error {
+// LoginAdd creates a new user in AuthManager
+func (ram *rethinkAuthManager) LoginAdd(username, password, fullname, fingerprint string) error {
 	ram.Lock()
 	defer ram.Unlock()
 
@@ -124,7 +127,8 @@ func (ram *RethinkAuthManager) LoginAdd(username, password, fullname, fingerprin
 	return err
 }
 
-func (ram *RethinkAuthManager) ChangePassword(username, password string) error {
+// ChangePassword changes the password of the specified user
+func (ram *rethinkAuthManager) ChangePassword(username, password string) error {
 	ram.Lock()
 	defer ram.Unlock()
 

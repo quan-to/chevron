@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"github.com/quan-to/chevron"
 	"github.com/quan-to/chevron/fieldcipher"
-	"github.com/quan-to/chevron/keyBackend"
+	"github.com/quan-to/chevron/keybackend"
 	"github.com/quan-to/chevron/keymagic"
 	"syscall/js"
 	"time"

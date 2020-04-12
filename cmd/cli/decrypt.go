@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/base64"
 	"fmt"
-	"github.com/quan-to/chevron/internal/etc/magicBuilder"
+	"github.com/quan-to/chevron/internal/etc/magicbuilder"
 	"io"
 	"io/ioutil"
 	"os"
@@ -14,7 +14,7 @@ func Decrypt(input, output string) {
 	var err error
 	var data []byte
 
-	pgpMan := magicBuilder.MakePGP(nil)
+	pgpMan := magicbuilder.MakePGP(nil)
 	pgpMan.LoadKeys(ctx)
 
 	if input == "-" {

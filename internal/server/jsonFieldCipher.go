@@ -19,6 +19,7 @@ type JFCEndpoint struct {
 	log slog.Instance
 }
 
+// MakeJFCEndpoint creates a handler for Json Field Cipher Endpoints
 func MakeJFCEndpoint(log slog.Instance, sm interfaces.SMInterface, gpg interfaces.PGPInterface) *JFCEndpoint {
 	if log == nil {
 		log = slog.Scope("JFC")

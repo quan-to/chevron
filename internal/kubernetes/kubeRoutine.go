@@ -62,10 +62,10 @@ func kubeFunc() {
 			continue
 		}
 
-		getUrl := fmt.Sprintf("http://%s:%d/remoteSigner/__internal/__getUnlockPasswords", pod.Status.PodIP, config.HttpPort)
-		postUrl := fmt.Sprintf("http://localhost:%d/remoteSigner/__internal/__postEncryptedPasswords", config.HttpPort)
+		getURL := fmt.Sprintf("http://%s:%d/remoteSigner/__internal/__getUnlockPasswords", pod.Status.PodIP, config.HttpPort)
+		postURL := fmt.Sprintf("http://localhost:%d/remoteSigner/__internal/__postEncryptedPasswords", config.HttpPort)
 
-		res, err := http.Get(getUrl)
+		res, err := http.Get(getURL)
 		if err != nil {
 			kubeLog.Error("Error fetching unlock passwords from %s: %s", pod.Status.PodIP, err)
 			continue
@@ -89,7 +89,7 @@ func kubeFunc() {
 		passwordCount += len(passwords)
 		kubeLog.Info("Received %d passwords from %s", len(passwords), pod.Status.PodIP)
 		if len(passwords) > 0 {
-			req, err := http.NewRequest("POST", postUrl, bytes.NewBuffer(data))
+			req, err := http.NewRequest("POST", postURL, bytes.NewBuffer(data))
 
 			if err != nil {
 				kubeLog.Error("Error sending unlock passwords from %s: %s", pod.Status.PodIP, err)

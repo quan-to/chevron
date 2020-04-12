@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/quan-to/chevron/internal/etc/magicBuilder"
+	"github.com/quan-to/chevron/internal/etc/magicbuilder"
 	"github.com/quan-to/chevron/internal/models"
 	"os"
 	"strings"
@@ -14,7 +14,7 @@ import (
 // ExportKey exports the specified public / secret key
 func ExportKey(name, password string, secret bool) {
 	var err error
-	pgpMan := magicBuilder.MakePGP(nil)
+	pgpMan := magicbuilder.MakePGP(nil)
 	pgpMan.LoadKeys(ctx)
 
 	// First Search the key

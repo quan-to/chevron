@@ -74,14 +74,17 @@ func kubeToken() string {
 	return string(data)
 }
 
+// Hostname returns the hostname of the kubernetes pod
 func Hostname() string {
 	return currentHostname
 }
 
+// Namespace returns the namespace of the kubernetes pod
 func Namespace() string {
 	return currentNamespace
 }
 
+// MySelf returns the data of the kubernetes pod
 func MySelf() *Pod {
 	data, err := getWithToken(fmt.Sprintf("%s/%s", podURL(), currentHostname), currentKubeToken)
 
@@ -100,6 +103,7 @@ func MySelf() *Pod {
 	return &pod
 }
 
+// Pods returns a list of the pods in the current deployment
 func Pods() []Pod {
 	data, err := getWithToken(podURL(), currentKubeToken)
 	if err != nil {
@@ -117,23 +121,7 @@ func Pods() []Pod {
 	return podList.Items
 }
 
-func Services() []Service {
-	data, err := getWithToken(serviceURL(), currentKubeToken)
-	if err != nil {
-		kubeLog.Error("Error fetching Services: %s", err)
-		return nil
-	}
-
-	var pods []Service
-
-	err = json.Unmarshal([]byte(data), &pods)
-	if err != nil {
-		kubeLog.Error("Error deserializing: %s", err)
-	}
-
-	return pods
-}
-
+// Me returns the pod that is currently running this instance
 func Me() Pod {
 	if me == nil {
 		return Pod{}
@@ -142,6 +130,7 @@ func Me() Pod {
 	return *me
 }
 
+// InKubernetes returns true when running inside a kubernetes instance
 func InKubernetes() bool {
 	return inKubernetes
 }

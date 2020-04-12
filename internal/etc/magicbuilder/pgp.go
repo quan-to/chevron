@@ -1,10 +1,10 @@
 // +build !js,!wasm
 
-package magicBuilder
+package magicbuilder
 
 import (
 	"github.com/quan-to/chevron/internal/config"
-	"github.com/quan-to/chevron/internal/keyBackend"
+	"github.com/quan-to/chevron/internal/keybackend"
 	"github.com/quan-to/chevron/internal/keymagic"
 	"github.com/quan-to/chevron/internal/vaultManager"
 	"github.com/quan-to/chevron/pkg/interfaces"
@@ -18,7 +18,7 @@ func MakePGP(log slog.Instance) interfaces.PGPInterface {
 	if config.VaultStorage {
 		kb = vaultManager.MakeVaultManager(log, config.KeyPrefix)
 	} else {
-		kb = keyBackend.MakeSaveToDiskBackend(log, config.PrivateKeyFolder, config.KeyPrefix)
+		kb = keybackend.MakeSaveToDiskBackend(log, config.PrivateKeyFolder, config.KeyPrefix)
 	}
 
 	return keymagic.MakePGPManagerWithKRM(log, kb, keymagic.MakeKeyRingManager(log))
@@ -26,5 +26,5 @@ func MakePGP(log slog.Instance) interfaces.PGPInterface {
 
 // MakeVoidPGP creates a PGPInterface that does not store anything anywhere
 func MakeVoidPGP(log slog.Instance) interfaces.PGPInterface {
-	return keymagic.MakePGPManagerWithKRM(log, keyBackend.MakeVoidBackend(), keymagic.MakeKeyRingManager(log))
+	return keymagic.MakePGPManagerWithKRM(log, keybackend.MakeVoidBackend(), keymagic.MakeKeyRingManager(log))
 }

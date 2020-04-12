@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	config "github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/etc"
-	"github.com/quan-to/chevron/internal/keyBackend"
+	"github.com/quan-to/chevron/internal/keybackend"
 	"github.com/quan-to/chevron/internal/vaultManager"
 	"github.com/quan-to/chevron/pkg/QuantoError"
 	"github.com/quan-to/chevron/pkg/interfaces"
@@ -54,7 +54,7 @@ func TestMain(m *testing.M) {
 	if config.VaultStorage {
 		kb = vaultManager.MakeVaultManager(nil, config.KeyPrefix)
 	} else {
-		kb = keyBackend.MakeSaveToDiskBackend(nil, config.PrivateKeyFolder, config.KeyPrefix)
+		kb = keybackend.MakeSaveToDiskBackend(nil, config.PrivateKeyFolder, config.KeyPrefix)
 	}
 
 	ctx := context.Background()

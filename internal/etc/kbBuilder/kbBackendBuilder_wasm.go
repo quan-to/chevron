@@ -2,7 +2,7 @@ package kbBuilder
 
 import (
 	"github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/keyBackend"
+	"github.com/quan-to/chevron/keybackend"
 )
 
 // BuildKeyBackend returns a new instance of SaveToDisk KeyBackend defined by environment variables KeyPrefix, PrivateKeyFolder

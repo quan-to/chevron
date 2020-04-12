@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-type RethinkTokenManager struct {
+type rethinkTokenManager struct {
 	log slog.Instance
 }
 
@@ -23,12 +23,13 @@ func MakeRethinkTokenManager(logger slog.Instance) interfaces.TokenManager {
 		logger = logger.SubScope("RQL-TM")
 	}
 	logger.Info("Creating RethinkDB Token Manager")
-	return &RethinkTokenManager{
+	return &rethinkTokenManager{
 		log: logger,
 	}
 }
 
-func (rtm *RethinkTokenManager) AddUserWithExpiration(user interfaces.UserData, expiration int) string {
+// AddUserWithExpiration adds an user to Token Manager that will expires in `expiration` seconds.
+func (rtm *rethinkTokenManager) AddUserWithExpiration(user interfaces.UserData, expiration int) string {
 	tokenUuid, _ := uuid.NewRandom()
 	token := tokenUuid.String()
 
@@ -46,7 +47,8 @@ func (rtm *RethinkTokenManager) AddUserWithExpiration(user interfaces.UserData, 
 	return token
 }
 
-func (rtm *RethinkTokenManager) AddUser(user interfaces.UserData) string {
+// AddUser adds a user to Token Manager and returns a login token
+func (rtm *rethinkTokenManager) AddUser(user interfaces.UserData) string {
 	tokenUuid, _ := uuid.NewRandom()
 	token := tokenUuid.String()
 
@@ -64,7 +66,7 @@ func (rtm *RethinkTokenManager) AddUser(user interfaces.UserData) string {
 	return token
 }
 
-func (rtm *RethinkTokenManager) invalidateTokens() {
+func (rtm *rethinkTokenManager) invalidateTokens() {
 	rtm.log.Await("Checking for invalid tokens")
 	conn := etc.GetConnection()
 	n, err := models.InvalidateUserTokens(conn)
@@ -76,7 +78,8 @@ func (rtm *RethinkTokenManager) invalidateTokens() {
 	rtm.log.Done("Cleaned %d invalid / expired tokens", n)
 }
 
-func (rtm *RethinkTokenManager) Verify(token string) error {
+// Verify verifies if the specified token is valid
+func (rtm *rethinkTokenManager) Verify(token string) error {
 	conn := etc.GetConnection()
 
 	ut, err := models.GetUserToken(conn, token)
@@ -97,14 +100,15 @@ func (rtm *RethinkTokenManager) Verify(token string) error {
 	return nil
 }
 
-func (rtm *RethinkTokenManager) GetUserData(token string) interfaces.UserData {
+// GetUserData returns the user data for the specified token
+func (rtm *rethinkTokenManager) GetUserData(token string) interfaces.UserData {
 	conn := etc.GetConnection()
 	udata, _ := models.GetUserToken(conn, token)
 	return udata
 }
 
 // InvalidateToken removes a token from the database making it unusable in the future
-func (rtm *RethinkTokenManager) InvalidateToken(token string) error {
+func (rtm *rethinkTokenManager) InvalidateToken(token string) error {
 	conn := etc.GetConnection()
 	u, _ := models.GetUserToken(conn, token)
 

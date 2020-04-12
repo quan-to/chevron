@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/quan-to/chevron/internal/etc/magicBuilder"
+	"github.com/quan-to/chevron/internal/etc/magicbuilder"
 	"github.com/quan-to/chevron/internal/tools"
 	"io/ioutil"
 	"os"
@@ -13,7 +13,7 @@ import (
 
 // GenerateFlow generates a GPG Key with specified parameters
 func GenerateFlow(password, output, identifier string, bits int) {
-	pgpMan := magicBuilder.MakePGP(nil)
+	pgpMan := magicbuilder.MakePGP(nil)
 	if password == "" {
 		_, _ = fmt.Fprint(os.Stderr, "Please enter the password: ")
 		bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))

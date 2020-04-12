@@ -7,11 +7,18 @@ import (
 	"github.com/quan-to/chevron/pkg/openpgp"
 )
 
+// KRMInterface is an interface to a Key Ring Manager Instance
 type KRMInterface interface {
+	// GetCachedKeys returns a list of the memory-cached keys
 	GetCachedKeys(ctx context.Context) []models.KeyInfo
-	ContainsKey(ctx context.Context, fp string) bool
-	GetKey(ctx context.Context, fp string) *openpgp.Entity
+	// ContainsKey checks if a key with the specified fingerprint exists in Key Ring
+	ContainsKey(ctx context.Context, fingerprint string) bool
+	// GetKey returns a key with the specified fingerprint if exists. Returns nil if it does not
+	GetKey(ctx context.Context, fingerprint string) *openpgp.Entity
+	// AddKey adds a key to key ring manager. If nonErasable is true it will be persistent in cache
 	AddKey(ctx context.Context, key *openpgp.Entity, nonErasable bool)
+	// GetFingerprints returns a list of stored key fingerpints
 	GetFingerPrints(ctx context.Context) []string
-	DeleteKey(ctx context.Context, fp string) error
+	// DeleteKey erases the specified key from the key ring
+	DeleteKey(ctx context.Context, fingerprint string) error
 }

@@ -278,9 +278,13 @@ ZdA1QYHupRIgr65w9vRnsjz6W21pHQUbftcRcRm9Z96cQMIf1NKtkNcsTk4XmKuR
 // SubKeysFromTestPublicKeyManySubkeys is the subkeys fingerprint from the TestPublicKeyManySubkeys key
 var SubKeysFromTestPublicKeyManySubkeys = []string{"BB69B7EFF050DA12", "C3836B40B1A54AF3", "69E2B2C3F13558B0"}
 
+// TestKeyName is the name in TestKey metadata
 const TestKeyName = "HUEBR"
+
+// TestKeyEmail is the email in TestKey metadata
 const TestKeyEmail = "jon@huebr.com"
 
+// TestPublicKey2 is an alternate test public key
 const TestPublicKey2 = `-----BEGIN PGP PUBLIC KEY BLOCK-----
 
 mQENBFxY/14BCACoBkihJXnPfYx+O8nYT8k+JKFi3gyrImdO+qiZTkhQuVxjbOsV
@@ -298,6 +302,7 @@ Xl/5GnX68EOgGysccm/O+KI9r0c6AjXrWQ1d2KJaKXbiUE5WW8eiCw4=
 =xTxF
 -----END PGP PUBLIC KEY BLOCK-----`
 
+// TestPublicKey2FingerPrint is the fingerprint for TestPublicKey2
 const TestPublicKey2FingerPrint = "9AF4242E7B2C7B8B"
 
 
