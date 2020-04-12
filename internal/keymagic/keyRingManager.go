@@ -110,12 +110,17 @@ func (krm *KeyRingManager) DeleteKey(ctx context.Context, fp string) error {
 	log := krm.log.Tag(requestID)
 	log.DebugNote("DeleteKey(%s)", fp)
 	krm.Lock()
+	keyFound := false
 	if _, ok := krm.entities[fp]; ok {
 		log.Info("Deleting key %s from memory", fp)
 		delete(krm.entities, fp)
+		keyFound = true
 	}
 	krm.Unlock()
 
+	if keyFound {
+		return nil
+	}
 	return fmt.Errorf("key %s not found", fp)
 }
 
@@ -163,7 +168,6 @@ func (krm *KeyRingManager) GetKey(ctx context.Context, fp string) *openpgp.Entit
 
 	if err != nil {
 		log.Error("Error fetching from KeyStore: %s", err)
-		log.Error(err)
 		return nil
 	}
 

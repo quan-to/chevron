@@ -8,6 +8,7 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+	"syscall"
 	"testing"
 )
 
@@ -154,6 +155,8 @@ func TestConfiguration(t *testing.T) {
 	testStringVar(&AgentExternalURL, "AGENT_EXTERNAL_URL", "AgentExternalURL", "/agent", t)
 	testStringVar(&AgentAdminExternalURL, "AGENTADMIN_EXTERNAL_URL", "AgentAdminExternalURL", "/agentAdmin", t)
 
+	PopVariables()
+
 	PushVariables()
 	slog.SetTestMode()
 	assertPanic(t, func() {
@@ -182,4 +185,16 @@ func TestConfiguration(t *testing.T) {
 
 	PopVariables()
 	slog.UnsetTestMode()
+
+	PushVariables()
+	_ = syscall.Setenv("SHOW_LINES", "true")
+	Setup()
+	assertEqual(slog.ShowLinesEnabled(), true, "SHOW_LINES=true env should set slog.SetShowLines to true", t)
+	PopVariables()
+
+	PushVariables()
+	_ = syscall.Setenv("SHOW_LINES", "false")
+	Setup()
+	assertEqual(slog.ShowLinesEnabled(), false, "SHOW_LINES=false env should set slog.SetShowLines to false", t)
+	PopVariables()
 }

@@ -127,6 +127,21 @@ func TestAddKey(t *testing.T) {
 	}
 	krm.AddKey(ctx, e, false)
 	krm.AddKey(ctx, e, false)
+
+	if !krm.ContainsKey(ctx, fp) {
+		t.Errorf("Expect key %s to be in KRM", fp)
+	}
+	err = krm.DeleteKey(ctx, fp)
+	if err != nil {
+		t.Errorf("Expect delete key to not return any error returned %q", err)
+	}
+	if krm.ContainsKey(ctx, fp) {
+		t.Errorf("Expect key %s to be removed from KRM", fp)
+	}
+	err = krm.DeleteKey(ctx, fp)
+	if err == nil {
+		t.Error("Expect delete key to return not found error")
+	}
 }
 
 func TestGetKeyExternal(t *testing.T) {

@@ -76,10 +76,7 @@ func Setup() {
 	KeyPrefix = os.Getenv("KEY_PREFIX")
 	ShowLines = os.Getenv("SHOW_LINES") == "true"
 	LogFormat = slog.ToFormat(os.Getenv("LOG_FORMAT"))
-
-	if ShowLines {
-		slog.SetShowLines(true)
-	}
+	slog.SetShowLines(ShowLines)
 
 	var maxKeyRingCache = os.Getenv("MAX_KEYRING_CACHE_SIZE")
 	if maxKeyRingCache != "" {

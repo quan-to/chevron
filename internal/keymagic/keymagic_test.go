@@ -3,6 +3,7 @@ package keymagic
 import (
 	"context"
 	"fmt"
+	"github.com/bouk/monkey"
 	"github.com/google/uuid"
 	config "github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/etc"
@@ -76,4 +77,19 @@ func TestMain(m *testing.M) {
 	slog.UnsetTestMode()
 	etc.Cleanup()
 	os.Exit(code)
+}
+
+func assertPanic(t *testing.T, f func(), message string) {
+	fakeExit := func(int) {
+		panic("os.Exit called")
+	}
+	patch := monkey.Patch(os.Exit, fakeExit)
+	defer patch.Unpatch()
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf(message)
+		}
+	}()
+	f()
 }
