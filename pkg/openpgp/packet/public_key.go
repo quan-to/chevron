@@ -141,7 +141,7 @@ func (f *ecdhKdf) serialize(w io.Writer) (err error) {
 	buf[1] = byte(0x01) // Reserved for future extensions, must be 1 for now
 	buf[2] = byte(f.KdfHash)
 	buf[3] = byte(f.KdfAlgo)
-	_, err = w.Write(buf[:])
+	_, err = w.Write(buf)
 	return
 }
 
@@ -420,7 +420,6 @@ func (pk *PublicKey) SerializeSignaturePrefix(h io.Writer) {
 	}
 	pLength += 6
 	_, _ = h.Write([]byte{0x99, byte(pLength >> 8), byte(pLength)})
-	return
 }
 
 func (pk *PublicKey) Serialize(w io.Writer) (err error) {

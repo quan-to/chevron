@@ -451,7 +451,6 @@ func serializeSubpackets(to []byte, subpackets []outputSubpacket, hashed bool) {
 			to = to[n:]
 		}
 	}
-	return
 }
 
 // KeyExpired returns whether sig is a self-signature of a key that has

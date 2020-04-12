@@ -297,9 +297,7 @@ func GetFingerPrintsFromEncryptedMessageRaw(rawB64Data string) ([]string, error)
 		if err != nil {
 			break
 		}
-
-		switch v := p.(type) {
-		case *packet.EncryptedKey:
+		if v, ok := p.(*packet.EncryptedKey); ok {
 			fps = append(fps, IssuerKeyIdToFP16(v.KeyId))
 		}
 	}
@@ -341,8 +339,7 @@ func GetFingerPrintsFromEncryptedMessage(armored string) ([]string, error) {
 			break
 		}
 
-		switch v := p.(type) {
-		case *packet.EncryptedKey:
+		if v, ok := p.(*packet.EncryptedKey); ok {
 			fps = append(fps, IssuerKeyIdToFP16(v.KeyId))
 		}
 	}

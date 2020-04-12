@@ -10,7 +10,7 @@ func CipherPathCombine(args ...string) string {
 
 	for _, v := range args {
 		s := strings.Split(v, "/")
-		if s != nil && len(s) > 1 {
+		if len(s) > 1 {
 			// If there is a slash, then its already in cipher mode
 			for _, o := range s {
 				combined += o + "/"

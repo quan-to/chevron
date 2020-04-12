@@ -97,7 +97,8 @@ func (pm *PGPManager) LoadKeys(ctx context.Context) {
 
 		files, err := pm.kbkend.List()
 		if err != nil {
-			log.Fatal("Error listing keys: %s", err)
+			log.Error("Error listing keys: %s", err)
+			return
 		}
 
 		keysLoaded := 0

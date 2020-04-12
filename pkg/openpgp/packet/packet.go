@@ -385,17 +385,17 @@ func Read(r io.Reader) (p Packet, err error) {
 type SignatureType uint8
 
 const (
-	SigTypeBinary            SignatureType = 0
-	SigTypeText                            = 1
-	SigTypeGenericCert                     = 0x10
-	SigTypePersonaCert                     = 0x11
-	SigTypeCasualCert                      = 0x12
-	SigTypePositiveCert                    = 0x13
-	SigTypeSubkeyBinding                   = 0x18
-	SigTypePrimaryKeyBinding               = 0x19
-	SigTypeDirectSignature                 = 0x1F
-	SigTypeKeyRevocation                   = 0x20
-	SigTypeSubkeyRevocation                = 0x28
+	SigTypeBinary            SignatureType = 0x00
+	SigTypeText              SignatureType = 0x01
+	SigTypeGenericCert       SignatureType = 0x10
+	SigTypePersonaCert       SignatureType = 0x11
+	SigTypeCasualCert        SignatureType = 0x12
+	SigTypePositiveCert      SignatureType = 0x13
+	SigTypeSubkeyBinding     SignatureType = 0x18
+	SigTypePrimaryKeyBinding SignatureType = 0x19
+	SigTypeDirectSignature   SignatureType = 0x1F
+	SigTypeKeyRevocation     SignatureType = 0x20
+	SigTypeSubkeyRevocation  SignatureType = 0x28
 )
 
 // PublicKeyAlgorithm represents the different public key system specified for

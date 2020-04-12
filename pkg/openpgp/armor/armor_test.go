@@ -47,10 +47,10 @@ func TestDecodeEncode(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	w.Close()
+	_ = w.Close()
 
 	if !bytes.Equal(buf.Bytes(), []byte(armorExample1)) {
-		t.Errorf("got: %s\nwant: %s", string(buf.Bytes()), armorExample1)
+		t.Errorf("got: %s\nwant: %s", buf.String(), armorExample1)
 	}
 }
 

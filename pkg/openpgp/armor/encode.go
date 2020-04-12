@@ -115,7 +115,7 @@ func (e *encoding) Close() (err error) {
 	if err != nil {
 		return
 	}
-	e.breaker.Close()
+	_ = e.breaker.Close()
 
 	var checksumBytes [3]byte
 	checksumBytes[0] = byte(e.crc >> 16)

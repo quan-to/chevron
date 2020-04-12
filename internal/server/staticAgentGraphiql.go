@@ -38,7 +38,7 @@ func (gql *StaticGraphiQL) displayFile(filename string, w http.ResponseWriter, r
 
 	fileData, err := agent.Asset("bundle" + filename)
 
-	if strings.Index(filename, "index.htm") > -1 {
+	if strings.Contains(filename, "index.htm") {
 		// Add server URL
 		f := string(fileData)
 		f = strings.Replace(f, "{SERVER_URL}", config.AgentTargetURL, -1)

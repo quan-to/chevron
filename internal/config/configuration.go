@@ -253,7 +253,7 @@ func Setup() {
 	}
 
 	// Other stuff
-	_ = os.Mkdir(PrivateKeyFolder, 0770)
+	_ = os.Mkdir(PrivateKeyFolder, 0750)
 
 	if Environment == "development" {
 		slog.SetDebug(true)

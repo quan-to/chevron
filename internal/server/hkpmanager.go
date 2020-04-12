@@ -13,36 +13,36 @@ import (
 
 /// HKP Server based on https://tools.ietf.org/html/draft-shaw-openpgp-hkp-00
 
-func operationGet(ctx context.Context, options, searchData string, machineReadable, noModification bool) (error, string) {
+func operationGet(ctx context.Context, options, searchData string, machineReadable, noModification bool) (string, error) {
 	if searchData[:2] == "0x" {
 		k, _ := keymagic.PKSGetKey(ctx, searchData[2:])
 		if k == "" {
-			return errors.New("not found"), ""
+			return "", errors.New("not found")
 		}
-		return nil, k
+		return k, nil
 	}
 
 	results, err := keymagic.PKSSearch(searchData, 0, 1)
 
 	if err != nil {
-		return err, ""
+		return "", nil
 	}
 
 	if len(results) > 0 {
-		return nil, results[0].AsciiArmoredPublicKey
+		return results[0].AsciiArmoredPublicKey, nil
 	}
 
-	return errors.New("not found"), ""
+	return "", errors.New("not found")
 }
 
-func operationIndex(options, searchData string, machineReadable, noModification, showFingerPrint, exactMatch bool) (error, string) {
+func operationIndex(options, searchData string, machineReadable, noModification, showFingerPrint, exactMatch bool) (string, error) {
 	//hkpLog.Warn("Index(%s, %s, %v, %v, %v, %v) ==> Not Implemented", options, searchData, machineReadable, noModification, showFingerPrint, exactMatch)
-	return errors.New("not implemented"), ""
+	return "", errors.New("not implemented")
 }
 
-func operationVIndex(options, searchData string, machineReadable, noModification, showFingerPrint, exactMatch bool) (error, string) {
+func operationVIndex(options, searchData string, machineReadable, noModification, showFingerPrint, exactMatch bool) (string, error) {
 	//hkpLog.Warn("VIndex(%s, %s, %v, %v, %v, %v) ==> Not Implemented", options, searchData, machineReadable, noModification, showFingerPrint, exactMatch)
-	return errors.New("not implemented"), ""
+	return "", errors.New("not implemented")
 }
 
 func hkpLookup(log slog.Instance, w http.ResponseWriter, r *http.Request) {
@@ -70,7 +70,7 @@ func hkpLookup(log slog.Instance, w http.ResponseWriter, r *http.Request) {
 			"mr":      mr,
 			"nm":      nm,
 		}).Await("Running operation GET")
-		err, result = operationGet(ctx, options, search, mr, nm)
+		result, err = operationGet(ctx, options, search, mr, nm)
 	case HKP.OperationIndex:
 		log.WithFields(map[string]interface{}{
 			"options":     options,
@@ -80,7 +80,7 @@ func hkpLookup(log slog.Instance, w http.ResponseWriter, r *http.Request) {
 			"fingerPrint": fingerPrint,
 			"exact":       exact,
 		}).Await("Running operation Index")
-		err, result = operationIndex(options, search, mr, nm, fingerPrint, exact)
+		result, err = operationIndex(options, search, mr, nm, fingerPrint, exact)
 	case HKP.OperationVindex:
 		log.WithFields(map[string]interface{}{
 			"options":     options,
@@ -90,7 +90,7 @@ func hkpLookup(log slog.Instance, w http.ResponseWriter, r *http.Request) {
 			"fingerPrint": fingerPrint,
 			"exact":       exact,
 		}).Await("Running operation Vindex")
-		err, result = operationVIndex(options, search, mr, nm, fingerPrint, exact)
+		result, err = operationVIndex(options, search, mr, nm, fingerPrint, exact)
 	}
 
 	log.Done("Finished operation")

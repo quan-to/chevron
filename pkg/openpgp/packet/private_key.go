@@ -309,8 +309,7 @@ func (pk *PrivateKey) Encrypt(passphrase []byte) error {
 		for i := 0; i < len(privateKeyBytes); i++ {
 			sum += uint16(privateKeyBytes[i])
 		}
-		privateKeyBytes = append(privateKeyBytes, uint8(sum>>8))
-		privateKeyBytes = append(privateKeyBytes, uint8(sum))
+		privateKeyBytes = append(privateKeyBytes, uint8(sum>>8), uint8(sum))
 	}
 
 	pk.encryptedData = make([]byte, len(privateKeyBytes))

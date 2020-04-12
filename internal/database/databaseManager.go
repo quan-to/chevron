@@ -88,7 +88,7 @@ func InitTables() {
 					Durability: "hard",
 					Replicas:   numNodes,
 				}).Exec(conn)
-				if err != nil && strings.Index(err.Error(), " already exists") == -1 {
+				if err != nil && !strings.Contains(err.Error(), " already exists") {
 					dbLog.Fatal(err)
 				}
 				WaitTableCreate(v.TableName)
@@ -103,7 +103,7 @@ func InitTables() {
 				if tools.StringIndexOf(vidx, idxs) == -1 {
 					dbLog.Note("           Index %s not found at table %s. Creating it...", vidx, v.TableName)
 					err := r.Table(v.TableName).IndexCreate(vidx).Exec(conn)
-					if err != nil && strings.Index(err.Error(), " already exists") == -1 {
+					if err != nil && !strings.Contains(err.Error(), " already exists") {
 						dbLog.Fatal(err)
 					}
 					WaitTableIndexCreate(v.TableName, vidx)

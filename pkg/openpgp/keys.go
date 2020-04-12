@@ -391,7 +391,7 @@ EachPacket:
 				current.Signatures = append(current.Signatures, pkt)
 			}
 		case *packet.PrivateKey:
-			if pkt.IsSubkey == false {
+			if !pkt.IsSubkey {
 				packets.Unread(p)
 				break EachPacket
 			}
@@ -400,7 +400,7 @@ EachPacket:
 				return nil, err
 			}
 		case *packet.PublicKey:
-			if pkt.IsSubkey == false {
+			if !pkt.IsSubkey {
 				packets.Unread(p)
 				break EachPacket
 			}
@@ -413,10 +413,10 @@ EachPacket:
 		}
 	}
 
-	if len(e.Identities) == 0 {
-		//e.Identities[""] = &Identity{}
-		//return nil, errors.StructuralError("entity without any identities")
-	}
+	//if len(e.Identities) == 0 {
+	//	//e.Identities[""] = &Identity{}
+	//	//return nil, errors.StructuralError("entity without any identities")
+	//}
 
 	for _, revocation := range revocations {
 		err = e.PrimaryKey.VerifyRevocationSignature(revocation)

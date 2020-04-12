@@ -56,7 +56,7 @@ func TestStaticGraphiQL(t *testing.T) {
 		got := GetFile("/"+v, t)
 		expected, _ := agent.Asset("bundle/" + v)
 
-		if strings.Index(v, "index.htm") > -1 {
+		if strings.Contains(v, "index.htm") {
 			f := string(expected)
 			f = strings.Replace(f, "{SERVER_URL}", config.AgentTargetURL, -1)
 			f = strings.Replace(f, "{AGENT_URL}", config.AgentExternalURL, -1)

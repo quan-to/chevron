@@ -128,7 +128,6 @@ func (pk *PublicKeyV3) SerializeSignaturePrefix(w io.Writer) {
 	}
 	pLength += 6
 	_, _ = w.Write([]byte{0x99, byte(pLength >> 8), byte(pLength)})
-	return
 }
 
 func (pk *PublicKeyV3) Serialize(w io.Writer) (err error) {

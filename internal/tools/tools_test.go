@@ -570,7 +570,7 @@ func TestGeneratePassword(t *testing.T) {
 	}
 
 	for _, v := range b {
-		if strings.Index(passwordBytes, string(v)) == -1 {
+		if !strings.Contains(passwordBytes, string(v)) {
 			t.Errorf("char %s is not in passwordBytes list.", string(v))
 		}
 	}
@@ -639,10 +639,10 @@ func TestTruncateFieldForDisplay(t *testing.T) {
 
 func TestGenerateTag(t *testing.T) {
 	tag := GenerateTag()
-	if strings.Index(tag, "-") > -1 {
+	if strings.Contains(tag, "-") {
 		t.Errorf("Expected generated tags to not have - sign")
 	}
-	if strings.Index(tag, "+") == -1 {
+	if !strings.Contains(tag, "+") {
 		t.Errorf("Expected generated tags to have + sign")
 	}
 }
