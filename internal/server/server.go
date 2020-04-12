@@ -13,7 +13,7 @@ import (
 )
 
 // GenRemoteSignerServerMux generates a remote signer HTTP Router
-func GenRemoteSignerServerMux(slog slog.Instance, sm interfaces.SMInterface, gpg interfaces.PGPInterface) *mux.Router {
+func GenRemoteSignerServerMux(slog slog.Instance, sm interfaces.SecretsManager, gpg interfaces.PGPManager) *mux.Router {
 	var vm *vaultManager.VaultManager
 	log := slog.Scope("MUX")
 
@@ -87,7 +87,7 @@ func GenRemoteSignerServerMux(slog slog.Instance, sm interfaces.SMInterface, gpg
 }
 
 // RunRemoteSignerServer runs a remote signer server asynchronously and returns a stop channel
-func RunRemoteSignerServer(slog slog.Instance, sm interfaces.SMInterface, gpg interfaces.PGPInterface) chan bool {
+func RunRemoteSignerServer(slog slog.Instance, sm interfaces.SecretsManager, gpg interfaces.PGPManager) chan bool {
 
 	r := GenRemoteSignerServerMux(slog, sm, gpg)
 

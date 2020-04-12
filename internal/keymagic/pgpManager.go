@@ -41,7 +41,7 @@ import (
 
 const MinKeyBits = 2048 // Should be safe until we have decent Quantum Computers
 
-type PGPManager struct {
+type pgpManager struct {
 	sync.Mutex
 	KeysBase64Encoded    bool
 	keyIdentity          map[string][]*openpgp.Identity
@@ -49,13 +49,13 @@ type PGPManager struct {
 	entities             map[string]*openpgp.Entity
 	fp8to16              map[string]string
 	subKeyToKey          map[string]string
-	krm                  interfaces.KRMInterface
-	kbkend               interfaces.Backend
+	krm                  interfaces.KeyRingManager
+	kbkend               interfaces.StorageBackend
 	log                  slog.Instance
 }
 
-// MakePGPManagerWithKRM creates a new PGPInterface with the specified keyBackend, log and KeyRingManager
-func MakePGPManagerWithKRM(log slog.Instance, keyBackend interfaces.Backend, krm interfaces.KRMInterface) interfaces.PGPInterface {
+// MakePGPManagerWithKRM creates a new PGPManager with the specified keyBackend, log and KeyRingManager
+func MakePGPManagerWithKRM(log slog.Instance, keyBackend interfaces.StorageBackend, krm interfaces.KeyRingManager) interfaces.PGPManager {
 	if log == nil {
 		log = slog.Scope("PGPMan")
 	} else {
@@ -66,7 +66,7 @@ func MakePGPManagerWithKRM(log slog.Instance, keyBackend interfaces.Backend, krm
 		log.Fatal("No keyBackend specified")
 	}
 
-	return &PGPManager{
+	return &pgpManager{
 		kbkend:               keyBackend,
 		KeysBase64Encoded:    config.KeysBase64Encoded,
 		keyIdentity:          make(map[string][]*openpgp.Identity),
@@ -79,11 +79,11 @@ func MakePGPManagerWithKRM(log slog.Instance, keyBackend interfaces.Backend, krm
 	}
 }
 
-func (pm *PGPManager) MinKeyBits() int {
+func (pm *pgpManager) MinKeyBits() int {
 	return MinKeyBits
 }
 
-func (pm *PGPManager) LoadKeys(ctx context.Context) {
+func (pm *pgpManager) LoadKeys(ctx context.Context) {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	pm.log.DebugNote("LoadKeys()")
@@ -133,7 +133,7 @@ func (pm *PGPManager) LoadKeys(ctx context.Context) {
 	}
 }
 
-func (pm *PGPManager) LoadKeyWithMetadata(ctx context.Context, armoredKey, metadata string) (error, int) {
+func (pm *pgpManager) LoadKeyWithMetadata(ctx context.Context, armoredKey, metadata string) (error, int) {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	log.DebugNote("LoadKeyWithMetadata(---, ---)")
@@ -173,12 +173,12 @@ func (pm *PGPManager) LoadKeyWithMetadata(ctx context.Context, armoredKey, metad
 	return nil, n
 }
 
-func (pm *PGPManager) SetKeysBase64Encoded(k bool) {
+func (pm *pgpManager) SetKeysBase64Encoded(k bool) {
 	pm.log.DebugNote("SetKeysBase64Encoded(%t)", k)
 	pm.KeysBase64Encoded = k
 }
 
-func (pm *PGPManager) LoadKey(ctx context.Context, armoredKey string) (error, int) {
+func (pm *pgpManager) LoadKey(ctx context.Context, armoredKey string) (error, int) {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	log.DebugNote("LoadKey(---)")
@@ -223,7 +223,7 @@ func (pm *PGPManager) LoadKey(ctx context.Context, armoredKey string) (error, in
 	return nil, keysLoaded
 }
 
-func (pm *PGPManager) sanitizeFingerprint(fp string) string {
+func (pm *pgpManager) sanitizeFingerprint(fp string) string {
 	if len(fp) > 16 {
 		fp = fp[len(fp)-16:]
 	}
@@ -238,14 +238,14 @@ func (pm *PGPManager) sanitizeFingerprint(fp string) string {
 	return fp
 }
 
-func (pm *PGPManager) FixFingerPrint(fp string) string {
+func (pm *pgpManager) FixFingerPrint(fp string) string {
 	pm.Lock()
 	defer pm.Unlock()
 
 	return pm.sanitizeFingerprint(fp)
 }
 
-func (pm *PGPManager) IsKeyLocked(fp string) bool {
+func (pm *pgpManager) IsKeyLocked(fp string) bool {
 	pm.Lock()
 	defer pm.Unlock()
 
@@ -253,7 +253,7 @@ func (pm *PGPManager) IsKeyLocked(fp string) bool {
 	return pm.decryptedPrivateKeys[fp] == nil
 }
 
-func (pm *PGPManager) unlockKey(ctx context.Context, fp, password string) error {
+func (pm *pgpManager) unlockKey(ctx context.Context, fp, password string) error {
 	fp = pm.sanitizeFingerprint(fp)
 	_ = pm.LoadKeyFromKB(ctx, fp)
 
@@ -307,7 +307,7 @@ func (pm *PGPManager) unlockKey(ctx context.Context, fp, password string) error 
 	return nil
 }
 
-func (pm *PGPManager) UnlockKey(ctx context.Context, fp, password string) error {
+func (pm *pgpManager) UnlockKey(ctx context.Context, fp, password string) error {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	log.DebugNote("UnlockKey(%s, ---)", fp)
@@ -317,7 +317,7 @@ func (pm *PGPManager) UnlockKey(ctx context.Context, fp, password string) error 
 	return pm.unlockKey(ctx, fp, password)
 }
 
-func (pm *PGPManager) LoadKeyFromKB(ctx context.Context, fingerPrint string) error {
+func (pm *pgpManager) LoadKeyFromKB(ctx context.Context, fingerPrint string) error {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	log.Info("Loading key %s", fingerPrint)
@@ -348,7 +348,7 @@ func (pm *PGPManager) LoadKeyFromKB(ctx context.Context, fingerPrint string) err
 	return nil
 }
 
-func (pm *PGPManager) GetPrivateKeyInfo(ctx context.Context, fingerPrint string) *models.KeyInfo {
+func (pm *pgpManager) GetPrivateKeyInfo(ctx context.Context, fingerPrint string) *models.KeyInfo {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	log.DebugNote("GetPrivateKeyInfo(%s)", fingerPrint)
@@ -373,7 +373,7 @@ func (pm *PGPManager) GetPrivateKeyInfo(ctx context.Context, fingerPrint string)
 	return nil
 }
 
-func (pm *PGPManager) GetLoadedPrivateKeys(ctx context.Context) []models.KeyInfo {
+func (pm *pgpManager) GetLoadedPrivateKeys(ctx context.Context) []models.KeyInfo {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	log.DebugNote("GetLoadedPrivateKeys()")
@@ -399,7 +399,7 @@ func (pm *PGPManager) GetLoadedPrivateKeys(ctx context.Context) []models.KeyInfo
 	return keyInfos
 }
 
-func (pm *PGPManager) GetLoadedKeys() []models.KeyInfo {
+func (pm *pgpManager) GetLoadedKeys() []models.KeyInfo {
 	pm.log.DebugNote("GetLoadedKeys()")
 	keyInfos := make([]models.KeyInfo, 0)
 
@@ -418,7 +418,7 @@ func (pm *PGPManager) GetLoadedKeys() []models.KeyInfo {
 	return keyInfos
 }
 
-func (pm *PGPManager) SaveKey(fingerPrint, armoredData string, password interface{}) error {
+func (pm *pgpManager) SaveKey(fingerPrint, armoredData string, password interface{}) error {
 	pm.log.DebugNote("SaveKey(%s, %s, ---)", fingerPrint, tools.TruncateFieldForDisplay(armoredData))
 	filename := fmt.Sprintf("%s.key", fingerPrint)
 	if pm.KeysBase64Encoded {
@@ -454,7 +454,7 @@ func (pm *PGPManager) SaveKey(fingerPrint, armoredData string, password interfac
 	return nil
 }
 
-func (pm *PGPManager) DeleteKey(ctx context.Context, fingerPrint string) error {
+func (pm *pgpManager) DeleteKey(ctx context.Context, fingerPrint string) error {
 	pm.log.DebugAwait("Deleting key %s from KeyBackend", fingerPrint)
 	fingerPrint = pm.sanitizeFingerprint(fingerPrint)
 
@@ -481,7 +481,7 @@ func (pm *PGPManager) DeleteKey(ctx context.Context, fingerPrint string) error {
 	return nil
 }
 
-func (pm *PGPManager) SignData(ctx context.Context, fingerPrint string, data []byte, hashAlgorithm crypto.Hash) (string, error) {
+func (pm *pgpManager) SignData(ctx context.Context, fingerPrint string, data []byte, hashAlgorithm crypto.Hash) (string, error) {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	log.DebugNote("SignData(%s, ---, %v)", fingerPrint, hashAlgorithm)
@@ -531,7 +531,7 @@ func (pm *PGPManager) SignData(ctx context.Context, fingerPrint string, data []b
 	return b.String(), nil
 }
 
-func (pm *PGPManager) GetPublicKeyEntity(ctx context.Context, fingerPrint string) *openpgp.Entity {
+func (pm *pgpManager) GetPublicKeyEntity(ctx context.Context, fingerPrint string) *openpgp.Entity {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	log.DebugNote("GetPublicKeyEntity(%s)", fingerPrint)
@@ -559,7 +559,7 @@ func (pm *PGPManager) GetPublicKeyEntity(ctx context.Context, fingerPrint string
 	return ent
 }
 
-func (pm *PGPManager) GetPublicKey(ctx context.Context, fingerPrint string) *packet.PublicKey {
+func (pm *pgpManager) GetPublicKey(ctx context.Context, fingerPrint string) *packet.PublicKey {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	log.DebugNote("GetPublicKey(%s)", fingerPrint)
@@ -600,7 +600,7 @@ func (pm *PGPManager) GetPublicKey(ctx context.Context, fingerPrint string) *pac
 	return pubKey
 }
 
-func (pm *PGPManager) GetSubKeys(fingerPrint string, decrypted bool) openpgp.EntityList {
+func (pm *pgpManager) GetSubKeys(fingerPrint string, decrypted bool) openpgp.EntityList {
 	pm.log.DebugNote("GetSubKeys(%s, %v)", fingerPrint, decrypted)
 	list := make([]*openpgp.Entity, 0)
 	for k, v := range pm.subKeyToKey {
@@ -615,7 +615,7 @@ func (pm *PGPManager) GetSubKeys(fingerPrint string, decrypted bool) openpgp.Ent
 	return list
 }
 
-func (pm *PGPManager) GetKey(ctx context.Context, fingerPrint string) *openpgp.Entity {
+func (pm *pgpManager) GetKey(ctx context.Context, fingerPrint string) *openpgp.Entity {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	log.DebugNote("GetKey(%s)", fingerPrint)
@@ -637,7 +637,7 @@ func (pm *PGPManager) GetKey(ctx context.Context, fingerPrint string) *openpgp.E
 	return nil
 }
 
-func (pm *PGPManager) GetPrivate(ctx context.Context, fingerPrint string) openpgp.EntityList {
+func (pm *pgpManager) GetPrivate(ctx context.Context, fingerPrint string) openpgp.EntityList {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	log.DebugNote("GetPrivate(%s)", fingerPrint)
@@ -664,7 +664,7 @@ func (pm *PGPManager) GetPrivate(ctx context.Context, fingerPrint string) openpg
 	return nil
 }
 
-func (pm *PGPManager) GetPublicKeyAscii(ctx context.Context, fingerPrint string) (string, error) {
+func (pm *pgpManager) GetPublicKeyAscii(ctx context.Context, fingerPrint string) (string, error) {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	log.Note("GetPublicKeyAscii(%s)", fingerPrint)
@@ -738,7 +738,7 @@ func (pm *PGPManager) GetPublicKeyAscii(ctx context.Context, fingerPrint string)
 	return key, nil
 }
 
-func (pm *PGPManager) GetPrivateKeyAsciiReencrypt(ctx context.Context, fingerPrint, currentPassword, newPassword string) (string, error) {
+func (pm *pgpManager) GetPrivateKeyAsciiReencrypt(ctx context.Context, fingerPrint, currentPassword, newPassword string) (string, error) {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	log.DebugNote("GetPrivateKeyAscii(%s, ---)", fingerPrint)
@@ -790,18 +790,18 @@ func (pm *PGPManager) GetPrivateKeyAsciiReencrypt(ctx context.Context, fingerPri
 	return key, nil
 }
 
-func (pm *PGPManager) GetPrivateKeyAscii(ctx context.Context, fingerPrint, password string) (string, error) {
+func (pm *pgpManager) GetPrivateKeyAscii(ctx context.Context, fingerPrint, password string) (string, error) {
 	return pm.GetPrivateKeyAsciiReencrypt(ctx, fingerPrint, password, password)
 }
 
-func (pm *PGPManager) VerifySignatureStringData(ctx context.Context, data string, signature string) (bool, error) {
+func (pm *pgpManager) VerifySignatureStringData(ctx context.Context, data string, signature string) (bool, error) {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	log.DebugNote("VerifySignatureStringData(---, %s)", tools.TruncateFieldForDisplay(signature))
 	return pm.VerifySignature(ctx, []byte(data), signature)
 }
 
-func (pm *PGPManager) VerifySignature(ctx context.Context, data []byte, signature string) (bool, error) {
+func (pm *pgpManager) VerifySignature(ctx context.Context, data []byte, signature string) (bool, error) {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	log.DebugNote("VerifySignature(---, %s)", tools.TruncateFieldForDisplay(signature))
@@ -876,7 +876,7 @@ func (pm *PGPManager) VerifySignature(ctx context.Context, data []byte, signatur
 	return true, nil
 }
 
-func (pm *PGPManager) GenerateTestKey() (string, error) {
+func (pm *pgpManager) GenerateTestKey() (string, error) {
 	pm.log.DebugNote("GenerateTestKey()")
 	privateKey, err := rsa.GenerateKey(rand.Reader, 1024)
 
@@ -928,7 +928,7 @@ func (pm *PGPManager) GenerateTestKey() (string, error) {
 	return buf.String(), nil
 }
 
-func (pm *PGPManager) GeneratePGPKey(ctx context.Context, identifier, password string, numBits int) (string, error) {
+func (pm *pgpManager) GeneratePGPKey(ctx context.Context, identifier, password string, numBits int) (string, error) {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	log.DebugNote("GeneratePGPKey(%s, ---, %d)", identifier, numBits)
@@ -992,7 +992,7 @@ func (pm *PGPManager) GeneratePGPKey(ctx context.Context, identifier, password s
 	return buf.String(), nil
 }
 
-func (pm *PGPManager) Encrypt(ctx context.Context, filename, fingerPrint string, data []byte, dataOnly bool) (string, error) {
+func (pm *pgpManager) Encrypt(ctx context.Context, filename, fingerPrint string, data []byte, dataOnly bool) (string, error) {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	log.DebugNote("Encrypt(%s, %s, ---, %v)", filename, fingerPrint, dataOnly)
@@ -1070,7 +1070,7 @@ func (pm *PGPManager) Encrypt(ctx context.Context, filename, fingerPrint string,
 	return buf.String(), nil
 }
 
-func (pm *PGPManager) Decrypt(ctx context.Context, data string, dataOnly bool) (*models.GPGDecryptedData, error) {
+func (pm *pgpManager) Decrypt(ctx context.Context, data string, dataOnly bool) (*models.GPGDecryptedData, error) {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	log.DebugNote("Decrypt(%s, %v)", tools.TruncateFieldForDisplay(data), dataOnly)
@@ -1176,7 +1176,7 @@ func (pm *PGPManager) Decrypt(ctx context.Context, data string, dataOnly bool) (
 	return ret, nil
 }
 
-func (pm *PGPManager) GetCachedKeys(ctx context.Context) []models.KeyInfo {
+func (pm *pgpManager) GetCachedKeys(ctx context.Context) []models.KeyInfo {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pm.log.Tag(requestID)
 	log.DebugNote("GetCachedKeys()")

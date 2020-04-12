@@ -2,7 +2,7 @@ package interfaces
 
 import "github.com/quan-to/chevron/internal/models"
 
-type PKSInterface interface {
+type PublicKeyServer interface {
 	PKSGetKey(fingerPrint string) string
 	PKSSearchByName(name string, pageStart, pageEnd int) []models.GPGKey
 	PKSSearchByFingerPrint(fingerPrint string, pageStart, pageEnd int) []models.GPGKey

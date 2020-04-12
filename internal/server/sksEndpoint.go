@@ -14,13 +14,13 @@ import (
 )
 
 type SKSEndpoint struct {
-	sm  interfaces.SMInterface
-	gpg interfaces.PGPInterface
+	sm  interfaces.SecretsManager
+	gpg interfaces.PGPManager
 	log slog.Instance
 }
 
 // MakeSKSEndpoint creates a handler for SKS Server Endpoint
-func MakeSKSEndpoint(log slog.Instance, sm interfaces.SMInterface, gpg interfaces.PGPInterface) *SKSEndpoint {
+func MakeSKSEndpoint(log slog.Instance, sm interfaces.SecretsManager, gpg interfaces.PGPManager) *SKSEndpoint {
 	if log == nil {
 		log = slog.Scope("SKS")
 	} else {

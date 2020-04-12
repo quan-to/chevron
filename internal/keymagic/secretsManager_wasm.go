@@ -23,8 +23,8 @@ type secretsManager struct {
 	amIUseless           bool
 }
 
-func MakeSecretsManager(log slog.Instance) interfaces.SMInterface {
-	var kb interfaces.Backend
+func MakeSecretsManager(log slog.Instance) interfaces.SecretsManager {
+	var kb interfaces.StorageBackend
 
 	kb = keybackend.MakeSaveToDiskBackend(path.Dir(remote_signer.MasterGPGKeyPath), "__master__")
 

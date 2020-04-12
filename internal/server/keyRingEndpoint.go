@@ -14,13 +14,13 @@ import (
 )
 
 type KeyRingEndpoint struct {
-	sm  interfaces.SMInterface
-	gpg interfaces.PGPInterface
+	sm  interfaces.SecretsManager
+	gpg interfaces.PGPManager
 	log slog.Instance
 }
 
 // MakeKeyRingEndpoint creates an instance of key ring management endpoints
-func MakeKeyRingEndpoint(log slog.Instance, sm interfaces.SMInterface, gpg interfaces.PGPInterface) *KeyRingEndpoint {
+func MakeKeyRingEndpoint(log slog.Instance, sm interfaces.SecretsManager, gpg interfaces.PGPManager) *KeyRingEndpoint {
 	if log == nil {
 		log = slog.Scope("KeyRing")
 	} else {

@@ -16,13 +16,13 @@ import (
 )
 
 type GPGEndpoint struct {
-	sm  interfaces.SMInterface
-	gpg interfaces.PGPInterface
+	sm  interfaces.SecretsManager
+	gpg interfaces.PGPManager
 	log slog.Instance
 }
 
 // MakeGPGEndpoint Creates an instance of an endpoint that handles GPG Calls
-func MakeGPGEndpoint(log slog.Instance, sm interfaces.SMInterface, gpg interfaces.PGPInterface) *GPGEndpoint {
+func MakeGPGEndpoint(log slog.Instance, sm interfaces.SecretsManager, gpg interfaces.PGPManager) *GPGEndpoint {
 	if log == nil {
 		log = slog.Scope("GPG (HTTP)")
 	} else {

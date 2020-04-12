@@ -21,14 +21,14 @@ import (
 const maxUUIDTries = 5
 
 type AgentProxy struct {
-	gpg       interfaces.PGPInterface
+	gpg       interfaces.PGPManager
 	transport *http.Transport
 	tm        interfaces.TokenManager
 	log       slog.Instance
 }
 
 // MakeAgentProxy creates an instance of agent proxy endpoint
-func MakeAgentProxy(log slog.Instance, gpg interfaces.PGPInterface, tm interfaces.TokenManager) *AgentProxy {
+func MakeAgentProxy(log slog.Instance, gpg interfaces.PGPManager, tm interfaces.TokenManager) *AgentProxy {
 	if log == nil {
 		log = slog.Scope("Agent")
 	} else {

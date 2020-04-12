@@ -11,8 +11,8 @@ import (
 )
 
 // BuildKeyBackend returns a new instance of KeyBackend defined by environment variables VaultStorage, KeyPrefix, PrivateKeyFolder
-func BuildKeyBackend(log slog.Instance) interfaces.Backend {
-	var kb interfaces.Backend
+func BuildKeyBackend(log slog.Instance) interfaces.StorageBackend {
+	var kb interfaces.StorageBackend
 
 	if config.VaultStorage {
 		kb = vaultManager.MakeVaultManager(log, config.KeyPrefix)

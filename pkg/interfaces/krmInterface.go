@@ -7,8 +7,8 @@ import (
 	"github.com/quan-to/chevron/pkg/openpgp"
 )
 
-// KRMInterface is an interface to a Key Ring Manager Instance
-type KRMInterface interface {
+// KeyRingManager is an interface to a Key Ring Manager Instance
+type KeyRingManager interface {
 	// GetCachedKeys returns a list of the memory-cached keys
 	GetCachedKeys(ctx context.Context) []models.KeyInfo
 	// ContainsKey checks if a key with the specified fingerprint exists in Key Ring

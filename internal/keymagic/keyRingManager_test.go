@@ -20,7 +20,7 @@ func TestAddKey(t *testing.T) {
 	defer remote_signer.PopVariables()
 	remote_signer.MaxKeyRingCache = 10
 	krm := MakeKeyRingManager(nil)
-	var kb interfaces.Backend
+	var kb interfaces.StorageBackend
 
 	if remote_signer.VaultStorage {
 		kb = vaultManager.MakeVaultManager(nil, remote_signer.KeyPrefix)

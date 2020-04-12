@@ -11,13 +11,13 @@ import (
 )
 
 type InternalEndpoint struct {
-	sm  interfaces.SMInterface
-	gpg interfaces.PGPInterface
+	sm  interfaces.SecretsManager
+	gpg interfaces.PGPManager
 	log slog.Instance
 }
 
 // MakeInternalEndpoint creates an instance to handle internal control endpoints such as key password data
-func MakeInternalEndpoint(log slog.Instance, sm interfaces.SMInterface, gpg interfaces.PGPInterface) *InternalEndpoint {
+func MakeInternalEndpoint(log slog.Instance, sm interfaces.SecretsManager, gpg interfaces.PGPManager) *InternalEndpoint {
 	if log == nil {
 		log = slog.Scope("Internal")
 	} else {

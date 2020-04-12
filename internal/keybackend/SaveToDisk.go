@@ -20,7 +20,7 @@ type diskBackend struct {
 const metadataPrefix = "metadata-"
 
 // MakeSaveToDiskBackend creates an instance of diskBackendBackend that stores keys in files
-func MakeSaveToDiskBackend(log slog.Instance, folder, prefix string) interfaces.Backend {
+func MakeSaveToDiskBackend(log slog.Instance, folder, prefix string) interfaces.StorageBackend {
 	if log == nil {
 		log = slog.Scope("diskBackend")
 	} else {
@@ -56,7 +56,7 @@ func MakeSaveToDiskBackend(log slog.Instance, folder, prefix string) interfaces.
 }
 
 func (d *diskBackend) Name() string {
-	return "diskBackend Backend"
+	return "diskBackend StorageBackend"
 }
 
 func (d *diskBackend) Path() string {

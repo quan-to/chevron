@@ -9,7 +9,7 @@ import (
 	"github.com/quan-to/chevron/pkg/openpgp/packet"
 )
 
-type PGPInterface interface {
+type PGPManager interface {
 	LoadKeys(ctx context.Context)
 	LoadKeyWithMetadata(ctx context.Context, armoredKey, metadata string) (error, int)
 	LoadKey(ctx context.Context, armoredKey string) (error, int)

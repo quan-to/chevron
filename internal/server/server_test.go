@@ -25,8 +25,8 @@ import (
 	"github.com/quan-to/slog"
 )
 
-var sm interfaces.SMInterface
-var gpg interfaces.PGPInterface
+var sm interfaces.SecretsManager
+var gpg interfaces.PGPManager
 var log = slog.Scope("TestRemoteSigner")
 
 var router *mux.Router

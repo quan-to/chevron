@@ -1,7 +1,7 @@
 package interfaces
 
-// Backend is a interface for storing / reading keys
-type Backend interface {
+// StorageBackend is a interface for storing / reading keys
+type StorageBackend interface {
 	// Save saves a key to the backend
 	Save(key, data string) error
 	// SaveWithMetadata saves a key to backend storing some metadata with it

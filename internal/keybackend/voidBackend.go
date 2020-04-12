@@ -5,17 +5,17 @@ import (
 	"github.com/quan-to/chevron/pkg/interfaces"
 )
 
-// voidBackend is a Key Backend that does nothing
+// voidBackend is a Key StorageBackend that does nothing
 type voidBackend struct{}
 
 // MakeVoidBackend creates a new KeyBackend that does nothing
-func MakeVoidBackend() interfaces.Backend {
+func MakeVoidBackend() interfaces.StorageBackend {
 	return &voidBackend{}
 }
 
 // Name returns the name of the KeyBackend
 func (d *voidBackend) Name() string {
-	return "voidBackend Backend"
+	return "voidBackend StorageBackend"
 }
 
 // Path returns the path of the current KeyBackend

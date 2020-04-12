@@ -22,14 +22,14 @@ import (
 type secretsManager struct {
 	sync.Mutex
 	encryptedPasswords   map[string]string
-	gpg                  interfaces.PGPInterface
+	gpg                  interfaces.PGPManager
 	masterKeyFingerPrint string
 	amIUseless           bool
 	log                  slog.Instance
 }
 
 // MakeSecretsManager creates an instance of the backend secrets manager
-func MakeSecretsManager(log slog.Instance) interfaces.SMInterface {
+func MakeSecretsManager(log slog.Instance) interfaces.SecretsManager {
 	if log == nil {
 		log = slog.Scope("SM")
 	} else {
@@ -38,7 +38,7 @@ func MakeSecretsManager(log slog.Instance) interfaces.SMInterface {
 
 	ctx := context.Background()
 
-	var kb interfaces.Backend
+	var kb interfaces.StorageBackend
 
 	if config.VaultStorage {
 		kb = vaultManager.MakeVaultManager(log, "__master__")
@@ -183,7 +183,7 @@ func (sm *secretsManager) GetPasswords(ctx context.Context) map[string]string {
 }
 
 // UnlockLocalKeys unlocks the local private keys using memory stored master key encrypted passwords
-func (sm *secretsManager) UnlockLocalKeys(ctx context.Context, gpg interfaces.PGPInterface) {
+func (sm *secretsManager) UnlockLocalKeys(ctx context.Context, gpg interfaces.PGPManager) {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pksLog.Tag(requestID)
 	log.DebugNote("UnlockLocalKeys(---)")

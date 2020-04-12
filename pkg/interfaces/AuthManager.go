@@ -1,7 +1,7 @@
 package interfaces
 
 // AuthManager is an interface to a Authentication Manager
-// Used in Chevron Agent for Authentication Backend
+// Used in Chevron Agent for Authentication StorageBackend
 type AuthManager interface {
 	// UserExists checks if a user with specified username exists in AuthManager
 	UserExists(username string) bool

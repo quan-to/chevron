@@ -19,8 +19,8 @@ import (
 
 var testData = []byte(testdata.TestSignatureData)
 
-var pgpMan *PGPManager
-var sm *SecretsManager
+var pgpMan *pgpManager
+var sm *secretsManager
 
 func TestMain(m *testing.M) {
 	slog.UnsetTestMode()
@@ -49,7 +49,7 @@ func TestMain(m *testing.M) {
 	etc.InitTables()
 	slog.SetTestMode()
 
-	var kb interfaces.Backend
+	var kb interfaces.StorageBackend
 
 	if config.VaultStorage {
 		kb = vaultManager.MakeVaultManager(nil, config.KeyPrefix)
@@ -58,10 +58,10 @@ func TestMain(m *testing.M) {
 	}
 
 	ctx := context.Background()
-	pgpMan = MakePGPManagerWithKRM(nil, kb, MakeKeyRingManager(nil)).(*PGPManager)
+	pgpMan = MakePGPManagerWithKRM(nil, kb, MakeKeyRingManager(nil)).(*pgpManager)
 	pgpMan.LoadKeys(ctx)
 
-	sm = MakeSecretsManager(nil)
+	sm = MakeSecretsManager(nil).(*secretsManager)
 
 	err = pgpMan.UnlockKey(ctx, testdata.TestKeyFingerprint, testdata.TestKeyPassword)
 

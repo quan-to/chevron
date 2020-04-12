@@ -22,8 +22,8 @@ const (
 )
 
 var (
-	pgp              interfaces.PGPInterface
-	krm              interfaces.KRMInterface
+	pgp              interfaces.PGPManager
+	krm              interfaces.KeyRingManager
 	executableFolder string
 	keysFolder       string
 )

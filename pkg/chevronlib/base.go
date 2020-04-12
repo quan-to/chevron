@@ -9,7 +9,7 @@ import (
 )
 
 var ctx = context.Background()
-var pgpBackend interfaces.PGPInterface
+var pgpBackend interfaces.PGPManager
 
 func init() {
 	slog.SetDebug(false)
