@@ -14,8 +14,8 @@ import (
 // region Tests
 func TestNilBackend(t *testing.T) {
 	assertPanic(t, func() {
-		_ = MakePGPManagerWithKRM(nil, nil, nil)
-	}, "Expected MakePGPManagerWithKRM to throw a fatal error")
+		_ = MakePGPManager(nil, nil, nil)
+	}, "Expected MakePGPManager to throw a fatal error")
 }
 
 func TestVerifySign(t *testing.T) {

@@ -198,7 +198,7 @@ func TestKREAddPrivateKey(t *testing.T) {
 	// endregion
 	// region Test Add Public Key as private
 	payload.Password = ""
-	payload.EncryptedPrivateKey, _ = gpg.GetPublicKeyAscii(ctx, testdata.TestKeyFingerprint)
+	payload.EncryptedPrivateKey, _ = gpg.GetPublicKeyASCII(ctx, testdata.TestKeyFingerprint)
 
 	body, _ = json.Marshal(payload)
 

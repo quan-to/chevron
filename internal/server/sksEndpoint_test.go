@@ -175,7 +175,7 @@ func TestAddKey(t *testing.T) {
 
 	config.EnableRethinkSKS = true
 	// region Test Add Key
-	pubKey, _ := gpg.GetPublicKeyAscii(ctx, testdata.TestKeyFingerprint)
+	pubKey, _ := gpg.GetPublicKeyASCII(ctx, testdata.TestKeyFingerprint)
 
 	payload := models.SKSAddKey{
 		PublicKey: pubKey,

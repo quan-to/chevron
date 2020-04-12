@@ -57,7 +57,7 @@ func (sks *SKSEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 
 	fingerPrint := q.Get("fingerPrint")
-	key, _ := sks.gpg.GetPublicKeyAscii(ctx, fingerPrint)
+	key, _ := sks.gpg.GetPublicKeyASCII(ctx, fingerPrint)
 
 	if key == "" {
 		NotFound("fingerPrint", fmt.Sprintf("Key with fingerPrint %s was not found", fingerPrint), w, r, log)

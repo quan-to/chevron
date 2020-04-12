@@ -58,7 +58,7 @@ func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 
 	fingerPrint := q.Get("fingerPrint")
 
-	key, _ := kre.gpg.GetPublicKeyAscii(ctx, fingerPrint)
+	key, _ := kre.gpg.GetPublicKeyASCII(ctx, fingerPrint)
 
 	if key == "" {
 		NotFound("fingerPrint", fmt.Sprintf("Key with fingerPrint %s was not found", fingerPrint), w, r, log)
@@ -200,7 +200,7 @@ func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request
 		}
 	}
 
-	pubKey, _ := kre.gpg.GetPublicKeyAscii(ctx, fp)
+	pubKey, _ := kre.gpg.GetPublicKeyASCII(ctx, fp)
 
 	log.Info("Adding public key for %s on PKS", fp)
 	res := keymagic.PKSAdd(ctx, pubKey)

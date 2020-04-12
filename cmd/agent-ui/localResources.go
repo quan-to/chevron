@@ -40,7 +40,7 @@ func Begin() {
 	_ = os.Mkdir(keysFolder, os.ModePerm)
 	kb := keybackend.MakeSaveToDiskBackend(nil, keysFolder, "key_")
 	krm = keymagic.MakeKeyRingManager(nil)
-	pgp = keymagic.MakePGPManagerWithKRM(nil, kb, krm)
+	pgp = keymagic.MakePGPManager(nil, kb, krm)
 	pgp.LoadKeys(ctx)
 }
 

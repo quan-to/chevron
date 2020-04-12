@@ -90,7 +90,7 @@ func TestMain(m *testing.M) {
 
 	config.EnableRethinkSKS = true
 	log.Info("Adding key %s to SKS Database", testdata.TestKeyFingerprint)
-	pubKey, _ := gpg.GetPublicKeyAscii(ctx, testdata.TestKeyFingerprint)
+	pubKey, _ := gpg.GetPublicKeyASCII(ctx, testdata.TestKeyFingerprint)
 	log.Info("Result: %s", keymagic.PKSAdd(ctx, pubKey))
 	config.EnableRethinkSKS = false
 

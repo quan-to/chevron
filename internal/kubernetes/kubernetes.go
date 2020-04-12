@@ -20,10 +20,6 @@ var currentKubeToken = ""
 var kubeLog = slog.Scope("Kubernetes").Tag(tools.DefaultTag)
 var me *Pod
 
-func serviceURL() string {
-	return fmt.Sprintf("https://kubernetes.default.svc/api/v1/namespaces/%s/services", currentNamespace)
-}
-
 func podURL() string {
 	return fmt.Sprintf("https://kubernetes.default.svc/api/v1/namespaces/%s/pods", currentNamespace)
 }

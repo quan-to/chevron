@@ -83,7 +83,7 @@ func MakeSecretsManager(log slog.Instance) interfaces.SecretsManager {
 
 	sm.masterKeyFingerPrint = masterKeyFp
 
-	sm.gpg = MakePGPManagerWithKRM(log, kb, MakeKeyRingManager(log))
+	sm.gpg = MakePGPManager(log, kb, MakeKeyRingManager(log))
 	sm.gpg.SetKeysBase64Encoded(config.MasterGPGKeyBase64Encoded)
 
 	n, err := sm.gpg.LoadKey(ctx, string(masterKeyBytes))

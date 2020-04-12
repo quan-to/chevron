@@ -117,7 +117,7 @@ func TestLookup(t *testing.T) {
 	config.EnableRethinkSKS = true
 	//log.UnsetTestMode()
 	// Ensure key is in SKS
-	key, _ := gpg.GetPublicKeyAscii(ctx, testdata.TestKeyFingerprint)
+	key, _ := gpg.GetPublicKeyASCII(ctx, testdata.TestKeyFingerprint)
 	_ = keymagic.PKSAdd(ctx, key)
 
 	// region Operation GET

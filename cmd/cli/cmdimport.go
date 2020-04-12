@@ -81,7 +81,7 @@ func ImportKey(filename, keyPassword string, keyPasswordFd int) {
 			_, _ = fmt.Fprintf(os.Stderr, "File contains private key, but no password supplied. Skipping saving private key.\n")
 		}
 		// Try public if no private
-		public, err := pgpMan.GetPublicKeyAscii(ctx, v)
+		public, err := pgpMan.GetPublicKeyASCII(ctx, v)
 		if err == nil {
 			err = pgpMan.SaveKey(v, public, nil)
 			if err == nil {

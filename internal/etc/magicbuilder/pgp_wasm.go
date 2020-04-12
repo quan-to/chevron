@@ -11,10 +11,10 @@ import (
 func MakePGP() interfaces.PGPManager {
 	kb := keybackend.MakeSaveToDiskBackend(nil, config.PrivateKeyFolder, config.KeyPrefix)
 
-	return keymagic.MakePGPManagerWithKRM(nil, kb, keymagic.MakeKeyRingManager())
+	return keymagic.MakePGPManager(nil, kb, keymagic.MakeKeyRingManager())
 }
 
 // MakeVoidPGP creates a PGPManager that does not store anything anywhere
 func MakeVoidPGP() interfaces.PGPManager {
-	return keymagic.MakePGPManagerWithKRM(nil, keybackend.MakeVoidBackend(), keymagic.MakeKeyRingManager())
+	return keymagic.MakePGPManager(nil, keybackend.MakeVoidBackend(), keymagic.MakeKeyRingManager())
 }

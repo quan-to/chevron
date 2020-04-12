@@ -59,7 +59,7 @@ func TestMain(m *testing.M) {
 	}
 
 	ctx := context.Background()
-	pgpMan = MakePGPManagerWithKRM(nil, kb, MakeKeyRingManager(nil)).(*pgpManager)
+	pgpMan = MakePGPManager(nil, kb, MakeKeyRingManager(nil)).(*pgpManager)
 	pgpMan.LoadKeys(ctx)
 
 	sm = MakeSecretsManager(nil).(*secretsManager)

@@ -28,7 +28,7 @@ func TestAddKey(t *testing.T) {
 		kb = keybackend.MakeSaveToDiskBackend(nil, remote_signer.PrivateKeyFolder, remote_signer.KeyPrefix)
 	}
 
-	gpg := MakePGPManagerWithKRM(nil, kb, krm)
+	gpg := MakePGPManager(nil, kb, krm)
 
 	str, err := gpg.GeneratePGPKey(ctx, "", "", gpg.MinKeyBits())
 

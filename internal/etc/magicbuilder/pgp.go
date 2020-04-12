@@ -21,10 +21,10 @@ func MakePGP(log slog.Instance) interfaces.PGPManager {
 		kb = keybackend.MakeSaveToDiskBackend(log, config.PrivateKeyFolder, config.KeyPrefix)
 	}
 
-	return keymagic.MakePGPManagerWithKRM(log, kb, keymagic.MakeKeyRingManager(log))
+	return keymagic.MakePGPManager(log, kb, keymagic.MakeKeyRingManager(log))
 }
 
 // MakeVoidPGP creates a PGPManager that does not store anything anywhere
 func MakeVoidPGP(log slog.Instance) interfaces.PGPManager {
-	return keymagic.MakePGPManagerWithKRM(log, keybackend.MakeVoidBackend(), keymagic.MakeKeyRingManager(log))
+	return keymagic.MakePGPManager(log, keybackend.MakeVoidBackend(), keymagic.MakeKeyRingManager(log))
 }

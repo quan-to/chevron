@@ -45,7 +45,7 @@ func ChangeKeyPassword(keyData, currentPassword, newPassword string) (newKeyData
 	if err != nil {
 		return
 	}
-	newKeyData, err = pgpBackend.GetPrivateKeyAsciiReencrypt(ctx, fp, currentPassword, newPassword)
+	newKeyData, err = pgpBackend.GetPrivateKeyASCIIReencrypt(ctx, fp, currentPassword, newPassword)
 
 	_ = pgpBackend.DeleteKey(ctx, fp) // Clean key after changing password
 	return
@@ -53,5 +53,5 @@ func ChangeKeyPassword(keyData, currentPassword, newPassword string) (newKeyData
 
 // GetPublicKey returns the cached public key from the specified fingerprint
 func GetPublicKey(fingerprint string) (keyData string, err error) {
-	return pgpBackend.GetPublicKeyAscii(ctx, fingerprint)
+	return pgpBackend.GetPublicKeyASCII(ctx, fingerprint)
 }
