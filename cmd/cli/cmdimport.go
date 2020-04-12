@@ -66,7 +66,7 @@ func ImportKey(filename, keyPassword string, keyPasswordFd int) {
 	for _, v := range fps {
 		if keyPassword != "" {
 			// Try get a private key
-			private, err := pgpMan.GetPrivateKeyAscii(ctx, v, keyPassword)
+			private, err := pgpMan.GetPrivateKeyASCII(ctx, v, keyPassword)
 
 			if err == nil {
 				err = pgpMan.SaveKey(v, private, keyPassword)
