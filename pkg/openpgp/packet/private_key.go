@@ -360,6 +360,7 @@ func serializeRSAPrivateKeyMPI(w io.Writer, priv *rsa.PrivateKey) error {
 		return err
 	}
 	u := new(big.Int).ModInverse(priv.Primes[0], priv.Primes[1])
+	// skipcq: SCC-SA1003
 	_ = binary.Write(w, binary.BigEndian, u.BitLen())
 	return writeBig(w, u)
 }
