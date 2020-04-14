@@ -36,6 +36,7 @@ import (
 	// Include SHA512 hashing algorithm by default
 	_ "crypto/sha512"
 	// Include RIPEMD160 hashing algorithm by default
+	// skipcq: SCC-SA1019
 	_ "golang.org/x/crypto/ripemd160"
 )
 

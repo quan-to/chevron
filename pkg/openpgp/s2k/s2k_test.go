@@ -15,6 +15,7 @@ import (
 	"encoding/hex"
 	"testing"
 
+	// skipcq: SCC-SA1019
 	_ "golang.org/x/crypto/ripemd160"
 )
 
