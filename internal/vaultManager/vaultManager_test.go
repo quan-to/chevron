@@ -75,7 +75,7 @@ func TestVaultManager_List(t *testing.T) {
 }
 
 func TestVaultManager_Read(t *testing.T) {
-	_ = vm.Save("testkey", "testdata")
+	_ = vm.Save("testkey", "test")
 
 	// Test Read
 
@@ -85,8 +85,8 @@ func TestVaultManager_Read(t *testing.T) {
 		t.FailNow()
 	}
 
-	if data != "testdata" {
-		t.Errorf("Expected %s got %s", "testdata", data)
+	if data != "test" {
+		t.Errorf("Expected %s got %s", "test", data)
 	}
 
 	// Test error
@@ -122,7 +122,7 @@ func TestVaultManager_Name(t *testing.T) {
 }
 
 func TestVaultManager_Save(t *testing.T) {
-	err := vm.Save("testkey", "testdata")
+	err := vm.Save("testkey", "test")
 	if err != nil {
 		t.Errorf("Error saving key: %s", err)
 		t.FailNow()
@@ -134,13 +134,13 @@ func TestVaultManager_Save(t *testing.T) {
 		t.FailNow()
 	}
 
-	if data != "testdata" {
-		t.Errorf("Expected %s got %s", "testdata", data)
+	if data != "test" {
+		t.Errorf("Expected %s got %s", "test", data)
 	}
 }
 
 func TestVaultManager_SaveWithMetadata(t *testing.T) {
-	err := vm.SaveWithMetadata("testkey_meta", "testdata", "testmetadata")
+	err := vm.SaveWithMetadata("testkey_meta", "test", "testmetadata")
 	if err != nil {
 		t.Errorf("Error saving key: %s", err)
 		t.FailNow()
@@ -152,8 +152,8 @@ func TestVaultManager_SaveWithMetadata(t *testing.T) {
 		t.FailNow()
 	}
 
-	if data != "testdata" {
-		t.Errorf("Expected %s got %s", "testdata", data)
+	if data != "test" {
+		t.Errorf("Expected %s got %s", "test", data)
 	}
 
 	if metadata != "testmetadata" {

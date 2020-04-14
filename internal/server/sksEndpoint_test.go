@@ -8,7 +8,7 @@ import (
 	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/models"
 	"github.com/quan-to/chevron/pkg/QuantoError"
-	"github.com/quan-to/chevron/testdata"
+	"github.com/quan-to/chevron/test"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -18,7 +18,7 @@ func TestSKSGetKey(t *testing.T) {
 	// region Test Get Key
 	req, err := http.NewRequest("GET", "/sks/getKey", nil)
 	q := req.URL.Query()
-	q.Add("fingerPrint", testdata.TestKeyFingerprint)
+	q.Add("fingerPrint", test.TestKeyFingerprint)
 	req.URL.RawQuery = q.Encode()
 
 	errorDie(err, t)
@@ -151,21 +151,21 @@ func BaseTestSearch(name, value, endpoint string, t *testing.T) {
 }
 
 func TestSKSSearchByName(t *testing.T) {
-	BaseTestSearch("name", testdata.TestKeyName, "/sks/searchByName", t)
+	BaseTestSearch("name", test.TestKeyName, "/sks/searchByName", t)
 }
 
 func TestSKSSearchByFingerPrint(t *testing.T) {
-	BaseTestSearch("fingerPrint", testdata.TestKeyFingerprint, "/sks/searchByFingerPrint", t)
+	BaseTestSearch("fingerPrint", test.TestKeyFingerprint, "/sks/searchByFingerPrint", t)
 }
 
 func TestSKSSearchByEmail(t *testing.T) {
-	BaseTestSearch("email", testdata.TestKeyEmail, "/sks/searchByEmail", t)
+	BaseTestSearch("email", test.TestKeyEmail, "/sks/searchByEmail", t)
 }
 
 func TestSKSSearch(t *testing.T) {
-	BaseTestSearch("valueData", testdata.TestKeyEmail, "/sks/search", t)
-	BaseTestSearch("valueData", testdata.TestKeyFingerprint, "/sks/search", t)
-	BaseTestSearch("valueData", testdata.TestKeyName, "/sks/search", t)
+	BaseTestSearch("valueData", test.TestKeyEmail, "/sks/search", t)
+	BaseTestSearch("valueData", test.TestKeyFingerprint, "/sks/search", t)
+	BaseTestSearch("valueData", test.TestKeyName, "/sks/search", t)
 }
 
 func TestAddKey(t *testing.T) {
@@ -175,7 +175,7 @@ func TestAddKey(t *testing.T) {
 
 	config.EnableRethinkSKS = true
 	// region Test Add Key
-	pubKey, _ := gpg.GetPublicKeyASCII(ctx, testdata.TestKeyFingerprint)
+	pubKey, _ := gpg.GetPublicKeyASCII(ctx, test.TestKeyFingerprint)
 
 	payload := models.SKSAddKey{
 		PublicKey: pubKey,

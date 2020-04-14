@@ -11,14 +11,14 @@ import (
 	"github.com/quan-to/chevron/internal/vaultManager"
 	"github.com/quan-to/chevron/pkg/QuantoError"
 	"github.com/quan-to/chevron/pkg/interfaces"
-	"github.com/quan-to/chevron/testdata"
+	"github.com/quan-to/chevron/test"
 	"os"
 	"testing"
 
 	"github.com/quan-to/slog"
 )
 
-var testData = []byte(testdata.TestSignatureData)
+var testData = []byte(test.TestSignatureData)
 
 var pgpMan *pgpManager
 var sm *secretsManager
@@ -31,13 +31,13 @@ func TestMain(m *testing.M) {
 	slog.SetTestMode()
 	u, _ := uuid.NewRandom()
 	config.DatabaseName = "qrs_test_" + u.String()
-	config.PrivateKeyFolder = "../../testdata/"
+	config.PrivateKeyFolder = "../../test/data/"
 	config.KeyPrefix = "testkey_"
 	config.KeysBase64Encoded = false
 
 	config.MasterGPGKeyBase64Encoded = false
-	config.MasterGPGKeyPath = "../../testdata/testkey_privateTestKey.gpg"
-	config.MasterGPGKeyPasswordPath = "../../testdata/testprivatekeyPassword.txt"
+	config.MasterGPGKeyPath = "../../test/data/testkey_privateTestKey.gpg"
+	config.MasterGPGKeyPasswordPath = "../../test/data/testprivatekeyPassword.txt"
 
 	config.HttpPort = 40000
 	config.SKSServer = fmt.Sprintf("http://localhost:%d/sks/", config.HttpPort)
@@ -64,7 +64,7 @@ func TestMain(m *testing.M) {
 
 	sm = MakeSecretsManager(nil).(*secretsManager)
 
-	err = pgpMan.UnlockKey(ctx, testdata.TestKeyFingerprint, testdata.TestKeyPassword)
+	err = pgpMan.UnlockKey(ctx, test.TestKeyFingerprint, test.TestKeyPassword)
 
 	if err != nil {
 		slog.SetError(true)

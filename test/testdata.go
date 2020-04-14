@@ -1,4 +1,4 @@
-package testdata
+package test
 
 // ExternalKeyFingerprint Test Fingerprint
 const ExternalKeyFingerprint = "6C39C1C16A9DA7BE"
@@ -304,5 +304,3 @@ Xl/5GnX68EOgGysccm/O+KI9r0c6AjXrWQ1d2KJaKXbiUE5WW8eiCw4=
 
 // TestPublicKey2FingerPrint is the fingerprint for TestPublicKey2
 const TestPublicKey2FingerPrint = "9AF4242E7B2C7B8B"
-
-

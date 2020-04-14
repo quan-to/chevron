@@ -12,7 +12,7 @@ import (
 	"github.com/quan-to/chevron/internal/keymagic"
 	"github.com/quan-to/chevron/pkg/QuantoError"
 	"github.com/quan-to/chevron/pkg/interfaces"
-	"github.com/quan-to/chevron/testdata"
+	"github.com/quan-to/chevron/test"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -57,7 +57,7 @@ func TestMain(m *testing.M) {
 	u, _ := uuid.NewRandom()
 
 	config.DatabaseName = "qrs_test_" + u.String()
-	config.PrivateKeyFolder = "../../testdata"
+	config.PrivateKeyFolder = "../../test/data"
 	config.KeyPrefix = "testkey_"
 	config.KeysBase64Encoded = false
 	config.EnableRethinkSKS = true
@@ -72,15 +72,15 @@ func TestMain(m *testing.M) {
 	config.EnableRethinkSKS = false
 
 	config.MasterGPGKeyBase64Encoded = false
-	config.MasterGPGKeyPath = "../../testdata/testkey_privateTestKey.gpg"
-	config.MasterGPGKeyPasswordPath = "../../testdata/testprivatekeyPassword.txt"
+	config.MasterGPGKeyPath = "../../test/data/testkey_privateTestKey.gpg"
+	config.MasterGPGKeyPasswordPath = "../../test/data/testprivatekeyPassword.txt"
 
 	ctx := context.Background()
 	sm = magicbuilder.MakeSM(nil)
 	gpg = magicbuilder.MakePGP(nil)
 	gpg.LoadKeys(ctx)
 
-	err = gpg.UnlockKey(ctx, testdata.TestKeyFingerprint, testdata.TestKeyPassword)
+	err = gpg.UnlockKey(ctx, test.TestKeyFingerprint, test.TestKeyPassword)
 
 	if err != nil {
 		slog.UnsetTestMode()
@@ -89,8 +89,8 @@ func TestMain(m *testing.M) {
 	}
 
 	config.EnableRethinkSKS = true
-	log.Info("Adding key %s to SKS Database", testdata.TestKeyFingerprint)
-	pubKey, _ := gpg.GetPublicKeyASCII(ctx, testdata.TestKeyFingerprint)
+	log.Info("Adding key %s to SKS Database", test.TestKeyFingerprint)
+	pubKey, _ := gpg.GetPublicKeyASCII(ctx, test.TestKeyFingerprint)
 	log.Info("Result: %s", keymagic.PKSAdd(ctx, pubKey))
 	config.EnableRethinkSKS = false
 

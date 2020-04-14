@@ -9,7 +9,7 @@ import (
 	"github.com/quan-to/chevron/internal/models"
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/QuantoError"
-	"github.com/quan-to/chevron/testdata"
+	"github.com/quan-to/chevron/test"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -150,9 +150,9 @@ func TestEncryptData(t *testing.T) {
 
 	encryptBody := models.GPGEncryptData{
 		DataOnly:    true,
-		Base64Data:  base64.StdEncoding.EncodeToString([]byte(testdata.TestSignatureData)),
+		Base64Data:  base64.StdEncoding.EncodeToString([]byte(test.TestSignatureData)),
 		Filename:    "test-encrypt",
-		FingerPrint: testdata.TestKeyFingerprint,
+		FingerPrint: test.TestKeyFingerprint,
 	}
 
 	body, _ := json.Marshal(encryptBody)
@@ -218,7 +218,7 @@ func TestDecryptDataOnly(t *testing.T) {
 
 	decryptBody := models.GPGDecryptData{
 		DataOnly:         true,
-		AsciiArmoredData: testdata.TestDecryptDataOnly,
+		AsciiArmoredData: test.TestDecryptDataOnly,
 	}
 
 	body, err := json.Marshal(decryptBody)
@@ -254,15 +254,15 @@ func TestDecryptDataOnly(t *testing.T) {
 
 	errorDie(err, t)
 
-	if string(decryptedBytes) != testdata.TestSignatureData {
-		t.Errorf("Expected \"%s\" got \"%s\"", testdata.TestSignatureData, string(decryptedBytes))
+	if string(decryptedBytes) != test.TestSignatureData {
+		t.Errorf("Expected \"%s\" got \"%s\"", test.TestSignatureData, string(decryptedBytes))
 	}
 }
 func TestDecrypt(t *testing.T) {
 	InvalidPayloadTest("/gpg/decrypt", t)
 	decryptBody := models.GPGDecryptData{
 		DataOnly:         false,
-		AsciiArmoredData: testdata.TestDecryptDataAscii,
+		AsciiArmoredData: test.TestDecryptDataAscii,
 	}
 
 	body, err := json.Marshal(decryptBody)
@@ -298,15 +298,15 @@ func TestDecrypt(t *testing.T) {
 
 	errorDie(err, t)
 
-	if string(decryptedBytes) != testdata.TestSignatureData {
-		t.Errorf("Expected \"%s\" got \"%s\"", testdata.TestSignatureData, string(decryptedBytes))
+	if string(decryptedBytes) != test.TestSignatureData {
+		t.Errorf("Expected \"%s\" got \"%s\"", test.TestSignatureData, string(decryptedBytes))
 	}
 }
 func TestVerifySignature(t *testing.T) {
 	InvalidPayloadTest("/gpg/verifySignature", t)
 	verifyBody := models.GPGVerifySignatureData{
-		Base64Data: base64.StdEncoding.EncodeToString([]byte(testdata.TestSignatureData)),
-		Signature:  testdata.TestSignatureSignature,
+		Base64Data: base64.StdEncoding.EncodeToString([]byte(test.TestSignatureData)),
+		Signature:  test.TestSignatureSignature,
 	}
 
 	body, err := json.Marshal(verifyBody)
@@ -338,10 +338,10 @@ func TestVerifySignature(t *testing.T) {
 }
 func TestVerifySignatureQuanto(t *testing.T) {
 	InvalidPayloadTest("/gpg/verifySignatureQuanto", t)
-	quantoSignature := tools.GPG2Quanto(testdata.TestSignatureSignature, testdata.TestKeyFingerprint, "SHA512")
+	quantoSignature := tools.GPG2Quanto(test.TestSignatureSignature, test.TestKeyFingerprint, "SHA512")
 
 	verifyBody := models.GPGVerifySignatureData{
-		Base64Data: base64.StdEncoding.EncodeToString([]byte(testdata.TestSignatureData)),
+		Base64Data: base64.StdEncoding.EncodeToString([]byte(test.TestSignatureData)),
 		Signature:  quantoSignature,
 	}
 
@@ -377,8 +377,8 @@ func TestSign(t *testing.T) {
 	InvalidPayloadTest("/gpg/sign", t)
 	// region Generate Signature
 	signBody := models.GPGSignData{
-		FingerPrint: testdata.TestKeyFingerprint,
-		Base64Data:  base64.StdEncoding.EncodeToString([]byte(testdata.TestSignatureData)),
+		FingerPrint: test.TestKeyFingerprint,
+		Base64Data:  base64.StdEncoding.EncodeToString([]byte(test.TestSignatureData)),
 	}
 
 	body, err := json.Marshal(signBody)
@@ -408,7 +408,7 @@ func TestSign(t *testing.T) {
 	// endregion
 	// region Verify Signature
 	verifyBody := models.GPGVerifySignatureData{
-		Base64Data: base64.StdEncoding.EncodeToString([]byte(testdata.TestSignatureData)),
+		Base64Data: base64.StdEncoding.EncodeToString([]byte(test.TestSignatureData)),
 		Signature:  string(d),
 	}
 
@@ -441,7 +441,7 @@ func TestSign(t *testing.T) {
 	// endregion
 	// region Test Invalid Data
 	signBody = models.GPGSignData{
-		FingerPrint: testdata.TestKeyFingerprint,
+		FingerPrint: test.TestKeyFingerprint,
 		Base64Data:  "é123 'en / .sd",
 	}
 
@@ -465,7 +465,7 @@ func TestSign(t *testing.T) {
 	// region Test Invalid Fingerprint
 	signBody = models.GPGSignData{
 		FingerPrint: "ABCDEFGH",
-		Base64Data:  base64.StdEncoding.EncodeToString([]byte(testdata.TestSignatureData)),
+		Base64Data:  base64.StdEncoding.EncodeToString([]byte(test.TestSignatureData)),
 	}
 
 	body, _ = json.Marshal(signBody)
@@ -490,8 +490,8 @@ func TestSignQuanto(t *testing.T) {
 	InvalidPayloadTest("/gpg/signQuanto", t)
 	// region Generate Signature
 	signBody := models.GPGSignData{
-		FingerPrint: testdata.TestKeyFingerprint,
-		Base64Data:  base64.StdEncoding.EncodeToString([]byte(testdata.TestSignatureData)),
+		FingerPrint: test.TestKeyFingerprint,
+		Base64Data:  base64.StdEncoding.EncodeToString([]byte(test.TestSignatureData)),
 	}
 
 	body, err := json.Marshal(signBody)
@@ -521,7 +521,7 @@ func TestSignQuanto(t *testing.T) {
 	// endregion
 	// region Verify Signature
 	verifyBody := models.GPGVerifySignatureData{
-		Base64Data: base64.StdEncoding.EncodeToString([]byte(testdata.TestSignatureData)),
+		Base64Data: base64.StdEncoding.EncodeToString([]byte(test.TestSignatureData)),
 		Signature:  string(d),
 	}
 
@@ -555,7 +555,7 @@ func TestSignQuanto(t *testing.T) {
 	// endregion
 	// region Test Invalid Data
 	signBody = models.GPGSignData{
-		FingerPrint: testdata.TestKeyFingerprint,
+		FingerPrint: test.TestKeyFingerprint,
 		Base64Data:  "é123 'en / .sd",
 	}
 
@@ -579,7 +579,7 @@ func TestSignQuanto(t *testing.T) {
 	// region Test Invalid Fingerprint
 	signBody = models.GPGSignData{
 		FingerPrint: "ABCDEFGH",
-		Base64Data:  base64.StdEncoding.EncodeToString([]byte(testdata.TestSignatureData)),
+		Base64Data:  base64.StdEncoding.EncodeToString([]byte(test.TestSignatureData)),
 	}
 
 	body, _ = json.Marshal(signBody)
@@ -605,8 +605,8 @@ func TestUnlockKey(t *testing.T) {
 	InvalidPayloadTest("/gpg/unlockKey", t)
 	// region Test Unlock Key
 	data := models.GPGUnlockKeyData{
-		FingerPrint: testdata.TestKeyFingerprint,
-		Password:    testdata.TestKeyPassword,
+		FingerPrint: test.TestKeyFingerprint,
+		Password:    test.TestKeyPassword,
 	}
 
 	body, _ := json.Marshal(data)

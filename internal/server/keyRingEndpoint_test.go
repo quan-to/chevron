@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"github.com/quan-to/chevron/internal/models"
 	"github.com/quan-to/chevron/pkg/QuantoError"
-	"github.com/quan-to/chevron/testdata"
+	"github.com/quan-to/chevron/test"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -17,7 +17,7 @@ func TestKREGetKey(t *testing.T) {
 	// region Test Get Key
 	req, err := http.NewRequest("GET", "/keyRing/getKey", nil)
 	q := req.URL.Query()
-	q.Add("fingerPrint", testdata.TestKeyFingerprint)
+	q.Add("fingerPrint", test.TestKeyFingerprint)
 	req.URL.RawQuery = q.Encode()
 
 	errorDie(err, t)
@@ -84,14 +84,14 @@ func TestKREGetCachedKeys(t *testing.T) {
 
 	found := false
 	for _, v := range keyInfo {
-		if v.FingerPrint == testdata.TestKeyFingerprint {
+		if v.FingerPrint == test.TestKeyFingerprint {
 			found = true
 			break
 		}
 	}
 
 	if !found {
-		errorDie(fmt.Errorf("expected key %s to be in cached keys", testdata.TestKeyFingerprint), t)
+		errorDie(fmt.Errorf("expected key %s to be in cached keys", test.TestKeyFingerprint), t)
 	}
 	// endregion
 }
@@ -122,14 +122,14 @@ func TestKREGetLoadedPrivateKeys(t *testing.T) {
 
 	found := false
 	for _, v := range keyInfo {
-		if v.FingerPrint == testdata.TestKeyFingerprint {
+		if v.FingerPrint == test.TestKeyFingerprint {
 			found = true
 			break
 		}
 	}
 
 	if !found {
-		errorDie(fmt.Errorf("expected key %s to be in private keys", testdata.TestKeyFingerprint), t)
+		errorDie(fmt.Errorf("expected key %s to be in private keys", test.TestKeyFingerprint), t)
 	}
 	// endregion
 }
@@ -198,7 +198,7 @@ func TestKREAddPrivateKey(t *testing.T) {
 	// endregion
 	// region Test Add Public Key as private
 	payload.Password = ""
-	payload.EncryptedPrivateKey, _ = gpg.GetPublicKeyASCII(ctx, testdata.TestKeyFingerprint)
+	payload.EncryptedPrivateKey, _ = gpg.GetPublicKeyASCII(ctx, test.TestKeyFingerprint)
 
 	body, _ = json.Marshal(payload)
 

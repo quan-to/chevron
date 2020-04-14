@@ -7,7 +7,7 @@ import (
 	"github.com/quan-to/chevron/internal/database"
 	"github.com/quan-to/chevron/internal/models"
 	"github.com/quan-to/chevron/internal/tools"
-	"github.com/quan-to/chevron/testdata"
+	"github.com/quan-to/chevron/test"
 	"io/ioutil"
 	"testing"
 )
@@ -21,7 +21,7 @@ func TestPKSGetKey(t *testing.T) {
 	// Test Internal
 	c := database.GetConnection()
 
-	z, err := ioutil.ReadFile("../../testdata/testkey_privateTestKey.gpg")
+	z, err := ioutil.ReadFile("../../test/data/testkey_privateTestKey.gpg")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -52,7 +52,7 @@ func TestPKSGetKey(t *testing.T) {
 	config.EnableRethinkSKS = false
 	config.SKSServer = "https://keyserver.ubuntu.com/"
 
-	key, _ = PKSGetKey(ctx, testdata.ExternalKeyFingerprint)
+	key, _ = PKSGetKey(ctx, test.ExternalKeyFingerprint)
 
 	fp, err = tools.GetFingerPrintFromKey(key)
 
@@ -61,8 +61,8 @@ func TestPKSGetKey(t *testing.T) {
 		t.FailNow()
 	}
 
-	if !tools.CompareFingerPrint(testdata.ExternalKeyFingerprint, fp) {
-		t.Errorf("Expected %s got %s", testdata.ExternalKeyFingerprint, fp)
+	if !tools.CompareFingerPrint(test.ExternalKeyFingerprint, fp) {
+		t.Errorf("Expected %s got %s", test.ExternalKeyFingerprint, fp)
 	}
 }
 
@@ -117,7 +117,7 @@ func TestPKSAdd(t *testing.T) {
 	config.EnableRethinkSKS = true
 	ctx := context.Background()
 	// Test Internal
-	z, err := ioutil.ReadFile("../../testdata/testkey_privateTestKey.gpg")
+	z, err := ioutil.ReadFile("../../test/data/testkey_privateTestKey.gpg")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

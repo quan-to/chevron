@@ -1,26 +1,26 @@
 package fieldcipher
 
 import (
-	"github.com/quan-to/chevron/testdata"
+	"github.com/quan-to/chevron/test"
 	"io/ioutil"
 	"testing"
 )
 
 func TestDecipher_DecipherPacket(t *testing.T) {
 
-	keyData, err := ioutil.ReadFile("../../testdata/testkey_privateTestKey.gpg")
+	keyData, err := ioutil.ReadFile("../../test/data/testkey_privateTestKey.gpg")
 
 	if err != nil {
 		t.Fatalf("Error reading private key: %s", err)
 	}
 
-	keyPass, err := ioutil.ReadFile("../../testdata/testprivatekeyPassword.txt")
+	keyPass, err := ioutil.ReadFile("../../test/data/testprivatekeyPassword.txt")
 
 	if err != nil {
 		t.Fatalf("Error reading private key password: %s", err)
 	}
 
-	cipher := MakeCipherFromASCIIArmoredKeys([]string{testdata.TestPublicKey})
+	cipher := MakeCipherFromASCIIArmoredKeys([]string{test.TestPublicKey})
 
 	dataToCipher := map[string]interface{}{
 		"a": "b",

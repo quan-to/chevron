@@ -1,12 +1,12 @@
 package fieldcipher
 
 import (
-	"github.com/quan-to/chevron/testdata"
+	"github.com/quan-to/chevron/test"
 	"testing"
 )
 
 func TestCipher_GenerateEncryptedPacket(t *testing.T) {
-	cipher := MakeCipherFromASCIIArmoredKeys([]string{testdata.TestPublicKey})
+	cipher := MakeCipherFromASCIIArmoredKeys([]string{test.TestPublicKey})
 
 	dataToCipher := map[string]interface{}{
 		"a": "b",

@@ -9,7 +9,7 @@ import (
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/internal/vaultManager"
 	"github.com/quan-to/chevron/pkg/interfaces"
-	"github.com/quan-to/chevron/testdata"
+	"github.com/quan-to/chevron/test"
 	"io/ioutil"
 	"testing"
 )
@@ -152,7 +152,7 @@ func TestGetKeyExternal(t *testing.T) {
 	remote_signer.SKSServer = "https://keyserver.ubuntu.com/"
 	krm := MakeKeyRingManager(nil)
 	remote_signer.EnableRethinkSKS = false
-	e := krm.GetKey(ctx, testdata.ExternalKeyFingerprint)
+	e := krm.GetKey(ctx, test.ExternalKeyFingerprint)
 
 	if e == nil {
 		t.Error("Expected External key to be fetch")
@@ -161,15 +161,15 @@ func TestGetKeyExternal(t *testing.T) {
 
 	fp := tools.IssuerKeyIdToFP16(e.PrimaryKey.KeyId)
 
-	if fp != testdata.ExternalKeyFingerprint {
-		t.Errorf("Expected key %s got %s", testdata.ExternalKeyFingerprint, fp)
+	if fp != test.ExternalKeyFingerprint {
+		t.Errorf("Expected key %s got %s", test.ExternalKeyFingerprint, fp)
 	}
 
 	// Test SKS Internal
 	remote_signer.EnableRethinkSKS = true
 	c := database.GetConnection()
 
-	z, err := ioutil.ReadFile("../../testdata/testkey_privateTestKey.gpg")
+	z, err := ioutil.ReadFile("../../test/data/testkey_privateTestKey.gpg")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

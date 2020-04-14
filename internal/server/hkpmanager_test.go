@@ -9,7 +9,7 @@ import (
 	"github.com/quan-to/chevron/internal/models/HKP"
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/QuantoError"
-	"github.com/quan-to/chevron/testdata"
+	"github.com/quan-to/chevron/test"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -25,7 +25,7 @@ func TestHKPAdd(t *testing.T) {
 	req, err := http.NewRequest("POST", "/pks/add", nil)
 
 	form := url.Values{}
-	form.Add("keytext", testdata.TestPublicKey2)
+	form.Add("keytext", test.TestPublicKey2)
 	req.PostForm = form
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
@@ -48,14 +48,14 @@ func TestHKPAdd(t *testing.T) {
 		errorDie(fmt.Errorf("expected OK got %s", string(d)), t)
 	}
 
-	pubKey := gpg.GetPublicKey(ctx, testdata.TestPublicKey2FingerPrint)
+	pubKey := gpg.GetPublicKey(ctx, test.TestPublicKey2FingerPrint)
 
 	if pubKey == nil {
-		errorDie(fmt.Errorf("expected to find key %s", testdata.TestPublicKey2FingerPrint), t)
+		errorDie(fmt.Errorf("expected to find key %s", test.TestPublicKey2FingerPrint), t)
 	}
 
-	if tools.IssuerKeyIdToFP16(pubKey.KeyId) != testdata.TestPublicKey2FingerPrint {
-		errorDie(fmt.Errorf("expected key fingerprint to be %s got %s", testdata.TestPublicKey2FingerPrint, tools.IssuerKeyIdToFP16(pubKey.KeyId)), t)
+	if tools.IssuerKeyIdToFP16(pubKey.KeyId) != test.TestPublicKey2FingerPrint {
+		errorDie(fmt.Errorf("expected key fingerprint to be %s got %s", test.TestPublicKey2FingerPrint, tools.IssuerKeyIdToFP16(pubKey.KeyId)), t)
 	}
 
 	// region Test Corrupted Form
@@ -117,11 +117,11 @@ func TestLookup(t *testing.T) {
 	config.EnableRethinkSKS = true
 	//log.UnsetTestMode()
 	// Ensure key is in SKS
-	key, _ := gpg.GetPublicKeyASCII(ctx, testdata.TestKeyFingerprint)
+	key, _ := gpg.GetPublicKeyASCII(ctx, test.TestKeyFingerprint)
 	_ = keymagic.PKSAdd(ctx, key)
 
 	// region Operation GET
-	output, errObj, err := MakeHKPLookup(HKP.OperationGet, "true", "true", "on", "true", "0x"+testdata.TestKeyFingerprint)
+	output, errObj, err := MakeHKPLookup(HKP.OperationGet, "true", "true", "on", "true", "0x"+test.TestKeyFingerprint)
 
 	errorDie(err, t)
 	if errObj != nil {
@@ -132,11 +132,11 @@ func TestLookup(t *testing.T) {
 
 	errorDie(err, t)
 
-	if fp != testdata.TestKeyFingerprint {
-		errorDie(fmt.Errorf("expected public key fingerprint to be %s got %s", testdata.TestKeyFingerprint, fp), t)
+	if fp != test.TestKeyFingerprint {
+		errorDie(fmt.Errorf("expected public key fingerprint to be %s got %s", test.TestKeyFingerprint, fp), t)
 	}
 
-	_, errObj, err = MakeHKPLookup(HKP.OperationGet, "true", "true", "on", "true", testdata.TestKeyName)
+	_, errObj, err = MakeHKPLookup(HKP.OperationGet, "true", "true", "on", "true", test.TestKeyName)
 
 	errorDie(err, t)
 	if errObj != nil {

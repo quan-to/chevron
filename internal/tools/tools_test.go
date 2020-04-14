@@ -9,7 +9,7 @@ import (
 	"github.com/quan-to/chevron/pkg/openpgp"
 	"github.com/quan-to/chevron/pkg/openpgp/armor"
 	"github.com/quan-to/chevron/pkg/openpgp/packet"
-	"github.com/quan-to/chevron/testdata"
+	"github.com/quan-to/chevron/test"
 	"io/ioutil"
 	"path"
 	"strings"
@@ -88,7 +88,7 @@ func TestGPG2Quanto(t *testing.T) {
 }
 
 func TestGetFingerPrintFromKey(t *testing.T) {
-	z, err := ioutil.ReadFile("../../testdata/testkey_privateTestKey.gpg")
+	z, err := ioutil.ReadFile("../../test/data/testkey_privateTestKey.gpg")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -101,8 +101,8 @@ func TestGetFingerPrintFromKey(t *testing.T) {
 		t.FailNow()
 	}
 
-	if k != testdata.TestKeyFingerprint {
-		t.Errorf("Expected %s got %s", testdata.TestKeyFingerprint, k)
+	if k != test.TestKeyFingerprint {
+		t.Errorf("Expected %s got %s", test.TestKeyFingerprint, k)
 	}
 
 	// Test Error Scenarios
@@ -118,7 +118,7 @@ func TestGetFingerPrintFromKey(t *testing.T) {
 }
 
 func TestGetFingerPrintsFromEncryptedMessage(t *testing.T) {
-	fps, err := GetFingerPrintsFromEncryptedMessage(testdata.TestDecryptDataAscii)
+	fps, err := GetFingerPrintsFromEncryptedMessage(test.TestDecryptDataAscii)
 
 	if err != nil {
 		t.Fatalf("Got error in test: %s", err)
@@ -148,7 +148,7 @@ func TestGetFingerPrintsFromEncryptedMessage(t *testing.T) {
 	}
 
 	// Test Non PGP Data
-	fps, err = GetFingerPrintsFromEncryptedMessage(strings.Replace(testdata.TestDecryptDataAscii, "PGP MESSAGE", "HUE MESSAGE", -1))
+	fps, err = GetFingerPrintsFromEncryptedMessage(strings.Replace(test.TestDecryptDataAscii, "PGP MESSAGE", "HUE MESSAGE", -1))
 
 	if err == nil {
 		t.Fatalf("Expected error")
@@ -162,7 +162,7 @@ func TestGetFingerPrintsFromEncryptedMessage(t *testing.T) {
 }
 
 func TestGetFingerPrintsFromEncryptedMessageRaw(t *testing.T) {
-	fps, err := GetFingerPrintsFromEncryptedMessageRaw(testdata.TestDecryptDataRawB64)
+	fps, err := GetFingerPrintsFromEncryptedMessageRaw(test.TestDecryptDataRawB64)
 
 	if err != nil {
 		t.Fatalf("Got error in test: %s", err)
@@ -204,7 +204,7 @@ func TestGetFingerPrintsFromEncryptedMessageRaw(t *testing.T) {
 }
 
 func TestReadKeyToEntity(t *testing.T) {
-	z, err := ioutil.ReadFile("../../testdata/testkey_privateTestKey.gpg")
+	z, err := ioutil.ReadFile("../../test/data/testkey_privateTestKey.gpg")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -217,8 +217,8 @@ func TestReadKeyToEntity(t *testing.T) {
 		t.FailNow()
 	}
 
-	if IssuerKeyIdToFP16(e.PrimaryKey.KeyId) != testdata.TestKeyFingerprint {
-		t.Errorf("Expected %s got %s", testdata.TestKeyFingerprint, IssuerKeyIdToFP16(e.PrimaryKey.KeyId))
+	if IssuerKeyIdToFP16(e.PrimaryKey.KeyId) != test.TestKeyFingerprint {
+		t.Errorf("Expected %s got %s", test.TestKeyFingerprint, IssuerKeyIdToFP16(e.PrimaryKey.KeyId))
 	}
 
 	_, err = ReadKeyToEntity("hueheueheuehue")
@@ -288,7 +288,7 @@ func TestCreateEntityForSubKey(t *testing.T) {
 	pgpPubKey := packet.NewRSAPublicKey(cTimestamp, &privateKey.PublicKey)
 	pgpPrivKey := packet.NewRSAPrivateKey(cTimestamp, privateKey)
 
-	e := CreateEntityForSubKey(testdata.TestKeyFingerprint, pgpPubKey, pgpPrivKey)
+	e := CreateEntityForSubKey(test.TestKeyFingerprint, pgpPubKey, pgpPrivKey)
 
 	if e.PrimaryKey != pgpPubKey {
 		t.Errorf("Expected Primary Key to be the Public key")
@@ -352,23 +352,23 @@ func TestCreateEntityFromKeys(t *testing.T) {
 }
 
 func TestSignatureFix(t *testing.T) {
-	s := SignatureFix(testdata.TestSignatureSignature)
+	s := SignatureFix(test.TestSignatureSignature)
 
-	original := GPG2Quanto(testdata.TestSignatureSignature, "", "")
+	original := GPG2Quanto(test.TestSignatureSignature, "", "")
 	fixed := GPG2Quanto(s, "", "")
 
 	if original != fixed {
 		t.Errorf("Expected: %s\nGot %s", original, fixed)
 	}
 
-	s = SignatureFix(testdata.TestSignatureSignatureNoCRC)
+	s = SignatureFix(test.TestSignatureSignatureNoCRC)
 	fixed = GPG2Quanto(s, "", "")
 
 	if original != fixed {
 		t.Errorf("Expected: %s\nGot %s", original, fixed)
 	}
 
-	s = SignatureFix(testdata.TestSignatureSignatureNoCRCSingleLine)
+	s = SignatureFix(test.TestSignatureSignatureNoCRCSingleLine)
 	fixed = GPG2Quanto(s, "", "")
 
 	if original != fixed {
@@ -377,10 +377,10 @@ func TestSignatureFix(t *testing.T) {
 
 	// Test invalid base64
 	assertPanic(t, func() {
-		SignatureFix(strings.Replace(testdata.TestSignatureSignatureNoCRC, "wsFcBAA", "iQ-----", -1))
+		SignatureFix(strings.Replace(test.TestSignatureSignatureNoCRC, "wsFcBAA", "iQ-----", -1))
 	}, "Expected panic on invalid base64")
 
-	s = SignatureFix(testdata.BrokenMacOSXSignature)
+	s = SignatureFix(test.BrokenMacOSXSignature)
 	fixed = GPG2Quanto(s, "", "")
 
 	if original != fixed {
@@ -388,7 +388,7 @@ func TestSignatureFix(t *testing.T) {
 	}
 
 	// Test Embedded CRC Case
-	s = SignatureFix(testdata.TestEmbeddedCRCSignature)
+	s = SignatureFix(test.TestEmbeddedCRCSignature)
 
 	//          Try get the fingerprint of signature
 	b := bytes.NewReader([]byte(s))
@@ -517,39 +517,39 @@ func TestCopyFiles(t *testing.T) {
 }
 
 func TestBrokenMacOSXKey(t *testing.T) {
-	s := strings.Split(testdata.BrokenMacOSXSignature, "\n")
+	s := strings.Split(test.BrokenMacOSXSignature, "\n")
 	s = brokenMacOSXArrayFix(s, true)
 
 	fixed := strings.Join(s, "\n")
-	if fixed != testdata.BrokenMacOSXSignatureFixed {
-		t.Errorf("macosx signature not fixed. Expected:\n%s\nGot:\n%s", testdata.BrokenMacOSXSignatureFixed, fixed)
+	if fixed != test.BrokenMacOSXSignatureFixed {
+		t.Errorf("macosx signature not fixed. Expected:\n%s\nGot:\n%s", test.BrokenMacOSXSignatureFixed, fixed)
 	}
 }
 
 func TestOneLineSignature(t *testing.T) {
-	sig := SignatureFix(testdata.OneLineSignature)
-	if sig != testdata.BrokenMacOSXSignatureFixed {
-		t.Errorf("expected one line signature to be fixed. Expected:\n%s\nGot:\n%s", testdata.BrokenMacOSXSignatureFixed, sig)
+	sig := SignatureFix(test.OneLineSignature)
+	if sig != test.BrokenMacOSXSignatureFixed {
+		t.Errorf("expected one line signature to be fixed. Expected:\n%s\nGot:\n%s", test.BrokenMacOSXSignatureFixed, sig)
 	}
 }
 
 func TestGetFingerPrintsFromKey(t *testing.T) {
-	fps, err := GetFingerPrintsFromKey(testdata.TestPublicKeyManySubkeys)
+	fps, err := GetFingerPrintsFromKey(test.TestPublicKeyManySubkeys)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	for _, v := range fps {
-		if StringIndexOf(v, testdata.SubKeysFromTestPublicKeyManySubkeys) == -1 {
+		if StringIndexOf(v, test.SubKeysFromTestPublicKeyManySubkeys) == -1 {
 			t.Errorf("expected %s to be in fingerprints list", v)
 		}
 	}
 }
 
 func TestFolderExists(t *testing.T) {
-	v := FolderExists("../../testdata")
+	v := FolderExists("../../test")
 	if !v {
-		t.Errorf("expected FolderExists(\"../../testdata\") == true")
+		t.Errorf("expected FolderExists(\"../../test\") == true")
 	}
 
 	v = FolderExists("__heuerbabsueaius31i2u3n13ubae___")
@@ -578,7 +578,7 @@ func TestGeneratePassword(t *testing.T) {
 }
 
 func TestIsASCIIArmored(t *testing.T) {
-	b, err := ioutil.ReadFile("../../testdata/nonasciiencrypted.gpg")
+	b, err := ioutil.ReadFile("../../test/data/nonasciiencrypted.gpg")
 	if err != nil {
 		t.Errorf("Error loading file: %s", err)
 	}
@@ -586,7 +586,7 @@ func TestIsASCIIArmored(t *testing.T) {
 	nonascii := string(b)
 
 	if IsASCIIArmored(nonascii) != false {
-		t.Errorf("Expected NONASCII from ../../testdata/nonasciiencrypted.gpg")
+		t.Errorf("Expected NONASCII from ../../test/data/nonasciiencrypted.gpg")
 	}
 
 	if IsASCIIArmored(sigConvertGPG) != true {
@@ -595,7 +595,7 @@ func TestIsASCIIArmored(t *testing.T) {
 }
 
 func TestNonASCIIFingerprints(t *testing.T) {
-	b, err := ioutil.ReadFile("../../testdata/nonasciiencrypted.gpg")
+	b, err := ioutil.ReadFile("../../test/data/nonasciiencrypted.gpg")
 	if err != nil {
 		t.Errorf("Error loading file: %s", err)
 	}

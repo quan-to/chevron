@@ -7,7 +7,7 @@ import (
 	"fmt"
 	remote_signer "github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/pkg/QuantoError"
-	"github.com/quan-to/chevron/testdata"
+	"github.com/quan-to/chevron/test"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -15,28 +15,28 @@ import (
 
 /*
 func TestGetPasswords(t *testing.T) {
-	sm.PutKeyPassword(testdata.TestKeyFingerprint, testdata.TestKeyFingerprint)
+	sm.PutKeyPassword(test.TestKeyFingerprint, test.TestKeyFingerprint)
 
 	passwords := sm.GetPasswords()
 
-	if passwords[testdata.TestKeyFingerprint] == "" {
-		t.Errorf("Expected %s key password to be in password list.", testdata.TestKeyFingerprint)
+	if passwords[test.TestKeyFingerprint] == "" {
+		t.Errorf("Expected %s key password to be in password list.", test.TestKeyFingerprint)
 	}
 }
 
 func TestUnlockLocalKeys(t *testing.T) {
-	filename := fmt.Sprintf("key-password-utf8-%s.txt", testdata.TestKeyFingerprint)
+	filename := fmt.Sprintf("key-password-utf8-%s.txt", test.TestKeyFingerprint)
 
-	encPass, err := sm.gpg.Encrypt(filename, sm.masterKeyFingerPrint, []byte(testdata.TestKeyFingerprint), smEncryptedDataOnly)
+	encPass, err := sm.gpg.Encrypt(filename, sm.masterKeyFingerPrint, []byte(test.TestKeyFingerprint), smEncryptedDataOnly)
 
 	if err != nil {
 		t.Errorf("Error saving password: %s", err)
 		t.FailNow()
 	}
 
-	sm.PutEncryptedPassword(testdata.TestKeyFingerprint, encPass)
+	sm.PutEncryptedPassword(test.TestKeyFingerprint, encPass)
 
-	if sm.encryptedPasswords[testdata.TestKeyFingerprint] != encPass {
+	if sm.encryptedPasswords[test.TestKeyFingerprint] != encPass {
 		t.Errorf("Expected stored encrypted password to be set.")
 	}
 
@@ -46,16 +46,16 @@ func TestUnlockLocalKeys(t *testing.T) {
 
 func TestGetUnlockPasswords(t *testing.T) {
 	ctx := context.Background()
-	filename := fmt.Sprintf("key-password-utf8-%s.txt", testdata.TestKeyFingerprint)
+	filename := fmt.Sprintf("key-password-utf8-%s.txt", test.TestKeyFingerprint)
 
-	encPass, err := gpg.Encrypt(ctx, filename, sm.GetMasterKeyFingerPrint(ctx), []byte(testdata.TestKeyPassword), remote_signer.SMEncryptedDataOnly)
+	encPass, err := gpg.Encrypt(ctx, filename, sm.GetMasterKeyFingerPrint(ctx), []byte(test.TestKeyPassword), remote_signer.SMEncryptedDataOnly)
 
 	if err != nil {
 		t.Errorf("Error saving password: %s", err)
 		t.FailNow()
 	}
 
-	sm.PutEncryptedPassword(ctx, testdata.TestKeyFingerprint, encPass)
+	sm.PutEncryptedPassword(ctx, test.TestKeyFingerprint, encPass)
 
 	req, err := http.NewRequest("GET", "/__internal/__getUnlockPasswords", nil)
 
@@ -83,7 +83,7 @@ func TestGetUnlockPasswords(t *testing.T) {
 	found := false
 
 	for k, v := range data {
-		if k == testdata.TestKeyFingerprint {
+		if k == test.TestKeyFingerprint {
 			found = true
 			if v != encPass {
 				t.Errorf("The encrypted password is not the expected one.")
@@ -99,9 +99,9 @@ func TestGetUnlockPasswords(t *testing.T) {
 
 func TestPostUnlockPassword(t *testing.T) {
 	ctx := context.Background()
-	filename := fmt.Sprintf("key-password-utf8-%s.txt", testdata.TestKeyFingerprint)
+	filename := fmt.Sprintf("key-password-utf8-%s.txt", test.TestKeyFingerprint)
 
-	encPass, err := gpg.Encrypt(ctx, filename, sm.GetMasterKeyFingerPrint(ctx), []byte(testdata.TestKeyFingerprint), remote_signer.SMEncryptedDataOnly)
+	encPass, err := gpg.Encrypt(ctx, filename, sm.GetMasterKeyFingerPrint(ctx), []byte(test.TestKeyFingerprint), remote_signer.SMEncryptedDataOnly)
 
 	if err != nil {
 		t.Errorf("Error saving password: %s", err)
@@ -109,7 +109,7 @@ func TestPostUnlockPassword(t *testing.T) {
 	}
 
 	payload := map[string]string{
-		testdata.TestKeyFingerprint: encPass,
+		test.TestKeyFingerprint: encPass,
 	}
 
 	d, _ := json.Marshal(payload)
@@ -138,8 +138,8 @@ func TestPostUnlockPassword(t *testing.T) {
 	}
 
 	passwords := sm.GetPasswords(ctx)
-	if passwords[testdata.TestKeyFingerprint] != encPass {
-		t.Errorf("Expected key %s to be in the password list.", testdata.TestKeyFingerprint)
+	if passwords[test.TestKeyFingerprint] != encPass {
+		t.Errorf("Expected key %s to be in the password list.", test.TestKeyFingerprint)
 	}
 }
 
