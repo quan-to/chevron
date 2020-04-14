@@ -30,7 +30,7 @@ jobs:
       name: "Upload chevron.dylib artifacts"
       with:
         name: chevronlib-darwin
-        path: wrappers/chevron.dylib
+        path: tools/wrappers/chevron.dylib
 
   buildnixwin:
     # The type of runner that the job will run on
