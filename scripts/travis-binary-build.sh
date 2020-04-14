@@ -6,14 +6,13 @@ BUILD_OS="windows freebsd darwin openbsd"
 
 export GOCACHE=/tmp/gocache
 
-TAG=`git describe --exact-match --tags HEAD`
+TAG=$(git describe --exact-match --tags HEAD)
 if [[ $? -eq 0 ]];
 then
   set -e
   # ----------------------------------- #
   echo "Releasing for tag ${TAG}"
-  ORIGINAL_FOLDER="`pwd`"
-  echo "I'm in `pwd`"
+  echo "I'm in $(pwd)"
   mkdir -p zips
 
   # ----------------------------------- #

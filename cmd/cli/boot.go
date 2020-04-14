@@ -1,8 +1,10 @@
 package main
 
-import "github.com/quan-to/chevron"
+import (
+	"github.com/quan-to/chevron/internal/config"
+)
 
 // Bootstrap default variables
 func init() {
-	remote_signer.KeyPrefix = "key_"
+	config.KeyPrefix = "key_"
 }
