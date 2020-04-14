@@ -12,6 +12,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/rand"
 	"crypto/rsa"
+	// skipcq: GSC-G505
 	"crypto/sha1"
 	"encoding/binary"
 	"fmt"
@@ -190,6 +191,7 @@ func (pk *PrivateKey) SerializeUnEncrypted(w io.Writer) (err error) {
 	}
 	privateKeyBytes := buf.Bytes()
 	if pk.sha1Checksum {
+		// skipcq: GSC-G401
 		h := sha1.New()
 		_, _ = h.Write(privateKeyBytes)
 		sum := h.Sum(nil)
@@ -299,6 +301,7 @@ func (pk *PrivateKey) Encrypt(passphrase []byte) error {
 
 	if pk.sha1Checksum {
 		pk.s2kType = S2KSHA1
+		// skipcq: GSC-G401
 		h := sha1.New()
 		_, _ = h.Write(privateKeyBytes)
 		sum := h.Sum(nil)
@@ -338,16 +341,19 @@ func (pk *PrivateKey) SerializePrivateMPI(privateKeyBuf io.Writer) error {
 }
 
 func serializeRSAPrivateKeyMPI(w io.Writer, priv *rsa.PrivateKey) error {
+	// skipcq: SCC-SA1003
 	_ = binary.Write(w, binary.BigEndian, priv.D.BitLen())
 	err := writeBig(w, priv.D)
 	if err != nil {
 		return err
 	}
+	// skipcq: SCC-SA1003
 	_ = binary.Write(w, binary.BigEndian, priv.Primes[0].BitLen())
 	err = writeBig(w, priv.Primes[0])
 	if err != nil {
 		return err
 	}
+	// skipcq: SCC-SA1003
 	_ = binary.Write(w, binary.BigEndian, priv.Primes[1].BitLen())
 	err = writeBig(w, priv.Primes[1])
 	if err != nil {
@@ -359,16 +365,19 @@ func serializeRSAPrivateKeyMPI(w io.Writer, priv *rsa.PrivateKey) error {
 }
 
 func serializeDSAPrivateKeyMPI(w io.Writer, priv *dsa.PrivateKey) error {
+	// skipcq: SCC-SA1003
 	_ = binary.Write(w, binary.BigEndian, priv.X.BitLen())
 	return writeBig(w, priv.X)
 }
 
 func serializeElGamalPrivateKeyMPI(w io.Writer, priv *elgamal.PrivateKey) error {
+	// skipcq: SCC-SA1003
 	_ = binary.Write(w, binary.BigEndian, priv.X.BitLen())
 	return writeBig(w, priv.X)
 }
 
 func serializeECDSAPrivateKeyMPI(w io.Writer, priv *ecdsa.PrivateKey) error {
+	// skipcq: SCC-SA1003
 	_ = binary.Write(w, binary.BigEndian, priv.D.BitLen())
 	return writeBig(w, priv.D)
 }
@@ -390,6 +399,7 @@ func (pk *PrivateKey) Decrypt(passphrase []byte) error {
 		if len(data) < sha1.Size {
 			return errors.StructuralError("truncated private key data")
 		}
+		// skipcq: GSC-G401
 		h := sha1.New()
 		_, _ = h.Write(data[:len(data)-sha1.Size])
 		sum := h.Sum(nil)

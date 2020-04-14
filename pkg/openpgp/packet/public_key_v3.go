@@ -6,6 +6,7 @@ package packet
 
 import (
 	"crypto"
+	// skipcq: GSC-G501
 	"crypto/md5"
 	"crypto/rsa"
 	"encoding/binary"
@@ -79,6 +80,7 @@ func (pk *PublicKeyV3) parse(r io.Reader) (err error) {
 
 func (pk *PublicKeyV3) setFingerPrintAndKeyId() {
 	// RFC 4880, section 12.2
+	// skipcq: GSC-G401
 	fingerPrint := md5.New()
 	_, _ = fingerPrint.Write(pk.n.bytes)
 	_, _ = fingerPrint.Write(pk.e.bytes)

@@ -8,6 +8,7 @@ import (
 )
 
 func getWithToken(url, token string) (string, error) {
+	// skipcq: GSC-G402
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true} // Sad :(
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

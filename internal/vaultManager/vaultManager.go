@@ -40,6 +40,7 @@ func MakeVaultManager(log slog.Instance, prefix string) *VaultManager {
 	if config.VaultSkipVerify {
 		log.Warn("WARNING: Vault Skip Verify is enable. We will not check for SSL Certs in Vault!")
 		tr := &http.Transport{
+			// skipcq: GSC-G402
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
 		httpClient = &http.Client{Transport: tr}

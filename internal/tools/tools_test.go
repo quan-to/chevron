@@ -570,6 +570,7 @@ func TestGeneratePassword(t *testing.T) {
 	}
 
 	for _, v := range b {
+		// skipcq: CRT-D0002
 		if !strings.Contains(passwordBytes, string(v)) {
 			t.Errorf("char %s is not in passwordBytes list.", string(v))
 		}

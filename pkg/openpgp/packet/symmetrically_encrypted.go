@@ -6,6 +6,7 @@ package packet
 
 import (
 	"crypto/cipher"
+	// skipcq: GSC-G505
 	"crypto/sha1"
 	"crypto/subtle"
 	"github.com/quan-to/chevron/pkg/openpgp/errors"
@@ -78,6 +79,7 @@ func (se *SymmetricallyEncrypted) Decrypt(c CipherFunction, key []byte) (io.Read
 
 	if se.MDC {
 		// MDC packets have an embedded hash that we need to check.
+		// skipcq: GSC-G401
 		h := sha1.New()
 		_, _ = h.Write(se.prefix)
 		return &seMDCReader{in: plaintext, h: h}, nil
@@ -282,6 +284,7 @@ func SerializeSymmetricallyEncrypted(w io.Writer, c CipherFunction, key []byte, 
 	}
 	plaintext := cipher.StreamWriter{S: s, W: ciphertext}
 
+	// skipcq: GSC-G401
 	h := sha1.New()
 	_, _ = h.Write(iv)
 	_, _ = h.Write(iv[blockSize-2:])

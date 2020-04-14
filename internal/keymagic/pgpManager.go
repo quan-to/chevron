@@ -28,8 +28,10 @@ import (
 	"github.com/quan-to/slog"
 
 	// Include MD5 hashing algorithm by default
+	// skipcq: GSC-G501
 	_ "crypto/md5"
 	// Include SHA1 hashing algorithm by default
+	// skipcq: GSC-G505
 	_ "crypto/sha1"
 	// Include SHA256 hashing algorithm by default
 	_ "crypto/sha256"

@@ -10,6 +10,7 @@ import (
 	"bufio"
 	"crypto/aes"
 	"crypto/cipher"
+	// skipcq: GSC-G502
 	"crypto/des"
 	"crypto/rsa"
 	"io"
@@ -481,6 +482,7 @@ func (cipher CipherFunction) blockSize() int {
 func (cipher CipherFunction) new(key []byte) (block cipher.Block) {
 	switch cipher {
 	case Cipher3DES:
+		// skipcq: GSC-G401
 		block, _ = des.NewTripleDESCipher(key)
 	case CipherCAST5:
 		block, _ = cast5.NewCipher(key)

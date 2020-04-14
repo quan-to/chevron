@@ -11,6 +11,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rsa"
+	// skipcq: GSC-G505
 	"crypto/sha1"
 	_ "crypto/sha256"
 	_ "crypto/sha512"
@@ -304,6 +305,7 @@ func (pk *PublicKey) parse(r io.Reader) (err error) {
 
 func (pk *PublicKey) setFingerPrintAndKeyId() {
 	// RFC 4880, section 12.2
+	// skipcq: GSC-G401
 	fingerPrint := sha1.New()
 	pk.SerializeSignaturePrefix(fingerPrint)
 	_ = pk.serializeWithoutHeaders(fingerPrint)
