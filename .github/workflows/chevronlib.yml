@@ -23,7 +23,7 @@ jobs:
         go-version: 1.13
     - name: Build ChevronLib
       run: |
-        cd wrappers
+        cd tools/wrappers
         echo "Building linux chevron.dylib"
         go build -o chevron.dylib -buildmode=c-shared
     - uses: actions/upload-artifact@v1
@@ -53,7 +53,7 @@ jobs:
     # Runs a set of commands using the runners shell
     - name: Build ChevronLib
       run: |
-        cd wrappers
+        cd tools/wrappers
         echo "Building linux chevron.so"
         go build -o chevron.so -buildmode=c-shared
         echo "Building chevron32.dll"
@@ -64,17 +64,17 @@ jobs:
       name: "Upload chevron.so artifacts"
       with:
         name: chevronlib-linux
-        path: wrappers/chevron.so
+        path: tools/wrappers/chevron.so
     - uses: actions/upload-artifact@v1
       name: "Upload chevron32.dll artifacts"
       with:
         name: chevronlib-win32
-        path: wrappers/chevron32.dll
+        path: tools/wrappers/chevron32.dll
     - uses: actions/upload-artifact@v1
       name: "Upload chevron.dll artifacts"
       with:
         name: chevronlib-win64
-        path: wrappers/chevron.dll
+        path: tools/wrappers/chevron.dll
   buildnodejs:
     needs:
       - buildmacosx
@@ -90,25 +90,25 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         name: chevronlib-win32
-        path: wrappers/
+        path: tools/wrappers/
     - name: Download ChevronLib Win64
       uses: actions/download-artifact@v1
       with:
         name: chevronlib-win64
-        path: wrappers/
+        path: tools/wrappers/
     - name: Download ChevronLib Linux
       uses: actions/download-artifact@v1
       with:
         name: chevronlib-linux
-        path: wrappers/
+        path: tools/wrappers/
     - name: Download ChevronLib MacOSX
       uses: actions/download-artifact@v1
       with:
         name: chevronlib-darwin
-        path: wrappers/
+        path: tools/wrappers/
     - name: Build NPM Package
       run: |
-        cd wrappers/nodejs
+        cd tools/wrappers/nodejs
         echo "Installing / Building dependencies"
         npm install
         npm -g install typescript
@@ -125,4 +125,4 @@ jobs:
       name: "Upload chevronlib.zip artifacts"
       with:
         name: chevronlib-npm.zip
-        path: wrappers/chevronlib.zip
+        path: tools/wrappers/chevronlib.zip
