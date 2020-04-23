@@ -55,6 +55,9 @@ var Environment string
 var AgentExternalURL string
 var AgentAdminExternalURL string
 var ShowLines bool
+var SingleKeyMode bool
+var SingleKeyPath string
+var SingleKeyPassword string
 
 // LogFormat allows to configure the output log format
 var LogFormat slog.Format
@@ -171,6 +174,10 @@ func Setup() {
 	}
 
 	OnDemandKeyLoad = os.Getenv("ON_DEMAND_KEY_LOAD") == "true"
+
+	SingleKeyMode = os.Getenv("MODE") == "single_key"
+	SingleKeyPath = os.Getenv("SINGLE_KEY_PATH")
+	SingleKeyPassword = os.Getenv("SINGLE_KEY_PASSWORD")
 
 	// Set defaults if not defined
 	if SyslogServer == "" {

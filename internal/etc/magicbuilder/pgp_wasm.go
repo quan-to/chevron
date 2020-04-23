@@ -8,13 +8,13 @@ import (
 )
 
 // MakePGP creates a new PGPManager using environment variables KeyPrefix, PrivateKeyFolder
-func MakePGP() interfaces.PGPManager {
-	kb := keybackend.MakeSaveToDiskBackend(nil, config.PrivateKeyFolder, config.KeyPrefix)
+func MakePGP(log slog.Instance) interfaces.PGPManager {
+	kb := keybackend.MakeSaveToDiskBackend(log, config.PrivateKeyFolder, config.KeyPrefix)
 
-	return keymagic.MakePGPManager(nil, kb, keymagic.MakeKeyRingManager())
+	return keymagic.MakePGPManager(log, kb, keymagic.MakeKeyRingManager())
 }
 
 // MakeVoidPGP creates a PGPManager that does not store anything anywhere
-func MakeVoidPGP() interfaces.PGPManager {
-	return keymagic.MakePGPManager(nil, keybackend.MakeVoidBackend(), keymagic.MakeKeyRingManager())
+func MakeVoidPGP(log slog.Instance) interfaces.PGPManager {
+	return keymagic.MakePGPManager(log, keybackend.MakeVoidBackend(), keymagic.MakeKeyRingManager())
 }
