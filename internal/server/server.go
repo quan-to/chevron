@@ -1,14 +1,17 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/quan-to/chevron/internal/agent"
-	remote_signer "github.com/quan-to/chevron/internal/config"
+	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/server/pages"
+	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/internal/vaultManager"
 	"github.com/quan-to/chevron/pkg/interfaces"
 	"github.com/quan-to/slog"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -17,8 +20,8 @@ func GenRemoteSignerServerMux(slog slog.Instance, sm interfaces.SecretsManager, 
 	var vm *vaultManager.VaultManager
 	log := slog.Scope("MUX")
 
-	if remote_signer.VaultStorage {
-		vm = vaultManager.MakeVaultManager(log, remote_signer.KeyPrefix)
+	if config.VaultStorage {
+		vm = vaultManager.MakeVaultManager(log, config.KeyPrefix)
 	}
 
 	ge := MakeGPGEndpoint(log, sm, gpg)
@@ -91,7 +94,7 @@ func RunRemoteSignerServer(slog slog.Instance, sm interfaces.SecretsManager, gpg
 
 	r := GenRemoteSignerServerMux(slog, sm, gpg)
 
-	listenAddr := fmt.Sprintf("0.0.0.0:%d", remote_signer.HttpPort)
+	listenAddr := fmt.Sprintf("0.0.0.0:%d", config.HttpPort)
 
 	srv := &http.Server{
 		Addr:    listenAddr,
@@ -117,4 +120,72 @@ func RunRemoteSignerServer(slog slog.Instance, sm interfaces.SecretsManager, gpg
 	slog.Info("Remote Signer is now listening at %s", listenAddr)
 
 	return stopChannel
+}
+
+// RunRemoteSignerServerSingleKey runs a single key instance of remote signer server asynchronously and returns a stop channel
+func RunRemoteSignerServerSingleKey(slog slog.Instance, sm interfaces.SecretsManager, gpg interfaces.PGPManager) (chan bool, error) {
+	slog.Info("Running in single-key mode")
+
+	slog.Info("Loading key from %q", config.SingleKeyPath)
+	keyData, err := ioutil.ReadFile(config.SingleKeyPath)
+
+	if err != nil {
+		return nil, fmt.Errorf("error reading key file at %s: %q", config.SingleKeyPath, err)
+	}
+
+	ctx := context.Background()
+
+	n, err := gpg.LoadKey(ctx, string(keyData))
+
+	if err != nil {
+		return nil, fmt.Errorf("error opening private key: %q", err)
+	}
+
+	if n == 0 {
+		return nil, fmt.Errorf("key parsed sucessfully but no private keys found. check if SINGLE_KEY_PATH points to a private key")
+	}
+
+	fps, _ := tools.GetFingerPrintsFromKey(string(keyData))
+
+	fp := fps[0]
+
+	slog.Info("Key loaded. Unlocking key %q", fp)
+
+	err = gpg.UnlockKey(ctx, fp, config.SingleKeyPassword)
+
+	if err != nil {
+		return nil, fmt.Errorf("cannot unlock key %q with password provided by SINGLE_KEY_PASSWORD environment", fp)
+	}
+
+	slog.Info("Key unlocked. Setting default Agent Key Fingerprint to %q", fp)
+	config.AgentKeyFingerPrint = fp
+
+	r := GenRemoteSignerServerMux(slog, sm, gpg)
+
+	listenAddr := fmt.Sprintf("0.0.0.0:%d", config.HttpPort)
+
+	srv := &http.Server{
+		Addr:    listenAddr,
+		Handler: r, // Pass our instance of gorilla/mux in.
+	}
+
+	stopChannel := make(chan bool)
+
+	go func() {
+		<-stopChannel
+		slog.Info("Received STOP. Closing server")
+		_ = srv.Close()
+		stopChannel <- true
+	}()
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil {
+			slog.Error(err)
+		}
+		slog.Info("HTTP Server Closed")
+	}()
+
+	slog.Info("Remote Signer is now listening at %s", listenAddr)
+
+	return stopChannel, nil
 }
