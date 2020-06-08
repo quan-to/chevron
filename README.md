@@ -1,4 +1,5 @@
 ![Logo](assets/logo/chevron.png)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fquan-to%2Fchevron.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fquan-to%2Fchevron?ref=badge_shield)
 
 [![MIT License](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://tldrlegal.com/license/mit-license) [![Coverage Status](https://coveralls.io/repos/github/quan-to/chevron/badge.svg?branch=master)](https://coveralls.io/github/quan-to/chevron?branch=master) [![Build Status](https://travis-ci.org/quan-to/chevron.svg?branch=master)](https://travis-ci.org/quan-to/chevron)
 
@@ -83,3 +84,7 @@ Top update agent-ui playground:
 5. Copy `build/*` to `cmd/agent-ui/resources/app/`
 6. Change `/static/` to `./static/` in `cmd/agent-ui/resources/app/index.html`
 7. Run `astilectron-bundler` in `cmd/agent-ui`
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fquan-to%2Fchevron.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fquan-to%2Fchevron?ref=badge_large)
