@@ -2,19 +2,19 @@ package main
 
 import (
 	"fmt"
+	"github.com/quan-to/chevron/internal/etc/magicbuilder"
+	"github.com/quan-to/chevron/internal/models"
 	"os"
 	"strings"
 	"syscall"
 
-	"github.com/quan-to/chevron/etc/magicBuilder"
-	"github.com/quan-to/chevron/models"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
 // ExportKey exports the specified public / secret key
 func ExportKey(name, password string, secret bool) {
 	var err error
-	pgpMan := magicBuilder.MakePGP(nil)
+	pgpMan := magicbuilder.MakePGP(nil)
 	pgpMan.LoadKeys(ctx)
 
 	// First Search the key
@@ -51,7 +51,7 @@ func ExportKey(name, password string, secret bool) {
 			fmt.Println("")
 		}
 
-		k, err = pgpMan.GetPrivateKeyAscii(ctx, kInfo.FingerPrint, password)
+		k, err = pgpMan.GetPrivateKeyASCII(ctx, kInfo.FingerPrint, password)
 		if err != nil {
 			if strings.Contains(err.Error(), "checksum failure") {
 				panic("Invalid key password")
@@ -59,7 +59,7 @@ func ExportKey(name, password string, secret bool) {
 			panic(err)
 		}
 	} else {
-		k, err = pgpMan.GetPublicKeyAscii(ctx, kInfo.FingerPrint)
+		k, err = pgpMan.GetPublicKeyASCII(ctx, kInfo.FingerPrint)
 		if err != nil {
 			panic(err)
 		}

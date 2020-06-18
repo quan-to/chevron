@@ -4,23 +4,22 @@ import (
 	"bufio"
 	"encoding/base64"
 	"fmt"
+	"github.com/quan-to/chevron/internal/etc/magicbuilder"
 	"io"
 	"io/ioutil"
 	"os"
-
-	"github.com/quan-to/chevron/etc/magicBuilder"
 )
 
 func Decrypt(input, output string) {
 	var err error
 	var data []byte
 
-	pgpMan := magicBuilder.MakePGP(nil)
+	pgpMan := magicbuilder.MakePGP(nil)
 	pgpMan.LoadKeys(ctx)
 
 	if input == "-" {
 		// Read from stdin
-		fmt.Fprintf(os.Stderr, "Reading from stdin:\n")
+		_, _ = fmt.Fprintf(os.Stderr, "Reading from stdin:\n")
 		fio := bufio.NewReader(os.Stdin)
 		chunk := make([]byte, 4096)
 		data = make([]byte, 0)

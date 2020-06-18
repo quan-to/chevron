@@ -3,19 +3,18 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/quan-to/chevron/internal/etc/magicbuilder"
 	"io"
 	"io/ioutil"
 	"os"
 	"time"
-
-	"github.com/quan-to/chevron/etc/magicBuilder"
 )
 
 // EncryptFile encrypts a file / data from input for the specified recipient
 func EncryptFile(input, output, recipient string) {
 	var err error
 	var data []byte
-	pgpMan := magicBuilder.MakePGP(nil)
+	pgpMan := magicbuilder.MakePGP(nil)
 	pgpMan.LoadKeys(ctx)
 
 	ent := pgpMan.GetPublicKeyEntity(ctx, recipient)
@@ -28,7 +27,7 @@ func EncryptFile(input, output, recipient string) {
 
 	if input == "-" {
 		// Read from stdin
-		fmt.Fprintf(os.Stderr, "Reading from stdin:\n")
+		_, _ = fmt.Fprintf(os.Stderr, "Reading from stdin:\n")
 		filename = fmt.Sprintf("stdin-%s", time.Now())
 		fio := bufio.NewReader(os.Stdin)
 		chunk := make([]byte, 4096)
@@ -52,7 +51,7 @@ func EncryptFile(input, output, recipient string) {
 		}
 	}
 
-	fmt.Fprintf(os.Stderr, "Encrypting to %s\n", recipient)
+	_, _ = fmt.Fprintf(os.Stderr, "Encrypting to %s\n", recipient)
 
 	var out *bufio.Writer
 	var f *os.File
@@ -77,7 +76,7 @@ func EncryptFile(input, output, recipient string) {
 		panic(err)
 	}
 
-	fmt.Fprintf(os.Stderr, "Done encrypting to %s\n", recipient)
+	_, _ = fmt.Fprintf(os.Stderr, "Done encrypting to %s\n", recipient)
 
 	_, err = out.WriteString(d)
 

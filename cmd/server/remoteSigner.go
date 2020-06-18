@@ -3,21 +3,24 @@ package main
 import (
 	"context"
 	_ "github.com/quan-to/chevron/cmd/server/init"
+	"github.com/quan-to/chevron/internal/bootstrap"
+	"github.com/quan-to/chevron/internal/config"
+	"github.com/quan-to/chevron/internal/etc/magicbuilder"
+	"github.com/quan-to/chevron/internal/kubernetes"
+	"github.com/quan-to/chevron/internal/server"
+	"github.com/quan-to/chevron/internal/tools"
+	"github.com/quan-to/slog"
 	"os"
 	"os/signal"
 	"syscall"
-
-	remote_signer "github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/bootstrap"
-	"github.com/quan-to/chevron/etc/magicBuilder"
-	"github.com/quan-to/chevron/kubernetes"
-	"github.com/quan-to/chevron/server"
-	"github.com/quan-to/slog"
 )
 
-var log = slog.Scope("QRS").Tag(remote_signer.DefaultTag)
+var log = slog.Scope("QRS").Tag(tools.DefaultTag)
 
 func main() {
+	var stop chan bool
+	var err error
+
 	if os.Getenv("SHOW_LINES") == "true" {
 		slog.SetShowLines(true)
 	}
@@ -25,12 +28,20 @@ func main() {
 	bootstrap.RunBootstraps()
 
 	ctx := context.Background()
-	sm := magicBuilder.MakeSM(log)
-	gpg := magicBuilder.MakePGP(log)
+	sm := magicbuilder.MakeSM(log)
+	gpg := magicbuilder.MakePGP(log)
 
 	gpg.LoadKeys(ctx)
 
-	stop := server.RunRemoteSignerServer(log, sm, gpg)
+	if config.SingleKeyMode {
+		stop, err = server.RunRemoteSignerServerSingleKey(log, sm, gpg)
+		if err != nil {
+			log.Fatal("Error starting in single-key mode: %s", err)
+		}
+	} else {
+		stop = server.RunRemoteSignerServer(log, sm, gpg)
+	}
+
 	localStop := make(chan bool)
 	kubeStop := make(chan bool)
 

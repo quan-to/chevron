@@ -4,18 +4,17 @@ import (
 	"context"
 	"crypto"
 	"fmt"
+	"github.com/quan-to/chevron/internal/keybackend"
+	"github.com/quan-to/chevron/internal/keymagic"
+	"github.com/quan-to/chevron/internal/models"
+	"github.com/quan-to/chevron/internal/tools"
+	"github.com/quan-to/chevron/pkg/interfaces"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
-
-	remote_signer "github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/etc"
-	"github.com/quan-to/chevron/keyBackend"
-	"github.com/quan-to/chevron/keymagic"
-	"github.com/quan-to/chevron/models"
 )
 
 const (
@@ -23,8 +22,8 @@ const (
 )
 
 var (
-	pgp              etc.PGPInterface
-	krm              etc.KRMInterface
+	pgp              interfaces.PGPManager
+	krm              interfaces.KeyRingManager
 	executableFolder string
 	keysFolder       string
 )
@@ -39,14 +38,14 @@ func init() {
 
 func Begin() {
 	_ = os.Mkdir(keysFolder, os.ModePerm)
-	kb := keyBackend.MakeSaveToDiskBackend(nil, keysFolder, "key_")
+	kb := keybackend.MakeSaveToDiskBackend(nil, keysFolder, "key_")
 	krm = keymagic.MakeKeyRingManager(nil)
-	pgp = keymagic.MakePGPManagerWithKRM(nil, kb, krm)
+	pgp = keymagic.MakePGPManager(nil, kb, krm)
 	pgp.LoadKeys(ctx)
 }
 
 func AddPrivateKey(privateKeyData string) (string, error) {
-	err, n := pgp.LoadKey(ctx, privateKeyData)
+	n, err := pgp.LoadKey(ctx, privateKeyData)
 	if err != nil {
 		return err.Error(), err
 	}
@@ -81,7 +80,7 @@ func Sign(fingerPrint, data string) (string, error) {
 	if err != nil {
 		return err.Error(), err
 	}
-	quantoSig := remote_signer.GPG2Quanto(signature, fingerPrint, "SHA512")
+	quantoSig := tools.GPG2Quanto(signature, fingerPrint, "SHA512")
 	return quantoSig, nil
 }
 
@@ -161,7 +160,7 @@ func AddKeys(files []string) (bool, []string) {
 			continue
 		}
 
-		fingerPrint, err := remote_signer.GetFingerPrintFromKey(string(data))
+		fingerPrint, err := tools.GetFingerPrintFromKey(string(data))
 		if err != nil {
 			errors[i] = err.Error()
 			continue
@@ -183,9 +182,9 @@ func AddKeys(files []string) (bool, []string) {
 
 func Migrate() {
 	storeFolder := path.Join(executableFolder, "store")
-	if remote_signer.FolderExists(storeFolder) { // Old key store
+	if tools.FolderExists(storeFolder) { // Old key store
 		log.Warn("Found \"store\" folder. Migrating keys...")
-		err := remote_signer.CopyFiles(storeFolder, keysFolder)
+		err := tools.CopyFiles(storeFolder, keysFolder)
 		if err != nil {
 			log.Error("Error moving files from store to keys: %s", err)
 		} else {
