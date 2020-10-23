@@ -94,12 +94,6 @@ jobs:
         echo "Closing RethinkDB"
         sudo kill -9 `cat ~/rethinkdb.pid`
 
-        if [ $LINT_OK == 1 ] || [ $FORMAT_OK == 1 ]
-        then
-          echo "Either Lint or Format went wrong"
-          exit 1
-        fi
-
     - name: Check results
       run: |
         FORMAT_OK="${{ steps.tests.outputs.format_ok }}"
