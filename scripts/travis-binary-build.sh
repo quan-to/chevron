@@ -28,7 +28,7 @@ then
   cd cmd
   for i in *
   do
-    if [[ "${i}" != "agent-ui" && "${i}" != "lib" ]]
+    if [[ "${i}" != "lib" ]]
     then
         echo "Building $i"
         cd $i
@@ -55,38 +55,7 @@ then
         cd ..
     fi
   done
-  # ----------------------------------- #
-  echo "Bundling Agent-UI"
-  cd agent-ui
-
-  echo "Getting Dependencies"
-  GOOS=linux go get ./...
-  GOOS=darwin go get ./...
-  GOOS=windows go get ./...
-
-  GO111MODULE=off GOOS=linux go get ./...
-  GO111MODULE=off GOOS=darwin go get ./...
-  GO111MODULE=off GOOS=windows go get ./...
-
-  # ----------------------------------- #
-  echo "Installing Astilectron"
-  go get github.com/asticode/go-astilectron
-  go get github.com/asticode/go-astilectron-bootstrap
-  go get github.com/asticode/go-astilectron-bundler/...
-  go install github.com/asticode/go-astilectron-bundler/astilectron-bundler
-
-  GO111MODULE=off go get github.com/asticode/go-astilectron
-  GO111MODULE=off go get github.com/asticode/go-astilectron-bootstrap
-  GO111MODULE=off go get github.com/asticode/go-astilectron-bundler/...
-  GO111MODULE=off go install github.com/asticode/go-astilectron-bundler/astilectron-bundler
-
-  echo "Bundling it"
-  ./bundleit.sh
-  zip -9 -r ../../zips/AgentUI.app.zip output/darwin-amd64/AgentUI.app
-  zip -9 -r ../../zips/AgentUI-windows-amd64.zip output/windows-amd64/AgentUI.exe
-  zip -9 -r ../../zips/AgentUI-linux-amd64.zip output/linux-amd64/AgentUI
-  cd ../..
-  # ----------------------------------- #
+  cd ..
   echo "Zip Files: "
   ls -la zips
 else

@@ -9,10 +9,6 @@ go:
 - 1.13.x
 git:
   depth: 1
-before_install:
-- cd cmd/agent-ui
-- "./placeholders.sh"
-- cd ../..
 script:
 - echo "Calling travis-binary-build.sh"
 - "./scripts/travis-binary-build.sh"

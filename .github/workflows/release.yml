@@ -60,8 +60,6 @@ jobs:
           echo "::set-output name=format_ok::1"
         fi
 
-        cd cmd/agent-ui && ./placeholders.sh && cd ../..
-
         echo "Starting vault"
         vault server -dev & echo $! > $HOME/vault.pid
         echo "Waiting vault settle" & sleep 2
@@ -123,9 +121,6 @@ jobs:
       run: |
         export COMMIT=${GITHUB_SHA::8}
         export GO111MODULE=on
-        cd cmd/agent-ui
-        "./placeholders.sh"
-        cd ../..
         echo "Calling travis-binary-build.sh"
         "./scripts/travis-binary-build.sh"
         echo "Done"

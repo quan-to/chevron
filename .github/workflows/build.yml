@@ -66,8 +66,6 @@ jobs:
           echo "::set-output name=format_ok::1"
         fi
 
-        cd cmd/agent-ui && ./placeholders.sh && cd ../..
-
         echo "Starting vault"
         vault server -dev & echo $! > $HOME/vault.pid
         echo "Waiting vault settle" & sleep 2
