@@ -1,0 +1,140 @@
+name: "Chevron Build Release"
+
+on: [ 'tags' ]
+
+jobs:
+  release:
+    env:
+        VAULT_ADDR: "http://127.0.0.1:8200"
+        VAULT_DEV_ROOT_TOKEN_ID: "123456"
+        VAULT_ROOT_TOKEN: "123456"
+        VAULT_ADDRESS: "http://127.0.0.1:8200"
+        VAULT_USE_USERPASS: "true"
+        VAULT_USERNAME: "remotesigner"
+        VAULT_PASSWORD: "123456"
+        DATABASE_NAME: "qrs_test"
+        DO_START_RETHINK: "true"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    # Install Go 1.13
+    - name: Set up Go 1.13
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
+
+    - name: Install Dependencies
+      run: |
+        echo "Installing RethinkDB"
+        echo "deb http://download.rethinkdb.com/apt bionic main" | sudo tee /etc/apt/sources.list.d/rethinkdb.list
+        wget -qO- https://download.rethinkdb.com/apt/pubkey.gpg | sudo apt-key add -
+        sudo apt-get -qq update && sudo apt-get install -y rethinkdb
+        echo "Installing vault"
+        wget https://releases.hashicorp.com/vault/1.0.2/vault_1.0.2_linux_amd64.zip
+        unzip vault_1.0.2_linux_amd64.zip
+        sudo cp vault /usr/bin
+        echo "Installing DeepSource"
+        curl https://deepsource.io/cli | sh
+        echo "Installing GolangCI Lint"
+        curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sudo bash -s -- -b $GOPATH/bin v1.15.0
+    - name: Run Tests
+      id: tests
+      run: |
+        echo "Checking code format"
+        LINES_FORMATTED=`go fmt ./...`
+        NUM_LINES_FORMATTED=`echo "${LINES_FORMATTED}" | wc -l | tr -d '[:space:]'`
+        LINES_FORMATTED="${LINES_FORMATTED//'%'/'%25'}"
+        LINES_FORMATTED="${LINES_FORMATTED//$'\n'/'%0A'}"
+        LINES_FORMATTED="${LINES_FORMATTED//$'\r'/'%0D'}"
+
+        if [ $NUM_LINES_FORMATTED -eq 1 ]
+        then
+          echo "::set-output name=result_format::No unformatted files! :1st_place_medal:"
+          echo "::set-output name=format_ok::0"
+        else
+          echo "::set-output name=result_format::There are some unformatted files. Please run \`go fmt ./...\` before commiting! :-1: : %0A%0A $LINES_FORMATTED"
+          echo "::set-output name=format_ok::1"
+        fi
+
+        cd cmd/agent-ui && ./placeholders.sh && cd ../..
+
+        echo "Starting vault"
+        vault server -dev & echo $! > $HOME/vault.pid
+        echo "Waiting vault settle" & sleep 2
+        echo "Vault started with PID `cat $HOME/vault.pid`"
+        vault auth enable userpass
+        vault policy write test-policy ./config/vault/test-policy.hcl
+        vault write auth/userpass/users/${VAULT_USERNAME} password=${VAULT_PASSWORD} policies=test-policy
+
+        echo "Starting RethinkDB"
+        rethinkdb --no-http-admin --bind 127.0.0.1 & echo $! > $HOME/rethinkdb.pid
+        echo "RethinkDB started with PID `cat $HOME/rethinkdb.pid`"
+
+        echo "Running GolangCI Lint"
+        golangci-lint run | gawk '{ if(match($0, /([^\:]+):([0-9]*):([0-9]*):(.*)/, m)) print "* **" m[1] "** on line " m[2] ": `" m[4] "`"  }' 2>&1 > lintresult.tmp || true
+        results=$(cat lintresult.tmp)
+        results="${results//'%'/'%25'}"
+        results="${results//$'\n'/'%0A'}"
+        results="${results//$'\r'/'%0D'}"
+        if [ -z "$results" ]
+        then
+          echo "::set-output name=result::No lint issues files! :1st_place_medal:"
+          echo "::set-output name=lint_ok::0"
+        else
+          echo "::set-output name=result::There are some lint issues in your files :-1: : %0A%0A $results"
+          echo "::set-output name=lint_ok::1"
+        fi
+
+        echo "Running race-condition / coverage tests"
+        go test -v -race ./... -coverprofile=qrs.coverprofile
+        echo "Closing Vault"
+        sudo kill -9 `cat ~/vault.pid`
+        echo "Closing RethinkDB"
+        sudo kill -9 `cat ~/rethinkdb.pid`
+
+        if [ $LINT_OK == 1 ] || [ $FORMAT_OK == 1 ]
+        then
+          echo "Either Lint or Format went wrong"
+          exit 1
+        fi
+
+    - name: Check results
+      run: |
+        FORMAT_OK="${{ steps.tests.outputs.format_ok }}"
+        LINT_OK="${{ steps.tests.outputs.lint_ok }}"
+
+        if [ $FORMAT_OK -eq "1" ]
+        then
+          echo "Code format is not OK!"
+          exit 1
+        fi
+
+        if [ $LINT_OK -eq "1" ]
+        then
+          echo "Code format is not OK!"
+          exit 1
+        fi
+
+    - name: Build
+      run: |
+        export COMMIT=${GITHUB_SHA::8}
+        export GO111MODULE=on
+        cd cmd/agent-ui
+        "./placeholders.sh"
+        cd ../..
+        echo "Calling travis-binary-build.sh"
+        "./scripts/travis-binary-build.sh"
+        echo "Done"
+
+    - name: Upload files to a GitHub release
+      uses: svenstaro/upload-release-action@2.2.0
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ github.ref }}
+        overwrite: true
+        file_glob: true
+        file: zips/*
+
+
+
