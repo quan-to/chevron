@@ -55,7 +55,9 @@ then
         cd ..
     fi
   done
+
   cd ..
+
   echo "Zip Files: "
   ls -la zips
 else
