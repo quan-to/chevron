@@ -2,8 +2,8 @@ package server
 
 import (
 	"encoding/json"
-	"github.com/quan-to/chevron/internal/models"
 	"github.com/quan-to/chevron/pkg/interfaces"
+	"github.com/quan-to/chevron/pkg/models"
 	"net/http"
 
 	"github.com/gorilla/mux"

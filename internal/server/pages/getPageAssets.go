@@ -2,7 +2,7 @@ package pages
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/quan-to/chevron/internal/models"
+	"github.com/quan-to/chevron/pkg/models"
 	"net/http"
 	"os"
 	"path"

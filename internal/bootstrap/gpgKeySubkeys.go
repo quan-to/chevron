@@ -1,8 +1,8 @@
 package bootstrap
 
 import (
-	"github.com/quan-to/chevron/internal/models"
 	"github.com/quan-to/chevron/internal/tools"
+	"github.com/quan-to/chevron/pkg/models"
 	r "gopkg.in/rethinkdb/rethinkdb-go.v6"
 )
 

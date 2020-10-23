@@ -3,8 +3,8 @@ package database
 import (
 	"fmt"
 	"github.com/quan-to/chevron/internal/config"
-	"github.com/quan-to/chevron/internal/models"
 	"github.com/quan-to/chevron/internal/tools"
+	"github.com/quan-to/chevron/pkg/models"
 	"github.com/quan-to/slog"
 	r "gopkg.in/rethinkdb/rethinkdb-go.v6"
 	"strings"

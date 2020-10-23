@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/quan-to/chevron/internal/keymagic"
-	"github.com/quan-to/chevron/internal/models"
 	"github.com/quan-to/chevron/internal/server/pages"
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/interfaces"
+	"github.com/quan-to/chevron/pkg/models"
 	"github.com/quan-to/slog"
 	"net/http"
 )

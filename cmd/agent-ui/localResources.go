@@ -4,11 +4,9 @@ import (
 	"context"
 	"crypto"
 	"fmt"
-	"github.com/quan-to/chevron/internal/keybackend"
-	"github.com/quan-to/chevron/internal/keymagic"
-	"github.com/quan-to/chevron/internal/models"
-	"github.com/quan-to/chevron/internal/tools"
+	"github.com/quan-to/chevron/pkg/chevronlib"
 	"github.com/quan-to/chevron/pkg/interfaces"
+	"github.com/quan-to/chevron/pkg/models"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -38,9 +36,9 @@ func init() {
 
 func Begin() {
 	_ = os.Mkdir(keysFolder, os.ModePerm)
-	kb := keybackend.MakeSaveToDiskBackend(nil, keysFolder, "key_")
-	krm = keymagic.MakeKeyRingManager(nil)
-	pgp = keymagic.MakePGPManager(nil, kb, krm)
+	kb := chevronlib.MakeSaveToDiskBackend(nil, keysFolder, "key_")
+	krm = chevronlib.MakeKeyRingManager(nil)
+	pgp = chevronlib.MakePGPManager(nil, kb, krm)
 	pgp.LoadKeys(ctx)
 }
 
@@ -80,7 +78,7 @@ func Sign(fingerPrint, data string) (string, error) {
 	if err != nil {
 		return err.Error(), err
 	}
-	quantoSig := tools.GPG2Quanto(signature, fingerPrint, "SHA512")
+	quantoSig := chevronlib.GPG2Quanto(signature, fingerPrint, "SHA512")
 	return quantoSig, nil
 }
 
@@ -160,7 +158,7 @@ func AddKeys(files []string) (bool, []string) {
 			continue
 		}
 
-		fingerPrint, err := tools.GetFingerPrintFromKey(string(data))
+		fingerPrint, err := chevronlib.GetFingerprintFromKey(string(data))
 		if err != nil {
 			errors[i] = err.Error()
 			continue
@@ -182,9 +180,9 @@ func AddKeys(files []string) (bool, []string) {
 
 func Migrate() {
 	storeFolder := path.Join(executableFolder, "store")
-	if tools.FolderExists(storeFolder) { // Old key store
+	if chevronlib.FolderExists(storeFolder) { // Old key store
 		log.Warn("Found \"store\" folder. Migrating keys...")
-		err := tools.CopyFiles(storeFolder, keysFolder)
+		err := chevronlib.CopyFiles(storeFolder, keysFolder)
 		if err != nil {
 			log.Error("Error moving files from store to keys: %s", err)
 		} else {

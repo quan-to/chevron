@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/quan-to/chevron/internal/etc/magicbuilder"
-	"github.com/quan-to/chevron/internal/models"
+	"github.com/quan-to/chevron/pkg/models"
 	"os"
 	"strings"
 	"syscall"

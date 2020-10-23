@@ -4,11 +4,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/graphql-go/graphql"
 	"github.com/quan-to/chevron/internal/config"
-	"github.com/quan-to/chevron/internal/models"
-	mgql "github.com/quan-to/chevron/internal/models/graphql"
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/QuantoError"
 	"github.com/quan-to/chevron/pkg/interfaces"
+	"github.com/quan-to/chevron/pkg/models"
+	mgql "github.com/quan-to/chevron/pkg/models/graphql"
 	"github.com/quan-to/slog"
 	"time"
 )

@@ -3,7 +3,7 @@ package interfaces
 import (
 	"context"
 	"crypto"
-	"github.com/quan-to/chevron/internal/models"
+	"github.com/quan-to/chevron/pkg/models"
 
 	"github.com/quan-to/chevron/pkg/openpgp"
 	"github.com/quan-to/chevron/pkg/openpgp/packet"

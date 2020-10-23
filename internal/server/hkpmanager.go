@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/quan-to/chevron/internal/keymagic"
-	"github.com/quan-to/chevron/internal/models/HKP"
+	"github.com/quan-to/chevron/pkg/models/HKP"
 	"net/http"
 
 	"github.com/gorilla/mux"

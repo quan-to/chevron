@@ -2,7 +2,7 @@ package graphql
 
 import (
 	"github.com/graphql-go/graphql"
-	"github.com/quan-to/chevron/internal/models"
+	"github.com/quan-to/chevron/pkg/models"
 )
 
 type AddUserResult struct {

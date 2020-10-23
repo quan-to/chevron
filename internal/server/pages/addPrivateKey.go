@@ -1,7 +1,7 @@
 package pages
 
 import (
-	"github.com/quan-to/chevron/internal/models"
+	"github.com/quan-to/chevron/pkg/models"
 	"html/template"
 	"net/http"
 )

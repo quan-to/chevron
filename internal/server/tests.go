@@ -4,9 +4,9 @@ import (
 	"context"
 	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/database"
-	"github.com/quan-to/chevron/internal/models"
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/internal/vaultManager"
+	"github.com/quan-to/chevron/pkg/models"
 	"net/http"
 
 	"github.com/gorilla/mux"

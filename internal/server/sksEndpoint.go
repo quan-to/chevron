@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/quan-to/chevron/internal/keymagic"
-	"github.com/quan-to/chevron/internal/models"
 	"github.com/quan-to/chevron/pkg/interfaces"
+	"github.com/quan-to/chevron/pkg/models"
 	"net/http"
 	"strconv"
 

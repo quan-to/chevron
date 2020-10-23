@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
-	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/slog"
 	"strings"
 )
@@ -23,7 +22,7 @@ const (
 	messageLoadPrivateKeyResult = "loadPrivateKeyResult"
 )
 
-var electronLog = slog.Scope("Electron").Tag(tools.DefaultTag)
+var electronLog = slog.Scope("Electron")
 
 // handleMessages handles messages
 func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload interface{}, err error) {
