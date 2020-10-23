@@ -5,6 +5,7 @@ BUILD_OTHER_ARCH="386 amd64"
 BUILD_OS="windows freebsd darwin openbsd"
 
 export GOCACHE=/tmp/gocache
+export PATH=$PATH:$(go env GOPATH)/bin
 
 TAG=$(git describe --exact-match --tags HEAD)
 if [[ $? -eq 0 ]];
@@ -18,6 +19,9 @@ then
   # ----------------------------------- #
   echo "Installing GOX"
   go get github.com/mitchellh/gox
+  go install github.com/mitchellh/gox
+  GO111MODULE=off go get github.com/mitchellh/gox
+  GO111MODULE=off go install github.com/mitchellh/gox
 
   # ----------------------------------- #
   echo "Building Projects"
