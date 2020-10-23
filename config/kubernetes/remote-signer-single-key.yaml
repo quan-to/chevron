@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: remote-signer
+  namespace: default
+spec:
+  minReadySeconds: 2
+  progressDeadlineSeconds: 600
+  replicas: 1
+  selector:
+    matchLabels:
+      quan.to/servicename: remote-signer
+  template:
+    metadata:
+      labels:
+        quan.to/servicename: remote-signer
+    spec:
+      containers:
+      - env:
+        - name: MODE
+          value: single_key
+        - name: SINGLE_KEY_PATH
+          value: "/etc/keys/armor-key"
+        - name: SINGLE_KEY_PASSWORD
+          value: "123456"
+        - name: KEYS_BASE64_ENCODED
+          value: "false"
+        - name: PRIVATE_KEY_FOLDER
+          value: /secrets/
+        - name: READONLY_KEYPATH
+          value: "true"
+        - name: SKS_SERVER
+          value: https://keyserver.ubuntu.com
+        image: quantocommons/remote-signer:latest
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /tests/ping
+            port: 5100
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 2
+          successThreshold: 1
+          timeoutSeconds: 2
+        name: remote-signer
+        ports:
+        - containerPort: 5100
+          name: 5100tcp02
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /tests/ping
+            port: 5100
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 2
+          successThreshold: 2
+          timeoutSeconds: 2
+        resources: {}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities: {}
+          privileged: false
+          procMount: Default
+          readOnlyRootFilesystem: false
+          runAsNonRoot: false
+        stdin: true
+        tty: true
+        volumeMounts:
+        - mountPath: /etc/keys
+          name: openbanking-keys
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: contaquanto
+      restartPolicy: Always
+      volumes:
+      - name: openbanking-keys
+        secret:
+          defaultMode: 256
+          optional: false
+          secretName: openbanking-keys
