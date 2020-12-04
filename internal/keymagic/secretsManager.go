@@ -26,10 +26,11 @@ type secretsManager struct {
 	masterKeyFingerPrint string
 	amIUseless           bool
 	log                  slog.Instance
+	dbh                  DatabaseHandler
 }
 
 // MakeSecretsManager creates an instance of the backend secrets manager
-func MakeSecretsManager(log slog.Instance) interfaces.SecretsManager {
+func MakeSecretsManager(log slog.Instance, dbHandler DatabaseHandler) interfaces.SecretsManager {
 	if log == nil {
 		log = slog.Scope("SM")
 	} else {
@@ -50,6 +51,7 @@ func MakeSecretsManager(log slog.Instance) interfaces.SecretsManager {
 		amIUseless:         false,
 		encryptedPasswords: map[string]string{},
 		log:                log,
+		dbh:                dbHandler,
 	}
 	masterKeyBytes, err := ioutil.ReadFile(config.MasterGPGKeyPath)
 
@@ -79,11 +81,11 @@ func MakeSecretsManager(log slog.Instance) interfaces.SecretsManager {
 		return sm
 	}
 
-	sm.log.Info("Master Key FingerPrint: %s", masterKeyFp)
+	sm.log.Info("Master Key Fingerprint: %s", masterKeyFp)
 
 	sm.masterKeyFingerPrint = masterKeyFp
 
-	sm.gpg = MakePGPManager(log, kb, MakeKeyRingManager(log))
+	sm.gpg = MakePGPManager(log, kb, MakeKeyRingManager(log, dbHandler))
 	sm.gpg.SetKeysBase64Encoded(config.MasterGPGKeyBase64Encoded)
 
 	n, err := sm.gpg.LoadKey(ctx, string(masterKeyBytes))

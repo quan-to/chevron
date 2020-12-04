@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	_ "github.com/quan-to/chevron/cmd/server/init"
-	"github.com/quan-to/chevron/internal/bootstrap"
+	"github.com/quan-to/chevron/internal/agent"
 	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/etc/magicbuilder"
 	"github.com/quan-to/chevron/internal/kubernetes"
@@ -25,21 +25,26 @@ func main() {
 		slog.SetShowLines(true)
 	}
 
-	bootstrap.RunBootstraps()
-
 	ctx := context.Background()
-	sm := magicbuilder.MakeSM(log)
-	gpg := magicbuilder.MakePGP(log)
+
+	dbh, err := agent.MakeDatabaseHandler(log)
+	if err != nil {
+		slog.Fatal("Error initializing selected database: %s", err)
+	}
+	ctx = context.WithValue(ctx, "dbHandler", dbh)
+
+	sm := magicbuilder.MakeSM(log, dbh)
+	gpg := magicbuilder.MakePGP(log, dbh)
 
 	gpg.LoadKeys(ctx)
 
 	if config.SingleKeyMode {
-		stop, err = server.RunRemoteSignerServerSingleKey(log, sm, gpg)
+		stop, err = server.RunRemoteSignerServerSingleKey(log, sm, gpg, dbh)
 		if err != nil {
 			log.Fatal("Error starting in single-key mode: %s", err)
 		}
 	} else {
-		stop = server.RunRemoteSignerServer(log, sm, gpg)
+		stop = server.RunRemoteSignerServer(log, sm, gpg, dbh)
 	}
 
 	localStop := make(chan bool)

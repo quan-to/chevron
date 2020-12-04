@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/quan-to/chevron/pkg/database/memory"
 	"os"
 
 	"github.com/quan-to/slog"
@@ -9,6 +10,7 @@ import (
 )
 
 var ctx = context.Background()
+var mem *memory.MemoryDBDriver
 
 func main() {
 	debugMode := kingpin.Flag("debug", "Enable debug mode").Bool()
@@ -73,6 +75,9 @@ func main() {
 		slog.SetWarning(true)
 		slog.Info("Debug Mode Enabled!")
 	}
+
+	mem = memory.MakeMemoryDBDriver(nil)
+	ctx = context.WithValue(ctx, "dbHandler", mem)
 
 	switch selectedCmd {
 	case "gen":

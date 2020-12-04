@@ -136,6 +136,7 @@ func TestKREGetLoadedPrivateKeys(t *testing.T) {
 
 func TestKREAddPrivateKey(t *testing.T) {
 	ctx := context.Background()
+	ctx = context.WithValue(ctx, "dbHandler", dbh)
 	key, err := gpg.GenerateTestKey()
 	errorDie(err, t)
 

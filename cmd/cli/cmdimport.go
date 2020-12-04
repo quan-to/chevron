@@ -14,7 +14,7 @@ import (
 func ImportKey(filename, keyPassword string, keyPasswordFd int) {
 	var data []byte
 	var err error
-	pgpMan := magicbuilder.MakePGP(nil)
+	pgpMan := magicbuilder.MakePGP(nil, mem)
 	pgpMan.LoadKeys(ctx)
 
 	if filename == "-" {

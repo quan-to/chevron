@@ -6,10 +6,10 @@ import (
 	"github.com/bouk/monkey"
 	"github.com/google/uuid"
 	config "github.com/quan-to/chevron/internal/config"
-	"github.com/quan-to/chevron/internal/etc"
 	"github.com/quan-to/chevron/internal/keybackend"
 	"github.com/quan-to/chevron/internal/vaultManager"
 	"github.com/quan-to/chevron/pkg/QuantoError"
+	"github.com/quan-to/chevron/pkg/database/memory"
 	"github.com/quan-to/chevron/pkg/interfaces"
 	"github.com/quan-to/chevron/test"
 	"os"
@@ -44,12 +44,6 @@ func TestMain(m *testing.M) {
 	config.EnableRethinkSKS = true
 	config.PushVariables()
 
-	slog.UnsetTestMode()
-	etc.DbSetup()
-	etc.ResetDatabase()
-	etc.InitTables()
-	slog.SetTestMode()
-
 	var kb interfaces.StorageBackend
 
 	if config.VaultStorage {
@@ -59,10 +53,12 @@ func TestMain(m *testing.M) {
 	}
 
 	ctx := context.Background()
-	pgpMan = MakePGPManager(nil, kb, MakeKeyRingManager(nil)).(*pgpManager)
+	mem := memory.MakeMemoryDBDriver(nil)
+	ctx = context.WithValue(ctx, "dbHandler", mem)
+	pgpMan = MakePGPManager(nil, kb, MakeKeyRingManager(nil, mem)).(*pgpManager)
 	pgpMan.LoadKeys(ctx)
 
-	sm = MakeSecretsManager(nil).(*secretsManager)
+	sm = MakeSecretsManager(nil, mem).(*secretsManager)
 
 	err = pgpMan.UnlockKey(ctx, test.TestKeyFingerprint, test.TestKeyPassword)
 
@@ -73,9 +69,7 @@ func TestMain(m *testing.M) {
 	}
 
 	code := m.Run()
-	etc.ResetDatabase()
 	slog.UnsetTestMode()
-	etc.Cleanup()
 	os.Exit(code)
 }
 

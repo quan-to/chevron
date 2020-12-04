@@ -4,39 +4,46 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/quan-to/chevron/internal/config"
-	"github.com/quan-to/chevron/internal/etc"
 	"github.com/quan-to/chevron/pkg/interfaces"
 	"github.com/quan-to/chevron/pkg/models"
 	"github.com/quan-to/slog"
 	"time"
 )
 
-type rethinkTokenManager struct {
-	log slog.Instance
+type DatabaseTokenManager struct {
+	log     slog.Instance
+	dbToken DBToken
 }
 
-// MakeRethinkTokenManager creates an instance of TokenManager that stores data in RethinkDB
-func MakeRethinkTokenManager(logger slog.Instance) interfaces.TokenManager {
+type DBToken interface {
+	GetUser(username string) (um *models.User, err error)
+	AddUserToken(ut models.UserToken) (string, error)
+	RemoveUserToken(token string) (err error)
+	GetUserToken(token string) (ut *models.UserToken, err error)
+	InvalidateUserTokens() (int, error)
+}
+
+// MakeDatabaseTokenManager creates an instance of TokenManager that stores data in RethinkDB
+func MakeDatabaseTokenManager(logger slog.Instance, dbToken DBToken) *DatabaseTokenManager {
 	if logger == nil {
-		logger = slog.Scope("RQL-TM")
+		logger = slog.Scope("DB-TM")
 	} else {
-		logger = logger.SubScope("RQL-TM")
+		logger = logger.SubScope("DB-TM")
 	}
-	logger.Info("Creating RethinkDB Token Manager")
-	return &rethinkTokenManager{
-		log: logger,
+	logger.Info("Creating Database Token Manager")
+	return &DatabaseTokenManager{
+		log:     logger,
+		dbToken: dbToken,
 	}
 }
 
 // AddUserWithExpiration adds an user to Token Manager that will expires in `expiration` seconds.
-func (rtm *rethinkTokenManager) AddUserWithExpiration(user interfaces.UserData, expiration int) string {
+func (rtm *DatabaseTokenManager) AddUserWithExpiration(user interfaces.UserData, expiration int) string {
 	tokenUuid, _ := uuid.NewRandom()
 	token := tokenUuid.String()
 
-	conn := etc.GetConnection()
-
-	_, _ = models.AddUserToken(conn, &models.UserToken{
-		FingerPrint: user.GetFingerPrint(),
+	_, _ = rtm.dbToken.AddUserToken(models.UserToken{
+		Fingerprint: user.GetFingerPrint(),
 		Username:    user.GetUsername(),
 		CreatedAt:   user.GetCreatedAt(),
 		Fullname:    user.GetFullName(),
@@ -48,14 +55,12 @@ func (rtm *rethinkTokenManager) AddUserWithExpiration(user interfaces.UserData, 
 }
 
 // AddUser adds a user to Token Manager and returns a login token
-func (rtm *rethinkTokenManager) AddUser(user interfaces.UserData) string {
+func (rtm *DatabaseTokenManager) AddUser(user interfaces.UserData) string {
 	tokenUuid, _ := uuid.NewRandom()
 	token := tokenUuid.String()
 
-	conn := etc.GetConnection()
-
-	_, _ = models.AddUserToken(conn, &models.UserToken{
-		FingerPrint: user.GetFingerPrint(),
+	_, _ = rtm.dbToken.AddUserToken(models.UserToken{
+		Fingerprint: user.GetFingerPrint(),
 		Username:    user.GetUsername(),
 		CreatedAt:   user.GetCreatedAt(),
 		Fullname:    user.GetFullName(),
@@ -66,10 +71,9 @@ func (rtm *rethinkTokenManager) AddUser(user interfaces.UserData) string {
 	return token
 }
 
-func (rtm *rethinkTokenManager) invalidateTokens() {
+func (rtm *DatabaseTokenManager) invalidateTokens() {
 	rtm.log.Await("Checking for invalid tokens")
-	conn := etc.GetConnection()
-	n, err := models.InvalidateUserTokens(conn)
+	n, err := rtm.dbToken.InvalidateUserTokens()
 	if err != nil {
 		rtm.log.Error(err)
 		return
@@ -79,10 +83,8 @@ func (rtm *rethinkTokenManager) invalidateTokens() {
 }
 
 // Verify verifies if the specified token is valid
-func (rtm *rethinkTokenManager) Verify(token string) error {
-	conn := etc.GetConnection()
-
-	ut, err := models.GetUserToken(conn, token)
+func (rtm *DatabaseTokenManager) Verify(token string) error {
+	ut, err := rtm.dbToken.GetUserToken(token)
 
 	if err != nil {
 		return err
@@ -101,20 +103,18 @@ func (rtm *rethinkTokenManager) Verify(token string) error {
 }
 
 // GetUserData returns the user data for the specified token
-func (rtm *rethinkTokenManager) GetUserData(token string) interfaces.UserData {
-	conn := etc.GetConnection()
-	udata, _ := models.GetUserToken(conn, token)
+func (rtm *DatabaseTokenManager) GetUserData(token string) interfaces.UserData {
+	udata, _ := rtm.dbToken.GetUserToken(token)
 	return udata
 }
 
 // InvalidateToken removes a token from the database making it unusable in the future
-func (rtm *rethinkTokenManager) InvalidateToken(token string) error {
-	conn := etc.GetConnection()
-	u, _ := models.GetUserToken(conn, token)
+func (rtm *DatabaseTokenManager) InvalidateToken(token string) error {
+	u, _ := rtm.dbToken.GetUserToken(token)
 
 	if u == nil {
 		return fmt.Errorf("not exists")
 	}
 
-	return models.RemoveUserToken(conn, token)
+	return rtm.dbToken.RemoveUserToken(token)
 }

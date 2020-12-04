@@ -14,7 +14,7 @@ import (
 func EncryptFile(input, output, recipient string) {
 	var err error
 	var data []byte
-	pgpMan := magicbuilder.MakePGP(nil)
+	pgpMan := magicbuilder.MakePGP(nil, mem)
 	pgpMan.LoadKeys(ctx)
 
 	ent := pgpMan.GetPublicKeyEntity(ctx, recipient)

@@ -150,6 +150,17 @@ func wrapWithLog(log slog.Instance, f HTTPHandleFuncWithLog) HTTPHandleFunc {
 	}
 }
 
+func wrapContextWithDatabaseHandler(dbh DatabaseHandler, ctx context.Context) context.Context {
+	return context.WithValue(ctx, "dbHandler", dbh)
+}
+
+func wrapRequestContextWithDatabaseHandler(dbHandler DatabaseHandler, f HTTPHandleFuncWithLog) HTTPHandleFuncWithLog {
+	return func(log slog.Instance, w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), "dbHandler", dbHandler)
+		f(log, w, r.WithContext(ctx))
+	}
+}
+
 func wrapContextWithRequestID(r *http.Request) context.Context {
 	var requestID string
 

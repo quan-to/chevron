@@ -17,10 +17,9 @@ import (
 )
 
 func TestHKPAdd(t *testing.T) {
-	ctx := context.Background()
+	ctx := wrapContextWithDatabaseHandler(dbh, context.Background())
 	config.PushVariables()
 	defer config.PopVariables()
-	config.EnableRethinkSKS = true
 
 	req, err := http.NewRequest("POST", "/pks/add", nil)
 
@@ -111,11 +110,8 @@ func MakeHKPLookup(op, mr, nm, fingerprint, exact, search string) (output string
 }
 
 func TestLookup(t *testing.T) {
-	ctx := context.Background()
-	config.PushVariables()
-	defer config.PopVariables()
-	config.EnableRethinkSKS = true
-	//log.UnsetTestMode()
+	ctx := wrapContextWithDatabaseHandler(dbh, context.Background())
+
 	// Ensure key is in SKS
 	key, _ := gpg.GetPublicKeyASCII(ctx, test.TestKeyFingerprint)
 	_ = keymagic.PKSAdd(ctx, key)

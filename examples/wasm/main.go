@@ -3,11 +3,14 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
-	"github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/fieldcipher"
-	"github.com/quan-to/chevron/keybackend"
-	"github.com/quan-to/chevron/keymagic"
+	"github.com/quan-to/chevron/internal/keybackend"
+	"github.com/quan-to/chevron/internal/keymagic"
+	"github.com/quan-to/chevron/pkg/database/memory"
+	"github.com/quan-to/chevron/pkg/fieldcipher"
+	"github.com/quan-to/chevron/test"
+	"github.com/quan-to/slog"
 	"syscall/js"
 	"time"
 )
@@ -159,33 +162,36 @@ const testEncryptedData = `{
   }`
 
 var log = slog.Scope("GOLANG")
+var ctx = context.Background()
 
 func main() {
-	krm := keymagic.MakeKeyRingManager()
-	kb := keyBackend.MakeSaveToDiskBackend("a", "")
-	pgp := keymagic.MakePGPManagerWithKRM(kb, krm)
+	mem := memory.MakeMemoryDBDriver(log)
+	ctx = context.WithValue(ctx, "dbHandler", mem)
+	krm := keymagic.MakeKeyRingManager(log, mem)
+	kb := keybackend.MakeSaveToDiskBackend(log, "a", "")
+	pgp := keymagic.MakePGPManager(log, kb, krm)
 
 	log.Info("Loading Private Key")
-	err, n := pgp.LoadKey(testPrivateKey)
+	n, err := pgp.LoadKey(ctx, testPrivateKey)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Info("Loaded %d private keys", n)
 	log.Info("Unlocking Key")
-	err = pgp.UnlockKey(rstest.TestKeyFingerprint, rstest.TestKeyFingerprint)
+	err = pgp.UnlockKey(ctx, test.TestKeyFingerprint, test.TestKeyFingerprint)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	log.Info("Loading public key")
-	pubKey, err := pgp.GetPublicKeyAscii(rstest.TestKeyFingerprint)
+	pubKey, err := pgp.GetPublicKeyASCII(ctx, test.TestKeyFingerprint)
 	//if err != nil {
 	//	panic(err)
 	//}
 
 	log.Info("Public Key loaded. Creating Field Cipher")
 	cipher := fieldcipher.MakeCipherFromASCIIArmoredKeys([]string{pubKey})
-	decipher, err := fieldcipher.MakeDecipher(pgp.GetPrivate(rstest.TestKeyFingerprint))
+	decipher, err := fieldcipher.MakeDecipher(pgp.GetPrivate(ctx, test.TestKeyFingerprint))
 
 	if err != nil {
 		log.Fatal(err)

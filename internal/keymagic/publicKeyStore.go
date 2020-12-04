@@ -3,26 +3,45 @@ package keymagic
 import (
 	"context"
 	"fmt"
-	"github.com/quan-to/chevron/internal/config"
-	"github.com/quan-to/chevron/internal/database"
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/models"
 
 	"github.com/quan-to/slog"
 )
 
+type DatabaseHandler interface {
+	AddGPGKey(key models.GPGKey) (string, bool, error)
+	FindGPGKeyByEmail(email string, pageStart, pageEnd int) ([]models.GPGKey, error)
+	FindGPGKeyByFingerPrint(fingerPrint string, pageStart, pageEnd int) ([]models.GPGKey, error)
+	FindGPGKeyByValue(value string, pageStart, pageEnd int) ([]models.GPGKey, error)
+	FindGPGKeyByName(name string, pageStart, pageEnd int) ([]models.GPGKey, error)
+	FetchGPGKeyByFingerprint(fingerprint string) (*models.GPGKey, error)
+}
+
 var pksLog = slog.Scope("PKS")
+
+func dbHandlerFromContext(ctx context.Context) DatabaseHandler {
+	dbhI := ctx.Value("dbHandler")
+	if dbhI != nil {
+		dbh, ok := dbhI.(DatabaseHandler)
+		if ok {
+			return dbh
+		}
+	}
+
+	return nil
+}
 
 func PKSGetKey(ctx context.Context, fingerPrint string) (string, error) {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pksLog.Tag(requestID)
-	log.DebugNote("PKSGetKey(%s)", fingerPrint)
-	if !config.EnableRethinkSKS {
+	log.DebugNote("PKSGetKey(%q)", fingerPrint)
+	dbh := dbHandlerFromContext(ctx)
+	if dbh == nil {
 		return GetSKSKey(fingerPrint)
 	}
 
-	conn := database.GetConnection()
-	v, err := models.GetGPGKeyByFingerPrint(conn, fingerPrint)
+	v, err := dbh.FetchGPGKeyByFingerprint(fingerPrint)
 
 	if v != nil {
 		return v.AsciiArmoredPublicKey, nil
@@ -31,55 +50,57 @@ func PKSGetKey(ctx context.Context, fingerPrint string) (string, error) {
 	return "", err
 }
 
-func PKSSearchByName(name string, pageStart, pageEnd int) ([]models.GPGKey, error) {
+func PKSSearchByName(ctx context.Context, name string, pageStart, pageEnd int) ([]models.GPGKey, error) {
 	pksLog.DebugNote("PKSSearchByName(%s, %d, %d)", name, pageStart, pageEnd)
-	if config.EnableRethinkSKS {
-		conn := database.GetConnection()
-		return models.SearchGPGKeyByName(conn, name, pageStart, pageEnd)
+	dbh := dbHandlerFromContext(ctx)
+	if dbh != nil {
+		return dbh.FindGPGKeyByName(name, pageStart, pageEnd)
 	}
-	return nil, fmt.Errorf("the server does not have RethinkDB enabled so it cannot serve search")
+
+	return nil, fmt.Errorf("the server does not have database enabled so it cannot serve search")
 }
 
-func PKSSearchByFingerPrint(fingerPrint string, pageStart, pageEnd int) ([]models.GPGKey, error) {
+func PKSSearchByFingerPrint(ctx context.Context, fingerPrint string, pageStart, pageEnd int) ([]models.GPGKey, error) {
 	pksLog.DebugNote("PKSSearchByFingerPrint(%s, %d, %d)", fingerPrint, pageStart, pageEnd)
-	if config.EnableRethinkSKS {
-		conn := database.GetConnection()
-		return models.SearchGPGKeyByFingerPrint(conn, fingerPrint, pageStart, pageEnd)
+	dbh := dbHandlerFromContext(ctx)
+	if dbh != nil {
+		return dbh.FindGPGKeyByFingerPrint(fingerPrint, pageStart, pageEnd)
 	}
-	return nil, fmt.Errorf("the server does not have RethinkDB enabled so it cannot serve search")
+	return nil, fmt.Errorf("the server does not have database enabled so it cannot serve search")
 }
 
-func PKSSearchByEmail(email string, pageStart, pageEnd int) ([]models.GPGKey, error) {
+func PKSSearchByEmail(ctx context.Context, email string, pageStart, pageEnd int) ([]models.GPGKey, error) {
 	pksLog.DebugNote("PKSSearchByEmail(%s, %d, %d)", email, pageStart, pageEnd)
-	if config.EnableRethinkSKS {
-		conn := database.GetConnection()
-		return models.SearchGPGKeyByEmail(conn, email, pageStart, pageEnd)
+	dbh := dbHandlerFromContext(ctx)
+	if dbh != nil {
+		return dbh.FindGPGKeyByEmail(email, pageStart, pageEnd)
 	}
-	return nil, fmt.Errorf("the server does not have RethinkDB enabled so it cannot serve search")
+	return nil, fmt.Errorf("the server does not have database enabled so it cannot serve search")
 }
 
-func PKSSearch(value string, pageStart, pageEnd int) ([]models.GPGKey, error) {
+func PKSSearch(ctx context.Context, value string, pageStart, pageEnd int) ([]models.GPGKey, error) {
 	pksLog.DebugNote("PKSSearch(%s, %d, %d)", value, pageStart, pageEnd)
-	if config.EnableRethinkSKS {
-		conn := database.GetConnection()
-		return models.SearchGPGKeyByValue(conn, value, pageStart, pageEnd)
+	dbh := dbHandlerFromContext(ctx)
+	if dbh != nil {
+		return dbh.FindGPGKeyByValue(value, pageStart, pageEnd)
 	}
-	return nil, fmt.Errorf("the server does not have RethinkDB enabled so it cannot serve search")
+
+	return nil, fmt.Errorf("the server does not have database enabled so it cannot serve search")
 }
 
 func PKSAdd(ctx context.Context, pubKey string) string {
 	requestID := tools.GetRequestIDFromContext(ctx)
 	log := pksLog.Tag(requestID)
 	log.DebugNote("PKSAdd(---)")
-	if config.EnableRethinkSKS {
-		conn := database.GetConnection()
+	dbh := dbHandlerFromContext(ctx)
+	if dbh != nil {
 		key, err := models.AsciiArmored2GPGKey(pubKey)
 		if err != nil {
 			log.Debug("PKSAdd Error: %s", err)
 			return "NOK"
 		}
 
-		keys, err := models.SearchGPGKeyByFingerPrint(conn, key.FullFingerPrint, 0, 1)
+		keys, err := dbh.FindGPGKeyByFingerPrint(key.FullFingerprint, 0, 1)
 
 		if err != nil {
 			log.Debug("PKSAdd Error: %s", err)
@@ -92,7 +113,7 @@ func PKSAdd(ctx context.Context, pubKey string) string {
 		}
 
 		log.Info("Adding public key %s to PKS", key.GetShortFingerPrint())
-		_, _, err = models.AddGPGKey(conn, key)
+		_, _, err = dbh.AddGPGKey(key)
 
 		if err != nil {
 			log.Debug("PKSAdd Error: %s", err)

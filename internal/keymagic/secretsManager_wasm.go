@@ -71,7 +71,7 @@ func MakeSecretsManager(log slog.Instance) interfaces.SecretsManager {
 		return sm
 	}
 
-	smLog.Info("Master Key FingerPrint: %s", masterKeyFp)
+	smLog.Info("Master Key Fingerprint: %s", masterKeyFp)
 
 	sm.masterKeyFingerPrint = masterKeyFp
 

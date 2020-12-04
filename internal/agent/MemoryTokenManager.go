@@ -19,6 +19,10 @@ type memoryUser struct {
 	expiration  time.Time
 }
 
+func (mu *memoryUser) GetId() string {
+	return mu.username
+}
+
 func (mu *memoryUser) GetUsername() string {
 	return mu.username
 }

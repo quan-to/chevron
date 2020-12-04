@@ -17,7 +17,7 @@ func MakeSaveToDiskBackend(log slog.Instance, keysFolder, prefix string) interfa
 // MakeKeyRingManager creates a new instance of Key Ring Manager
 // log instance can be nil
 func MakeKeyRingManager(log slog.Instance) interfaces.KeyRingManager {
-	return keymagic.MakeKeyRingManager(log)
+	return keymagic.MakeKeyRingManager(log, mem)
 }
 
 // MakePGPManager creates a new instance of PGP Operations Manager

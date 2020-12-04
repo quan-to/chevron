@@ -16,7 +16,7 @@ import (
 )
 
 // GenRemoteSignerServerMux generates a remote signer HTTP Router
-func GenRemoteSignerServerMux(slog slog.Instance, sm interfaces.SecretsManager, gpg interfaces.PGPManager) *mux.Router {
+func GenRemoteSignerServerMux(slog slog.Instance, sm interfaces.SecretsManager, gpg interfaces.PGPManager, dbh DatabaseHandler) *mux.Router {
 	var vm *vaultManager.VaultManager
 	log := slog.Scope("MUX")
 
@@ -26,11 +26,11 @@ func GenRemoteSignerServerMux(slog slog.Instance, sm interfaces.SecretsManager, 
 
 	ge := MakeGPGEndpoint(log, sm, gpg)
 	ie := MakeInternalEndpoint(log, sm, gpg)
-	te := MakeTestsEndpoint(log, vm)
-	kre := MakeKeyRingEndpoint(log, sm, gpg)
-	sks := MakeSKSEndpoint(log, sm, gpg)
-	tm := agent.MakeTokenManager(log)
-	am := agent.MakeAuthManager(log)
+	te := MakeTestsEndpoint(log, vm, dbh)
+	kre := MakeKeyRingEndpoint(log, sm, gpg, dbh)
+	sks := MakeSKSEndpoint(log, sm, gpg, dbh)
+	tm := agent.MakeTokenManager(log, dbh)
+	am := agent.MakeAuthManager(log, dbh)
 	ap := MakeAgentProxy(log, gpg, tm)
 	sGql := MakeStaticGraphiQL(log)
 	agentAdmin := MakeAgentAdmin(log, tm, am)
@@ -52,7 +52,7 @@ func GenRemoteSignerServerMux(slog slog.Instance, sm interfaces.SecretsManager, 
 
 	r := mux.NewRouter()
 	// Add for /
-	AddHKPEndpoints(log, r.PathPrefix("/pks").Subrouter())
+	AddHKPEndpoints(log, dbh, r.PathPrefix("/pks").Subrouter())
 	ge.AttachHandlers(r.PathPrefix("/gpg").Subrouter())
 	ie.AttachHandlers(r.PathPrefix("/__internal").Subrouter())
 	te.AttachHandlers(r.PathPrefix("/tests").Subrouter())
@@ -61,7 +61,7 @@ func GenRemoteSignerServerMux(slog slog.Instance, sm interfaces.SecretsManager, 
 	jfc.AttachHandlers(r.PathPrefix("/fieldCipher").Subrouter())
 
 	// Add for /remoteSigner
-	AddHKPEndpoints(log, r.PathPrefix("/remoteSigner/pks").Subrouter())
+	AddHKPEndpoints(log, dbh, r.PathPrefix("/remoteSigner/pks").Subrouter())
 	ge.AttachHandlers(r.PathPrefix("/remoteSigner/gpg").Subrouter())
 	ie.AttachHandlers(r.PathPrefix("/remoteSigner/__internal").Subrouter())
 	te.AttachHandlers(r.PathPrefix("/remoteSigner/tests").Subrouter())
@@ -90,9 +90,9 @@ func GenRemoteSignerServerMux(slog slog.Instance, sm interfaces.SecretsManager, 
 }
 
 // RunRemoteSignerServer runs a remote signer server asynchronously and returns a stop channel
-func RunRemoteSignerServer(slog slog.Instance, sm interfaces.SecretsManager, gpg interfaces.PGPManager) chan bool {
+func RunRemoteSignerServer(slog slog.Instance, sm interfaces.SecretsManager, gpg interfaces.PGPManager, dbh DatabaseHandler) chan bool {
 
-	r := GenRemoteSignerServerMux(slog, sm, gpg)
+	r := GenRemoteSignerServerMux(slog, sm, gpg, dbh)
 
 	listenAddr := fmt.Sprintf("0.0.0.0:%d", config.HttpPort)
 
@@ -123,7 +123,7 @@ func RunRemoteSignerServer(slog slog.Instance, sm interfaces.SecretsManager, gpg
 }
 
 // RunRemoteSignerServerSingleKey runs a single key instance of remote signer server asynchronously and returns a stop channel
-func RunRemoteSignerServerSingleKey(slog slog.Instance, sm interfaces.SecretsManager, gpg interfaces.PGPManager) (chan bool, error) {
+func RunRemoteSignerServerSingleKey(slog slog.Instance, sm interfaces.SecretsManager, gpg interfaces.PGPManager, dbh DatabaseHandler) (chan bool, error) {
 	slog.Info("Running in single-key mode")
 
 	slog.Info("Loading key from %q", config.SingleKeyPath)
@@ -160,7 +160,7 @@ func RunRemoteSignerServerSingleKey(slog slog.Instance, sm interfaces.SecretsMan
 	slog.Info("Key unlocked. Setting default Agent Key Fingerprint to %q", fp)
 	config.AgentKeyFingerPrint = fp
 
-	r := GenRemoteSignerServerMux(slog, sm, gpg)
+	r := GenRemoteSignerServerMux(slog, sm, gpg, dbh)
 
 	listenAddr := fmt.Sprintf("0.0.0.0:%d", config.HttpPort)
 

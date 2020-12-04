@@ -29,10 +29,6 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        echo "Installing RethinkDB"
-        source /etc/lsb-release && echo "deb https://download.rethinkdb.com/repository/ubuntu-$DISTRIB_CODENAME $DISTRIB_CODENAME main" | sudo tee /etc/apt/sources.list.d/rethinkdb.list
-        wget -qO- https://download.rethinkdb.com/repository/raw/pubkey.gpg | sudo apt-key add -
-        sudo apt-get -qq update && sudo apt-get install -y rethinkdb
         echo "Installing vault"
         wget https://releases.hashicorp.com/vault/1.0.2/vault_1.0.2_linux_amd64.zip
         unzip vault_1.0.2_linux_amd64.zip
@@ -68,10 +64,6 @@ jobs:
         vault policy write test-policy ./config/vault/test-policy.hcl
         vault write auth/userpass/users/${VAULT_USERNAME} password=${VAULT_PASSWORD} policies=test-policy
 
-        echo "Starting RethinkDB"
-        rethinkdb --no-http-admin --bind 127.0.0.1 & echo $! > $HOME/rethinkdb.pid
-        echo "RethinkDB started with PID `cat $HOME/rethinkdb.pid`"
-
         echo "Running GolangCI Lint"
         golangci-lint run | gawk '{ if(match($0, /([^\:]+):([0-9]*):([0-9]*):(.*)/, m)) print "* **" m[1] "** on line " m[2] ": `" m[4] "`"  }' 2>&1 > lintresult.tmp || true
         results=$(cat lintresult.tmp)
@@ -91,8 +83,6 @@ jobs:
         go test -v -race ./... -coverprofile=qrs.coverprofile
         echo "Closing Vault"
         sudo kill -9 `cat ~/vault.pid`
-        echo "Closing RethinkDB"
-        sudo kill -9 `cat ~/rethinkdb.pid`
 
     - name: Check results
       run: |

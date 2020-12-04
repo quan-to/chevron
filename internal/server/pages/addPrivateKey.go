@@ -35,7 +35,7 @@ const addPrivateKeyHTML = `
                 if (data.errorCode) {
                     setError(data.message);
                 } else {
-                    setInfo("Added key " + data.FingerPrint);
+                    setInfo("Added key " + data.Fingerprint);
                     clearFields();
                 }
                 enableButton();

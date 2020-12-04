@@ -14,7 +14,7 @@ func Decrypt(input, output string) {
 	var err error
 	var data []byte
 
-	pgpMan := magicbuilder.MakePGP(nil)
+	pgpMan := magicbuilder.MakePGP(nil, mem)
 	pgpMan.LoadKeys(ctx)
 
 	if input == "-" {

@@ -7,6 +7,6 @@ import (
 )
 
 // MakeSM creates a new Instance of SecretsManager
-func MakeSM(log slog.Instance) interfaces.SecretsManager {
-	return keymagic.MakeSecretsManager(log)
+func MakeSM(log slog.Instance, dbHandler DatabaseHandler) interfaces.SecretsManager {
+	return keymagic.MakeSecretsManager(log, dbHandler)
 }

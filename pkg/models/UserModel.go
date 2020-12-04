@@ -1,112 +1,42 @@
 package models
 
-import (
-	"fmt"
-	r "gopkg.in/rethinkdb/rethinkdb-go.v6"
-	"time"
-)
+import "time"
 
-var UserModelTableInit = TableInitStruct{
-	TableName:    "users",
-	TableIndexes: []string{"Username", "FingerPrint", "CreatedAt"},
-}
-
-type UserModel struct {
-	id          string
-	FingerPrint string
+type User struct {
+	ID          string `json:"id,omitempty"`
+	Fingerprint string
 	Username    string
 	Password    string
-	Fullname    string
+	FullName    string
 	CreatedAt   time.Time
 }
 
-func (um *UserModel) GetUsername() string {
-	return um.Username
+// GetID returns the id
+func (u User) GetID() string {
+	return u.ID
 }
 
-func (um *UserModel) GetFullName() string {
-	return um.Fullname
+// GetUsername returns the username
+func (u User) GetUsername() string {
+	return u.Username
 }
 
-func (um *UserModel) GetUserdata() interface{} {
-	return nil
+// GetFullName returns the user full name
+func (u User) GetFullName() string {
+	return u.FullName
 }
 
-func (um *UserModel) GetToken() string {
-	return ""
+// GetUserdata returns the raw user data
+func (u User) GetUserdata() interface{} {
+	return &u
 }
 
-func (um *UserModel) GetCreatedAt() time.Time {
-	return um.CreatedAt
+// GetCreatedAt returns when the user was created
+func (u User) GetCreatedAt() time.Time {
+	return u.CreatedAt
 }
 
-func (um *UserModel) GetFingerPrint() string {
-	return um.FingerPrint
-}
-
-func AddUser(conn *r.Session, um *UserModel) (string, error) {
-	existing, err := r.
-		Table(UserModelTableInit.TableName).
-		GetAllByIndex("Username", um.Username).
-		Run(conn)
-
-	if err != nil {
-		return "", err
-	}
-
-	defer existing.Close()
-
-	if !existing.IsNil() {
-		return "", fmt.Errorf("already exists")
-	}
-
-	wr, err := r.Table(UserModelTableInit.TableName).
-		Insert(um).
-		RunWrite(conn)
-
-	if err != nil {
-		return "", err
-	}
-
-	um.id = wr.GeneratedKeys[0]
-
-	return wr.GeneratedKeys[0], err
-}
-
-func GetUser(conn *r.Session, username string) (um *UserModel, err error) {
-	var res *r.Cursor
-	res, err = r.Table(UserModelTableInit.TableName).
-		GetAllByIndex("Username", username).
-		Limit(1).
-		CoerceTo("array").
-		Run(conn)
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer res.Close()
-
-	if res.Next(&um) {
-		return um, nil
-	}
-
-	return nil, fmt.Errorf("not found")
-}
-
-func UpdateUser(conn *r.Session, um *UserModel) error {
-	res, err := r.Table(UserModelTableInit.TableName).
-		GetAllByIndex("Username", um.Username).
-		Update(um).
-		RunWrite(conn)
-
-	if err != nil {
-		return err
-	}
-
-	if res.Replaced == 0 {
-		return fmt.Errorf("not found")
-	}
-
-	return nil
+// GetFingerprint returns the user key fingerprint
+func (u User) GetFingerprint() string {
+	return u.Fingerprint
 }
