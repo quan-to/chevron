@@ -21,9 +21,9 @@ var GraphQLAddUserResult = graphql.NewObject(graphql.ObjectConfig{
 			Type:        graphql.String,
 			Description: "Full name of the user",
 		},
-		"FingerPrint": &graphql.Field{
+		"Fingerprint": &graphql.Field{
 			Type:        graphql.String,
-			Description: "FingerPrint of the key user has access",
+			Description: "Fingerprint of the key user has access",
 		},
 		"Password": &graphql.Field{
 			Type:        graphql.String,

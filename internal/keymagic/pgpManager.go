@@ -289,7 +289,7 @@ func (pm *pgpManager) unlockKey(ctx context.Context, fp, password string) error 
 	}
 
 	if config.AgentKeyFingerPrint == "" { // set default fingerprint
-		pm.log.Warn("No Agent Key FingerPrint specified. Using %s", fp)
+		pm.log.Warn("No Agent Key Fingerprint specified. Using %s", fp)
 		config.AgentKeyFingerPrint = fp
 	}
 

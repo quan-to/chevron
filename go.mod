@@ -25,6 +25,7 @@ require (
 	github.com/hashicorp/vault v1.1.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/kr/pretty v0.2.0 // indirect
+	github.com/kylelemons/godebug v1.1.0
 	github.com/logrusorgru/aurora v0.0.0-20200102142835-e9ef32dff381 // indirect
 	github.com/mewkiz/pkg v0.0.0-20200212014339-e3282939ac6c
 	github.com/mitchellh/gox v1.0.1 // indirect

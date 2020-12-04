@@ -92,7 +92,7 @@ var RootManagementMutation = graphql.NewObject(graphql.ObjectConfig{
 				},
 				"fingerPrint": &graphql.ArgumentConfig{
 					Type:        graphql.String,
-					Description: "FingerPrint of the key to give access to. Defaults to Agent Default",
+					Description: "Fingerprint of the key to give access to. Defaults to Agent Default",
 				},
 				"expiresAfter": &graphql.ArgumentConfig{
 					Type:        graphql.Int,

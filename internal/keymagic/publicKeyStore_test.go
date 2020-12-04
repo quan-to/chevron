@@ -152,7 +152,7 @@ func TestPKSAdd(t *testing.T) {
 	}
 
 	if !tools.CompareFingerPrint(fp, fp2) {
-		t.Errorf("FingerPrint does not match. Expected %s got %s", fp, fp2)
+		t.Errorf("Fingerprint does not match. Expected %s got %s", fp, fp2)
 	}
 
 	// Test External
