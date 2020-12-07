@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/QuantoError"
 	"github.com/quan-to/chevron/pkg/models"
 	"github.com/quan-to/chevron/test"
@@ -136,7 +137,7 @@ func TestKREGetLoadedPrivateKeys(t *testing.T) {
 
 func TestKREAddPrivateKey(t *testing.T) {
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, "dbHandler", dbh)
+	ctx = context.WithValue(ctx, tools.CtxDatabaseHandler, dbh)
 	key, err := gpg.GenerateTestKey()
 	errorDie(err, t)
 

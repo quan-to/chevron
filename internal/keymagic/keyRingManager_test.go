@@ -180,7 +180,7 @@ func TestGetKeyExternal(t *testing.T) {
 		t.Fatal("expected database handler to test")
 	}
 
-	ctx = context.WithValue(ctx, "dbHandler", dbh)
+	ctx = context.WithValue(ctx, tools.CtxDatabaseHandler, dbh)
 
 	z, err := ioutil.ReadFile("../../test/data/testkey_privateTestKey.gpg")
 	if err != nil {

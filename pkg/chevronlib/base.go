@@ -16,7 +16,7 @@ var mem *memory.MemoryDBDriver
 func init() {
 	slog.SetDebug(false)
 	mem = memory.MakeMemoryDBDriver(nil)
-	ctx = context.WithValue(ctx, "dbHandler", mem)
+	ctx = context.WithValue(ctx, tools.CtxDatabaseHandler, mem)
 	pgpBackend = magicbuilder.MakeVoidPGP(nil, mem)
 }
 

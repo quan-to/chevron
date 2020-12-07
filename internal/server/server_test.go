@@ -10,6 +10,7 @@ import (
 	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/etc/magicbuilder"
 	"github.com/quan-to/chevron/internal/keymagic"
+	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/QuantoError"
 	"github.com/quan-to/chevron/pkg/interfaces"
 	"github.com/quan-to/chevron/test"
@@ -74,7 +75,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		slog.Fatal("Error initializing selected database: %s", err)
 	}
-	ctx = context.WithValue(ctx, "dbHandler", dbh)
+	ctx = context.WithValue(ctx, tools.CtxDatabaseHandler, dbh)
 
 	sm = magicbuilder.MakeSM(nil, dbh)
 	gpg = magicbuilder.MakePGP(nil, dbh)

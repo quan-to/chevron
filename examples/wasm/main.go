@@ -166,7 +166,7 @@ var ctx = context.Background()
 
 func main() {
 	mem := memory.MakeMemoryDBDriver(log)
-	ctx = context.WithValue(ctx, "dbHandler", mem)
+	ctx = context.WithValue(ctx, tools.CtxDatabaseHandler, mem)
 	krm := keymagic.MakeKeyRingManager(log, mem)
 	kb := keybackend.MakeSaveToDiskBackend(log, "a", "")
 	pgp := keymagic.MakePGPManager(log, kb, krm)

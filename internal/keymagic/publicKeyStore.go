@@ -21,7 +21,7 @@ type DatabaseHandler interface {
 var pksLog = slog.Scope("PKS")
 
 func dbHandlerFromContext(ctx context.Context) DatabaseHandler {
-	dbhI := ctx.Value("dbHandler")
+	dbhI := ctx.Value(tools.CtxDatabaseHandler)
 	if dbhI != nil {
 		dbh, ok := dbhI.(DatabaseHandler)
 		if ok {

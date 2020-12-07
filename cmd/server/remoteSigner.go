@@ -31,7 +31,7 @@ func main() {
 	if err != nil {
 		slog.Fatal("Error initializing selected database: %s", err)
 	}
-	ctx = context.WithValue(ctx, "dbHandler", dbh)
+	ctx = context.WithValue(ctx, tools.CtxDatabaseHandler, dbh)
 
 	sm := magicbuilder.MakeSM(log, dbh)
 	gpg := magicbuilder.MakePGP(log, dbh)

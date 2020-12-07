@@ -166,7 +166,7 @@ func (krm *KeyRingManager) GetKey(ctx context.Context, fp string) *openpgp.Entit
 	// Try fetch SKS
 	log.Await("Key %s not found in local cache. Trying fetch KeyStore", fp)
 
-	ctx = context.WithValue(ctx, "dbHandler", krm.dbh)
+	ctx = context.WithValue(ctx, tools.CtxDatabaseHandler, krm.dbh)
 	asciiArmored, err := PKSGetKey(ctx, fp)
 
 	if err != nil {

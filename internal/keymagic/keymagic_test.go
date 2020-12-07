@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	config "github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/keybackend"
+	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/internal/vaultManager"
 	"github.com/quan-to/chevron/pkg/QuantoError"
 	"github.com/quan-to/chevron/pkg/database/memory"
@@ -54,7 +55,7 @@ func TestMain(m *testing.M) {
 
 	ctx := context.Background()
 	mem := memory.MakeMemoryDBDriver(nil)
-	ctx = context.WithValue(ctx, "dbHandler", mem)
+	ctx = context.WithValue(ctx, tools.CtxDatabaseHandler, mem)
 	pgpMan = MakePGPManager(nil, kb, MakeKeyRingManager(nil, mem)).(*pgpManager)
 	pgpMan.LoadKeys(ctx)
 

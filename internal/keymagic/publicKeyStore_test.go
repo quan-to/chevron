@@ -34,7 +34,7 @@ func TestPKSGetKey(t *testing.T) {
 		t.Fatal("expected database handler to test")
 	}
 
-	ctx := context.WithValue(context.Background(), "dbHandler", dbh)
+	ctx := context.WithValue(context.Background(), tools.CtxDatabaseHandler, dbh)
 	gpgKey, _ := models.AsciiArmored2GPGKey(string(z))
 
 	_, _, err = dbh.AddGPGKey(gpgKey)
@@ -130,7 +130,7 @@ func TestPKSAdd(t *testing.T) {
 		t.Fatal("expected database handler to test")
 	}
 
-	ctx := context.WithValue(context.Background(), "dbHandler", dbh)
+	ctx := context.WithValue(context.Background(), tools.CtxDatabaseHandler, dbh)
 	// Test Internal
 	z, err := ioutil.ReadFile("../../test/data/testkey_privateTestKey.gpg")
 	if err != nil {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/database/memory"
 	"os"
 
@@ -77,7 +78,7 @@ func main() {
 	}
 
 	mem = memory.MakeMemoryDBDriver(nil)
-	ctx = context.WithValue(ctx, "dbHandler", mem)
+	ctx = context.WithValue(ctx, tools.CtxDatabaseHandler, mem)
 
 	switch selectedCmd {
 	case "gen":

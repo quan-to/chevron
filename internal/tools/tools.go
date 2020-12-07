@@ -31,7 +31,8 @@ var pgpsig = regexp.MustCompile("(?s)-----BEGIN PGP SIGNATURE-----\n(.*)-----END
 type ContextField string
 
 const (
-	CtxRequestID ContextField = "requestID"
+	CtxRequestID       ContextField = "requestID"
+	CtxDatabaseHandler ContextField = "dbHandler"
 )
 
 func StringIndexOf(v string, a []string) int {
