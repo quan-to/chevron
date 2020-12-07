@@ -108,18 +108,7 @@ func (h *RethinkDBDriver) AddGPGKey(key models.GPGKey) (string, bool, error) {
 	return wr.GeneratedKeys[0], true, err
 }
 
-func (h *RethinkDBDriver) FetchGPGKeysWithoutSubKeys() ([]models.GPGKey, error) {
-	res, err := r.Table(gpgKeyTableInit.TableName).
-		Filter(r.Row.HasFields("Subkeys").Not().Or(r.Row.Field("Subkeys").Count().Eq(0))).
-		CoerceTo("array").
-		Run(h.conn)
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer res.Close()
-
+func (h *RethinkDBDriver) resultsAsArray(res *r.Cursor) ([]models.GPGKey, error) {
 	results := make([]models.GPGKey, 0)
 	var gpgKey map[string]interface{}
 
@@ -134,6 +123,21 @@ func (h *RethinkDBDriver) FetchGPGKeysWithoutSubKeys() ([]models.GPGKey, error) 
 	}
 
 	return results, nil
+}
+
+func (h *RethinkDBDriver) FetchGPGKeysWithoutSubKeys() ([]models.GPGKey, error) {
+	res, err := r.Table(gpgKeyTableInit.TableName).
+		Filter(r.Row.HasFields("Subkeys").Not().Or(r.Row.Field("Subkeys").Count().Eq(0))).
+		CoerceTo("array").
+		Run(h.conn)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Close()
+
+	return h.resultsAsArray(res)
 }
 
 func (h *RethinkDBDriver) FetchGPGKeyByFingerprint(fingerprint string) (*models.GPGKey, error) {
@@ -195,20 +199,7 @@ func (h *RethinkDBDriver) FindGPGKeyByEmail(email string, pageStart, pageEnd int
 	}
 
 	defer res.Close()
-	results := make([]models.GPGKey, 0)
-	var gpgKey map[string]interface{}
-
-	for res.Next(&gpgKey) {
-		gpgKey = h.fixGPGKey(gpgKey)
-		var key models.GPGKey
-		err := convertFromRethinkDB(gpgKey, &key)
-		if err != nil {
-			return nil, err
-		}
-		results = append(results, key)
-	}
-
-	return results, nil
+	return h.resultsAsArray(res)
 }
 
 func (h *RethinkDBDriver) FindGPGKeyByFingerPrint(fingerPrint string, pageStart, pageEnd int) ([]models.GPGKey, error) {
@@ -234,20 +225,7 @@ func (h *RethinkDBDriver) FindGPGKeyByFingerPrint(fingerPrint string, pageStart,
 	}
 
 	defer res.Close()
-	results := make([]models.GPGKey, 0)
-	var gpgKey map[string]interface{}
-
-	for res.Next(&gpgKey) {
-		gpgKey = h.fixGPGKey(gpgKey)
-		var key models.GPGKey
-		err := convertFromRethinkDB(gpgKey, &key)
-		if err != nil {
-			return nil, err
-		}
-		results = append(results, key)
-	}
-
-	return results, nil
+	return h.resultsAsArray(res)
 }
 
 func (h *RethinkDBDriver) FindGPGKeyByValue(value string, pageStart, pageEnd int) ([]models.GPGKey, error) {
@@ -283,21 +261,7 @@ func (h *RethinkDBDriver) FindGPGKeyByValue(value string, pageStart, pageEnd int
 	}
 
 	defer res.Close()
-
-	results := make([]models.GPGKey, 0)
-	var gpgKey map[string]interface{}
-
-	for res.Next(&gpgKey) {
-		gpgKey = h.fixGPGKey(gpgKey)
-		var key models.GPGKey
-		err := convertFromRethinkDB(gpgKey, &key)
-		if err != nil {
-			return nil, err
-		}
-		results = append(results, key)
-	}
-
-	return results, nil
+	return h.resultsAsArray(res)
 }
 
 func (h *RethinkDBDriver) FindGPGKeyByName(name string, pageStart, pageEnd int) ([]models.GPGKey, error) {
@@ -329,18 +293,5 @@ func (h *RethinkDBDriver) FindGPGKeyByName(name string, pageStart, pageEnd int) 
 
 	defer res.Close()
 
-	results := make([]models.GPGKey, 0)
-	var gpgKey map[string]interface{}
-
-	for res.Next(&gpgKey) {
-		gpgKey = h.fixGPGKey(gpgKey)
-		var key models.GPGKey
-		err := convertFromRethinkDB(gpgKey, &key)
-		if err != nil {
-			return nil, err
-		}
-		results = append(results, key)
-	}
-
-	return results, nil
+	return h.resultsAsArray(res)
 }
