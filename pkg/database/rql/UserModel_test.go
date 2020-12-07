@@ -63,7 +63,7 @@ func TestRethinkDBDriver_AddUser(t *testing.T) {
 			{"id": "abcd"},
 		}, nil)
 
-	id, err = h.AddUser(userToAdd)
+	_, err = h.AddUser(userToAdd)
 
 	if err == nil {
 		t.Fatalf("expected error but got nil")
