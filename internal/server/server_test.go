@@ -64,7 +64,7 @@ func TestMain(m *testing.M) {
 	config.KeyPrefix = "testkey_"
 	config.KeysBase64Encoded = false
 	config.RethinkDBPoolSize = 1
-	config.EnableRethinkSKS = false
+	config.EnableDatabase = false
 
 	config.MasterGPGKeyBase64Encoded = false
 	config.MasterGPGKeyPath = "../../test/data/testkey_privateTestKey.gpg"

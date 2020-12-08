@@ -3,6 +3,7 @@ package agent
 import (
 	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/pkg/database/memory"
+	"github.com/quan-to/chevron/pkg/database/pg"
 	"github.com/quan-to/chevron/pkg/database/rql"
 	"github.com/quan-to/chevron/pkg/interfaces"
 	"github.com/quan-to/chevron/pkg/models"
@@ -26,31 +27,53 @@ type DatabaseHandler interface {
 	HealthCheck() error
 }
 
-func MakeDatabaseHandler(logger slog.Instance) (DatabaseHandler, error) {
-	if config.RethinkAuthManager {
-		logger.Info("RethinkDB Database Enabled. Creating handler")
-		rdb := rql.MakeRethinkDBDriver(logger)
-		logger.Info("Connecting to RethinkDB")
-		err := rdb.Connect(config.RethinkDBHost, config.RethinkDBUsername, config.RethinkDBPassword, config.DatabaseName, config.RethinkDBPort, config.RethinkDBPoolSize)
-		if err != nil {
-			return nil, err
-		}
-		logger.Info("Initializing database")
-		err = rdb.InitDatabase()
-		if err != nil {
-			return nil, err
-		}
-		logger.Info("RethinkDB Handler done!")
-		return rdb, nil
+func makeRethinkDBHandler(logger slog.Instance) (*rql.RethinkDBDriver, error) {
+	logger.Info("RethinkDB Database Enabled. Creating handler")
+	rdb := rql.MakeRethinkDBDriver(logger)
+	logger.Info("Connecting to RethinkDB")
+	err := rdb.Connect(config.RethinkDBHost, config.RethinkDBUsername, config.RethinkDBPassword, config.DatabaseName, config.RethinkDBPort, config.RethinkDBPoolSize)
+	if err != nil {
+		return nil, err
 	}
-	logger.Warn("No database handler specified. Using memory database")
+	logger.Info("Initializing database")
+	err = rdb.InitDatabase()
+	if err != nil {
+		return nil, err
+	}
+	logger.Info("RethinkDB Handler done!")
+	return rdb, nil
+}
+
+func makePostgresDBHandler(logger slog.Instance) (*pg.PostgreSQLDBDriver, error) {
+	logger.Info("PostgreSQL Database Enabled. Creating handler")
+	rdb := pg.MakePostgreSQLDBDriver(logger)
+	logger.Info("Initializing database")
+	err := rdb.Connect(config.ConnectionString)
+	if err != nil {
+		return nil, err
+	}
+	return rdb, nil
+}
+
+func MakeDatabaseHandler(logger slog.Instance) (DatabaseHandler, error) {
+	if config.EnableDatabase {
+		switch config.DatabaseDialect {
+		case "rethinkdb":
+			return makeRethinkDBHandler(logger)
+		case "postgres":
+			return makePostgresDBHandler(logger)
+		default:
+			logger.Fatal("Unknown database dialect %q", config.DatabaseDialect)
+		}
+	}
+	logger.Warn("No database handler enabled. Using memory database")
 
 	mdb := memory.MakeMemoryDBDriver(logger)
 
 	return mdb, nil
 }
 
-// MakeTokenManager creates an instance of token manager. If Rethink is enabled returns an RethinkTokenManager, if not a MemoryTokenManager
+// MakeTokenManager creates an instance of token manager. If Rethink is enabled returns an DatabaseTokenManager, if not a MemoryTokenManager
 func MakeTokenManager(logger slog.Instance, dbHandler DatabaseHandler) interfaces.TokenManager {
 	if dbHandler != nil {
 		return MakeDatabaseTokenManager(logger, dbHandler)
@@ -59,7 +82,7 @@ func MakeTokenManager(logger slog.Instance, dbHandler DatabaseHandler) interface
 	return MakeMemoryTokenManager(logger)
 }
 
-// MakeAuthManager creates an instance of auth manager. If Rethink is enabled returns an RethinkAuthManager, if not a JSONAuthManager
+// MakeAuthManager creates an instance of auth manager. If Rethink is enabled returns an DatabaseAuthManager, if not a JSONAuthManager
 func MakeAuthManager(logger slog.Instance, dbHandler DatabaseHandler) interfaces.AuthManager {
 	if dbHandler != nil {
 		return NewDatabaseAuthManager(logger, dbHandler)

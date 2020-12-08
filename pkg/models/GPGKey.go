@@ -23,6 +23,7 @@ type GPGKey struct {
 	Subkeys                []string
 	AsciiArmoredPublicKey  string
 	AsciiArmoredPrivateKey string
+	ParentKey              *GPGKey
 }
 
 func (key *GPGKey) GetShortFingerPrint() string {

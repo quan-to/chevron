@@ -62,7 +62,7 @@ func BaseTestSearch(name, value, endpoint string, t *testing.T) {
 	config.PushVariables()
 	defer config.PopVariables()
 
-	config.EnableRethinkSKS = true
+	config.EnableDatabase = true
 
 	// region Test Get Key
 	req, err := http.NewRequest("GET", endpoint, nil)
@@ -174,7 +174,7 @@ func TestAddKey(t *testing.T) {
 	config.PushVariables()
 	defer config.PopVariables()
 
-	config.EnableRethinkSKS = true
+	config.EnableDatabase = true
 	// region Test Add Key
 	pubKey, _ := gpg.GetPublicKeyASCII(ctx, test.TestKeyFingerprint)
 

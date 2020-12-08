@@ -43,7 +43,7 @@ func TestMain(m *testing.M) {
 
 	config.HttpPort = 40000
 	config.SKSServer = fmt.Sprintf("http://localhost:%d/sks/", config.HttpPort)
-	config.EnableRethinkSKS = true
+	config.EnableDatabase = true
 	config.PushVariables()
 
 	var kb interfaces.StorageBackend
