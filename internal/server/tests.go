@@ -2,10 +2,11 @@ package server
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/internal/vaultManager"
 	"github.com/quan-to/chevron/pkg/models"
-	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/quan-to/slog"

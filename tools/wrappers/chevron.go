@@ -2,8 +2,9 @@ package main
 
 import "C"
 import (
-	"github.com/quan-to/chevron/pkg/chevronlib"
 	"strings"
+
+	"github.com/quan-to/chevron/pkg/chevronlib"
 )
 
 // LoadKey loads a private or public key into the memory keyring

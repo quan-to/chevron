@@ -2,6 +2,7 @@ package rql
 
 import (
 	"fmt"
+
 	"github.com/quan-to/chevron/pkg/models"
 	r "gopkg.in/rethinkdb/rethinkdb-go.v6"
 )

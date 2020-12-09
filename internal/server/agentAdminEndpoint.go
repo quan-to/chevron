@@ -2,6 +2,8 @@ package server
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/graphql/gqlerrors"
@@ -11,7 +13,6 @@ import (
 	"github.com/quan-to/chevron/pkg/QuantoError"
 	"github.com/quan-to/chevron/pkg/interfaces"
 	"github.com/quan-to/slog"
-	"net/http"
 )
 
 type AgentAdmin struct {

@@ -2,10 +2,11 @@ package memory
 
 import (
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/quan-to/chevron/pkg/models"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/quan-to/chevron/pkg/models"
 )
 
 func (h *MemoryDBDriver) AddUserToken(ut models.UserToken) (string, error) {

@@ -3,6 +3,8 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/quan-to/chevron/internal/keymagic"
 	"github.com/quan-to/chevron/internal/server/pages"
@@ -10,7 +12,6 @@ import (
 	"github.com/quan-to/chevron/pkg/interfaces"
 	"github.com/quan-to/chevron/pkg/models"
 	"github.com/quan-to/slog"
-	"net/http"
 )
 
 type KeyRingEndpoint struct {

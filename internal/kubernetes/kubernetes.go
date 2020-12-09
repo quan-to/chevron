@@ -3,12 +3,13 @@ package kubernetes
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mewkiz/pkg/osutil"
-	"github.com/quan-to/chevron/internal/tools"
-	"github.com/quan-to/slog"
 	"io/ioutil"
 	"os"
 	"path"
+
+	"github.com/mewkiz/pkg/osutil"
+	"github.com/quan-to/chevron/internal/tools"
+	"github.com/quan-to/slog"
 )
 
 const ServiceAccountPath = "/run/secrets/kubernetes.io/serviceaccount"

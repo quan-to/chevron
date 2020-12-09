@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"github.com/quan-to/chevron/pkg/openpgp"
 	"strings"
+
+	"github.com/quan-to/chevron/pkg/openpgp"
 )
 
 const DefaultValue = -1

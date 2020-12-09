@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
+	"os"
+
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/database/memory"
-	"os"
 
 	"github.com/quan-to/slog"
 	"gopkg.in/alecthomas/kingpin.v2"

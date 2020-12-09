@@ -6,15 +6,16 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"io/ioutil"
+	"path"
+	"strings"
+	"sync"
+
 	config "github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/keybackend"
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/internal/vaultManager"
 	"github.com/quan-to/chevron/pkg/interfaces"
-	"io/ioutil"
-	"path"
-	"strings"
-	"sync"
 
 	"github.com/quan-to/slog"
 )

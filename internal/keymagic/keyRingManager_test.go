@@ -2,6 +2,9 @@ package keymagic
 
 import (
 	"context"
+	"io/ioutil"
+	"testing"
+
 	"github.com/quan-to/chevron/internal/agent"
 	remote_signer "github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/keybackend"
@@ -12,8 +15,6 @@ import (
 	"github.com/quan-to/chevron/pkg/models"
 	"github.com/quan-to/chevron/test"
 	"github.com/quan-to/slog"
-	"io/ioutil"
-	"testing"
 )
 
 func TestAddKey(t *testing.T) {

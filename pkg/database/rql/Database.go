@@ -2,10 +2,11 @@ package rql
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/tools"
 	r "gopkg.in/rethinkdb/rethinkdb-go.v6"
-	"time"
 )
 
 const maxRetryCount = 5

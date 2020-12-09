@@ -2,6 +2,10 @@ package main
 
 import (
 	"context"
+	"os"
+	"os/signal"
+	"syscall"
+
 	_ "github.com/quan-to/chevron/cmd/server/init"
 	"github.com/quan-to/chevron/internal/agent"
 	"github.com/quan-to/chevron/internal/config"
@@ -10,9 +14,6 @@ import (
 	"github.com/quan-to/chevron/internal/server"
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/slog"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 var log = slog.Scope("QRS").Tag(tools.DefaultTag)

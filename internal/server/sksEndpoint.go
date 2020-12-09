@@ -3,11 +3,12 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strconv"
+
 	"github.com/quan-to/chevron/internal/keymagic"
 	"github.com/quan-to/chevron/pkg/interfaces"
 	"github.com/quan-to/chevron/pkg/models"
-	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/quan-to/slog"

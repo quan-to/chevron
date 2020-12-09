@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"testing"
+
 	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/test"
-	"testing"
 )
 
 func TestPutKeyPassword(t *testing.T) {

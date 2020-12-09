@@ -3,14 +3,15 @@ package keymagic
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
+	"testing"
+
 	"github.com/quan-to/chevron/internal/agent"
 	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/models"
 	"github.com/quan-to/chevron/test"
 	"github.com/quan-to/slog"
-	"io/ioutil"
-	"testing"
 )
 
 func TestPKSGetKey(t *testing.T) {

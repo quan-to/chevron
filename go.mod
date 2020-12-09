@@ -27,8 +27,10 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/quan-to/slog v0.1.1
 	github.com/ryanuber/go-glob v1.0.0 // indirect
-	golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	golang.org/x/mod v0.4.0 // indirect
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
+	golang.org/x/tools v0.0.0-20201208233053-a543418bbed2 // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/rethinkdb/rethinkdb-go.v6 v6.1.1
 )

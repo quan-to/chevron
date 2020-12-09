@@ -12,6 +12,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/rand"
 	"crypto/rsa"
+
 	// skipcq: GSC-G505
 	"crypto/sha1"
 	"encoding/binary"

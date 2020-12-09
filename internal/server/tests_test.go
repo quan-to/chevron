@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	config "github.com/quan-to/chevron/internal/config"
-	"github.com/quan-to/chevron/pkg/QuantoError"
 	"io/ioutil"
 	"net/http"
 	"testing"
+
+	config "github.com/quan-to/chevron/internal/config"
+	"github.com/quan-to/chevron/pkg/QuantoError"
 )
 
 func TestPing(t *testing.T) {

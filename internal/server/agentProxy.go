@@ -5,13 +5,14 @@ import (
 	"crypto"
 	"encoding/json"
 	"fmt"
-	"github.com/quan-to/chevron/internal/config"
-	"github.com/quan-to/chevron/internal/tools"
-	"github.com/quan-to/chevron/pkg/interfaces"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/quan-to/chevron/internal/config"
+	"github.com/quan-to/chevron/internal/tools"
+	"github.com/quan-to/chevron/pkg/interfaces"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"

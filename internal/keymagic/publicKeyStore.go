@@ -3,6 +3,7 @@ package keymagic
 import (
 	"context"
 	"fmt"
+
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/models"
 

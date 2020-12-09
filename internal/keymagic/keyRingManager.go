@@ -3,10 +3,11 @@ package keymagic
 import (
 	"context"
 	"fmt"
+	"sync"
+
 	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/models"
-	"sync"
 
 	"github.com/quan-to/chevron/pkg/openpgp"
 	"github.com/quan-to/slog"

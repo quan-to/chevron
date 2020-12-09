@@ -4,14 +4,15 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"io/ioutil"
+	"path"
+	"sync"
+
 	remote_signer "github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/keybackend"
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/interfaces"
 	"github.com/quan-to/slog"
-	"io/ioutil"
-	"path"
-	"sync"
 )
 
 var smLog = slog.Scope("secretsManager")

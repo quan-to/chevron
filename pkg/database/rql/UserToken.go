@@ -2,9 +2,10 @@ package rql
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/quan-to/chevron/pkg/models"
 	r "gopkg.in/rethinkdb/rethinkdb-go.v6"
-	"time"
 )
 
 var userTokenTableInit = tableInitStruct{

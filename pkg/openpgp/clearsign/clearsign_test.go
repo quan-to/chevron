@@ -6,8 +6,9 @@ package clearsign
 
 import (
 	"bytes"
-	"github.com/quan-to/chevron/pkg/openpgp"
 	"testing"
+
+	"github.com/quan-to/chevron/pkg/openpgp"
 )
 
 func testParse(t *testing.T, input []byte, expected, expectedPlaintext string) {

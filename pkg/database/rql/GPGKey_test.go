@@ -2,12 +2,13 @@ package rql
 
 import (
 	"fmt"
+	"strings"
+	"testing"
+
 	"github.com/kylelemons/godebug/pretty"
 	"github.com/quan-to/chevron/pkg/models"
 	"github.com/quan-to/slog"
 	r "gopkg.in/rethinkdb/rethinkdb-go.v6"
-	"strings"
-	"testing"
 )
 
 var testGPGKey = models.GPGKey{

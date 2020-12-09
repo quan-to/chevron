@@ -4,16 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+	"testing"
+
 	config "github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/keymagic"
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/QuantoError"
 	"github.com/quan-to/chevron/pkg/models/HKP"
 	"github.com/quan-to/chevron/test"
-	"io/ioutil"
-	"net/http"
-	"net/url"
-	"testing"
 )
 
 func TestHKPAdd(t *testing.T) {

@@ -2,14 +2,15 @@ package config
 
 import (
 	"fmt"
-	"github.com/bouk/monkey"
-	"github.com/quan-to/slog"
 	"math/rand"
 	"os"
 	"reflect"
 	"strconv"
 	"syscall"
 	"testing"
+
+	"github.com/bouk/monkey"
+	"github.com/quan-to/slog"
 )
 
 func assertPanic(t *testing.T, f func(), message string) {

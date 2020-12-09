@@ -4,10 +4,11 @@ import (
 	"bufio"
 	"encoding/base64"
 	"fmt"
-	"github.com/quan-to/chevron/internal/etc/magicbuilder"
 	"io"
 	"io/ioutil"
 	"os"
+
+	"github.com/quan-to/chevron/internal/etc/magicbuilder"
 )
 
 func Decrypt(input, output string) {

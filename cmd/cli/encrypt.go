@@ -3,11 +3,12 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/quan-to/chevron/internal/etc/magicbuilder"
 	"io"
 	"io/ioutil"
 	"os"
 	"time"
+
+	"github.com/quan-to/chevron/internal/etc/magicbuilder"
 )
 
 // EncryptFile encrypts a file / data from input for the specified recipient

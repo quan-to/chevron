@@ -1,9 +1,10 @@
 package pages
 
 import (
-	"github.com/quan-to/chevron/pkg/models"
 	"html/template"
 	"net/http"
+
+	"github.com/quan-to/chevron/pkg/models"
 )
 
 const addPrivateKeyHTML = `

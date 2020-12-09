@@ -2,9 +2,10 @@ package memory
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/google/uuid"
 	"github.com/quan-to/chevron/pkg/models"
-	"strings"
 )
 
 func (h *MemoryDBDriver) UpdateGPGKey(key models.GPGKey) error {

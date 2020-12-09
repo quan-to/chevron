@@ -2,8 +2,9 @@ package main
 
 import "C"
 import (
-	"github.com/quan-to/slog"
 	"unsafe"
+
+	"github.com/quan-to/slog"
 )
 
 // TRUE is a C Int with value 1

@@ -6,14 +6,15 @@ import (
 	"crypto/cipher"
 	"encoding/base64"
 	"fmt"
-	"github.com/quan-to/chevron/internal/tools"
-	"github.com/quan-to/chevron/pkg/openpgp"
 	"io"
 	"io/ioutil"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/quan-to/chevron/internal/tools"
+	"github.com/quan-to/chevron/pkg/openpgp"
 )
 
 var fieldMatchRegex = regexp.MustCompile(`\(([a-zA-Z0-9]*)\)\[([\-A-Za-z0-9+/\\=]*)\](.*)`)

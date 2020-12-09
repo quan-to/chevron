@@ -2,12 +2,13 @@ package agent
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/pkg/interfaces"
 	"github.com/quan-to/chevron/pkg/models"
 	"github.com/quan-to/slog"
-	"time"
 )
 
 type DatabaseTokenManager struct {

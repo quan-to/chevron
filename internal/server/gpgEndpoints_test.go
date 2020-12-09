@@ -6,13 +6,14 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"testing"
+
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/QuantoError"
 	"github.com/quan-to/chevron/pkg/models"
 	"github.com/quan-to/chevron/test"
-	"io/ioutil"
-	"net/http"
-	"testing"
 )
 
 // region GPG Endpoint Tests

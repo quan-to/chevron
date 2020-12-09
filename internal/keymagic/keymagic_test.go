@@ -3,6 +3,9 @@ package keymagic
 import (
 	"context"
 	"fmt"
+	"os"
+	"testing"
+
 	"github.com/bouk/monkey"
 	"github.com/google/uuid"
 	config "github.com/quan-to/chevron/internal/config"
@@ -13,8 +16,6 @@ import (
 	"github.com/quan-to/chevron/pkg/database/memory"
 	"github.com/quan-to/chevron/pkg/interfaces"
 	"github.com/quan-to/chevron/test"
-	"os"
-	"testing"
 
 	"github.com/quan-to/slog"
 )

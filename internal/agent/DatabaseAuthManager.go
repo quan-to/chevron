@@ -3,12 +3,13 @@ package agent
 import (
 	"encoding/base64"
 	"fmt"
-	cofig "github.com/quan-to/chevron/internal/config"
+	"sync"
+	"time"
+
+	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/pkg/models"
 	"github.com/quan-to/slog"
 	"golang.org/x/crypto/bcrypt"
-	"sync"
-	"time"
 )
 
 type DatabaseAuthManager struct {
@@ -46,7 +47,7 @@ func NewDatabaseAuthManager(logger slog.Instance, dbAuth DBAuth) *DatabaseAuthMa
 }
 
 func (ram *DatabaseAuthManager) addDefaultAdmin() {
-	err := ram.LoginAdd("admin", "admin", "Administrator", cofig.AgentKeyFingerPrint)
+	err := ram.LoginAdd("admin", "admin", "Administrator", config.AgentKeyFingerPrint)
 
 	if err != nil {
 		ram.log.Fatal("Error adding default admin: %v", err)
@@ -105,7 +106,7 @@ func (ram *DatabaseAuthManager) LoginAdd(username, password, fullname, fingerpri
 
 	fp := fingerprint
 	if fp == "" {
-		fp = cofig.AgentKeyFingerPrint
+		fp = config.AgentKeyFingerPrint
 	}
 
 	pass, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)

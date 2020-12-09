@@ -1,9 +1,10 @@
 package memory
 
 import (
+	"sync"
+
 	"github.com/quan-to/chevron/pkg/models"
 	"github.com/quan-to/slog"
-	"sync"
 )
 
 // MemoryDBDriver is a database driver for in-memory database for testing

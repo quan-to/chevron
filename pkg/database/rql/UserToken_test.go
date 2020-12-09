@@ -2,13 +2,14 @@ package rql
 
 import (
 	"fmt"
+	"strings"
+	"testing"
+	"time"
+
 	"github.com/kylelemons/godebug/pretty"
 	"github.com/quan-to/chevron/pkg/models"
 	"github.com/quan-to/slog"
 	r "gopkg.in/rethinkdb/rethinkdb-go.v6"
-	"strings"
-	"testing"
-	"time"
 )
 
 var testToken = models.UserToken{

@@ -2,10 +2,11 @@ package rql
 
 import (
 	"encoding/json"
+	"strings"
+
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/slog"
 	r "gopkg.in/rethinkdb/rethinkdb-go.v6"
-	"strings"
 )
 
 // tableInitStruct is used for representing a table initialization

@@ -1,6 +1,8 @@
 package agent
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/graphql-go/graphql"
 	"github.com/quan-to/chevron/internal/config"
@@ -10,7 +12,6 @@ import (
 	"github.com/quan-to/chevron/pkg/models"
 	mgql "github.com/quan-to/chevron/pkg/models/graphql"
 	"github.com/quan-to/slog"
-	"time"
 )
 
 const TokenManagerKey = "TokenManager"

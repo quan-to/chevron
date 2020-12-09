@@ -3,6 +3,9 @@ package server
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/quan-to/chevron/internal/agent"
 	"github.com/quan-to/chevron/internal/config"
@@ -11,8 +14,6 @@ import (
 	"github.com/quan-to/chevron/internal/vaultManager"
 	"github.com/quan-to/chevron/pkg/interfaces"
 	"github.com/quan-to/slog"
-	"io/ioutil"
-	"net/http"
 )
 
 // GenRemoteSignerServerMux generates a remote signer HTTP Router
