@@ -12,7 +12,7 @@ import (
 
 var ctx = context.Background()
 var pgpBackend interfaces.PGPManager
-var mem *memory.MemoryDBDriver
+var mem *memory.DbDriver
 
 func init() {
 	slog.SetDebug(false)

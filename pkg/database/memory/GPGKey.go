@@ -8,7 +8,7 @@ import (
 	"github.com/quan-to/chevron/pkg/models"
 )
 
-func (h *MemoryDBDriver) UpdateGPGKey(key models.GPGKey) error {
+func (h *DbDriver) UpdateGPGKey(key models.GPGKey) error {
 	h.lock.Lock()
 	defer h.lock.Unlock()
 	h.log.Debug("UpdateGPGKey(%q)", key.FullFingerprint)
@@ -27,7 +27,7 @@ func (h *MemoryDBDriver) UpdateGPGKey(key models.GPGKey) error {
 	return fmt.Errorf("not found")
 }
 
-func (h *MemoryDBDriver) DeleteGPGKey(key models.GPGKey) error {
+func (h *DbDriver) DeleteGPGKey(key models.GPGKey) error {
 	h.log.Debug("DeleteGPGKey(%q, %q)", key.ID, key.FullFingerprint)
 	h.lock.Lock()
 	defer h.lock.Unlock()
@@ -44,7 +44,7 @@ func (h *MemoryDBDriver) DeleteGPGKey(key models.GPGKey) error {
 
 // AddGPGKey adds a GPG Key to the database or update an existing one by fingerprint
 // Returns generated id / hasBeenAdded / error
-func (h *MemoryDBDriver) AddGPGKey(key models.GPGKey) (string, bool, error) {
+func (h *DbDriver) AddGPGKey(key models.GPGKey) (string, bool, error) {
 	h.log.Debug("AddGPGKey(%q)", key.FullFingerprint)
 	h.lock.Lock()
 	defer h.lock.Unlock()
@@ -68,7 +68,7 @@ func (h *MemoryDBDriver) AddGPGKey(key models.GPGKey) (string, bool, error) {
 	return key.ID, true, nil
 }
 
-func (h *MemoryDBDriver) FetchGPGKeysWithoutSubKeys() ([]models.GPGKey, error) {
+func (h *DbDriver) FetchGPGKeysWithoutSubKeys() ([]models.GPGKey, error) {
 	h.lock.RLock()
 	defer h.lock.RUnlock()
 	var keys []models.GPGKey
@@ -82,7 +82,7 @@ func (h *MemoryDBDriver) FetchGPGKeysWithoutSubKeys() ([]models.GPGKey, error) {
 	return keys, nil
 }
 
-func (h *MemoryDBDriver) FetchGPGKeyByFingerprint(fingerprint string) (*models.GPGKey, error) {
+func (h *DbDriver) FetchGPGKeyByFingerprint(fingerprint string) (*models.GPGKey, error) {
 	h.log.Debug("FetchGPGKeyByFingerprint(%q)", fingerprint)
 	h.lock.RLock()
 	defer h.lock.RUnlock()
@@ -101,7 +101,7 @@ func (h *MemoryDBDriver) FetchGPGKeyByFingerprint(fingerprint string) (*models.G
 	return nil, fmt.Errorf("not found")
 }
 
-func (h *MemoryDBDriver) FindGPGKeyByEmail(email string, pageStart, pageEnd int) ([]models.GPGKey, error) {
+func (h *DbDriver) FindGPGKeyByEmail(email string, pageStart, pageEnd int) ([]models.GPGKey, error) {
 	h.log.Debug("FindGPGKeyByEmail(%q, %d, %d)", email, pageStart, pageEnd)
 	h.lock.RLock()
 	defer h.lock.RUnlock()
@@ -140,7 +140,7 @@ func (h *MemoryDBDriver) FindGPGKeyByEmail(email string, pageStart, pageEnd int)
 	return items, nil
 }
 
-func (h *MemoryDBDriver) FindGPGKeyByFingerPrint(fingerprint string, pageStart, pageEnd int) ([]models.GPGKey, error) {
+func (h *DbDriver) FindGPGKeyByFingerPrint(fingerprint string, pageStart, pageEnd int) ([]models.GPGKey, error) {
 	h.log.Debug("FindGPGKeyByFingerPrint(%q, %d, %d)", fingerprint, pageStart, pageEnd)
 	h.lock.RLock()
 	defer h.lock.RUnlock()
@@ -176,7 +176,7 @@ func (h *MemoryDBDriver) FindGPGKeyByFingerPrint(fingerprint string, pageStart, 
 	return items, nil
 }
 
-func (h *MemoryDBDriver) FindGPGKeyByValue(value string, pageStart, pageEnd int) ([]models.GPGKey, error) {
+func (h *DbDriver) FindGPGKeyByValue(value string, pageStart, pageEnd int) ([]models.GPGKey, error) {
 	h.log.Debug("FindGPGKeyByValue(%q, %d, %d)", value, pageStart, pageEnd)
 	h.lock.RLock()
 	defer h.lock.RUnlock()
@@ -227,7 +227,7 @@ func (h *MemoryDBDriver) FindGPGKeyByValue(value string, pageStart, pageEnd int)
 	return items, nil
 }
 
-func (h *MemoryDBDriver) FindGPGKeyByName(name string, pageStart, pageEnd int) ([]models.GPGKey, error) {
+func (h *DbDriver) FindGPGKeyByName(name string, pageStart, pageEnd int) ([]models.GPGKey, error) {
 	h.log.Debug("FindGPGKeyByName(%q, %d, %d)", name, pageStart, pageEnd)
 	h.lock.RLock()
 	defer h.lock.RUnlock()

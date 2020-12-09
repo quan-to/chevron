@@ -7,8 +7,8 @@ import (
 	"github.com/quan-to/slog"
 )
 
-// MemoryDBDriver is a database driver for in-memory database for testing
-type MemoryDBDriver struct {
+// DbDriver is a database driver for in-memory database for testing
+type DbDriver struct {
 	log    slog.Instance
 	users  []models.User
 	tokens []models.UserToken
@@ -17,19 +17,19 @@ type MemoryDBDriver struct {
 }
 
 // MakeMemoryDBDriver creates a new database driver for rethinkdb
-func MakeMemoryDBDriver(log slog.Instance) *MemoryDBDriver {
+func MakeMemoryDBDriver(log slog.Instance) *DbDriver {
 	if log == nil {
 		log = slog.Scope("MemoryDB")
 	} else {
 		log = log.SubScope("MemoryDB")
 	}
 
-	return &MemoryDBDriver{
+	return &DbDriver{
 		log:  log,
 		lock: sync.RWMutex{},
 	}
 }
 
-func (h *MemoryDBDriver) HealthCheck() error {
+func (h *DbDriver) HealthCheck() error {
 	return nil
 }

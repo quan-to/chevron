@@ -12,7 +12,7 @@ import (
 )
 
 var ctx = context.Background()
-var mem *memory.MemoryDBDriver
+var mem *memory.DbDriver
 
 func main() {
 	debugMode := kingpin.Flag("debug", "Enable debug mode").Bool()

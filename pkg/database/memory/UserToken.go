@@ -9,7 +9,7 @@ import (
 	"github.com/quan-to/chevron/pkg/models"
 )
 
-func (h *MemoryDBDriver) AddUserToken(ut models.UserToken) (string, error) {
+func (h *DbDriver) AddUserToken(ut models.UserToken) (string, error) {
 	h.lock.Lock()
 	defer h.lock.Unlock()
 
@@ -21,7 +21,7 @@ func (h *MemoryDBDriver) AddUserToken(ut models.UserToken) (string, error) {
 }
 
 // RemoveUserToken removes a user token from the database
-func (h *MemoryDBDriver) RemoveUserToken(token string) (err error) {
+func (h *DbDriver) RemoveUserToken(token string) (err error) {
 	h.lock.Lock()
 	defer h.lock.Unlock()
 
@@ -35,7 +35,7 @@ func (h *MemoryDBDriver) RemoveUserToken(token string) (err error) {
 	return fmt.Errorf("not found")
 }
 
-func (h *MemoryDBDriver) GetUserToken(token string) (ut *models.UserToken, err error) {
+func (h *DbDriver) GetUserToken(token string) (ut *models.UserToken, err error) {
 	h.lock.RLock()
 	defer h.lock.RUnlock()
 
@@ -49,7 +49,7 @@ func (h *MemoryDBDriver) GetUserToken(token string) (ut *models.UserToken, err e
 	return nil, fmt.Errorf("not found")
 }
 
-func (h *MemoryDBDriver) InvalidateUserTokens() (int, error) {
+func (h *DbDriver) InvalidateUserTokens() (int, error) {
 	h.lock.RLock()
 	var tokensToDelete []string
 	for _, v := range h.tokens {
