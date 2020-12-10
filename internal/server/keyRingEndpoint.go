@@ -3,6 +3,8 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/quan-to/chevron/internal/keymagic"
 	"github.com/quan-to/chevron/internal/server/pages"
@@ -10,17 +12,17 @@ import (
 	"github.com/quan-to/chevron/pkg/interfaces"
 	"github.com/quan-to/chevron/pkg/models"
 	"github.com/quan-to/slog"
-	"net/http"
 )
 
 type KeyRingEndpoint struct {
 	sm  interfaces.SecretsManager
 	gpg interfaces.PGPManager
 	log slog.Instance
+	dbh DatabaseHandler
 }
 
 // MakeKeyRingEndpoint creates an instance of key ring management endpoints
-func MakeKeyRingEndpoint(log slog.Instance, sm interfaces.SecretsManager, gpg interfaces.PGPManager) *KeyRingEndpoint {
+func MakeKeyRingEndpoint(log slog.Instance, sm interfaces.SecretsManager, gpg interfaces.PGPManager, dbHandler DatabaseHandler) *KeyRingEndpoint {
 	if log == nil {
 		log = slog.Scope("KeyRing")
 	} else {
@@ -31,6 +33,7 @@ func MakeKeyRingEndpoint(log slog.Instance, sm interfaces.SecretsManager, gpg in
 		sm:  sm,
 		gpg: gpg,
 		log: log,
+		dbh: dbHandler,
 	}
 }
 
@@ -46,6 +49,7 @@ func (kre *KeyRingEndpoint) AttachHandlers(r *mux.Router) {
 func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(kre.log, r)
+	ctx = wrapContextWithDatabaseHandler(kre.dbh, ctx)
 	InitHTTPTimer(log, r)
 
 	defer func() {
@@ -74,6 +78,7 @@ func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 func (kre *KeyRingEndpoint) getCachedKeys(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(kre.log, r)
+	ctx = wrapContextWithDatabaseHandler(kre.dbh, ctx)
 	InitHTTPTimer(log, r)
 
 	defer func() {
@@ -101,6 +106,7 @@ func (kre *KeyRingEndpoint) getCachedKeys(w http.ResponseWriter, r *http.Request
 func (kre *KeyRingEndpoint) getLoadedPrivateKeys(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(kre.log, r)
+	ctx = wrapContextWithDatabaseHandler(kre.dbh, ctx)
 	InitHTTPTimer(log, r)
 
 	defer func() {
@@ -127,6 +133,7 @@ func (kre *KeyRingEndpoint) getLoadedPrivateKeys(w http.ResponseWriter, r *http.
 func (kre *KeyRingEndpoint) deletePrivateKey(w http.ResponseWriter, r *http.Request) {
 	var data models.KeyRingDeletePrivateKeyData
 	ctx := wrapContextWithRequestID(r)
+	ctx = wrapContextWithDatabaseHandler(kre.dbh, ctx)
 	log := wrapLogWithRequestID(kre.log, r)
 	InitHTTPTimer(log, r)
 
@@ -162,6 +169,7 @@ func (kre *KeyRingEndpoint) deletePrivateKey(w http.ResponseWriter, r *http.Requ
 func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request) {
 	var data models.KeyRingAddPrivateKeyData
 	ctx := wrapContextWithRequestID(r)
+	ctx = wrapContextWithDatabaseHandler(kre.dbh, ctx)
 	log := wrapLogWithRequestID(kre.log, r)
 	InitHTTPTimer(log, r)
 

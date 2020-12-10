@@ -2,9 +2,10 @@ package chevronlib
 
 import (
 	"encoding/base64"
+	"testing"
+
 	"github.com/quan-to/chevron/internal/keymagic"
 	"github.com/quan-to/chevron/internal/tools"
-	"testing"
 )
 
 func TestGenerateKey(t *testing.T) {

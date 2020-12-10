@@ -3,10 +3,15 @@ package models
 import "time"
 
 type BasicUser struct {
+	ID          string
 	FingerPrint string
 	Username    string
 	FullName    string
 	CreatedAt   time.Time
+}
+
+func (bu *BasicUser) GetId() string {
+	return bu.ID
 }
 
 func (bu *BasicUser) GetFullName() string {

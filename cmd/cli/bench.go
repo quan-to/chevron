@@ -2,14 +2,15 @@ package main
 
 import (
 	"fmt"
-	"github.com/quan-to/chevron/internal/etc/magicbuilder"
 	"runtime"
 	"time"
+
+	"github.com/quan-to/chevron/internal/etc/magicbuilder"
 )
 
 // BenchmarkGeneration benchmarks the key generation
 func BenchmarkGeneration(runs, bits int) {
-	pgpMan := magicbuilder.MakePGP(nil)
+	pgpMan := magicbuilder.MakePGP(nil, mem)
 
 	fmt.Printf("Benchmarking GPG Key Generation with %d bits and %d runs.\n", bits, runs)
 	fmt.Printf("Running on %s-%s\n", runtime.GOOS, runtime.GOARCH)

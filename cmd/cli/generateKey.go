@@ -2,18 +2,19 @@ package main
 
 import (
 	"fmt"
-	"github.com/quan-to/chevron/internal/etc/magicbuilder"
-	"github.com/quan-to/chevron/internal/tools"
 	"io/ioutil"
 	"os"
 	"syscall"
+
+	"github.com/quan-to/chevron/internal/etc/magicbuilder"
+	"github.com/quan-to/chevron/internal/tools"
 
 	"golang.org/x/crypto/ssh/terminal"
 )
 
 // GenerateFlow generates a GPG Key with specified parameters
 func GenerateFlow(password, output, identifier string, bits int) {
-	pgpMan := magicbuilder.MakePGP(nil)
+	pgpMan := magicbuilder.MakePGP(nil, mem)
 	if password == "" {
 		_, _ = fmt.Fprint(os.Stderr, "Please enter the password: ")
 		bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))

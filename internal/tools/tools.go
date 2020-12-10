@@ -7,10 +7,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"github.com/quan-to/chevron/pkg/models"
-	"github.com/quan-to/chevron/pkg/openpgp"
-	"github.com/quan-to/chevron/pkg/openpgp/armor"
-	"github.com/quan-to/chevron/pkg/openpgp/packet"
 	"io"
 	"io/ioutil"
 	"math/rand"
@@ -22,6 +18,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/mewkiz/pkg/osutil"
 	"github.com/pkg/errors"
+	"github.com/quan-to/chevron/pkg/models"
+	"github.com/quan-to/chevron/pkg/openpgp"
+	"github.com/quan-to/chevron/pkg/openpgp/armor"
+	"github.com/quan-to/chevron/pkg/openpgp/packet"
 	"github.com/quan-to/slog"
 )
 
@@ -31,7 +31,8 @@ var pgpsig = regexp.MustCompile("(?s)-----BEGIN PGP SIGNATURE-----\n(.*)-----END
 type ContextField string
 
 const (
-	CtxRequestID ContextField = "requestID"
+	CtxRequestID       ContextField = "requestID"
+	CtxDatabaseHandler ContextField = "dbHandler"
 )
 
 func StringIndexOf(v string, a []string) int {

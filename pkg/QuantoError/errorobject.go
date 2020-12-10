@@ -2,9 +2,10 @@ package QuantoError
 
 import (
 	"fmt"
-	"github.com/graphql-go/graphql/gqlerrors"
 	"log"
 	"runtime/debug"
+
+	"github.com/graphql-go/graphql/gqlerrors"
 )
 
 var stackEnabled = true

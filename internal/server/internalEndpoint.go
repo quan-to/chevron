@@ -2,9 +2,10 @@ package server
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/quan-to/chevron/pkg/interfaces"
 	"github.com/quan-to/chevron/pkg/models"
-	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/quan-to/slog"

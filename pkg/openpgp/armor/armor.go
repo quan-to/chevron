@@ -10,8 +10,9 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/base64"
-	"github.com/quan-to/chevron/pkg/openpgp/errors"
 	"io"
+
+	"github.com/quan-to/chevron/pkg/openpgp/errors"
 )
 
 // A Block represents an OpenPGP armored structure.

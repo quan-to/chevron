@@ -4,12 +4,13 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"sync"
+
 	"github.com/mewkiz/pkg/osutil"
 	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/slog"
 	"golang.org/x/crypto/bcrypt"
-	"io/ioutil"
-	"sync"
 )
 
 const jamFileName = "users.json"

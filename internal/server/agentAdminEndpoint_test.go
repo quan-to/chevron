@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/quan-to/chevron/pkg/QuantoError"
 	"io/ioutil"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/quan-to/chevron/pkg/QuantoError"
 )
 
 func TestAdminLogin(t *testing.T) {

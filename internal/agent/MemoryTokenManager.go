@@ -2,12 +2,13 @@ package agent
 
 import (
 	"fmt"
+	"sync"
+	"time"
+
 	"github.com/google/uuid"
 	remote_signer "github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/pkg/interfaces"
 	"github.com/quan-to/slog"
-	"sync"
-	"time"
 )
 
 type memoryUser struct {
@@ -17,6 +18,10 @@ type memoryUser struct {
 	createdAt   time.Time
 	fingerPrint string
 	expiration  time.Time
+}
+
+func (mu *memoryUser) GetId() string {
+	return mu.username
 }
 
 func (mu *memoryUser) GetUsername() string {

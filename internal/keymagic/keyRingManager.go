@@ -3,10 +3,11 @@ package keymagic
 import (
 	"context"
 	"fmt"
+	"sync"
+
 	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/models"
-	"sync"
 
 	"github.com/quan-to/chevron/pkg/openpgp"
 	"github.com/quan-to/slog"
@@ -18,10 +19,11 @@ type KeyRingManager struct {
 	entities     map[string]*openpgp.Entity
 	keyInfo      map[string]models.KeyInfo
 	log          slog.Instance
+	dbh          DatabaseHandler
 }
 
 // MakeKeyRingManager creates a new instance of KeyRingManager
-func MakeKeyRingManager(log slog.Instance) *KeyRingManager {
+func MakeKeyRingManager(log slog.Instance, dbHandler DatabaseHandler) *KeyRingManager {
 	if log == nil {
 		log = slog.Scope("KRM")
 	} else {
@@ -33,6 +35,7 @@ func MakeKeyRingManager(log slog.Instance) *KeyRingManager {
 		entities:     make(map[string]*openpgp.Entity),
 		keyInfo:      make(map[string]models.KeyInfo),
 		log:          log,
+		dbh:          dbHandler,
 	}
 }
 
@@ -164,6 +167,7 @@ func (krm *KeyRingManager) GetKey(ctx context.Context, fp string) *openpgp.Entit
 	// Try fetch SKS
 	log.Await("Key %s not found in local cache. Trying fetch KeyStore", fp)
 
+	ctx = context.WithValue(ctx, tools.CtxDatabaseHandler, krm.dbh)
 	asciiArmored, err := PKSGetKey(ctx, fp)
 
 	if err != nil {

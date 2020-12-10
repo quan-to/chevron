@@ -3,13 +3,18 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
-	"github.com/quan-to/chevron"
-	"github.com/quan-to/chevron/fieldcipher"
-	"github.com/quan-to/chevron/keybackend"
-	"github.com/quan-to/chevron/keymagic"
 	"syscall/js"
 	"time"
+
+	"github.com/quan-to/chevron/internal/keybackend"
+	"github.com/quan-to/chevron/internal/keymagic"
+	"github.com/quan-to/chevron/internal/tools"
+	"github.com/quan-to/chevron/pkg/database/memory"
+	"github.com/quan-to/chevron/pkg/fieldcipher"
+	"github.com/quan-to/chevron/test"
+	"github.com/quan-to/slog"
 )
 
 const testPrivateKey = `-----BEGIN PGP PRIVATE KEY BLOCK-----
@@ -159,33 +164,36 @@ const testEncryptedData = `{
   }`
 
 var log = slog.Scope("GOLANG")
+var ctx = context.Background()
 
 func main() {
-	krm := keymagic.MakeKeyRingManager()
-	kb := keyBackend.MakeSaveToDiskBackend("a", "")
-	pgp := keymagic.MakePGPManagerWithKRM(kb, krm)
+	mem := memory.MakeMemoryDBDriver(log)
+	ctx = context.WithValue(ctx, tools.CtxDatabaseHandler, mem)
+	krm := keymagic.MakeKeyRingManager(log, mem)
+	kb := keybackend.MakeSaveToDiskBackend(log, "a", "")
+	pgp := keymagic.MakePGPManager(log, kb, krm)
 
 	log.Info("Loading Private Key")
-	err, n := pgp.LoadKey(testPrivateKey)
+	n, err := pgp.LoadKey(ctx, testPrivateKey)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Info("Loaded %d private keys", n)
 	log.Info("Unlocking Key")
-	err = pgp.UnlockKey(rstest.TestKeyFingerprint, rstest.TestKeyFingerprint)
+	err = pgp.UnlockKey(ctx, test.TestKeyFingerprint, test.TestKeyFingerprint)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	log.Info("Loading public key")
-	pubKey, err := pgp.GetPublicKeyAscii(rstest.TestKeyFingerprint)
+	pubKey, err := pgp.GetPublicKeyASCII(ctx, test.TestKeyFingerprint)
 	//if err != nil {
 	//	panic(err)
 	//}
 
 	log.Info("Public Key loaded. Creating Field Cipher")
 	cipher := fieldcipher.MakeCipherFromASCIIArmoredKeys([]string{pubKey})
-	decipher, err := fieldcipher.MakeDecipher(pgp.GetPrivate(rstest.TestKeyFingerprint))
+	decipher, err := fieldcipher.MakeDecipher(pgp.GetPrivate(ctx, test.TestKeyFingerprint))
 
 	if err != nil {
 		log.Fatal(err)
@@ -201,7 +209,7 @@ func main() {
 	log.Info("Decrypting Data")
 	t := time.Now()
 	d, err := decipher.DecipherPacket(fieldcipher.CipherPacket{
-		EncryptedKey: "wcFMA6uJF6HKi88OARAAGKMZRQ+UwIQUTnBkfpJQqTCryzmgDXnpNgxnPvjbOXgVZmG7XK28mb5W4IHMQWwpZeu0dZ18MmQhc5w5rVVqr8xYGfcYUA2dUiSJD68Kg8ZrGe8pKrev69rfFIRS5PLSpq9T7w/dNNhS1cDyULZCFni/1kRRtkqd/QAyxkLrKgbBNR56cBmP4beCMkTXgzMGlAilR8zJ2+mYSQAMBmg8/V8QnIDwPjuKcU8Kwsa/T209g9oMuEmqAifaCS9dn/3+ALJtbI5o1ajX5S6NJGDmZFfDa1QQf2yK3n8l3s/FBoZ/zfIodC6WYsTv505lIpIEABDIW5pt5B65ZGG0/Nnr6LpG1shsQZEb9eHrpcQQEdq1wI7c/qxNuY/PpSSnnWCdMQnPclOo1koPY45cysK5DaD7YyAXj9lNxyKjznmVXpiqv0hJ/tr/TKrVm8vMuzG9iPFF3aaPiZacA5gS+JB7/uZrGgfVzLw5BA9aBJNCnGj0SNNn2ULjctpkknLQ35fURgayRWc8YBf5EVnxZBYCeE+8OxvfkKA/rES8uKiPrfIXSd6P7NMMDea33ROOlEMVv95gMviO75cN8Xi0QsgkSX8KhGfM2P6Gj8LwIKTcf0oV7zzRbNwY3ao9zRCJ370WcLW/vMaFy8cORe65p4S1lJvw1RRiKi5OjxuAIthNBj7S4AHkKaKjH53yJw4pwnG3GqyN4uHPwOAH4HXh6xjg+eQ5zMU0yLgKnUCPL9urojou4FDiRjKjo+CC4kQ80uDgKeXq+2oP1MH0szgZpEYjBGHajtd3kfUqLpb6CXczf1dLWODI5PHfHxjMnPI6EyR0/6c2tjviWLMQdOE9DgA=",
+		EncryptedKey:  "wcFMA6uJF6HKi88OARAAGKMZRQ+UwIQUTnBkfpJQqTCryzmgDXnpNgxnPvjbOXgVZmG7XK28mb5W4IHMQWwpZeu0dZ18MmQhc5w5rVVqr8xYGfcYUA2dUiSJD68Kg8ZrGe8pKrev69rfFIRS5PLSpq9T7w/dNNhS1cDyULZCFni/1kRRtkqd/QAyxkLrKgbBNR56cBmP4beCMkTXgzMGlAilR8zJ2+mYSQAMBmg8/V8QnIDwPjuKcU8Kwsa/T209g9oMuEmqAifaCS9dn/3+ALJtbI5o1ajX5S6NJGDmZFfDa1QQf2yK3n8l3s/FBoZ/zfIodC6WYsTv505lIpIEABDIW5pt5B65ZGG0/Nnr6LpG1shsQZEb9eHrpcQQEdq1wI7c/qxNuY/PpSSnnWCdMQnPclOo1koPY45cysK5DaD7YyAXj9lNxyKjznmVXpiqv0hJ/tr/TKrVm8vMuzG9iPFF3aaPiZacA5gS+JB7/uZrGgfVzLw5BA9aBJNCnGj0SNNn2ULjctpkknLQ35fURgayRWc8YBf5EVnxZBYCeE+8OxvfkKA/rES8uKiPrfIXSd6P7NMMDea33ROOlEMVv95gMviO75cN8Xi0QsgkSX8KhGfM2P6Gj8LwIKTcf0oV7zzRbNwY3ao9zRCJ370WcLW/vMaFy8cORe65p4S1lJvw1RRiKi5OjxuAIthNBj7S4AHkKaKjH53yJw4pwnG3GqyN4uHPwOAH4HXh6xjg+eQ5zMU0yLgKnUCPL9urojou4FDiRjKjo+CC4kQ80uDgKeXq+2oP1MH0szgZpEYjBGHajtd3kfUqLpb6CXczf1dLWODI5PHfHxjMnPI6EyR0/6c2tjviWLMQdOE9DgA=",
 		EncryptedJSON: encData,
 	})
 	delta := time.Since(t)
@@ -236,7 +244,7 @@ func main() {
 		log.Info("Decrypting Data")
 		t := time.Now()
 		d, err := decipher.DecipherPacket(fieldcipher.CipherPacket{
-			EncryptedKey: "wcFMA6uJF6HKi88OARAAGKMZRQ+UwIQUTnBkfpJQqTCryzmgDXnpNgxnPvjbOXgVZmG7XK28mb5W4IHMQWwpZeu0dZ18MmQhc5w5rVVqr8xYGfcYUA2dUiSJD68Kg8ZrGe8pKrev69rfFIRS5PLSpq9T7w/dNNhS1cDyULZCFni/1kRRtkqd/QAyxkLrKgbBNR56cBmP4beCMkTXgzMGlAilR8zJ2+mYSQAMBmg8/V8QnIDwPjuKcU8Kwsa/T209g9oMuEmqAifaCS9dn/3+ALJtbI5o1ajX5S6NJGDmZFfDa1QQf2yK3n8l3s/FBoZ/zfIodC6WYsTv505lIpIEABDIW5pt5B65ZGG0/Nnr6LpG1shsQZEb9eHrpcQQEdq1wI7c/qxNuY/PpSSnnWCdMQnPclOo1koPY45cysK5DaD7YyAXj9lNxyKjznmVXpiqv0hJ/tr/TKrVm8vMuzG9iPFF3aaPiZacA5gS+JB7/uZrGgfVzLw5BA9aBJNCnGj0SNNn2ULjctpkknLQ35fURgayRWc8YBf5EVnxZBYCeE+8OxvfkKA/rES8uKiPrfIXSd6P7NMMDea33ROOlEMVv95gMviO75cN8Xi0QsgkSX8KhGfM2P6Gj8LwIKTcf0oV7zzRbNwY3ao9zRCJ370WcLW/vMaFy8cORe65p4S1lJvw1RRiKi5OjxuAIthNBj7S4AHkKaKjH53yJw4pwnG3GqyN4uHPwOAH4HXh6xjg+eQ5zMU0yLgKnUCPL9urojou4FDiRjKjo+CC4kQ80uDgKeXq+2oP1MH0szgZpEYjBGHajtd3kfUqLpb6CXczf1dLWODI5PHfHxjMnPI6EyR0/6c2tjviWLMQdOE9DgA=",
+			EncryptedKey:  "wcFMA6uJF6HKi88OARAAGKMZRQ+UwIQUTnBkfpJQqTCryzmgDXnpNgxnPvjbOXgVZmG7XK28mb5W4IHMQWwpZeu0dZ18MmQhc5w5rVVqr8xYGfcYUA2dUiSJD68Kg8ZrGe8pKrev69rfFIRS5PLSpq9T7w/dNNhS1cDyULZCFni/1kRRtkqd/QAyxkLrKgbBNR56cBmP4beCMkTXgzMGlAilR8zJ2+mYSQAMBmg8/V8QnIDwPjuKcU8Kwsa/T209g9oMuEmqAifaCS9dn/3+ALJtbI5o1ajX5S6NJGDmZFfDa1QQf2yK3n8l3s/FBoZ/zfIodC6WYsTv505lIpIEABDIW5pt5B65ZGG0/Nnr6LpG1shsQZEb9eHrpcQQEdq1wI7c/qxNuY/PpSSnnWCdMQnPclOo1koPY45cysK5DaD7YyAXj9lNxyKjznmVXpiqv0hJ/tr/TKrVm8vMuzG9iPFF3aaPiZacA5gS+JB7/uZrGgfVzLw5BA9aBJNCnGj0SNNn2ULjctpkknLQ35fURgayRWc8YBf5EVnxZBYCeE+8OxvfkKA/rES8uKiPrfIXSd6P7NMMDea33ROOlEMVv95gMviO75cN8Xi0QsgkSX8KhGfM2P6Gj8LwIKTcf0oV7zzRbNwY3ao9zRCJ370WcLW/vMaFy8cORe65p4S1lJvw1RRiKi5OjxuAIthNBj7S4AHkKaKjH53yJw4pwnG3GqyN4uHPwOAH4HXh6xjg+eQ5zMU0yLgKnUCPL9urojou4FDiRjKjo+CC4kQ80uDgKeXq+2oP1MH0szgZpEYjBGHajtd3kfUqLpb6CXczf1dLWODI5PHfHxjMnPI6EyR0/6c2tjviWLMQdOE9DgA=",
 			EncryptedJSON: encData,
 		})
 		delta := time.Since(t)

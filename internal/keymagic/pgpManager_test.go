@@ -4,9 +4,10 @@ import (
 	"context"
 	"crypto"
 	"encoding/base64"
-	"github.com/quan-to/chevron/internal/tools"
 	"io/ioutil"
 	"testing"
+
+	"github.com/quan-to/chevron/internal/tools"
 
 	"github.com/quan-to/chevron/test"
 )

@@ -9,10 +9,11 @@ import (
 	// skipcq: GSC-G505
 	"crypto/sha1"
 	"crypto/subtle"
-	"github.com/quan-to/chevron/pkg/openpgp/errors"
 	"hash"
 	"io"
 	"strconv"
+
+	"github.com/quan-to/chevron/pkg/openpgp/errors"
 )
 
 // SymmetricallyEncrypted represents a symmetrically encrypted byte string. The

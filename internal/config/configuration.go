@@ -1,11 +1,12 @@
 package config
 
 import (
-	"github.com/quan-to/chevron/pkg/QuantoError"
-	"github.com/quan-to/slog"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/quan-to/chevron/pkg/QuantoError"
+	"github.com/quan-to/slog"
 )
 
 const SMEncryptedDataOnly = false

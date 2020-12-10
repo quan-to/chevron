@@ -3,13 +3,14 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/quan-to/chevron/internal/config"
-	"github.com/quan-to/chevron/internal/server/agent"
-	"github.com/quan-to/chevron/pkg/QuantoError"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"testing"
+
+	"github.com/quan-to/chevron/internal/config"
+	"github.com/quan-to/chevron/internal/server/agent"
+	"github.com/quan-to/chevron/pkg/QuantoError"
 )
 
 func GetFile(url string, t *testing.T) []byte {

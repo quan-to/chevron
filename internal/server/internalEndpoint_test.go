@@ -5,12 +5,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	remote_signer "github.com/quan-to/chevron/internal/config"
-	"github.com/quan-to/chevron/pkg/QuantoError"
-	"github.com/quan-to/chevron/test"
 	"io/ioutil"
 	"net/http"
 	"testing"
+
+	remote_signer "github.com/quan-to/chevron/internal/config"
+	"github.com/quan-to/chevron/pkg/QuantoError"
+	"github.com/quan-to/chevron/test"
 )
 
 /*

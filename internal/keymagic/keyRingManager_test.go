@@ -2,16 +2,19 @@ package keymagic
 
 import (
 	"context"
+	"io/ioutil"
+	"testing"
+
+	"github.com/quan-to/chevron/internal/agent"
 	remote_signer "github.com/quan-to/chevron/internal/config"
-	"github.com/quan-to/chevron/internal/database"
 	"github.com/quan-to/chevron/internal/keybackend"
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/internal/vaultManager"
+	"github.com/quan-to/chevron/pkg/database/memory"
 	"github.com/quan-to/chevron/pkg/interfaces"
 	"github.com/quan-to/chevron/pkg/models"
 	"github.com/quan-to/chevron/test"
-	"io/ioutil"
-	"testing"
+	"github.com/quan-to/slog"
 )
 
 func TestAddKey(t *testing.T) {
@@ -19,7 +22,8 @@ func TestAddKey(t *testing.T) {
 	remote_signer.PushVariables()
 	defer remote_signer.PopVariables()
 	remote_signer.MaxKeyRingCache = 10
-	krm := MakeKeyRingManager(nil)
+	mem := memory.MakeMemoryDBDriver(nil)
+	krm := MakeKeyRingManager(nil, mem)
 	var kb interfaces.StorageBackend
 
 	if remote_signer.VaultStorage {
@@ -150,7 +154,7 @@ func TestGetKeyExternal(t *testing.T) {
 	defer remote_signer.PopVariables()
 	// Test External SKS Fetch
 	remote_signer.SKSServer = "https://keyserver.ubuntu.com/"
-	krm := MakeKeyRingManager(nil)
+	krm := MakeKeyRingManager(nil, nil)
 	remote_signer.EnableRethinkSKS = false
 	e := krm.GetKey(ctx, test.ExternalKeyFingerprint)
 
@@ -167,7 +171,17 @@ func TestGetKeyExternal(t *testing.T) {
 
 	// Test SKS Internal
 	remote_signer.EnableRethinkSKS = true
-	c := database.GetConnection()
+	dbh, err := agent.MakeDatabaseHandler(slog.Scope("TEST"))
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+
+	if dbh == nil {
+		t.Fatal("expected database handler to test")
+	}
+
+	ctx = context.WithValue(ctx, tools.CtxDatabaseHandler, dbh)
 
 	z, err := ioutil.ReadFile("../../test/data/testkey_privateTestKey.gpg")
 	if err != nil {
@@ -177,13 +191,13 @@ func TestGetKeyExternal(t *testing.T) {
 
 	gpgKey, _ := models.AsciiArmored2GPGKey(string(z))
 
-	_, _, err = models.AddGPGKey(c, gpgKey)
+	_, _, err = dbh.AddGPGKey(gpgKey)
 	if err != nil {
 		t.Errorf("Fail to add key to database: %s", err)
 		t.FailNow()
 	}
 
-	e = krm.GetKey(ctx, gpgKey.FullFingerPrint)
+	e = krm.GetKey(ctx, gpgKey.FullFingerprint)
 
 	if e == nil {
 		t.Error("Expected Internal key to be fetch")
@@ -192,12 +206,12 @@ func TestGetKeyExternal(t *testing.T) {
 
 	fp = tools.IssuerKeyIdToFP16(e.PrimaryKey.KeyId)
 
-	if !tools.CompareFingerPrint(fp, gpgKey.FullFingerPrint) {
-		t.Errorf("Expected %s == %s", fp, gpgKey.FullFingerPrint)
+	if !tools.CompareFingerPrint(fp, gpgKey.FullFingerprint) {
+		t.Errorf("Expected %s == %s", fp, gpgKey.FullFingerprint)
 	}
 
 	//// Test Bad Scenario
-	//gpgKey.FullFingerPrint = "ABCDABCDABCDABCDABCDABCDABCDABCD"
+	//gpgKey.FullFingerprint = "ABCDABCDABCDABCDABCDABCDABCDABCD"
 	//gpgKey.AsciiArmoredPublicKey = "HUEBR"
 	//_, _, err = models.AddGPGKey(c, gpgKey)
 	//if err != nil {
@@ -205,7 +219,7 @@ func TestGetKeyExternal(t *testing.T) {
 	//	t.FailNow()
 	//}
 	//
-	//e = krm.GetKey(gpgKey.FullFingerPrint)
+	//e = krm.GetKey(gpgKey.FullFingerprint)
 	//
 	//if e != nil {
 	//	t.Errorf("Expected key to be null got %v", e)

@@ -1,9 +1,10 @@
 package tools
 
 import (
-	"github.com/bouk/monkey"
 	"os"
 	"testing"
+
+	"github.com/bouk/monkey"
 )
 
 func assertPanic(t *testing.T, f func(), message string) {

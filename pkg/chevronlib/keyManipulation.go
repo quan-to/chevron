@@ -2,8 +2,9 @@ package chevronlib
 
 import (
 	"fmt"
-	"github.com/quan-to/chevron/internal/tools"
 	"os"
+
+	"github.com/quan-to/chevron/internal/tools"
 )
 
 // GenerateKey generates a new key using specified bits and identifier and encrypts it using the specified password

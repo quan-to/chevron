@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/quan-to/chevron/pkg/QuantoError"
 	"io/ioutil"
 	"net/http"
 	"testing"
+
+	"github.com/quan-to/chevron/pkg/QuantoError"
 )
 
 func TestProxy(t *testing.T) {

@@ -1,11 +1,12 @@
 package pages
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/quan-to/chevron/pkg/models"
 	"net/http"
 	"os"
 	"path"
+
+	"github.com/gorilla/mux"
+	"github.com/quan-to/chevron/pkg/models"
 )
 
 func displayFile(filename string, w http.ResponseWriter, r *http.Request) {

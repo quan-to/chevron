@@ -5,11 +5,12 @@ package vaultManager
 import (
 	"crypto/tls"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/hashicorp/vault/api"
 	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/slog"
-	"net/http"
-	"time"
 )
 
 const VaultData = "data"

@@ -4,11 +4,15 @@ import (
 	"context"
 	"os"
 
+	"github.com/quan-to/chevron/internal/tools"
+	"github.com/quan-to/chevron/pkg/database/memory"
+
 	"github.com/quan-to/slog"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 var ctx = context.Background()
+var mem *memory.DbDriver
 
 func main() {
 	debugMode := kingpin.Flag("debug", "Enable debug mode").Bool()
@@ -73,6 +77,9 @@ func main() {
 		slog.SetWarning(true)
 		slog.Info("Debug Mode Enabled!")
 	}
+
+	mem = memory.MakeMemoryDBDriver(nil)
+	ctx = context.WithValue(ctx, tools.CtxDatabaseHandler, mem)
 
 	switch selectedCmd {
 	case "gen":

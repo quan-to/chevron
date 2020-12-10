@@ -1,9 +1,10 @@
 package fieldcipher
 
 import (
-	"github.com/quan-to/chevron/test"
 	"io/ioutil"
 	"testing"
+
+	"github.com/quan-to/chevron/test"
 )
 
 func TestDecipher_DecipherPacket(t *testing.T) {

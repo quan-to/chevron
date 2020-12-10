@@ -6,15 +6,16 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"encoding/base64"
-	"github.com/quan-to/chevron/pkg/openpgp"
-	"github.com/quan-to/chevron/pkg/openpgp/armor"
-	"github.com/quan-to/chevron/pkg/openpgp/packet"
-	"github.com/quan-to/chevron/test"
 	"io/ioutil"
 	"path"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/quan-to/chevron/pkg/openpgp"
+	"github.com/quan-to/chevron/pkg/openpgp/armor"
+	"github.com/quan-to/chevron/pkg/openpgp/packet"
+	"github.com/quan-to/chevron/test"
 )
 
 func TestStringIndexOf(t *testing.T) {

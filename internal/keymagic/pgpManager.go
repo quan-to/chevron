@@ -10,10 +10,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/quan-to/chevron/internal/config"
-	"github.com/quan-to/chevron/internal/tools"
-	"github.com/quan-to/chevron/pkg/interfaces"
-	"github.com/quan-to/chevron/pkg/models"
 	"io"
 	"io/ioutil"
 	"path"
@@ -22,6 +18,10 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/quan-to/chevron/internal/config"
+	"github.com/quan-to/chevron/internal/tools"
+	"github.com/quan-to/chevron/pkg/interfaces"
+	"github.com/quan-to/chevron/pkg/models"
 	"github.com/quan-to/chevron/pkg/openpgp"
 	"github.com/quan-to/chevron/pkg/openpgp/armor"
 	"github.com/quan-to/chevron/pkg/openpgp/packet"
@@ -289,7 +289,7 @@ func (pm *pgpManager) unlockKey(ctx context.Context, fp, password string) error 
 	}
 
 	if config.AgentKeyFingerPrint == "" { // set default fingerprint
-		pm.log.Warn("No Agent Key FingerPrint specified. Using %s", fp)
+		pm.log.Warn("No Agent Key Fingerprint specified. Using %s", fp)
 		config.AgentKeyFingerPrint = fp
 	}
 

@@ -4,6 +4,8 @@ import "time"
 
 // UserData is an interface for user data
 type UserData interface {
+	// GetId returns the id
+	GetId() string
 	// GetUsername returns the username
 	GetUsername() string
 	// GetFullName returns the user full name
