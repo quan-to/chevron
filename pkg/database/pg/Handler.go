@@ -18,9 +18,8 @@ import (
 
 // PostgreSQLDBDriver is a database driver for PostgreSQL
 type PostgreSQLDBDriver struct {
-	log      slog.Instance
-	database string
-	conn     *sqlx.DB
+	log  slog.Instance
+	conn *sqlx.DB
 }
 
 // MakeRethinkDBDriver creates a new database driver for rethinkdb
@@ -69,7 +68,8 @@ func (h *PostgreSQLDBDriver) Connect(connectionString string) error {
 }
 
 func (h *PostgreSQLDBDriver) HealthCheck() error {
-	ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(time.Second*5)) // 5 second timeout
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5) // 5 second timeout
+	defer cancel()
 	return h.conn.PingContext(ctx)
 }
 
@@ -82,6 +82,9 @@ func (h *PostgreSQLDBDriver) rollbackIfErrorCommitIfNot(err error, tx *sqlx.Tx) 
 		_ = tx.Rollback()
 	} else if tx != nil {
 		err = tx.Commit()
+		if err != nil {
+			slog.Error("error committing to database: %s", err)
+		}
 	}
 }
 

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"crypto"
 	"encoding/json"
-	"github.com/quan-to/chevron/pkg/uuid"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -14,10 +13,9 @@ import (
 	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/interfaces"
+	"github.com/quan-to/chevron/pkg/uuid"
 	"github.com/quan-to/slog"
 )
-
-const maxUUIDTries = 5
 
 type AgentProxy struct {
 	gpg       interfaces.PGPManager

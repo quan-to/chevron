@@ -102,14 +102,6 @@ func (h *PostgreSQLDBDriver) fetchGPGKeyByFingerprint(tx *sqlx.Tx, fingerprint s
 }
 
 func (h *PostgreSQLDBDriver) findGPGKeyByEmail(tx *sqlx.Tx, email string, pageStart, pageEnd int) (res []pgGPGKey, err error) {
-	if pageStart < 0 {
-		pageStart = models.DefaultPageStart
-	}
-
-	if pageEnd < 0 {
-		pageEnd = models.DefaultPageEnd
-	}
-
 	return nil, fmt.Errorf("not supported") // Slow query
 }
 
@@ -140,25 +132,9 @@ func (h *PostgreSQLDBDriver) findGPGKeyByFingerPrint(tx *sqlx.Tx, fingerPrint st
 }
 
 func (h *PostgreSQLDBDriver) findGPGKeyByValue(tx *sqlx.Tx, value string, pageStart, pageEnd int) (res []pgGPGKey, err error) {
-	if pageStart < 0 {
-		pageStart = models.DefaultPageStart
-	}
-
-	if pageEnd < 0 {
-		pageEnd = models.DefaultPageEnd
-	}
-
 	return nil, fmt.Errorf("not supported") // Slow query
 }
 
 func (h *PostgreSQLDBDriver) findGPGKeyByName(tx *sqlx.Tx, name string, pageStart, pageEnd int) (res []pgGPGKey, err error) {
-	if pageStart < 0 {
-		pageStart = models.DefaultPageStart
-	}
-
-	if pageEnd < 0 {
-		pageEnd = models.DefaultPageEnd
-	}
-
 	return nil, fmt.Errorf("not supported") // Slow query
 }
