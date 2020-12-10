@@ -57,7 +57,7 @@ func (s customConverter) ConvertValue(v interface{}) (driver.Value, error) {
 	return v, nil
 }
 
-func expectToUpdate(mock sqlmock.Sqlmock) {
+func expectToUpdate(mock sqlmock.Sqlmock, withSubkeys bool) {
 	mock.ExpectBegin()
 	// Check existance
 	testRow := sqlmock.NewRows([]string{
@@ -87,20 +87,22 @@ func expectToUpdate(mock sqlmock.Sqlmock) {
 			time.Time{},
 			(*string)(nil),
 		))
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM chevron_gpg_key WHERE gpg_key_fingerprint16 = $1 LIMIT 1`)).
-		WithArgs(tools.FPto16(testGPGKey.FullFingerprint)).
-		WillReturnRows(testRow.AddRow(
-			testGPGKey.ID,
-			testGPGKey.FullFingerprint,
-			tools.FPto16(testGPGKey.FullFingerprint),
-			testGPGKey.KeyBits,
-			testGPGKey.AsciiArmoredPublicKey,
-			testGPGKey.AsciiArmoredPrivateKey,
-			time.Now(),
-			time.Now(),
-			time.Time{},
-			(*string)(nil),
-		))
+	if withSubkeys {
+		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM chevron_gpg_key WHERE gpg_key_fingerprint16 = $1 LIMIT 1`)).
+			WithArgs(tools.FPto16(testGPGKey.FullFingerprint)).
+			WillReturnRows(testRow.AddRow(
+				testGPGKey.ID,
+				testGPGKey.FullFingerprint,
+				tools.FPto16(testGPGKey.FullFingerprint),
+				testGPGKey.KeyBits,
+				testGPGKey.AsciiArmoredPublicKey,
+				testGPGKey.AsciiArmoredPrivateKey,
+				time.Now(),
+				time.Now(),
+				time.Time{},
+				(*string)(nil),
+			))
+	}
 	// Load UIDs
 	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM chevron_gpg_key_uid WHERE gpg_key_uid_parent = $1`)).
 		WithArgs(testGPGKey.ID).
@@ -161,7 +163,7 @@ func TestPostgreSQLDBDriver_AddGPGKey(t *testing.T) {
 	mockDB, mock, _ = sqlmock.New(converter)
 	h.conn = sqlx.NewDb(mockDB, "sqlmock")
 
-	expectToUpdate(mock)
+	expectToUpdate(mock, true)
 
 	_, added, err = h.AddGPGKey(testGPGKey)
 	if err != nil {
@@ -524,7 +526,7 @@ func TestPostgreSQLDBDriver_UpdateGPGKey(t *testing.T) {
 	mockDB, mock, _ := sqlmock.New(converter)
 	h.conn = sqlx.NewDb(mockDB, "sqlmock")
 
-	expectToUpdate(mock)
+	expectToUpdate(mock, false)
 
 	err := h.UpdateGPGKey(testGPGKey)
 	if err != nil {

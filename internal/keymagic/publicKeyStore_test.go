@@ -17,6 +17,7 @@ import (
 func TestPKSGetKey(t *testing.T) {
 	config.PushVariables()
 	defer config.PopVariables()
+	config.DatabaseDialect = "memory"
 
 	// Test Internal
 	z, err := ioutil.ReadFile("../../test/data/testkey_privateTestKey.gpg")
