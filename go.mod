@@ -9,9 +9,7 @@ require (
 	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
 	github.com/bouk/monkey v1.0.1
 	github.com/frankban/quicktest v1.11.2 // indirect
-	github.com/go-bindata/go-bindata v3.1.2+incompatible // indirect
 	github.com/golang-migrate/migrate/v4 v4.14.1
-	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/mux v1.7.4
 	github.com/graphql-go/graphql v0.7.8
@@ -32,8 +30,6 @@ require (
 	github.com/quan-to/slog v0.1.1
 	github.com/ryanuber/go-glob v1.0.0 // indirect
 	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
-	golang.org/x/mod v0.4.0 // indirect
-	golang.org/x/tools v0.0.0-20201208233053-a543418bbed2 // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/rethinkdb/rethinkdb-go.v6 v6.1.1
 )

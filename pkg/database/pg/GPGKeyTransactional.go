@@ -29,8 +29,8 @@ func (h *PostgreSQLDBDriver) updateGPGKey(tx *sqlx.Tx, key models.GPGKey) error 
 		// Update Fields if needed
 		if gpgKey.fieldsChanged(key) {
 			gpgKey.KeyBits = key.KeyBits
-			gpgKey.AsciiArmoredPublicKey = key.AsciiArmoredPublicKey
-			gpgKey.AsciiArmoredPrivateKey = key.AsciiArmoredPrivateKey
+			gpgKey.ASCIIArmoredPublicKey = key.AsciiArmoredPublicKey
+			gpgKey.ASCIIArmoredPrivateKey = key.AsciiArmoredPrivateKey
 			err := gpgKey.save(tx)
 			if err != nil {
 				return err

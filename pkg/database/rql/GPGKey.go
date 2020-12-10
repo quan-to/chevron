@@ -41,6 +41,7 @@ func (h *RethinkDBDriver) fixGPGKey(k map[string]interface{}) map[string]interfa
 	return k
 }
 
+// UpdateGPGKey updates the specified GPG key by using it's ID
 func (h *RethinkDBDriver) UpdateGPGKey(key models.GPGKey) error {
 	rdata, err := convertToRethinkDB(key)
 	if err != nil {
@@ -53,6 +54,7 @@ func (h *RethinkDBDriver) UpdateGPGKey(key models.GPGKey) error {
 		Exec(h.conn)
 }
 
+// DeleteGPGKey deletes the specified GPG key by using it's ID
 func (h *RethinkDBDriver) DeleteGPGKey(key models.GPGKey) error {
 	return r.Table(gpgKeyTableInit.TableName).
 		Get(key.ID).
@@ -109,23 +111,7 @@ func (h *RethinkDBDriver) AddGPGKey(key models.GPGKey) (string, bool, error) {
 	return wr.GeneratedKeys[0], true, err
 }
 
-func (h *RethinkDBDriver) resultsAsArray(res *r.Cursor) ([]models.GPGKey, error) {
-	results := make([]models.GPGKey, 0)
-	var gpgKey map[string]interface{}
-
-	for res.Next(&gpgKey) {
-		gpgKey = h.fixGPGKey(gpgKey)
-		var key models.GPGKey
-		err := convertFromRethinkDB(gpgKey, &key)
-		if err != nil {
-			return nil, err
-		}
-		results = append(results, key)
-	}
-
-	return results, nil
-}
-
+// FetchGPGKeysWithoutSubKeys fetch all keys that does not have a subkey
 func (h *RethinkDBDriver) FetchGPGKeysWithoutSubKeys() ([]models.GPGKey, error) {
 	res, err := r.Table(gpgKeyTableInit.TableName).
 		Filter(r.Row.HasFields("Subkeys").Not().Or(r.Row.Field("Subkeys").Count().Eq(0))).
@@ -141,6 +127,7 @@ func (h *RethinkDBDriver) FetchGPGKeysWithoutSubKeys() ([]models.GPGKey, error) 
 	return h.resultsAsArray(res)
 }
 
+// FetchGPGKeyByFingerprint fetch a GPG Key by its fingerprint
 func (h *RethinkDBDriver) FetchGPGKeyByFingerprint(fingerprint string) (*models.GPGKey, error) {
 	res, err := r.Table(gpgKeyTableInit.TableName).
 		Filter(r.Row.Field("FullFingerprint").Match(fmt.Sprintf("%s$", fingerprint)).
@@ -172,6 +159,7 @@ func (h *RethinkDBDriver) FetchGPGKeyByFingerprint(fingerprint string) (*models.
 	return nil, fmt.Errorf("not found")
 }
 
+// FindGPGKeyByEmail find all keys that has a underlying UID that contains that email
 func (h *RethinkDBDriver) FindGPGKeyByEmail(email string, pageStart, pageEnd int) ([]models.GPGKey, error) {
 	if pageStart < 0 {
 		pageStart = models.DefaultPageStart
@@ -203,6 +191,7 @@ func (h *RethinkDBDriver) FindGPGKeyByEmail(email string, pageStart, pageEnd int
 	return h.resultsAsArray(res)
 }
 
+// FindGPGKeyByFingerPrint find all keys that has a fingerprint that matches the specified fingerprint
 func (h *RethinkDBDriver) FindGPGKeyByFingerPrint(fingerPrint string, pageStart, pageEnd int) ([]models.GPGKey, error) {
 	if pageStart < 0 {
 		pageStart = models.DefaultPageStart
@@ -229,6 +218,7 @@ func (h *RethinkDBDriver) FindGPGKeyByFingerPrint(fingerPrint string, pageStart,
 	return h.resultsAsArray(res)
 }
 
+// FindGPGKeyByValue find all keys that has a underlying UID that contains that email, name or fingerprint specified by value
 func (h *RethinkDBDriver) FindGPGKeyByValue(value string, pageStart, pageEnd int) ([]models.GPGKey, error) {
 	if pageStart < 0 {
 		pageStart = models.DefaultPageStart
@@ -265,6 +255,7 @@ func (h *RethinkDBDriver) FindGPGKeyByValue(value string, pageStart, pageEnd int
 	return h.resultsAsArray(res)
 }
 
+// FindGPGKeyByName find all keys that has a underlying UID that contains that name
 func (h *RethinkDBDriver) FindGPGKeyByName(name string, pageStart, pageEnd int) ([]models.GPGKey, error) {
 	if pageStart < 0 {
 		pageStart = models.DefaultPageStart

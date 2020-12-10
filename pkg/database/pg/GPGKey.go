@@ -7,6 +7,7 @@ import (
 
 // database calls
 
+// UpdateGPGKey updates the specified GPG key by using it's ID
 func (h *PostgreSQLDBDriver) UpdateGPGKey(key models.GPGKey) (err error) {
 	h.log.Debug("UpdateGPGKey(%s)", key.FullFingerprint)
 	tx, err := h.conn.Beginx()
@@ -18,6 +19,7 @@ func (h *PostgreSQLDBDriver) UpdateGPGKey(key models.GPGKey) (err error) {
 	return h.updateGPGKey(tx, key)
 }
 
+// DeleteGPGKey deletes the specified GPG key by using it's ID
 func (h *PostgreSQLDBDriver) DeleteGPGKey(key models.GPGKey) error {
 	h.log.Debug("DeleteGPGKey(%s)", key.FullFingerprint)
 	tx, err := h.conn.Beginx()
@@ -42,6 +44,8 @@ func (h *PostgreSQLDBDriver) AddGPGKey(key models.GPGKey) (string, bool, error) 
 	return h.addGPGKey(tx, key)
 }
 
+// FetchGPGKeysWithoutSubKeys fetch all keys that does not have a subkey
+// This query is not implemented on PostgreSQL
 func (h *PostgreSQLDBDriver) FetchGPGKeysWithoutSubKeys() (res []models.GPGKey, err error) {
 	h.log.Debug("FetchGPGKeysWithoutSubKeys()")
 	tx, err := h.conn.Beginx()
@@ -58,6 +62,7 @@ func (h *PostgreSQLDBDriver) FetchGPGKeysWithoutSubKeys() (res []models.GPGKey, 
 	return convertArray(keys, tx)
 }
 
+// FetchGPGKeyByFingerprint fetch a GPG Key by its fingerprint
 func (h *PostgreSQLDBDriver) FetchGPGKeyByFingerprint(fingerprint string) (*models.GPGKey, error) {
 	h.log.Debug("FetchGPGKeyByFingerprint(%s)", fingerprint)
 	tx, err := h.conn.Beginx()
@@ -74,6 +79,7 @@ func (h *PostgreSQLDBDriver) FetchGPGKeyByFingerprint(fingerprint string) (*mode
 	return k.toGPGKey(tx)
 }
 
+// FindGPGKeyByEmail find all keys that has a underlying UID that contains that email
 func (h *PostgreSQLDBDriver) FindGPGKeyByEmail(email string, pageStart, pageEnd int) ([]models.GPGKey, error) {
 	h.log.Debug("FindGPGKeyByEmail(%s, %d, %d)", email, pageStart, pageEnd)
 	tx, err := h.conn.Beginx()
@@ -90,6 +96,7 @@ func (h *PostgreSQLDBDriver) FindGPGKeyByEmail(email string, pageStart, pageEnd 
 	return convertArray(keys, tx)
 }
 
+// FindGPGKeyByFingerPrint find all keys that has a fingerprint that matches the specified fingerprint
 func (h *PostgreSQLDBDriver) FindGPGKeyByFingerPrint(fingerPrint string, pageStart, pageEnd int) ([]models.GPGKey, error) {
 	h.log.Debug("FindGPGKeyByFingerPrint(%s, %d, %d)", fingerPrint, pageStart, pageEnd)
 	tx, err := h.conn.Beginx()
@@ -106,6 +113,7 @@ func (h *PostgreSQLDBDriver) FindGPGKeyByFingerPrint(fingerPrint string, pageSta
 	return convertArray(keys, tx)
 }
 
+// FindGPGKeyByValue find all keys that has a underlying UID that contains that email, name or fingerprint specified by value
 func (h *PostgreSQLDBDriver) FindGPGKeyByValue(value string, pageStart, pageEnd int) ([]models.GPGKey, error) {
 	h.log.Debug("FindGPGKeyByValue(%s, %d, %d)", value, pageStart, pageEnd)
 	tx, err := h.conn.Beginx()
@@ -122,6 +130,7 @@ func (h *PostgreSQLDBDriver) FindGPGKeyByValue(value string, pageStart, pageEnd 
 	return convertArray(keys, tx)
 }
 
+// FindGPGKeyByName find all keys that has a underlying UID that contains that name
 func (h *PostgreSQLDBDriver) FindGPGKeyByName(name string, pageStart, pageEnd int) ([]models.GPGKey, error) {
 	h.log.Debug("FindGPGKeyByName(%s, %d, %d)", name, pageStart, pageEnd)
 	tx, err := h.conn.Beginx()

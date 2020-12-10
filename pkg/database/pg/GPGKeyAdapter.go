@@ -17,15 +17,15 @@ type pgGPGKey struct {
 	FullFingerprint        string    `db:"gpg_key_full_fingerprint"`
 	Fingerprint16          string    `db:"gpg_key_fingerprint16"`
 	KeyBits                int       `db:"gpg_key_keybits"`
-	AsciiArmoredPublicKey  string    `db:"gpg_key_public_key"`
-	AsciiArmoredPrivateKey string    `db:"gpg_key_private_key"`
+	ASCIIArmoredPublicKey  string    `db:"gpg_key_public_key"`
+	ASCIIArmoredPrivateKey string    `db:"gpg_key_private_key"`
 	CreatedAt              time.Time `db:"gpg_key_created_at"`
 	UpdatedAt              time.Time `db:"gpg_key_updated_at"`
 	DeletedAt              time.Time `db:"gpg_key_deleted_at"`
-	ParentKeyId            *string   `db:"gpg_key_parent"`
+	ParentKeyID            *string   `db:"gpg_key_parent"`
 
 	// Relations
-	keyUids       []*pgGPGKeyUid
+	keyUids       []*pgGPGKeyUID
 	subkeys       []*pgGPGKey
 	keyUidsLoaded bool
 	subkeysLoaded bool
@@ -57,7 +57,7 @@ func (k *pgGPGKey) getEmails(tx *sqlx.Tx) (emails []string, err error) {
 	return emails, err
 }
 
-func (k *pgGPGKey) getKeyUids(tx *sqlx.Tx) ([]*pgGPGKeyUid, error) {
+func (k *pgGPGKey) getKeyUids(tx *sqlx.Tx) ([]*pgGPGKeyUID, error) {
 	if k.keyUidsLoaded {
 		return k.keyUids, nil
 	}
@@ -87,8 +87,8 @@ func pgGPGKeyFromGPGKey(key models.GPGKey) *pgGPGKey {
 		FullFingerprint:        key.FullFingerprint,
 		Fingerprint16:          tools.FPto16(key.FullFingerprint),
 		KeyBits:                key.KeyBits,
-		AsciiArmoredPublicKey:  key.AsciiArmoredPublicKey,
-		AsciiArmoredPrivateKey: key.AsciiArmoredPrivateKey,
+		ASCIIArmoredPublicKey:  key.AsciiArmoredPublicKey,
+		ASCIIArmoredPrivateKey: key.AsciiArmoredPrivateKey,
 
 		// Relations
 		keyUidsLoaded: true,
@@ -96,11 +96,11 @@ func pgGPGKeyFromGPGKey(key models.GPGKey) *pgGPGKey {
 	}
 
 	if key.ParentKey != nil {
-		k.ParentKeyId = &key.ParentKey.ID
+		k.ParentKeyID = &key.ParentKey.ID
 	}
 
 	for _, uid := range key.KeyUids {
-		k.keyUids = append(k.keyUids, &pgGPGKeyUid{
+		k.keyUids = append(k.keyUids, &pgGPGKeyUID{
 			Parent:      key.ID,
 			Name:        uid.Name,
 			Description: uid.Description,
@@ -166,16 +166,16 @@ func (k *pgGPGKey) toGPGKey(tx *sqlx.Tx) (*models.GPGKey, error) {
 		KeyUids:                keyUids,
 		KeyBits:                k.KeyBits,
 		Subkeys:                subkeys,
-		AsciiArmoredPublicKey:  k.AsciiArmoredPublicKey,
-		AsciiArmoredPrivateKey: k.AsciiArmoredPrivateKey,
+		AsciiArmoredPublicKey:  k.ASCIIArmoredPublicKey,
+		AsciiArmoredPrivateKey: k.ASCIIArmoredPrivateKey,
 	}
 
 	return &key, nil
 }
 
 func (k *pgGPGKey) fieldsChanged(key models.GPGKey) bool {
-	if strings.EqualFold(k.AsciiArmoredPrivateKey, key.AsciiArmoredPrivateKey) ||
-		strings.EqualFold(k.AsciiArmoredPublicKey, key.AsciiArmoredPublicKey) ||
+	if strings.EqualFold(k.ASCIIArmoredPrivateKey, key.AsciiArmoredPrivateKey) ||
+		strings.EqualFold(k.ASCIIArmoredPublicKey, key.AsciiArmoredPublicKey) ||
 		k.KeyBits != key.KeyBits {
 		return true
 	}
@@ -198,23 +198,23 @@ func (k *pgGPGKey) fieldsChanged(key models.GPGKey) bool {
 	return false
 }
 
-func (k *pgGPGKey) updateUIDs(tx *sqlx.Tx, newUids []models.GPGKeyUid) error {
+func (k *pgGPGKey) updateUIDs(tx *sqlx.Tx, newUIDs []models.GPGKeyUid) error {
 	oldUids, err := k.getKeyUids(tx)
 	if err != nil {
 		return err
 	}
 
-	for _, newUid := range newUids {
+	for _, newUID := range newUIDs {
 		found := false
-		for _, oldUid := range oldUids {
-			if oldUid.compareWithKeyUID(newUid) {
+		for _, oldUID := range oldUids {
+			if oldUID.compareWithKeyUID(newUID) {
 				// Found
 				found = true
-				if oldUid.fieldsChanged(newUid) {
-					oldUid.Name = newUid.Name
-					oldUid.Email = newUid.Email
-					oldUid.Description = newUid.Description
-					err = oldUid.save(tx)
+				if oldUID.fieldsChanged(newUID) {
+					oldUID.Name = newUID.Name
+					oldUID.Email = newUID.Email
+					oldUID.Description = newUID.Description
+					err = oldUID.save(tx)
 					if err != nil {
 						return err
 					}
@@ -223,11 +223,11 @@ func (k *pgGPGKey) updateUIDs(tx *sqlx.Tx, newUids []models.GPGKeyUid) error {
 			}
 		}
 		if !found {
-			newUid := &pgGPGKeyUid{
+			newUid := &pgGPGKeyUID{
 				Parent:      k.ID,
-				Name:        newUid.Name,
-				Description: newUid.Description,
-				Email:       newUid.Email,
+				Name:        newUID.Name,
+				Description: newUID.Description,
+				Email:       newUID.Email,
 			}
 			err = newUid.save(tx)
 			if err != nil {
@@ -266,7 +266,7 @@ func (k *pgGPGKey) save(tx *sqlx.Tx) error {
 	return err
 }
 
-type pgGPGKeyUid struct {
+type pgGPGKeyUID struct {
 	ID          string    `db:"gpg_key_uid_id"`
 	Parent      string    `db:"gpg_key_uid_parent"`
 	Name        string    `db:"gpg_key_uid_name"`
@@ -277,15 +277,15 @@ type pgGPGKeyUid struct {
 	DeletedAt   time.Time `db:"gpg_key_uid_deleted_at"`
 }
 
-func (k *pgGPGKeyUid) fieldsChanged(m models.GPGKeyUid) bool {
+func (k *pgGPGKeyUID) fieldsChanged(m models.GPGKeyUid) bool {
 	return k.Name != m.Name || k.Email != m.Email || k.Description != m.Description
 }
 
-func (k *pgGPGKeyUid) compareWithKeyUID(m models.GPGKeyUid) bool {
+func (k *pgGPGKeyUID) compareWithKeyUID(m models.GPGKeyUid) bool {
 	return strings.EqualFold(k.Name, m.Name) || strings.EqualFold(k.Email, m.Email)
 }
 
-func (k *pgGPGKeyUid) save(tx *sqlx.Tx) error {
+func (k *pgGPGKeyUID) save(tx *sqlx.Tx) error {
 	if k.ID == "" { // Insert
 		k.ID = uuid.EnsureUUID(nil)
 		_, err := tx.NamedExec(`INSERT INTO 
