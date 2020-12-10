@@ -55,6 +55,7 @@ func makePostgresDBHandler(logger slog.Instance) (*pg.PostgreSQLDBDriver, error)
 	return rdb, nil
 }
 
+// MakeDatabaseHandler initializes a Database Access Handler based on the current configuration
 func MakeDatabaseHandler(logger slog.Instance) (DatabaseHandler, error) {
 	if config.EnableDatabase {
 		switch config.DatabaseDialect {
@@ -62,15 +63,15 @@ func MakeDatabaseHandler(logger slog.Instance) (DatabaseHandler, error) {
 			return makeRethinkDBHandler(logger)
 		case "postgres":
 			return makePostgresDBHandler(logger)
+		case "memory":
+			return memory.MakeMemoryDBDriver(logger), nil
 		default:
 			logger.Fatal("Unknown database dialect %q", config.DatabaseDialect)
 		}
 	}
 	logger.Warn("No database handler enabled. Using memory database")
 
-	mdb := memory.MakeMemoryDBDriver(logger)
-
-	return mdb, nil
+	return memory.MakeMemoryDBDriver(logger), nil
 }
 
 // MakeTokenManager creates an instance of token manager. If Rethink is enabled returns an DatabaseTokenManager, if not a MemoryTokenManager
