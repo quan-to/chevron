@@ -40,6 +40,9 @@ var testGPGKey = models.GPGKey{
 	AsciiArmoredPrivateKey: "PRIVKEY",
 }
 
+const unexpectedError = "unexpected error %q"
+const expectationsDidNotMet = "expectations did not met: %s"
+
 func init() {
 	slog.SetTestMode()
 }
@@ -54,48 +57,7 @@ func (s customConverter) ConvertValue(v interface{}) (driver.Value, error) {
 	return v, nil
 }
 
-func TestPostgreSQLDBDriver_AddGPGKey(t *testing.T) {
-	h := MakePostgreSQLDBDriver(nil)
-	converter := sqlmock.ValueConverterOption(customConverter{})
-	// region Test ADD
-	mockDB, mock, _ := sqlmock.New(converter)
-	h.conn = sqlx.NewDb(mockDB, "sqlmock")
-
-	mock.ExpectBegin()
-	// Check existance
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM chevron_gpg_key WHERE gpg_key_fingerprint16 = $1 LIMIT 1`)).
-		WithArgs(tools.FPto16(testGPGKey.FullFingerprint)).
-		WillReturnError(fmt.Errorf("sql: no rows in result set"))
-	// Insert Key
-	mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO chevron_gpg_key(gpg_key_id, gpg_key_full_fingerprint, gpg_key_fingerprint16, gpg_key_keybits, gpg_key_parent, gpg_key_public_key, gpg_key_private_key) VALUES (?, ?, ?, ?, ?, ?, ?)`)).
-		WithArgs(sqlmock.AnyArg(), testGPGKey.FullFingerprint, tools.FPto16(testGPGKey.FullFingerprint), testGPGKey.KeyBits, (*string)(nil), testGPGKey.AsciiArmoredPublicKey, testGPGKey.AsciiArmoredPrivateKey).
-		WillReturnResult(sqlmock.NewResult(0, 1))
-
-	// Insert UIDs
-	for _, uid := range testGPGKey.KeyUids {
-		mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO chevron_gpg_key_uid(gpg_key_uid_id, gpg_key_uid_name, gpg_key_uid_email, gpg_key_uid_description, gpg_key_uid_parent) VALUES (?, ?, ?, ?, ?)`)).
-			WithArgs(sqlmock.AnyArg(), uid.Name, uid.Email, uid.Description, sqlmock.AnyArg()).
-			WillReturnResult(sqlmock.NewResult(0, 1))
-	}
-	mock.ExpectCommit()
-
-	_, added, err := h.AddGPGKey(testGPGKey)
-	if err != nil {
-		t.Fatalf("unexpected error %q", err)
-	}
-	if !added {
-		t.Fatalf("expected added but got updated")
-	}
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Fatalf("expectations did not met: %s", err)
-	}
-	// endregion
-	// region Test UPDATE
-	// Test existing key
-	mockDB, mock, _ = sqlmock.New(converter)
-	h.conn = sqlx.NewDb(mockDB, "sqlmock")
-
+func expectToUpdate(mock sqlmock.Sqlmock) {
 	mock.ExpectBegin()
 	// Check existance
 	testRow := sqlmock.NewRows([]string{
@@ -155,17 +117,62 @@ func TestPostgreSQLDBDriver_AddGPGKey(t *testing.T) {
 		WithArgs(testGPGKey.AsciiArmoredPrivateKey, testGPGKey.AsciiArmoredPublicKey, testGPGKey.ID).
 		WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectCommit()
+}
+
+func TestPostgreSQLDBDriver_AddGPGKey(t *testing.T) {
+	h := MakePostgreSQLDBDriver(nil)
+	converter := sqlmock.ValueConverterOption(customConverter{})
+	// region Test ADD
+	mockDB, mock, _ := sqlmock.New(converter)
+	h.conn = sqlx.NewDb(mockDB, "sqlmock")
+
+	mock.ExpectBegin()
+	// Check existance
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM chevron_gpg_key WHERE gpg_key_fingerprint16 = $1 LIMIT 1`)).
+		WithArgs(tools.FPto16(testGPGKey.FullFingerprint)).
+		WillReturnError(fmt.Errorf("sql: no rows in result set"))
+	// Insert Key
+	mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO chevron_gpg_key(gpg_key_id, gpg_key_full_fingerprint, gpg_key_fingerprint16, gpg_key_keybits, gpg_key_parent, gpg_key_public_key, gpg_key_private_key) VALUES (?, ?, ?, ?, ?, ?, ?)`)).
+		WithArgs(sqlmock.AnyArg(), testGPGKey.FullFingerprint, tools.FPto16(testGPGKey.FullFingerprint), testGPGKey.KeyBits, (*string)(nil), testGPGKey.AsciiArmoredPublicKey, testGPGKey.AsciiArmoredPrivateKey).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	// Insert UIDs
+	for _, uid := range testGPGKey.KeyUids {
+		mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO chevron_gpg_key_uid(gpg_key_uid_id, gpg_key_uid_name, gpg_key_uid_email, gpg_key_uid_description, gpg_key_uid_parent) VALUES (?, ?, ?, ?, ?)`)).
+			WithArgs(sqlmock.AnyArg(), uid.Name, uid.Email, uid.Description, sqlmock.AnyArg()).
+			WillReturnResult(sqlmock.NewResult(0, 1))
+	}
+	mock.ExpectCommit()
+
+	_, added, err := h.AddGPGKey(testGPGKey)
+	if err != nil {
+		t.Fatalf(unexpectedError, err)
+	}
+	if !added {
+		t.Fatalf("expected added but got updated")
+	}
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf(expectationsDidNotMet, err)
+	}
+	// endregion
+	// region Test UPDATE
+	// Test existing key
+	mockDB, mock, _ = sqlmock.New(converter)
+	h.conn = sqlx.NewDb(mockDB, "sqlmock")
+
+	expectToUpdate(mock)
 
 	_, added, err = h.AddGPGKey(testGPGKey)
 	if err != nil {
-		t.Fatalf("unexpected error %q", err)
+		t.Fatalf(unexpectedError, err)
 	}
 	if added {
 		t.Fatalf("expected updated but got added")
 	}
 
 	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Fatalf("expectations did not met: %s", err)
+		t.Fatalf(expectationsDidNotMet, err)
 	}
 	// endregion
 }
@@ -186,10 +193,10 @@ func TestPostgreSQLDBDriver_DeleteGPGKey(t *testing.T) {
 
 	err := h.DeleteGPGKey(testGPGKey)
 	if err != nil {
-		t.Fatalf("unexpected error: %s", err)
+		t.Fatalf(unexpectedError, err)
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Fatalf("expectations did not met: %s", err)
+		t.Fatalf(expectationsDidNotMet, err)
 	}
 }
 
@@ -293,7 +300,7 @@ func TestPostgreSQLDBDriver_FetchGPGKeyByFingerprint(t *testing.T) {
 	mock.ExpectCommit()
 	key, err := h.FetchGPGKeyByFingerprint(testGPGKey.FullFingerprint)
 	if err != nil {
-		t.Fatalf("unexpected error: %s", err)
+		t.Fatalf(unexpectedError, err)
 	}
 
 	if key == nil {
@@ -303,7 +310,7 @@ func TestPostgreSQLDBDriver_FetchGPGKeyByFingerprint(t *testing.T) {
 		t.Errorf("Expected gpgKey to be the same. (-got +want)\\n%s", diff)
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Fatalf("expectations did not met: %s", err)
+		t.Fatalf(expectationsDidNotMet, err)
 	}
 }
 
@@ -328,7 +335,7 @@ func TestPostgreSQLDBDriver_FetchGPGKeysWithoutSubKeys(t *testing.T) {
 	}
 
 	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Fatalf("expectations did not met: %s", err)
+		t.Fatalf(expectationsDidNotMet, err)
 	}
 }
 
@@ -353,7 +360,7 @@ func TestPostgreSQLDBDriver_FindGPGKeyByEmail(t *testing.T) {
 	}
 
 	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Fatalf("expectations did not met: %s", err)
+		t.Fatalf(expectationsDidNotMet, err)
 	}
 }
 
@@ -430,7 +437,7 @@ func TestPostgreSQLDBDriver_FindGPGKeyByFingerPrint(t *testing.T) {
 
 	results, err := h.FindGPGKeyByFingerPrint(testGPGKey.FullFingerprint, 0, 10)
 	if err != nil {
-		t.Fatalf("unexpected error: %s", err)
+		t.Fatalf(unexpectedError, err)
 	}
 
 	if len(results) == 0 {
@@ -455,7 +462,7 @@ func TestPostgreSQLDBDriver_FindGPGKeyByFingerPrint(t *testing.T) {
 	}
 
 	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Fatalf("expectations did not met: %s", err)
+		t.Fatalf(expectationsDidNotMet, err)
 	}
 }
 
@@ -480,7 +487,7 @@ func TestPostgreSQLDBDriver_FindGPGKeyByName(t *testing.T) {
 	}
 
 	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Fatalf("expectations did not met: %s", err)
+		t.Fatalf(expectationsDidNotMet, err)
 	}
 }
 
@@ -505,7 +512,7 @@ func TestPostgreSQLDBDriver_FindGPGKeyByValue(t *testing.T) {
 	}
 
 	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Fatalf("expectations did not met: %s", err)
+		t.Fatalf(expectationsDidNotMet, err)
 	}
 }
 
@@ -517,58 +524,14 @@ func TestPostgreSQLDBDriver_UpdateGPGKey(t *testing.T) {
 	mockDB, mock, _ := sqlmock.New(converter)
 	h.conn = sqlx.NewDb(mockDB, "sqlmock")
 
-	mock.ExpectBegin()
-	// Check existance
-	testRow := sqlmock.NewRows([]string{
-		"gpg_key_id",
-		"gpg_key_full_fingerprint",
-		"gpg_key_fingerprint16",
-		"gpg_key_keybits",
-		"gpg_key_public_key",
-		"gpg_key_private_key",
-		"gpg_key_created_at",
-		"gpg_key_updated_at",
-		"gpg_key_deleted_at",
-		"gpg_key_parent",
-	})
-
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM chevron_gpg_key WHERE gpg_key_fingerprint16 = $1 LIMIT 1`)).
-		WithArgs(tools.FPto16(testGPGKey.FullFingerprint)).
-		WillReturnRows(testRow.AddRow(
-			testGPGKey.ID,
-			testGPGKey.FullFingerprint,
-			tools.FPto16(testGPGKey.FullFingerprint),
-			testGPGKey.KeyBits,
-			testGPGKey.AsciiArmoredPublicKey,
-			testGPGKey.AsciiArmoredPrivateKey,
-			time.Now(),
-			time.Now(),
-			time.Time{},
-			(*string)(nil),
-		))
-	// Load UIDs
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM chevron_gpg_key_uid WHERE gpg_key_uid_parent = $1`)).
-		WithArgs(testGPGKey.ID).
-		WillReturnRows(sqlmock.NewRows(nil))
-
-	// Insert UIDs
-	for _, uid := range testGPGKey.KeyUids {
-		mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO chevron_gpg_key_uid(gpg_key_uid_id, gpg_key_uid_name, gpg_key_uid_email, gpg_key_uid_description, gpg_key_uid_parent) VALUES (?, ?, ?, ?, ?)`)).
-			WithArgs(sqlmock.AnyArg(), uid.Name, uid.Email, uid.Description, sqlmock.AnyArg()).
-			WillReturnResult(sqlmock.NewResult(0, 1))
-	}
-	// Update Key
-	mock.ExpectExec(regexp.QuoteMeta(`UPDATE chevron_gpg_key SET gpg_key_private_key = ?, gpg_key_public_key = ? WHERE gpg_key_id = ?`)).
-		WithArgs(testGPGKey.AsciiArmoredPrivateKey, testGPGKey.AsciiArmoredPublicKey, testGPGKey.ID).
-		WillReturnResult(sqlmock.NewResult(0, 1))
-	mock.ExpectCommit()
+	expectToUpdate(mock)
 
 	err := h.UpdateGPGKey(testGPGKey)
 	if err != nil {
-		t.Fatalf("unexpected error %q", err)
+		t.Fatalf(unexpectedError, err)
 	}
 
 	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Fatalf("expectations did not met: %s", err)
+		t.Fatalf(expectationsDidNotMet, err)
 	}
 }
