@@ -68,7 +68,7 @@ These are the Environment Variables that you can set to manage the webserver:
 *   `MASTER_GPG_KEY_BASE64_ENCODED` => If the Master GPG Key is base64 encoded (default: true)
 *   `SYSLOG_IP` => IP of the Syslog Server to send Console Messages _(defaults to '127.0.0.1')_ *Does not apply for Windows*
 *   `SYSLOG_FACILITY` => Facility of the Syslog to use. _(defaults to 'LOG_USER')_
-*   `DATABASE_DIALECT` => Dialect of the Database connection (`postgresql`, `rethinkdb`. Defaults: none)
+*   `DATABASE_DIALECT` => Dialect of the Database connection (`postgres`, `rethinkdb`. Defaults: none)
 *   `CONNECTION_STRING` => Connection string for the database.
 
 ## Hashicorp Vault Key Backend Environment

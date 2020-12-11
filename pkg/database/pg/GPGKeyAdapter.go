@@ -288,17 +288,17 @@ func (k *pgGPGKeyUID) compareWithKeyUID(m models.GPGKeyUid) bool {
 func (k *pgGPGKeyUID) save(tx *sqlx.Tx) error {
 	if k.ID == "" { // Insert
 		k.ID = uuid.EnsureUUID(nil)
-		_, err := tx.NamedExec(`INSERT INTO 
-										chevron_gpg_key_uid(gpg_key_uid_id, gpg_key_uid_name, gpg_key_uid_email, gpg_key_uid_description, gpg_key_uid_parent)
- 										VALUES (:gpg_key_uid_id, :gpg_key_uid_name, :gpg_key_uid_email, :gpg_key_uid_description, :gpg_key_uid_parent)`, k)
+		_, err := tx.NamedExec(`INSERT INTO
+                               chevron_gpg_key_uid(gpg_key_uid_id, gpg_key_uid_name, gpg_key_uid_email, gpg_key_uid_description, gpg_key_uid_parent)
+                               VALUES (:gpg_key_uid_id, :gpg_key_uid_name, :gpg_key_uid_email, :gpg_key_uid_description, :gpg_key_uid_parent)`, k)
 		return err
 	}
 	// Update
-	_, err := tx.NamedExec(`UPDATE chevron_gpg_key_uid SET 
-									gpg_key_uid_name = :gpg_key_uid_name, 
-									gpg_key_uid_email = :gpg_key_uid_email, 
-									gpg_key_uid_description = :gpg_key_uid_description, 
-									gpg_key_uid_updated_at = now() 
-									WHERE gpg_key_uid_id = :gpg_key_uid_id`, k)
+	_, err := tx.NamedExec(`UPDATE chevron_gpg_key_uid SET
+                           gpg_key_uid_name = :gpg_key_uid_name,
+                           gpg_key_uid_email = :gpg_key_uid_email,
+                           gpg_key_uid_description = :gpg_key_uid_description,
+                           gpg_key_uid_updated_at = now()
+                           WHERE gpg_key_uid_id = :gpg_key_uid_id`, k)
 	return err
 }
