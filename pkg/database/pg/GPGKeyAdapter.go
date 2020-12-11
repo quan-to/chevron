@@ -4,12 +4,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/quan-to/chevron/internal/tools"
-
-	"github.com/quan-to/chevron/pkg/uuid"
-
 	"github.com/jmoiron/sqlx"
+	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/models"
+	"github.com/quan-to/chevron/pkg/uuid"
 )
 
 type pgGPGKey struct {

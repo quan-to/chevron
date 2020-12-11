@@ -6,6 +6,8 @@
 // migrations/000002_create_gpgkey_table.up.sql
 // migrations/000003_create_gpgkeyuid_table.down.sql
 // migrations/000003_create_gpgkeyuid_table.up.sql
+// migrations/000004_add_username_to_user.down.sql
+// migrations/000004_add_username_to_user.up.sql
 package migrations
 
 import (
@@ -97,7 +99,7 @@ func _000001_create_users_tableDownSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000001_create_users_table.down.sql", size: 65, mode: os.FileMode(436), modTime: time.Unix(1607539736, 0)}
+	info := bindataFileInfo{name: "000001_create_users_table.down.sql", size: 65, mode: os.FileMode(436), modTime: time.Unix(1607959210, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -117,7 +119,7 @@ func _000001_create_users_tableUpSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000001_create_users_table.up.sql", size: 442, mode: os.FileMode(436), modTime: time.Unix(1607539736, 0)}
+	info := bindataFileInfo{name: "000001_create_users_table.up.sql", size: 442, mode: os.FileMode(436), modTime: time.Unix(1607959210, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -137,7 +139,7 @@ func _000002_create_gpgkey_tableDownSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000002_create_gpgkey_table.down.sql", size: 68, mode: os.FileMode(436), modTime: time.Unix(1607539736, 0)}
+	info := bindataFileInfo{name: "000002_create_gpgkey_table.down.sql", size: 68, mode: os.FileMode(436), modTime: time.Unix(1607959210, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -157,7 +159,7 @@ func _000002_create_gpgkey_tableUpSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000002_create_gpgkey_table.up.sql", size: 812, mode: os.FileMode(436), modTime: time.Unix(1607621856, 0)}
+	info := bindataFileInfo{name: "000002_create_gpgkey_table.up.sql", size: 812, mode: os.FileMode(436), modTime: time.Unix(1607959210, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -177,7 +179,7 @@ func _000003_create_gpgkeyuid_tableDownSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000003_create_gpgkeyuid_table.down.sql", size: 76, mode: os.FileMode(436), modTime: time.Unix(1607539736, 0)}
+	info := bindataFileInfo{name: "000003_create_gpgkeyuid_table.down.sql", size: 76, mode: os.FileMode(436), modTime: time.Unix(1607959210, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -197,7 +199,47 @@ func _000003_create_gpgkeyuid_tableUpSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000003_create_gpgkeyuid_table.up.sql", size: 700, mode: os.FileMode(436), modTime: time.Unix(1607539736, 0)}
+	info := bindataFileInfo{name: "000003_create_gpgkeyuid_table.up.sql", size: 700, mode: os.FileMode(436), modTime: time.Unix(1607959210, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var __000004_add_username_to_userDownSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xd2\xd5\x4d\xce\x48\xcc\x4b\x4f\x2d\x4e\x2d\x51\x28\x4a\x4c\x4e\x2d\xaa\x48\xc9\xb1\x4a\x4c\x49\x89\x2f\x2d\x4e\x2d\xca\x4b\xcc\x4d\x8d\x2f\xc9\x07\xb3\xb9\xb8\x1c\x7d\x42\x5c\x83\x14\x42\x1c\x9d\x7c\x5c\x15\x92\x33\x52\xcb\x8a\xf2\xf3\x20\x32\x0a\x0a\x0a\x0a\x2e\x41\xfe\x01\x0a\xce\xfe\x3e\xa1\xbe\x7e\x0a\x20\x41\xb8\x7e\x6b\x2e\x2e\xb0\x9c\xa7\x9f\x8b\x6b\x04\x8a\x3e\x84\x15\x99\x29\x15\xd6\x5c\x80\x00\x00\x00\xff\xff\x0f\x03\x4d\xfb\x8a\x00\x00\x00")
+
+func _000004_add_username_to_userDownSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__000004_add_username_to_userDownSql,
+		"000004_add_username_to_user.down.sql",
+	)
+}
+
+func _000004_add_username_to_userDownSql() (*asset, error) {
+	bytes, err := _000004_add_username_to_userDownSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "000004_add_username_to_user.down.sql", size: 138, mode: os.FileMode(436), modTime: time.Unix(1607959215, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var __000004_add_username_to_userUpSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x54\x8d\x4d\x0a\xc2\x30\x14\x84\xf7\x39\xc5\xec\xaa\x8b\x5e\xc0\xae\x9e\x4d\x44\xe1\x99\x42\x48\xc5\x5d\x09\xcd\xc3\x0a\xda\x42\x5a\xa5\xc7\x17\x15\x94\xee\x86\xf9\xe6\x27\xcf\xdb\x2e\xf4\x17\x19\x65\x42\x0a\xad\xa4\x39\xde\x36\x21\xc6\xe6\x31\x4a\xea\xc3\x5d\x9a\x69\xf8\x68\xa5\x88\xbd\x71\xf0\xb4\x65\x83\xb6\x93\x67\x1a\xfa\x2f\x01\x00\xd2\x1a\x65\xc5\xf5\xd1\xe2\xed\xfd\xea\x38\x91\x2b\xf7\xe4\x60\x2b\x0f\x5b\x33\x43\x9b\x1d\xd5\xec\x91\x65\x85\x52\xa5\x33\xe4\x0d\x0e\x56\x9b\xf3\x62\xf4\xff\x7f\x8d\x33\x2a\xbb\x80\x58\x2d\x22\xeb\x42\xbd\x02\x00\x00\xff\xff\x50\x7a\x18\x3b\xc7\x00\x00\x00")
+
+func _000004_add_username_to_userUpSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__000004_add_username_to_userUpSql,
+		"000004_add_username_to_user.up.sql",
+	)
+}
+
+func _000004_add_username_to_userUpSql() (*asset, error) {
+	bytes, err := _000004_add_username_to_userUpSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "000004_add_username_to_user.up.sql", size: 199, mode: os.FileMode(436), modTime: time.Unix(1607959215, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -260,6 +302,8 @@ var _bindata = map[string]func() (*asset, error){
 	"000002_create_gpgkey_table.up.sql":      _000002_create_gpgkey_tableUpSql,
 	"000003_create_gpgkeyuid_table.down.sql": _000003_create_gpgkeyuid_tableDownSql,
 	"000003_create_gpgkeyuid_table.up.sql":   _000003_create_gpgkeyuid_tableUpSql,
+	"000004_add_username_to_user.down.sql":   _000004_add_username_to_userDownSql,
+	"000004_add_username_to_user.up.sql":     _000004_add_username_to_userUpSql,
 }
 
 // AssetDir returns the file names below a certain
@@ -309,6 +353,8 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"000002_create_gpgkey_table.up.sql":      &bintree{_000002_create_gpgkey_tableUpSql, map[string]*bintree{}},
 	"000003_create_gpgkeyuid_table.down.sql": &bintree{_000003_create_gpgkeyuid_tableDownSql, map[string]*bintree{}},
 	"000003_create_gpgkeyuid_table.up.sql":   &bintree{_000003_create_gpgkeyuid_tableUpSql, map[string]*bintree{}},
+	"000004_add_username_to_user.down.sql":   &bintree{_000004_add_username_to_userDownSql, map[string]*bintree{}},
+	"000004_add_username_to_user.up.sql":     &bintree{_000004_add_username_to_userUpSql, map[string]*bintree{}},
 }}
 
 // RestoreAsset restores an asset under the given directory
