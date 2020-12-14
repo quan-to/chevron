@@ -17,6 +17,7 @@ import (
 func TestPKSGetKey(t *testing.T) {
 	config.PushVariables()
 	defer config.PopVariables()
+	config.DatabaseDialect = "memory"
 
 	// Test Internal
 	z, err := ioutil.ReadFile("../../test/data/testkey_privateTestKey.gpg")
@@ -58,7 +59,7 @@ func TestPKSGetKey(t *testing.T) {
 	}
 
 	// Test External
-	config.EnableRethinkSKS = false
+	config.EnableDatabase = false
 	config.SKSServer = "https://keyserver.ubuntu.com/"
 
 	ctx = context.Background()
@@ -81,7 +82,7 @@ func TestPKSSearchByName(t *testing.T) {
 	defer config.PopVariables()
 
 	// Test Panics
-	config.EnableRethinkSKS = false
+	config.EnableDatabase = false
 	_, err := PKSSearchByName(context.Background(), "", 0, 1)
 	if err == nil {
 		t.Fatalf("Search should fail as not implemented for rethinkdb disabled!")

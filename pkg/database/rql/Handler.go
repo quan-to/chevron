@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/quan-to/chevron/internal/tools"
+	"github.com/quan-to/chevron/pkg/models"
 	"github.com/quan-to/slog"
 	r "gopkg.in/rethinkdb/rethinkdb-go.v6"
 )
@@ -147,4 +148,21 @@ func convertFromRethinkDB(input map[string]interface{}, output interface{}) erro
 	}
 
 	return json.Unmarshal(bdata, output)
+}
+
+func (h *RethinkDBDriver) resultsAsArray(res *r.Cursor) ([]models.GPGKey, error) {
+	results := make([]models.GPGKey, 0)
+	var gpgKey map[string]interface{}
+
+	for res.Next(&gpgKey) {
+		gpgKey = h.fixGPGKey(gpgKey)
+		var key models.GPGKey
+		err := convertFromRethinkDB(gpgKey, &key)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, key)
+	}
+
+	return results, nil
 }

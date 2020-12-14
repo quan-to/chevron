@@ -153,9 +153,9 @@ func TestGetKeyExternal(t *testing.T) {
 	remote_signer.PushVariables()
 	defer remote_signer.PopVariables()
 	// Test External SKS Fetch
+	remote_signer.EnableDatabase = false
 	remote_signer.SKSServer = "https://keyserver.ubuntu.com/"
 	krm := MakeKeyRingManager(nil, nil)
-	remote_signer.EnableRethinkSKS = false
 	e := krm.GetKey(ctx, test.ExternalKeyFingerprint)
 
 	if e == nil {
@@ -170,7 +170,6 @@ func TestGetKeyExternal(t *testing.T) {
 	}
 
 	// Test SKS Internal
-	remote_signer.EnableRethinkSKS = true
 	dbh, err := agent.MakeDatabaseHandler(slog.Scope("TEST"))
 	if err != nil {
 		t.Error(err)

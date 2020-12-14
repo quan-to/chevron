@@ -3,6 +3,7 @@ package keymagic
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/models"
@@ -101,14 +102,14 @@ func PKSAdd(ctx context.Context, pubKey string) string {
 			return "NOK"
 		}
 
-		keys, err := dbh.FindGPGKeyByFingerPrint(key.FullFingerprint, 0, 1)
+		existingKey, err := dbh.FetchGPGKeyByFingerprint(key.FullFingerprint)
 
-		if err != nil {
+		if err != nil && !strings.EqualFold(err.Error(), "not found") {
 			log.Debug("PKSAdd Error: %s", err)
 			return "NOK"
 		}
 
-		if len(keys) > 0 {
+		if existingKey != nil {
 			log.Info("Tried to add key %s to PKS but already exists.", key.GetShortFingerPrint())
 			return "OK"
 		}

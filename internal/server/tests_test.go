@@ -14,7 +14,7 @@ import (
 
 func TestPing(t *testing.T) {
 	// region Generate Signature
-	config.EnableRethinkSKS = true
+	config.EnableDatabase = true
 	config.VaultStorage = true
 
 	r := bytes.NewReader([]byte(""))

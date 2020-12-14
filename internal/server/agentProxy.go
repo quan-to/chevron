@@ -4,22 +4,18 @@ import (
 	"bytes"
 	"crypto"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/interfaces"
-
-	"github.com/google/uuid"
-	"github.com/gorilla/mux"
+	"github.com/quan-to/chevron/pkg/uuid"
 	"github.com/quan-to/slog"
 )
-
-const maxUUIDTries = 5
 
 type AgentProxy struct {
 	gpg       interfaces.PGPManager
@@ -47,31 +43,8 @@ func MakeAgentProxy(log slog.Instance, gpg interfaces.PGPManager, tm interfaces.
 	}
 }
 
-func generateUUID(log slog.Instance) (string, error) {
-	uniqueString := ""
-
-	for tries := 0; tries < maxUUIDTries; tries++ {
-		u, err := uuid.NewRandom()
-		if err == nil {
-			uniqueString = u.String()
-			break
-		}
-		log.Warn("Error generating UUID: %q. Trying again", err)
-	}
-
-	if len(uniqueString) == 0 {
-		return "", fmt.Errorf("cannot generate uuid. max tries reached")
-	}
-
-	return uniqueString, nil
-}
-
 func injectUniquenessFields(log slog.Instance, json map[string]interface{}) error {
-	uniqueString, err := generateUUID(log)
-	if err != nil {
-		log.Error("Error generating a random number for UUID. Cannot continue request.")
-		return err
-	}
+	uniqueString := uuid.EnsureUUID(log)
 
 	json["_timeUniqueId"] = uniqueString
 	json["_timestamp"] = time.Now().UnixNano() / 1e6

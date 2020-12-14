@@ -47,11 +47,21 @@ func StringIndexOf(v string, a []string) int {
 
 func ByteFingerPrint2FP16(raw []byte) string {
 	fp := hex.EncodeToString(raw)
-	return strings.ToUpper(fp[len(fp)-16:])
+	return FPto16(fp)
 }
 
 func IssuerKeyIdToFP16(issuerKeyId uint64) string {
-	return strings.ToUpper(fmt.Sprintf("%016x", issuerKeyId))
+	return FPto16(fmt.Sprintf("%016x", issuerKeyId))
+}
+
+// FPto16 returns a 16 byte fingerprint for the specified fingerprint
+// if len(fingerprint) < 16 it returns the same string in upper case
+func FPto16(fingerprint string) string {
+	if len(fingerprint) > 16 {
+		fingerprint = fingerprint[len(fingerprint)-16:]
+	}
+
+	return strings.ToUpper(fingerprint)
 }
 
 func Quanto2GPG(signature string) string {

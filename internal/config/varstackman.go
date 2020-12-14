@@ -15,7 +15,7 @@ func PushVariables() {
 		"SKSServer":                 SKSServer,
 		"HttpPort":                  HttpPort,
 		"MaxKeyRingCache":           MaxKeyRingCache,
-		"EnableRethinkSKS":          EnableRethinkSKS,
+		"EnableDatabase":            EnableDatabase,
 		"RethinkDBHost":             RethinkDBHost,
 		"RethinkDBPort":             RethinkDBPort,
 		"RethinkDBUsername":         RethinkDBUsername,
@@ -42,8 +42,8 @@ func PushVariables() {
 		"AgentTokenExpiration":      AgentTokenExpiration,
 		"AgentKeyFingerPrint":       AgentKeyFingerPrint,
 		"AgentBypassLogin":          AgentBypassLogin,
-		"RethinkTokenManager":       RethinkTokenManager,
-		"RethinkAuthManager":        RethinkAuthManager,
+		"DatabaseTokenManager":      DatabaseTokenManager,
+		"DatabaseAuthManager":       DatabaseAuthManager,
 		"Environment":               Environment,
 		"AgentExternalURL":          AgentExternalURL,
 		"AgentAdminExternalURL":     AgentAdminExternalURL,
@@ -68,7 +68,7 @@ func PopVariables() {
 	SKSServer = insMap["SKSServer"].(string)
 	HttpPort = insMap["HttpPort"].(int)
 	MaxKeyRingCache = insMap["MaxKeyRingCache"].(int)
-	EnableRethinkSKS = insMap["EnableRethinkSKS"].(bool)
+	EnableDatabase = insMap["EnableDatabase"].(bool)
 	RethinkDBHost = insMap["RethinkDBHost"].(string)
 	RethinkDBPort = insMap["RethinkDBPort"].(int)
 	RethinkDBUsername = insMap["RethinkDBUsername"].(string)
@@ -95,8 +95,8 @@ func PopVariables() {
 	AgentTokenExpiration = insMap["AgentTokenExpiration"].(int)
 	AgentKeyFingerPrint = insMap["AgentKeyFingerPrint"].(string)
 	AgentBypassLogin = insMap["AgentBypassLogin"].(bool)
-	RethinkTokenManager = insMap["RethinkTokenManager"].(bool)
-	RethinkAuthManager = insMap["RethinkAuthManager"].(bool)
+	DatabaseTokenManager = insMap["DatabaseTokenManager"].(bool)
+	DatabaseAuthManager = insMap["DatabaseAuthManager"].(bool)
 	Environment = insMap["Environment"].(string)
 	AgentExternalURL = insMap["AgentExternalURL"].(string)
 	AgentAdminExternalURL = insMap["AgentAdminExternalURL"].(string)
