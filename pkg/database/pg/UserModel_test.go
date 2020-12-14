@@ -23,6 +23,31 @@ var testUser = models.User{
 	CreatedAt:   time.Now().Truncate(time.Second),
 }
 
+func expectUserSelect(mock sqlmock.Sqlmock) {
+	expectedUserRows := sqlmock.NewRows([]string{
+		"user_id",
+		"user_fingerprint",
+		"user_username",
+		"user_password",
+		"user_full_name",
+		"user_created_at",
+		"user_updated_at",
+		"user_deleted_at",
+	}).AddRow(
+		testUser.ID,
+		testUser.Fingerprint,
+		testUser.Username,
+		[]byte(testUser.Password),
+		testUser.FullName,
+		testUser.CreatedAt,
+		time.Time{},
+		(*time.Time)(nil),
+	)
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM chevron_user WHERE user_username = $1 LIMIT 1`)).
+		WithArgs(testUser.Username).
+		WillReturnRows(expectedUserRows)
+}
+
 func TestPostgreSQLDBDriver_AddUser(t *testing.T) {
 	h := MakePostgreSQLDBDriver(nil)
 	converter := sqlmock.ValueConverterOption(customConverter{})
@@ -66,31 +91,9 @@ func TestPostgreSQLDBDriver_GetUser(t *testing.T) {
 	mockDB, mock, _ := sqlmock.New(converter)
 	h.conn = sqlx.NewDb(mockDB, "sqlmock")
 
-	expectedUserRows := sqlmock.NewRows([]string{
-		"user_id",
-		"user_fingerprint",
-		"user_username",
-		"user_password",
-		"user_full_name",
-		"user_created_at",
-		"user_updated_at",
-		"user_deleted_at",
-	}).AddRow(
-		testUser.ID,
-		testUser.Fingerprint,
-		testUser.Username,
-		[]byte(testUser.Password),
-		testUser.FullName,
-		testUser.CreatedAt,
-		time.Time{},
-		(*time.Time)(nil),
-	)
-
 	// Test Existing GET
 	mock.ExpectBegin()
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM chevron_user WHERE user_username = $1 LIMIT 1`)).
-		WithArgs(testUser.Username).
-		WillReturnRows(expectedUserRows)
+	expectUserSelect(mock)
 	mock.ExpectCommit()
 
 	u, err := h.GetUser(testUser.Username)
@@ -119,7 +122,7 @@ func TestPostgreSQLDBDriver_GetUser(t *testing.T) {
 		WillReturnError(fmt.Errorf("sql: no rows in result set"))
 	mock.ExpectRollback()
 
-	u, err = h.GetUser(testUser.Username)
+	_, err = h.GetUser(testUser.Username)
 	if err == nil {
 		t.Fatalf(unexpectedError, "expected error to be not nil, got nil")
 	}
@@ -162,30 +165,8 @@ func TestPostgreSQLDBDriver_UpdateUser(t *testing.T) {
 	mockDB, mock, _ = sqlmock.New(converter)
 	h.conn = sqlx.NewDb(mockDB, "sqlmock")
 
-	expectedUserRows := sqlmock.NewRows([]string{
-		"user_id",
-		"user_fingerprint",
-		"user_username",
-		"user_password",
-		"user_full_name",
-		"user_created_at",
-		"user_updated_at",
-		"user_deleted_at",
-	}).AddRow(
-		testUser.ID,
-		testUser.Fingerprint,
-		testUser.Username,
-		[]byte(testUser.Password),
-		testUser.FullName,
-		testUser.CreatedAt,
-		time.Time{},
-		(*time.Time)(nil),
-	)
-
 	mock.ExpectBegin()
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM chevron_user WHERE user_username = $1 LIMIT 1`)).
-		WithArgs(testUser.Username).
-		WillReturnRows(expectedUserRows)
+	expectUserSelect(mock)
 	mock.ExpectExec(regexp.QuoteMeta(`UPDATE chevron_user SET user_fingerprint = ?, user_password = ?, user_full_name = ?, user_updated_at = now() WHERE user_id = ?`)).
 		WithArgs(
 			testUser.Fingerprint,
