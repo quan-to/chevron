@@ -36,6 +36,7 @@ func MakeRethinkDBDriver(log slog.Instance) *RethinkDBDriver {
 	}
 }
 
+// HealthCheck returns nil if everything is OK with the handler
 func (h *RethinkDBDriver) HealthCheck() error {
 	d, err := r.Expr(1).Run(h.conn)
 	_ = d.Close()

@@ -67,6 +67,7 @@ func (h *PostgreSQLDBDriver) Connect(connectionString string) error {
 	return nil
 }
 
+// HealthCheck returns nil if everything is OK with the handler
 func (h *PostgreSQLDBDriver) HealthCheck() error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5) // 5 second timeout
 	defer cancel()

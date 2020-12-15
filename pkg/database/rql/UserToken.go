@@ -34,6 +34,7 @@ func (h *RethinkDBDriver) migrateUserTokenTable() error {
 	return nil
 }
 
+// AddUserToken adds a new user token to be valid and returns its token ID
 func (h *RethinkDBDriver) AddUserToken(ut models.UserToken) (string, error) {
 	rut, err := convertToRethinkDB(ut)
 	if err != nil {
@@ -65,6 +66,7 @@ func (h *RethinkDBDriver) RemoveUserToken(token string) (err error) {
 	return nil
 }
 
+// GetUserToken fetch a UserToken object by the specified token
 func (h *RethinkDBDriver) GetUserToken(token string) (ut *models.UserToken, err error) {
 	var res *r.Cursor
 	res, err = r.Table(userTokenTableInit.TableName).
@@ -90,6 +92,7 @@ func (h *RethinkDBDriver) GetUserToken(token string) (ut *models.UserToken, err 
 	return ut, fmt.Errorf("not found")
 }
 
+// InvalidateUserTokens removes all user tokens that had been already expired
 func (h *RethinkDBDriver) InvalidateUserTokens() (int, error) {
 	wr, err := r.Table(userTokenTableInit.TableName).
 		Filter(r.Row.Field("Expiration").Lt(time.Now())).
