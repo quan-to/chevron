@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/openpgp"
 )
 
@@ -27,7 +28,7 @@ type GPGKey struct {
 }
 
 func (key *GPGKey) GetShortFingerPrint() string {
-	return key.FullFingerprint[len(key.FullFingerprint)-16:]
+	return tools.FPto16(key.FullFingerprint)
 }
 
 func AsciiArmored2GPGKey(asciiArmored string) (GPGKey, error) {

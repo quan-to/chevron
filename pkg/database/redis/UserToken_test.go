@@ -17,7 +17,7 @@ import (
 
 const unexpectedError = "unexpected error: %s"
 const expectationsWereNotMet = "expectations were not met: %s"
-const expirationTime = time.Hour
+const userTokenExpirationTime = time.Hour
 
 var testTime = time.Now().Truncate(time.Second)
 
@@ -27,7 +27,7 @@ var testToken = models.UserToken{
 	Fullname:    "John HUEBR",
 	Token:       uuid.EnsureUUID(nil),
 	CreatedAt:   testTime.Truncate(time.Second),
-	Expiration:  testTime.Add(expirationTime).Truncate(time.Second),
+	Expiration:  testTime.Add(userTokenExpirationTime).Truncate(time.Second),
 }
 
 func TestDriver_AddUserToken(t *testing.T) {
@@ -53,7 +53,7 @@ func TestDriver_AddUserToken(t *testing.T) {
 		t.Fatalf(unexpectedError, err)
 	}
 
-	mock.ExpectSet(userTokenPrefix+testToken.Token, data, expirationTime).
+	mock.ExpectSet(userTokenPrefix+testToken.Token, data, userTokenExpirationTime).
 		SetVal("")
 
 	entryId, err := h.AddUserToken(testToken)
