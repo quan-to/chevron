@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/quan-to/chevron/pkg/models"
+	"github.com/quan-to/chevron/pkg/uuid"
 )
 
 func (h *DbDriver) AddUser(um models.User) (string, error) {
 	h.lock.Lock()
 	defer h.lock.Unlock()
 
-	um.ID = uuid.New().String()
+	um.ID = uuid.EnsureUUID(h.log)
 
 	h.users = append(h.users, um)
 
