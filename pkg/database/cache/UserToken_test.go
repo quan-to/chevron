@@ -6,11 +6,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/quan-to/chevron/pkg/models/testmodels"
+
 	"bou.ke/monkey"
 	"github.com/go-redis/cache/v8"
 	"github.com/go-redis/redismock/v8"
 	"github.com/kylelemons/godebug/pretty"
-	"github.com/quan-to/chevron/pkg/models"
 	"github.com/quan-to/chevron/pkg/uuid"
 	"github.com/quan-to/slog"
 )
@@ -18,17 +19,6 @@ import (
 const unexpectedError = "unexpected error: %s"
 const expectationsWereNotMet = "expectations were not met: %s"
 const userTokenExpirationTime = time.Hour
-
-var testTime = time.Now().Truncate(time.Second)
-
-var testToken = models.UserToken{
-	Fingerprint: "DEADBEEF",
-	Username:    "johnhuebr",
-	Fullname:    "John HUEBR",
-	Token:       uuid.EnsureUUID(nil),
-	CreatedAt:   testTime.Truncate(time.Second),
-	Expiration:  testTime.Add(userTokenExpirationTime).Truncate(time.Second),
-}
 
 func TestDriver_AddUserToken(t *testing.T) {
 	db, mock := redismock.NewClientMock()
@@ -41,10 +31,10 @@ func TestDriver_AddUserToken(t *testing.T) {
 		return "0000"
 	})
 	monkey.Patch(time.Now, func() time.Time {
-		return testTime
+		return testmodels.Time
 	})
 
-	testData := testToken
+	testData := testmodels.Token
 	testData.ID = "0000"
 
 	data, err := h.cache.Marshal(&testData)
@@ -53,10 +43,10 @@ func TestDriver_AddUserToken(t *testing.T) {
 		t.Fatalf(unexpectedError, err)
 	}
 
-	mock.ExpectSet(userTokenPrefix+testToken.Token, data, userTokenExpirationTime).
+	mock.ExpectSet(userTokenPrefix+testmodels.Token.Token, data, userTokenExpirationTime).
 		SetVal("")
 
-	entryId, err := h.AddUserToken(testToken)
+	entryId, err := h.AddUserToken(testmodels.Token)
 	if err != nil {
 		t.Fatalf(unexpectedError, err)
 	}
@@ -77,7 +67,7 @@ func TestDriver_GetUserToken(t *testing.T) {
 		Redis: db,
 	})
 
-	testData := testToken
+	testData := testmodels.Token
 	testData.ID = "0000"
 
 	data, err := h.cache.Marshal(&testData)
@@ -86,10 +76,10 @@ func TestDriver_GetUserToken(t *testing.T) {
 		t.Fatalf(unexpectedError, err)
 	}
 
-	mock.ExpectGet(userTokenPrefix + testToken.Token).SetVal(string(data))
+	mock.ExpectGet(userTokenPrefix + testmodels.Token.Token).SetVal(string(data))
 	mock.ExpectGet(userTokenPrefix + "HUEBR").SetErr(fmt.Errorf("test error"))
 
-	entry, err := h.GetUserToken(testToken.Token)
+	entry, err := h.GetUserToken(testmodels.Token.Token)
 	if err != nil {
 		t.Fatalf(unexpectedError, err)
 	}

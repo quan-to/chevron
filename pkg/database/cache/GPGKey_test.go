@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/quan-to/chevron/pkg/models/testmodels"
+
 	"bou.ke/monkey"
 	"github.com/go-redis/cache/v8"
 	"github.com/go-redis/redismock/v8"
@@ -14,29 +16,6 @@ import (
 	"github.com/quan-to/slog"
 )
 
-var testGPGKey = models.GPGKey{
-	ID:              "abcd",
-	FullFingerprint: "DEADBEEFDEADBEEFDEADBEEFDEADBEEF",
-	Names:           []string{"AbCE", "B ASD"},
-	Emails:          []string{"a@a.com", "b@a.com"},
-	KeyUids: []models.GPGKeyUid{
-		{
-			Name:        "AbCE",
-			Email:       "a@a.com",
-			Description: "desc",
-		},
-		{
-			Name:        "B ASD",
-			Email:       "b@a.com",
-			Description: "desc",
-		},
-	},
-	KeyBits:                1234,
-	Subkeys:                []string{"BABABEBE"},
-	AsciiArmoredPublicKey:  "PUBKEY",
-	AsciiArmoredPrivateKey: "PRIVKEY",
-}
-
 func TestDriver_AddGPGKey(t *testing.T) {
 	mem := memory.MakeMemoryDBDriver(nil)
 	db, mock := redismock.NewClientMock()
@@ -45,7 +24,7 @@ func TestDriver_AddGPGKey(t *testing.T) {
 		Redis: db,
 	})
 
-	testKeyToAdd := testGPGKey
+	testKeyToAdd := testmodels.GpgKey
 	testKeyToAdd.ID = "0000"
 
 	monkey.Patch(uuid.EnsureUUID, func(log slog.Instance) string {
@@ -63,7 +42,7 @@ func TestDriver_AddGPGKey(t *testing.T) {
 	mock.ExpectSet(gpgKeyByFingerprintPrefix+testKeyToAdd.GetShortFingerPrint(), data, gpgKeyExpiration).
 		SetVal("")
 
-	id, added, err := h.AddGPGKey(testGPGKey)
+	id, added, err := h.AddGPGKey(testmodels.GpgKey)
 	if err != nil {
 		t.Fatalf(unexpectedError, err)
 	}
@@ -72,7 +51,7 @@ func TestDriver_AddGPGKey(t *testing.T) {
 	}
 
 	// Check if key has been added
-	key, err := mem.FetchGPGKeyByFingerprint(testGPGKey.FullFingerprint)
+	key, err := mem.FetchGPGKeyByFingerprint(testmodels.GpgKey.FullFingerprint)
 	if err != nil {
 		t.Fatalf(unexpectedError, err)
 	}
@@ -93,11 +72,11 @@ func TestDriver_DeleteGPGKey(t *testing.T) {
 		Redis: db,
 	})
 
-	testKeyToRemove := testGPGKey
+	testKeyToRemove := testmodels.GpgKey
 	testKeyToRemove.ID = "0000"
 
 	// Assume mem works, and add the gpg key
-	_, _, _ = mem.AddGPGKey(testGPGKey)
+	_, _, _ = mem.AddGPGKey(testmodels.GpgKey)
 
 	mock.ExpectDel(gpgKeyByIDPrefix + testKeyToRemove.ID).SetVal(0)
 	mock.ExpectDel(gpgKeyByFingerprintPrefix + testKeyToRemove.FullFingerprint).SetVal(0)
@@ -125,7 +104,7 @@ func TestDriver_UpdateGPGKey(t *testing.T) {
 		Redis: db,
 	})
 
-	testKeyToUpdate := testGPGKey
+	testKeyToUpdate := testmodels.GpgKey
 	testKeyToUpdate.ID = "0000"
 
 	// Assume mem works, and add the gpg key
@@ -160,7 +139,7 @@ func TestDriver_FetchGPGKeyByFingerprint(t *testing.T) {
 	})
 
 	t.Log("Testing uncached key")
-	testKeyToFetch := testGPGKey
+	testKeyToFetch := testmodels.GpgKey
 	testKeyToFetch.ID = "0000"
 
 	// Assume mem works, and add the gpg key
@@ -255,7 +234,7 @@ func testFindFunction(value, criteria string, h *Driver, f keyListFallbackFunc, 
 	})
 
 	// Assume mem works, and add the gpg key
-	testKey := testGPGKey
+	testKey := testmodels.GpgKey
 	id, _, _ := mem.AddGPGKey(testKey)
 	testKey.ID = id
 
@@ -291,33 +270,33 @@ func testFindFunction(value, criteria string, h *Driver, f keyListFallbackFunc, 
 }
 
 func TestDriver_FindGPGKeyByEmail(t *testing.T) {
-	value := testGPGKey.Emails[0]
+	value := testmodels.GpgKey.Emails[0]
 	h := MakeRedisDriver(nil, nil)
 	testFindFunction(value, gpgKeysByEmailCriteria, h, h.FindGPGKeyByEmail, t)
 }
 
 func TestDriver_FindGPGKeyByFingerPrint(t *testing.T) {
-	value := testGPGKey.FullFingerprint
+	value := testmodels.GpgKey.FullFingerprint
 	h := MakeRedisDriver(nil, nil)
 	testFindFunction(value, gpgKeysByFingerprintCriteria, h, h.FindGPGKeyByFingerPrint, t)
 }
 
 func TestDriver_FindGPGKeyByName(t *testing.T) {
-	value := testGPGKey.Names[0]
+	value := testmodels.GpgKey.Names[0]
 	h := MakeRedisDriver(nil, nil)
 	testFindFunction(value, gpgKeysByNameCriteria, h, h.FindGPGKeyByName, t)
 }
 
 func TestDriver_FindGPGKeyByValue(t *testing.T) {
 	valuesToFind := []string{
-		testGPGKey.FullFingerprint,
-		testGPGKey.GetShortFingerPrint(),
+		testmodels.GpgKey.FullFingerprint,
+		testmodels.GpgKey.GetShortFingerPrint(),
 	}
 
-	for _, v := range testGPGKey.Names {
+	for _, v := range testmodels.GpgKey.Names {
 		valuesToFind = append(valuesToFind, v)
 	}
-	for _, v := range testGPGKey.Emails {
+	for _, v := range testmodels.GpgKey.Emails {
 		valuesToFind = append(valuesToFind, v)
 	}
 

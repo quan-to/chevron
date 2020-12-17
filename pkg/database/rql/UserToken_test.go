@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-	"time"
+
+	"github.com/quan-to/chevron/pkg/models/testmodels"
 
 	"github.com/kylelemons/godebug/pretty"
 	"github.com/quan-to/chevron/pkg/models"
@@ -12,42 +13,32 @@ import (
 	r "gopkg.in/rethinkdb/rethinkdb-go.v6"
 )
 
-var testToken = models.UserToken{
-	ID:          "abcd",
-	Fingerprint: "DEADBEEF",
-	Username:    "johnhuebr",
-	Fullname:    "John HUEBR",
-	Token:       "dummytoken",
-	CreatedAt:   time.Now().Truncate(time.Second),
-	Expiration:  time.Now().Add(time.Hour).Truncate(time.Second),
-}
-
 func TestRethinkDBDriver_AddUserToken(t *testing.T) {
 	mock := r.NewMock()
 	h := MakeRethinkDBDriver(slog.Scope("TEST"))
 	h.conn = mock
 
-	m, _ := convertToRethinkDB(testToken)
+	m, _ := convertToRethinkDB(testmodels.Token)
 	m2, _ := convertToRethinkDB(models.UserToken{})
 
 	mock.ExpectedQueries = append(mock.ExpectedQueries, mock.On(r.Table(userTokenTableInit.TableName).
 		Insert(m)).
 		Return(r.WriteResponse{
-			GeneratedKeys: []string{testToken.ID},
+			GeneratedKeys: []string{testmodels.Token.ID},
 		}, nil))
 
 	mock.ExpectedQueries = append(mock.ExpectedQueries, mock.On(r.Table(userTokenTableInit.TableName).
 		Insert(m2)).
 		Return(r.WriteResponse{}, fmt.Errorf("test error")))
 
-	id, err := h.AddUserToken(testToken)
+	id, err := h.AddUserToken(testmodels.Token)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %s", err)
 	}
 
-	if !strings.EqualFold(id, testToken.ID) {
-		t.Fatalf("expected token id to be %q but got %q", testToken.ID, id)
+	if !strings.EqualFold(id, testmodels.Token.ID) {
+		t.Fatalf("expected token id to be %q but got %q", testmodels.Token.ID, id)
 	}
 
 	// Test error
@@ -69,10 +60,10 @@ func TestRethinkDBDriver_GetUserToken(t *testing.T) {
 	h := MakeRethinkDBDriver(slog.Scope("TEST"))
 	h.conn = mock
 
-	m, _ := convertToRethinkDB(testToken)
+	m, _ := convertToRethinkDB(testmodels.Token)
 
 	mock.ExpectedQueries = append(mock.ExpectedQueries, mock.On(r.Table(userTokenTableInit.TableName).
-		GetAllByIndex("Token", testToken.Token).
+		GetAllByIndex("Token", testmodels.Token.Token).
 		Limit(1).
 		CoerceTo("array")).
 		Return([]map[string]interface{}{m}, nil))
@@ -83,12 +74,12 @@ func TestRethinkDBDriver_GetUserToken(t *testing.T) {
 		CoerceTo("array")).
 		Return([]map[string]interface{}{}, nil))
 
-	u, err := h.GetUserToken(testToken.Token)
+	u, err := h.GetUserToken(testmodels.Token.Token)
 	if err != nil {
 		t.Fatalf("unexpected error %q", err)
 	}
 
-	if diff := pretty.Compare(testToken, u); diff != "" {
+	if diff := pretty.Compare(testmodels.Token, u); diff != "" {
 		t.Errorf("Expected token to be the same. (-got +want)\\n%s", diff)
 	}
 
@@ -155,7 +146,7 @@ func TestRethinkDBDriver_RemoveUserToken(t *testing.T) {
 	h.conn = mock
 
 	mock.ExpectedQueries = append(mock.ExpectedQueries, mock.On(r.Table(userTokenTableInit.TableName).
-		GetAllByIndex("Token", testToken.Token).
+		GetAllByIndex("Token", testmodels.Token.Token).
 		Limit(1).
 		Delete()).
 		Return(r.WriteResponse{Deleted: 1}, nil))
@@ -166,7 +157,7 @@ func TestRethinkDBDriver_RemoveUserToken(t *testing.T) {
 		Delete()).
 		Return(r.WriteResponse{}, fmt.Errorf("test error")))
 
-	err := h.RemoveUserToken(testToken.Token)
+	err := h.RemoveUserToken(testmodels.Token.Token)
 
 	if err != nil {
 		t.Fatalf("unexpected error %q", err)

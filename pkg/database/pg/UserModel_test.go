@@ -7,20 +7,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/quan-to/chevron/pkg/models/testmodels"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jmoiron/sqlx"
 	"github.com/kylelemons/godebug/pretty"
-	"github.com/quan-to/chevron/pkg/models"
 )
-
-var testUser = models.User{
-	ID:          "abcd",
-	Username:    "johnhuebr",
-	FullName:    "John HUEBR",
-	Fingerprint: "DEADBEEFDEADBEEF",
-	Password:    "I think you will never guess",
-	CreatedAt:   time.Now().Truncate(time.Second),
-}
 
 func expectUserSelect(mock sqlmock.Sqlmock) {
 	expectedUserRows := sqlmock.NewRows([]string{
@@ -33,17 +25,17 @@ func expectUserSelect(mock sqlmock.Sqlmock) {
 		"user_updated_at",
 		"user_deleted_at",
 	}).AddRow(
-		testUser.ID,
-		testUser.Fingerprint,
-		testUser.Username,
-		[]byte(testUser.Password),
-		testUser.FullName,
-		testUser.CreatedAt,
+		testmodels.User.ID,
+		testmodels.User.Fingerprint,
+		testmodels.User.Username,
+		[]byte(testmodels.User.Password),
+		testmodels.User.FullName,
+		testmodels.User.CreatedAt,
 		time.Time{},
 		(*time.Time)(nil),
 	)
 	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM chevron_user WHERE user_username = $1 LIMIT 1`)).
-		WithArgs(testUser.Username).
+		WithArgs(testmodels.User.Username).
 		WillReturnRows(expectedUserRows)
 }
 
@@ -54,12 +46,12 @@ func TestPostgreSQLDBDriver_AddUser(t *testing.T) {
 	mockDB, mock, _ := sqlmock.New(converter)
 	h.conn = sqlx.NewDb(mockDB, "sqlmock")
 
-	testAdd := testUser
+	testAdd := testmodels.User
 	testAdd.ID = ""
 
 	mock.ExpectBegin()
 	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM chevron_user WHERE user_username = $1 LIMIT 1`)).
-		WithArgs(testUser.Username).
+		WithArgs(testmodels.User.Username).
 		WillReturnRows(sqlmock.NewRows(nil))
 	mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO chevron_user(user_id, user_fingerprint, user_username, user_password, user_full_name, user_created_at) VALUES (?, ?, ?, ?, ?, now())`)).
 		WithArgs(
@@ -95,7 +87,7 @@ func TestPostgreSQLDBDriver_GetUser(t *testing.T) {
 	expectUserSelect(mock)
 	mock.ExpectCommit()
 
-	u, err := h.GetUser(testUser.Username)
+	u, err := h.GetUser(testmodels.User.Username)
 	if err != nil {
 		t.Fatalf(unexpectedError, err)
 	}
@@ -104,7 +96,7 @@ func TestPostgreSQLDBDriver_GetUser(t *testing.T) {
 		t.Fatalf(unexpectedError, "user came nil")
 	}
 
-	if diff := pretty.Compare(testUser, u); diff != "" {
+	if diff := pretty.Compare(testmodels.User, u); diff != "" {
 		t.Errorf("Expected user to be the same. (-got +want)\\n%s", diff)
 	}
 
@@ -117,11 +109,11 @@ func TestPostgreSQLDBDriver_GetUser(t *testing.T) {
 	h.conn = sqlx.NewDb(mockDB, "sqlmock")
 	mock.ExpectBegin()
 	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM chevron_user WHERE user_username = $1 LIMIT 1`)).
-		WithArgs(testUser.Username).
+		WithArgs(testmodels.User.Username).
 		WillReturnError(fmt.Errorf("sql: no rows in result set"))
 	mock.ExpectRollback()
 
-	_, err = h.GetUser(testUser.Username)
+	_, err = h.GetUser(testmodels.User.Username)
 	if err == nil {
 		t.Fatalf(unexpectedError, "expected error to be not nil, got nil")
 	}
@@ -144,14 +136,14 @@ func TestPostgreSQLDBDriver_UpdateUser(t *testing.T) {
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(`UPDATE chevron_user SET user_fingerprint = ?, user_password = ?, user_full_name = ?, user_updated_at = now() WHERE user_id = ?`)).
 		WithArgs(
-			testUser.Fingerprint,
-			[]byte(testUser.Password),
-			testUser.FullName,
-			testUser.ID,
+			testmodels.User.Fingerprint,
+			[]byte(testmodels.User.Password),
+			testmodels.User.FullName,
+			testmodels.User.ID,
 		).WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectCommit()
 
-	err := h.UpdateUser(testUser)
+	err := h.UpdateUser(testmodels.User)
 	if err != nil {
 		t.Fatalf(unexpectedError, err)
 	}
@@ -168,14 +160,14 @@ func TestPostgreSQLDBDriver_UpdateUser(t *testing.T) {
 	expectUserSelect(mock)
 	mock.ExpectExec(regexp.QuoteMeta(`UPDATE chevron_user SET user_fingerprint = ?, user_password = ?, user_full_name = ?, user_updated_at = now() WHERE user_id = ?`)).
 		WithArgs(
-			testUser.Fingerprint,
-			[]byte(testUser.Password),
-			testUser.FullName,
-			testUser.ID,
+			testmodels.User.Fingerprint,
+			[]byte(testmodels.User.Password),
+			testmodels.User.FullName,
+			testmodels.User.ID,
 		).WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectCommit()
 
-	upUser := testUser
+	upUser := testmodels.User
 	upUser.ID = ""
 
 	err = h.UpdateUser(upUser)

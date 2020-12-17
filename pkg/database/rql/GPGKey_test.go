@@ -5,42 +5,26 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/quan-to/chevron/pkg/models/testmodels"
+
 	"github.com/kylelemons/godebug/pretty"
 	"github.com/quan-to/chevron/pkg/models"
 	"github.com/quan-to/slog"
 	r "gopkg.in/rethinkdb/rethinkdb-go.v6"
 )
 
-var testGPGKey = models.GPGKey{
-	ID:              "abcd",
-	FullFingerprint: "DEADBEEF",
-	Names:           []string{"A", "B"},
-	Emails:          []string{"a@a.com", "b@a.com"},
-	KeyUids: []models.GPGKeyUid{
-		{
-			Name:        "A",
-			Email:       "a@a.com",
-			Description: "desc",
-		},
-	},
-	KeyBits:                1234,
-	Subkeys:                []string{"BABABEBE"},
-	AsciiArmoredPublicKey:  "PUBKEY",
-	AsciiArmoredPrivateKey: "PRIVKEY",
-}
-
 func TestRethinkDBDriver_AddGPGKey(t *testing.T) {
 	mock := r.NewMock()
 	h := MakeRethinkDBDriver(slog.Scope("TEST"))
 	h.conn = mock
 
-	toUpdate := testGPGKey
+	toUpdate := testmodels.GpgKey
 	toUpdate.FullFingerprint = "HUEBR"
 	toUpdate.ID = "A123"
 
 	mock.ExpectedQueries = append(mock.ExpectedQueries, mock.On(r.
 		Table(gpgKeyTableInit.TableName).
-		GetAllByIndex("FullFingerprint", testGPGKey.FullFingerprint)).
+		GetAllByIndex("FullFingerprint", testmodels.GpgKey.FullFingerprint)).
 		Return(nil, nil))
 
 	mock.ExpectedQueries = append(mock.ExpectedQueries, mock.On(r.
@@ -55,9 +39,9 @@ func TestRethinkDBDriver_AddGPGKey(t *testing.T) {
 		GetAllByIndex("FullFingerprint", "ERR")).
 		Return(nil, fmt.Errorf("test error")))
 
-	m, _ := convertToRethinkDB(testGPGKey)
+	m, _ := convertToRethinkDB(testmodels.GpgKey)
 	mock.ExpectedQueries = append(mock.ExpectedQueries, mock.On(r.Table(gpgKeyTableInit.TableName).Insert(m)).Return(r.WriteResponse{
-		GeneratedKeys: []string{testGPGKey.ID}, Inserted: 1,
+		GeneratedKeys: []string{testmodels.GpgKey.ID}, Inserted: 1,
 	}, nil))
 
 	m2, _ := convertToRethinkDB(toUpdate)
@@ -66,7 +50,7 @@ func TestRethinkDBDriver_AddGPGKey(t *testing.T) {
 	}, nil))
 
 	// Test Create
-	id, added, err := h.AddGPGKey(testGPGKey)
+	id, added, err := h.AddGPGKey(testmodels.GpgKey)
 
 	if err != nil {
 		t.Fatalf("unexpected error %q", err)
@@ -76,8 +60,8 @@ func TestRethinkDBDriver_AddGPGKey(t *testing.T) {
 		t.Fatalf("expected item to be added")
 	}
 
-	if id != testGPGKey.ID {
-		t.Fatalf("expected id to be %q but got %q", testGPGKey.ID, id)
+	if id != testmodels.GpgKey.ID {
+		t.Fatalf("expected id to be %q but got %q", testmodels.GpgKey.ID, id)
 	}
 
 	// Test Update
@@ -113,14 +97,14 @@ func TestRethinkDBDriver_DeleteGPGKey(t *testing.T) {
 	h.conn = mock
 
 	mock.ExpectedQueries = append(mock.ExpectedQueries, mock.On(r.Table(gpgKeyTableInit.TableName).
-		Get(testGPGKey.ID).
+		Get(testmodels.GpgKey.ID).
 		Delete()).Return(nil, nil))
 
 	mock.ExpectedQueries = append(mock.ExpectedQueries, mock.On(r.Table(gpgKeyTableInit.TableName).
 		Get("ERR").
 		Delete()).Return(nil, fmt.Errorf("test error")))
 
-	err := h.DeleteGPGKey(testGPGKey)
+	err := h.DeleteGPGKey(testmodels.GpgKey)
 	if err != nil {
 		t.Fatalf("unexpected error %q", err)
 	}
@@ -141,12 +125,12 @@ func TestRethinkDBDriver_FetchGPGKeyByFingerprint(t *testing.T) {
 	h := MakeRethinkDBDriver(slog.Scope("TEST"))
 	h.conn = mock
 
-	m, _ := convertToRethinkDB(testGPGKey)
+	m, _ := convertToRethinkDB(testmodels.GpgKey)
 
 	mock.ExpectedQueries = append(mock.ExpectedQueries, mock.On(r.Table(gpgKeyTableInit.TableName).
-		Filter(r.Row.Field("FullFingerprint").Match(fmt.Sprintf("%s$", testGPGKey.FullFingerprint)).
+		Filter(r.Row.Field("FullFingerprint").Match(fmt.Sprintf("%s$", testmodels.GpgKey.FullFingerprint)).
 			Or(r.Row.HasFields("Subkeys").And(r.Row.Field("Subkeys").Filter(func(p r.Term) interface{} {
-				return p.Match(fmt.Sprintf("%s$", testGPGKey.FullFingerprint))
+				return p.Match(fmt.Sprintf("%s$", testmodels.GpgKey.FullFingerprint))
 			}).Count().Gt(0)))).
 		Limit(1).
 		CoerceTo("array")).Return([]map[string]interface{}{m}, nil))
@@ -159,12 +143,12 @@ func TestRethinkDBDriver_FetchGPGKeyByFingerprint(t *testing.T) {
 		Limit(1).
 		CoerceTo("array")).Return(nil, fmt.Errorf("test error")))
 
-	gpgKey, err := h.FetchGPGKeyByFingerprint(testGPGKey.FullFingerprint)
+	gpgKey, err := h.FetchGPGKeyByFingerprint(testmodels.GpgKey.FullFingerprint)
 	if err != nil {
 		t.Fatalf("unexpected error %q", err)
 	}
 
-	if diff := pretty.Compare(testGPGKey, *gpgKey); diff != "" {
+	if diff := pretty.Compare(testmodels.GpgKey, *gpgKey); diff != "" {
 		t.Errorf("Expected gpgKey to be the same. (-got +want)\\n%s", diff)
 	}
 
@@ -184,7 +168,7 @@ func TestRethinkDBDriver_FetchGPGKeysWithoutSubKeys(t *testing.T) {
 	h := MakeRethinkDBDriver(slog.Scope("TEST"))
 	h.conn = mock
 
-	m, _ := convertToRethinkDB(testGPGKey)
+	m, _ := convertToRethinkDB(testmodels.GpgKey)
 
 	mock.ExpectedQueries = append(mock.ExpectedQueries, mock.On(r.Table(gpgKeyTableInit.TableName).
 		Filter(r.Row.HasFields("Subkeys").Not().Or(r.Row.Field("Subkeys").Count().Eq(0))).
@@ -201,7 +185,7 @@ func TestRethinkDBDriver_FetchGPGKeysWithoutSubKeys(t *testing.T) {
 	}
 
 	for i, v := range keys {
-		if diff := pretty.Compare(testGPGKey, v); diff != "" {
+		if diff := pretty.Compare(testmodels.GpgKey, v); diff != "" {
 			t.Errorf("[%d] Expected gpgKey to be the same. (-got +want)\\n%s", i, diff)
 		}
 	}
@@ -232,7 +216,7 @@ func TestRethinkDBDriver_FindGPGKeyByEmail(t *testing.T) {
 	h := MakeRethinkDBDriver(slog.Scope("TEST"))
 	h.conn = mock
 
-	m, _ := convertToRethinkDB(testGPGKey)
+	m, _ := convertToRethinkDB(testmodels.GpgKey)
 
 	testEmail := "a@a.com"
 
@@ -258,7 +242,7 @@ func TestRethinkDBDriver_FindGPGKeyByEmail(t *testing.T) {
 	}
 
 	for i, v := range keys {
-		if diff := pretty.Compare(testGPGKey, v); diff != "" {
+		if diff := pretty.Compare(testmodels.GpgKey, v); diff != "" {
 			t.Errorf("[%d] Expected gpgKey to be the same. (-got +want)\\n%s", i, diff)
 		}
 	}
@@ -271,17 +255,17 @@ func TestRethinkDBDriver_FindGPGKeyByFingerPrint(t *testing.T) {
 	h := MakeRethinkDBDriver(slog.Scope("TEST"))
 	h.conn = mock
 
-	m, _ := convertToRethinkDB(testGPGKey)
+	m, _ := convertToRethinkDB(testmodels.GpgKey)
 
 	mock.ExpectedQueries = append(mock.ExpectedQueries, mock.On(r.Table(gpgKeyTableInit.TableName).
-		Filter(r.Row.Field("FullFingerprint").Match(fmt.Sprintf("%s$", testGPGKey.FullFingerprint)).
+		Filter(r.Row.Field("FullFingerprint").Match(fmt.Sprintf("%s$", testmodels.GpgKey.FullFingerprint)).
 			Or(r.Row.HasFields("Subkeys").And(r.Row.Field("Subkeys").Filter(func(p r.Term) interface{} {
-				return p.Match(fmt.Sprintf("%s$", testGPGKey.FullFingerprint))
+				return p.Match(fmt.Sprintf("%s$", testmodels.GpgKey.FullFingerprint))
 			}).Count().Gt(0)))).
 		Slice(models.DefaultPageStart, models.DefaultPageEnd).
 		CoerceTo("array")).Return([]map[string]interface{}{m, m}, nil))
 
-	keys, err := h.FindGPGKeyByFingerPrint(testGPGKey.FullFingerprint, models.DefaultPageStart, models.DefaultPageEnd)
+	keys, err := h.FindGPGKeyByFingerPrint(testmodels.GpgKey.FullFingerprint, models.DefaultPageStart, models.DefaultPageEnd)
 	if err != nil {
 		t.Fatalf("unexpected error %q", err)
 	}
@@ -291,7 +275,7 @@ func TestRethinkDBDriver_FindGPGKeyByFingerPrint(t *testing.T) {
 	}
 
 	for i, v := range keys {
-		if diff := pretty.Compare(testGPGKey, v); diff != "" {
+		if diff := pretty.Compare(testmodels.GpgKey, v); diff != "" {
 			t.Errorf("[%d] Expected gpgKey to be the same. (-got +want)\\n%s", i, diff)
 		}
 	}
@@ -304,7 +288,7 @@ func TestRethinkDBDriver_FindGPGKeyByName(t *testing.T) {
 	h := MakeRethinkDBDriver(slog.Scope("TEST"))
 	h.conn = mock
 
-	m, _ := convertToRethinkDB(testGPGKey)
+	m, _ := convertToRethinkDB(testmodels.GpgKey)
 	testName := "testName"
 
 	mock.ExpectedQueries = append(mock.ExpectedQueries, mock.On(r.Table(gpgKeyTableInit.TableName).
@@ -329,7 +313,7 @@ func TestRethinkDBDriver_FindGPGKeyByName(t *testing.T) {
 	}
 
 	for i, v := range keys {
-		if diff := pretty.Compare(testGPGKey, v); diff != "" {
+		if diff := pretty.Compare(testmodels.GpgKey, v); diff != "" {
 			t.Errorf("[%d] Expected gpgKey to be the same. (-got +want)\\n%s", i, diff)
 		}
 	}
@@ -342,7 +326,7 @@ func TestRethinkDBDriver_FindGPGKeyByValue(t *testing.T) {
 	h := MakeRethinkDBDriver(slog.Scope("TEST"))
 	h.conn = mock
 
-	m, _ := convertToRethinkDB(testGPGKey)
+	m, _ := convertToRethinkDB(testmodels.GpgKey)
 	testName := "testName"
 
 	var filterEmailList = func(r r.Term) interface{} {
@@ -374,7 +358,7 @@ func TestRethinkDBDriver_FindGPGKeyByValue(t *testing.T) {
 	}
 
 	for i, v := range keys {
-		if diff := pretty.Compare(testGPGKey, v); diff != "" {
+		if diff := pretty.Compare(testmodels.GpgKey, v); diff != "" {
 			t.Errorf("[%d] Expected gpgKey to be the same. (-got +want)\\n%s", i, diff)
 		}
 	}
@@ -387,14 +371,14 @@ func TestRethinkDBDriver_UpdateGPGKey(t *testing.T) {
 	h := MakeRethinkDBDriver(slog.Scope("TEST"))
 	h.conn = mock
 
-	m, _ := convertToRethinkDB(testGPGKey)
+	m, _ := convertToRethinkDB(testmodels.GpgKey)
 
 	mock.ExpectedQueries = append(mock.ExpectedQueries,
 		mock.On(r.Table(gpgKeyTableInit.TableName).
-			Get(testGPGKey.ID).
+			Get(testmodels.GpgKey.ID).
 			Update(m)).Return(nil, nil))
 
-	err := h.UpdateGPGKey(testGPGKey)
+	err := h.UpdateGPGKey(testmodels.GpgKey)
 	if err != nil {
 		t.Fatalf("unexpected error %q", err)
 	}
