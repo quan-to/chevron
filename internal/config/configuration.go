@@ -4,6 +4,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/quan-to/chevron/pkg/QuantoError"
 	"github.com/quan-to/slog"
@@ -62,6 +63,15 @@ var SingleKeyPassword string
 var DatabaseDialect string
 var ConnectionString string
 
+var EnableRedis bool
+var RedisHost string
+var RedisUser string
+var RedisPass string
+var RedisDatabaseIndex int
+var RedisTLSEnabled bool
+var RedisMaxLocalObjects int
+var RedisLocalObjectTTL time.Duration
+
 // LogFormat allows to configure the output log format
 var LogFormat slog.Format
 
@@ -74,6 +84,7 @@ func configDeprecationMessage(userConfig, newConfig string) {
 }
 
 func Setup() {
+	var err error
 	// Pre init
 	MaxKeyRingCache = -1
 	HttpPort = -1
@@ -200,6 +211,40 @@ func Setup() {
 	SingleKeyPath = os.Getenv("SINGLE_KEY_PATH")
 	SingleKeyPassword = os.Getenv("SINGLE_KEY_PASSWORD")
 
+	EnableRedis = os.Getenv("REDIS_ENABLE") == "true"
+	RedisTLSEnabled = os.Getenv("REDIS_TLS_ENABLED") == "true"
+	RedisHost = os.Getenv("REDIS_HOST")
+	RedisUser = os.Getenv("REDIS_USER")
+	RedisPass = os.Getenv("REDIS_PASS")
+
+	redisDBIdx := os.Getenv("REDIS_DATABASE_INDEX")
+	RedisDatabaseIndex = 0
+	if redisDBIdx != "" {
+		v, err := strconv.ParseInt(redisDBIdx, 10, 32)
+		if err != nil {
+			slog.Error("Invalid field REDIS_DATABASE_INDEX = %q - Invalid number", redisDBIdx)
+			v = 0
+		}
+		RedisDatabaseIndex = int(v)
+	}
+
+	redisLocalObjectTTL := os.Getenv("REDIS_MAX_LOCAL_TTL")
+	if redisLocalObjectTTL != "" {
+		if RedisLocalObjectTTL, err = time.ParseDuration(redisLocalObjectTTL); err != nil {
+			slog.Error("Invalid field REDIS_MAX_LOCAL_TTL = %q - Invalid Duration")
+		}
+	}
+
+	redisMaxLocalObjects := os.Getenv("REDIS_MAX_LOCAL_OBJECTS")
+	if redisMaxLocalObjects != "" {
+		v, err := strconv.ParseInt(redisMaxLocalObjects, 10, 32)
+		if err != nil {
+			slog.Error("Invalid field REDIS_MAX_LOCAL_OBJECTS = %q - Invalid number", redisMaxLocalObjects)
+			v = 0
+		}
+		RedisMaxLocalObjects = int(v)
+	}
+
 	// Set defaults if not defined
 	if SyslogServer == "" {
 		SyslogServer = "127.0.0.1"
@@ -275,6 +320,18 @@ func Setup() {
 
 	if AgentAdminExternalURL == "" {
 		AgentAdminExternalURL = "/agentAdmin"
+	}
+
+	if RedisMaxLocalObjects == 0 {
+		RedisMaxLocalObjects = 100
+	}
+
+	if RedisLocalObjectTTL == 0 {
+		RedisLocalObjectTTL = time.Minute * 5
+	}
+
+	if RedisHost == "" {
+		RedisHost = "localhost:6379"
 	}
 
 	// Other stuff

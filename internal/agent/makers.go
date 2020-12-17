@@ -1,7 +1,11 @@
 package agent
 
 import (
+	"crypto/tls"
+
+	"github.com/go-redis/redis/v8"
 	"github.com/quan-to/chevron/internal/config"
+	"github.com/quan-to/chevron/pkg/database/cache"
 	"github.com/quan-to/chevron/pkg/database/memory"
 	"github.com/quan-to/chevron/pkg/database/pg"
 	"github.com/quan-to/chevron/pkg/database/rql"
@@ -25,6 +29,9 @@ type DatabaseHandler interface {
 	FindGPGKeyByName(name string, pageStart, pageEnd int) ([]models.GPGKey, error)
 	FetchGPGKeyByFingerprint(fingerprint string) (*models.GPGKey, error)
 	HealthCheck() error
+	FetchGPGKeysWithoutSubKeys() (res []models.GPGKey, err error)
+	DeleteGPGKey(key models.GPGKey) error
+	UpdateGPGKey(key models.GPGKey) (err error)
 }
 
 func makeRethinkDBHandler(logger slog.Instance) (*rql.RethinkDBDriver, error) {
@@ -56,22 +63,56 @@ func makePostgresDBHandler(logger slog.Instance) (*pg.PostgreSQLDBDriver, error)
 }
 
 // MakeDatabaseHandler initializes a Database Access Handler based on the current configuration
-func MakeDatabaseHandler(logger slog.Instance) (DatabaseHandler, error) {
+func MakeDatabaseHandler(logger slog.Instance) (dbh DatabaseHandler, err error) {
 	if config.EnableDatabase {
 		switch config.DatabaseDialect {
 		case "rethinkdb":
-			return makeRethinkDBHandler(logger)
+			dbh, err = makeRethinkDBHandler(logger)
+			if err != nil {
+				return nil, err
+			}
 		case "postgres":
-			return makePostgresDBHandler(logger)
+			dbh, err = makePostgresDBHandler(logger)
+			if err != nil {
+				return nil, err
+			}
 		case "memory":
-			return memory.MakeMemoryDBDriver(logger), nil
+			dbh = memory.MakeMemoryDBDriver(logger)
 		default:
 			logger.Fatal("Unknown database dialect %q", config.DatabaseDialect)
 		}
 	}
-	logger.Warn("No database handler enabled. Using memory database")
+	if dbh == nil {
+		logger.Warn("No database handler enabled. Using memory database")
+		dbh = memory.MakeMemoryDBDriver(logger)
+	}
 
-	return memory.MakeMemoryDBDriver(logger), nil
+	if config.EnableRedis {
+		logger.Info("Redis enabled. Wrapping cache layer")
+		redisDriver := cache.MakeRedisDriver(dbh, logger)
+		var tlsConfig *tls.Config
+		if config.RedisTLSEnabled {
+			tlsConfig = &tls.Config{
+				InsecureSkipVerify: true,
+			}
+		}
+
+		err = redisDriver.Setup(&redis.RingOptions{
+			Addrs: map[string]string{
+				"server0": config.RedisHost,
+			},
+			Username:  config.RedisUser,
+			Password:  config.RedisPass,
+			DB:        config.RedisDatabaseIndex,
+			TLSConfig: tlsConfig,
+		}, config.RedisMaxLocalObjects, config.RedisLocalObjectTTL)
+		if err != nil {
+			return nil, err
+		}
+		dbh = redisDriver
+	}
+
+	return dbh, nil
 }
 
 // MakeTokenManager creates an instance of token manager. If Rethink is enabled returns an DatabaseTokenManager, if not a MemoryTokenManager

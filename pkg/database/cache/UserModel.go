@@ -1,4 +1,4 @@
-package redis
+package cache
 
 import (
 	"github.com/quan-to/chevron/pkg/models"
