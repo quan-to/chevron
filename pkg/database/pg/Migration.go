@@ -58,7 +58,9 @@ func (h *PostgreSQLDBDriver) NextGPGKey(key *models.GPGKey) bool {
 			h.log.Error("Error starting transaction: %s", err)
 			return false
 		}
-		defer tx.Rollback()
+		defer func() {
+			_ = tx.Rollback()
+		}()
 
 		newKey, err := pgKey.toGPGKey(tx)
 		if err != nil {
