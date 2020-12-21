@@ -21,6 +21,10 @@ type RethinkDBDriver struct {
 	conn     r.QueryExecutor
 	log      slog.Instance
 	database string
+
+	// Migration tools
+	gpgKeysMigrationCursor *r.Cursor
+	userMigrationCursor    *r.Cursor
 }
 
 // MakeRethinkDBDriver creates a new database driver for rethinkdb

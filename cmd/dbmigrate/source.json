@@ -1,0 +1,6 @@
+{
+  "DATABASE_DIALECT": "rethinkdb",
+  "DATABASE_HOST": "localhost",
+  "RETHINKDB_PORT": 28015,
+  "DATABASE_NAME": "remote_signer"
+}

@@ -14,7 +14,27 @@ import (
 	"github.com/quan-to/slog"
 )
 
-type DatabaseHandler interface {
+type MigrationHandler interface {
+	InitCursor() error
+	FinishCursor() error
+	NextGPGKey(key *models.GPGKey) bool
+	NextUser(user *models.User) bool
+	NumGPGKeys() (int, error)
+}
+
+type GPGRepository interface {
+	AddGPGKey(key models.GPGKey) (string, bool, error)
+	FindGPGKeyByEmail(email string, pageStart, pageEnd int) ([]models.GPGKey, error)
+	FindGPGKeyByFingerPrint(fingerPrint string, pageStart, pageEnd int) ([]models.GPGKey, error)
+	FindGPGKeyByValue(value string, pageStart, pageEnd int) ([]models.GPGKey, error)
+	FindGPGKeyByName(name string, pageStart, pageEnd int) ([]models.GPGKey, error)
+	FetchGPGKeyByFingerprint(fingerprint string) (*models.GPGKey, error)
+	FetchGPGKeysWithoutSubKeys() (res []models.GPGKey, err error)
+	DeleteGPGKey(key models.GPGKey) error
+	UpdateGPGKey(key models.GPGKey) (err error)
+}
+
+type UserRepository interface {
 	GetUser(username string) (um *models.User, err error)
 	AddUserToken(ut models.UserToken) (string, error)
 	RemoveUserToken(token string) (err error)
@@ -22,16 +42,17 @@ type DatabaseHandler interface {
 	InvalidateUserTokens() (int, error)
 	AddUser(um models.User) (string, error)
 	UpdateUser(um models.User) error
-	AddGPGKey(key models.GPGKey) (string, bool, error)
-	FindGPGKeyByEmail(email string, pageStart, pageEnd int) ([]models.GPGKey, error)
-	FindGPGKeyByFingerPrint(fingerPrint string, pageStart, pageEnd int) ([]models.GPGKey, error)
-	FindGPGKeyByValue(value string, pageStart, pageEnd int) ([]models.GPGKey, error)
-	FindGPGKeyByName(name string, pageStart, pageEnd int) ([]models.GPGKey, error)
-	FetchGPGKeyByFingerprint(fingerprint string) (*models.GPGKey, error)
+}
+
+type HealthChecker interface {
 	HealthCheck() error
-	FetchGPGKeysWithoutSubKeys() (res []models.GPGKey, err error)
-	DeleteGPGKey(key models.GPGKey) error
-	UpdateGPGKey(key models.GPGKey) (err error)
+}
+
+type DatabaseHandler interface {
+	MigrationHandler
+	GPGRepository
+	UserRepository
+	HealthChecker
 }
 
 func makeRethinkDBHandler(logger slog.Instance) (*rql.RethinkDBDriver, error) {

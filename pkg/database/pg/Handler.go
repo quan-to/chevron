@@ -20,6 +20,10 @@ import (
 type PostgreSQLDBDriver struct {
 	log  slog.Instance
 	conn *sqlx.DB
+
+	// Migrate
+	gpgKeysRows *sqlx.Rows
+	usersRows   *sqlx.Rows
 }
 
 // MakeRethinkDBDriver creates a new database driver for rethinkdb
