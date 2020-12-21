@@ -58,6 +58,8 @@ func (h *PostgreSQLDBDriver) NextGPGKey(key *models.GPGKey) bool {
 			h.log.Error("Error starting transaction: %s", err)
 			return false
 		}
+		defer tx.Rollback()
+
 		newKey, err := pgKey.toGPGKey(tx)
 		if err != nil {
 			h.log.Error("Error fetching data: %s", err)
@@ -82,8 +84,8 @@ func (h *PostgreSQLDBDriver) NextGPGKey(key *models.GPGKey) bool {
 func (h *PostgreSQLDBDriver) NextUser(user *models.User) bool {
 	pgUser := &pgUser{}
 
-	if h.gpgKeysRows.Next() {
-		err := h.gpgKeysRows.StructScan(pgUser)
+	if h.usersRows.Next() {
+		err := h.usersRows.StructScan(pgUser)
 		if err != nil {
 			h.log.Error("Error fetching next User: %s", err)
 			return false
@@ -96,6 +98,7 @@ func (h *PostgreSQLDBDriver) NextUser(user *models.User) bool {
 		user.Username = newUser.Username
 		user.FullName = newUser.FullName
 		user.CreatedAt = newUser.CreatedAt
+		user.Password = newUser.Password
 
 		return true
 	}

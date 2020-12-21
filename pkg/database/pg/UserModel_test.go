@@ -7,11 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/quan-to/chevron/pkg/models/testmodels"
-
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jmoiron/sqlx"
 	"github.com/kylelemons/godebug/pretty"
+	"github.com/quan-to/chevron/pkg/models/testmodels"
 )
 
 func expectUserSelect(mock sqlmock.Sqlmock) {
