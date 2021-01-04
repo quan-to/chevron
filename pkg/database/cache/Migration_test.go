@@ -8,6 +8,7 @@ import (
 	"github.com/go-redis/redismock/v8"
 	"github.com/quan-to/chevron/pkg/database/memory"
 	"github.com/quan-to/chevron/pkg/models"
+	"github.com/quan-to/chevron/pkg/models/testmodels"
 )
 
 func TestDriver_InitCursor(t *testing.T) {
@@ -147,4 +148,20 @@ func TestDriver_NumGPGKeys(t *testing.T) {
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Fatalf(expectationsWereNotMet, err)
 	}
+}
+
+func TestDriver_AddGPGKeys(t *testing.T) {
+	h, mem, mock := prepareAddGPGKey(t)
+
+	id, added, err := h.AddGPGKeys([]models.GPGKey{testmodels.GpgKey})
+	if err != nil {
+		t.Fatalf(unexpectedError, err)
+	}
+	if len(added) != 1 {
+		t.Fatalf("expected added length to be 1 got %d", len(added))
+	}
+	if len(id) != 1 {
+		t.Fatalf("expected id length to be 1 got %d", len(id))
+	}
+	checkKeyAdded(added[0], id[0], mem, mock, t)
 }

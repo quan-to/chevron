@@ -60,6 +60,7 @@ To enable, use the following environment variables:
 *   `REDIS_PASS` => Password of the REDIS server
 *   `REDIS_MAX_LOCAL_TTL` => Max local object TTL (in golang duration format): `default: 5m`
 *   `REDIS_MAX_LOCAL_OBJECTS` => Max local objects (`default: 100`)
+*   `REDIS_CLUSTER_MODE` => If the redis host is running in cluster mode. (`default: false`)
 
 ## Agent Configuration
 

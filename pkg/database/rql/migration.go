@@ -91,3 +91,19 @@ func (h *RethinkDBDriver) NumGPGKeys() (int, error) {
 
 	return -1, fmt.Errorf("no table to count from")
 }
+
+// AddGPGKey adds a list GPG Key to the database or update an existing one by fingerprint
+// Same as AddGPGKey but in a single transaction
+func (h *RethinkDBDriver) AddGPGKeys(keys []models.GPGKey) (ids []string, addeds []bool, err error) {
+	// TODO: Proper parallel add if we ever need
+	for _, key := range keys {
+		id, added, err := h.AddGPGKey(key)
+		if err != nil {
+			return ids, addeds, err
+		}
+		ids = append(ids, id)
+		addeds = append(addeds, added)
+	}
+
+	return ids, addeds, err
+}

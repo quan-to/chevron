@@ -262,3 +262,35 @@ func TestPostgreSQLDBDriver_NumGPGKeys(t *testing.T) {
 		t.Fatalf(expectationsDidNotMet, err)
 	}
 }
+
+func TestPostgreSQLDBDriver_AddGPGKeys(t *testing.T) {
+	h, mock := prepareAddGPGKey(t)
+	_, added, err := h.AddGPGKeys([]models.GPGKey{testmodels.GpgKey})
+	if err != nil {
+		t.Fatalf(unexpectedError, err)
+	}
+	if len(added) != 1 {
+		t.Fatalf("expected added length to be 1 got %d", len(added))
+	}
+	checkKeyAdded(added[0], mock, t)
+	// endregion
+	// region Test UPDATE
+	// Test existing key
+	mockDB, mock := newMock()
+	h.conn = sqlx.NewDb(mockDB, "sqlmock")
+
+	expectToUpdate(mock, true)
+
+	_, added, err = h.AddGPGKeys([]models.GPGKey{testmodels.GpgKey})
+	if err != nil {
+		t.Fatalf(unexpectedError, err)
+	}
+	if len(added) == 0 || added[0] {
+		t.Fatalf("expected updated but got added")
+	}
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf(expectationsDidNotMet, err)
+	}
+	// endregion
+}

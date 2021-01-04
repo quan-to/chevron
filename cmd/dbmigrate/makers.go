@@ -117,13 +117,27 @@ func makeRedisLayer(config map[string]interface{}, dbh agent.DatabaseHandler, lo
 	redisHost := stringParam(config, "REDIS_HOST")
 	redisUser := stringParam(config, "REDIS_USER")
 	redisPass := stringParam(config, "REDIS_PASS")
+	redisCluster := boolParam(config, "REDIS_CLUSTER_MODE")
 
-	err := redisDriver.Setup(&redis.ClusterOptions{
-		Addrs:     []string{redisHost},
-		Username:  redisUser,
-		Password:  redisPass,
-		TLSConfig: tlsConfig,
-	}, 1, time.Second)
+	var err error
+
+	if redisCluster != nil && *redisCluster {
+		cluster := redis.NewClusterClient(&redis.ClusterOptions{
+			Addrs:     []string{redisHost},
+			Username:  redisUser,
+			Password:  redisPass,
+			TLSConfig: tlsConfig,
+		})
+		err = redisDriver.Setup(cluster, 1000, time.Second)
+	} else {
+		client := redis.NewClient(&redis.Options{
+			Addr:      redisHost,
+			Username:  redisUser,
+			Password:  redisPass,
+			TLSConfig: tlsConfig,
+		})
+		err = redisDriver.Setup(client, 1000, time.Second)
+	}
 	if err != nil {
 		return nil, err
 	}

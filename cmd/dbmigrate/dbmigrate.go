@@ -10,8 +10,9 @@ import (
 )
 
 var cli struct {
-	FromConfigFile string `arg:"" name:"path" help:"JSON Config file for the source database" type:"path"`
-	ToConfigFile   string `arg:"" name:"path" help:"JSON Config file for the destination database" type:"path"`
+	FromConfigFile  string `arg:"" name:"path" help:"JSON Config file for the source database" type:"path"`
+	ToConfigFile    string `arg:"" name:"path" help:"JSON Config file for the destination database" type:"path"`
+	NumParallelKeys int    `arg:"" name:"parallelkeys" help:"Number of parallel keys to fetch at once" type:"int" default:"500"`
 }
 
 type dbSource interface {
@@ -24,6 +25,7 @@ type dbSource interface {
 
 type dbDestination interface {
 	AddGPGKey(key models.GPGKey) (string, bool, error)
+	AddGPGKeys(keys []models.GPGKey) ([]string, []bool, error)
 	AddUser(um models.User) (string, error)
 	GetUser(username string) (um *models.User, err error)
 	UpdateUser(um models.User) error
@@ -68,22 +70,39 @@ func main() {
 	if err != nil {
 		logger.Fatal("Error getting number of keys: %s", err)
 	}
+	if cli.NumParallelKeys <= 0 {
+		cli.NumParallelKeys = 500
+	}
 	logger.Info("Starting migration of %d keys", totalKeys)
 	migratedKeys := 0
 
 	gpgKey := models.GPGKey{}
+	var keys []models.GPGKey
 
+	logger.Info("Fetching <= %d keys from source", cli.NumParallelKeys)
 	for src.NextGPGKey(&gpgKey) {
+		if len(keys) >= cli.NumParallelKeys {
+			logger.Info("Saving %d keys to destination", len(keys))
+			_, _, err = dst.AddGPGKeys(keys)
+			if err != nil {
+				logger.Fatal("error migrating keys: %s", err)
+			}
+			migratedKeys += len(keys)
+			logger.Info("Migrated %6d from %6d keys... [%d]", migratedKeys, totalKeys, len(keys))
+			keys = nil
+			logger.Info("Fetching <= %d keys from source", cli.NumParallelKeys)
+		}
 		gpgKey.ID = "" // Re-generate the ID
-		_, _, err := dst.AddGPGKey(gpgKey)
-		if err != nil {
-			logger.Fatal("error migrating key %s: %s", gpgKey.GetShortFingerPrint(), err)
-		}
+		keys = append(keys, gpgKey)
+	}
 
-		migratedKeys++
-		if migratedKeys%10 == 0 {
-			logger.Info("Migrated %6d from %6d keys...", migratedKeys, totalKeys)
+	if len(keys) > 0 {
+		logger.Info("Saving %d keys to destination", len(keys))
+		_, _, err = dst.AddGPGKeys(keys)
+		if err != nil {
+			logger.Fatal("error migrating keys: %s", err)
 		}
+		migratedKeys += len(keys)
 	}
 
 	logger.Info("Migrated %d keys...", migratedKeys)

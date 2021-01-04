@@ -10,11 +10,20 @@ import (
 	"github.com/quan-to/slog"
 )
 
+type rediser interface {
+	Set(ctx context.Context, key string, value interface{}, ttl time.Duration) *redis.StatusCmd
+	SetXX(ctx context.Context, key string, value interface{}, ttl time.Duration) *redis.BoolCmd
+	SetNX(ctx context.Context, key string, value interface{}, ttl time.Duration) *redis.BoolCmd
+
+	Get(ctx context.Context, key string) *redis.StringCmd
+	Del(ctx context.Context, keys ...string) *redis.IntCmd
+}
+
 // Driver is a database handler proxy for caching
 type Driver struct {
 	proxy ProxiedHandler
 	log   slog.Instance
-	redis *redis.ClusterClient
+	redis rediser
 	cache *cache.Cache
 }
 
@@ -47,15 +56,17 @@ func (h *Driver) HealthCheck() error {
 }
 
 // Setup configures the RedisDriver connection and cache ring
-func (h *Driver) Setup(opts *redis.ClusterOptions, maxLocalObjects int, localObjectTTL time.Duration) error {
+func (h *Driver) Setup(client rediser, maxLocalObjects int, localObjectTTL time.Duration) error {
 	if maxLocalObjects == 0 {
 		return fmt.Errorf("max local objects can't be zero")
 	}
 	if localObjectTTL == 0 {
 		return fmt.Errorf("local object TTL can't be zero")
 	}
-
-	h.redis = redis.NewClusterClient(opts)
+	if client == nil {
+		return fmt.Errorf("you should specify a redis client")
+	}
+	h.redis = client
 	h.cache = cache.New(&cache.Options{
 		Redis:      h.redis,
 		LocalCache: cache.NewTinyLFU(maxLocalObjects, localObjectTTL),

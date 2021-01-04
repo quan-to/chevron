@@ -1,6 +1,7 @@
 package pg
 
 import (
+	"database/sql"
 	"database/sql/driver"
 	"fmt"
 	"regexp"
@@ -99,11 +100,16 @@ func expectToUpdate(mock sqlmock.Sqlmock, withSubkeys bool) {
 	mock.ExpectCommit()
 }
 
-func TestPostgreSQLDBDriver_AddGPGKey(t *testing.T) {
-	h := MakePostgreSQLDBDriver(nil)
+func newMock() (*sql.DB, sqlmock.Sqlmock) {
 	converter := sqlmock.ValueConverterOption(customConverter{})
-	// region Test ADD
 	mockDB, mock, _ := sqlmock.New(converter)
+	return mockDB, mock
+}
+
+func prepareAddGPGKey(t *testing.T) (*PostgreSQLDBDriver, sqlmock.Sqlmock) {
+	h := MakePostgreSQLDBDriver(nil)
+	mockDB, mock := newMock()
+	// region Test ADD
 	h.conn = sqlx.NewDb(mockDB, "sqlmock")
 
 	mock.ExpectBegin()
@@ -124,10 +130,10 @@ func TestPostgreSQLDBDriver_AddGPGKey(t *testing.T) {
 	}
 	mock.ExpectCommit()
 
-	_, added, err := h.AddGPGKey(testmodels.GpgKey)
-	if err != nil {
-		t.Fatalf(unexpectedError, err)
-	}
+	return h, mock
+}
+
+func checkKeyAdded(added bool, mock sqlmock.Sqlmock, t *testing.T) {
 	if !added {
 		t.Fatalf("expected added but got updated")
 	}
@@ -135,10 +141,20 @@ func TestPostgreSQLDBDriver_AddGPGKey(t *testing.T) {
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Fatalf(expectationsDidNotMet, err)
 	}
+}
+
+func TestPostgreSQLDBDriver_AddGPGKey(t *testing.T) {
+	h, mock := prepareAddGPGKey(t)
+	_, added, err := h.AddGPGKey(testmodels.GpgKey)
+	if err != nil {
+		t.Fatalf(unexpectedError, err)
+	}
+	checkKeyAdded(added, mock, t)
+
 	// endregion
 	// region Test UPDATE
 	// Test existing key
-	mockDB, mock, _ = sqlmock.New(converter)
+	mockDB, mock := newMock()
 	h.conn = sqlx.NewDb(mockDB, "sqlmock")
 
 	expectToUpdate(mock, true)

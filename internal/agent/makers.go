@@ -24,6 +24,9 @@ type MigrationHandler interface {
 
 type GPGRepository interface {
 	AddGPGKey(key models.GPGKey) (string, bool, error)
+	// AddGPGKey adds a list GPG Key to the database or update an existing one by fingerprint
+	// Same as AddGPGKey but in a single transaction
+	AddGPGKeys(keys []models.GPGKey) (ids []string, addeds []bool, err error)
 	FindGPGKeyByEmail(email string, pageStart, pageEnd int) ([]models.GPGKey, error)
 	FindGPGKeyByFingerPrint(fingerPrint string, pageStart, pageEnd int) ([]models.GPGKey, error)
 	FindGPGKeyByValue(value string, pageStart, pageEnd int) ([]models.GPGKey, error)
@@ -118,12 +121,24 @@ func MakeDatabaseHandler(logger slog.Instance) (dbh DatabaseHandler, err error) 
 			}
 		}
 
-		err = redisDriver.Setup(&redis.ClusterOptions{
-			Addrs:     []string{config.RedisHost},
-			Username:  config.RedisUser,
-			Password:  config.RedisPass,
-			TLSConfig: tlsConfig,
-		}, config.RedisMaxLocalObjects, config.RedisLocalObjectTTL)
+		if config.RedisClusterMode {
+			cluster := redis.NewClusterClient(&redis.ClusterOptions{
+				Addrs:     []string{config.RedisHost},
+				Username:  config.RedisUser,
+				Password:  config.RedisPass,
+				TLSConfig: tlsConfig,
+			})
+			err = redisDriver.Setup(cluster, config.RedisMaxLocalObjects, config.RedisLocalObjectTTL)
+		} else {
+			client := redis.NewClient(&redis.Options{
+				Addr:      config.RedisHost,
+				Username:  config.RedisUser,
+				Password:  config.RedisPass,
+				TLSConfig: tlsConfig,
+			})
+			err = redisDriver.Setup(client, config.RedisMaxLocalObjects, config.RedisLocalObjectTTL)
+		}
+
 		if err != nil {
 			return nil, err
 		}

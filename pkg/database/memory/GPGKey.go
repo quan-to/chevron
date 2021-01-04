@@ -42,13 +42,7 @@ func (h *DbDriver) DeleteGPGKey(key models.GPGKey) error {
 	return fmt.Errorf("not found")
 }
 
-// AddGPGKey adds a GPG Key to the database or update an existing one by fingerprint
-// Returns generated id / hasBeenAdded / error
-func (h *DbDriver) AddGPGKey(key models.GPGKey) (string, bool, error) {
-	h.log.Debug("AddGPGKey(%q)", key.FullFingerprint)
-	h.lock.Lock()
-	defer h.lock.Unlock()
-
+func (h *DbDriver) addGpgKey(key models.GPGKey) (string, bool, error) {
 	if key.FullFingerprint == "" {
 		return "", false, fmt.Errorf("invalid key fingerprint")
 	}
@@ -64,8 +58,17 @@ func (h *DbDriver) AddGPGKey(key models.GPGKey) (string, bool, error) {
 	key.ID = uuid.EnsureUUID(h.log)
 
 	h.keys = append(h.keys, key)
-
 	return key.ID, true, nil
+}
+
+// AddGPGKey adds a GPG Key to the database or update an existing one by fingerprint
+// Returns generated id / hasBeenAdded / error
+func (h *DbDriver) AddGPGKey(key models.GPGKey) (string, bool, error) {
+	h.log.Debug("AddGPGKey(%q)", key.FullFingerprint)
+	h.lock.Lock()
+	defer h.lock.Unlock()
+
+	return h.addGpgKey(key)
 }
 
 func (h *DbDriver) FetchGPGKeysWithoutSubKeys() ([]models.GPGKey, error) {
