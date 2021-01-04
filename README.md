@@ -58,7 +58,6 @@ To enable, use the following environment variables:
 *   `REDIS_HOST` => Hostname of the REDIS server (`default: localhost:6379`)
 *   `REDIS_USER` => Username of the REDIS server
 *   `REDIS_PASS` => Password of the REDIS server
-*   `REDIS_DATABASE_INDEX` => Index of the database (`default: 0`)
 *   `REDIS_MAX_LOCAL_TTL` => Max local object TTL (in golang duration format): `default: 5m`
 *   `REDIS_MAX_LOCAL_OBJECTS` => Max local objects (`default: 100`)
 

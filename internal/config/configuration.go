@@ -67,7 +67,6 @@ var EnableRedis bool
 var RedisHost string
 var RedisUser string
 var RedisPass string
-var RedisDatabaseIndex int
 var RedisTLSEnabled bool
 var RedisMaxLocalObjects int
 var RedisLocalObjectTTL time.Duration
@@ -216,17 +215,6 @@ func Setup() {
 	RedisHost = os.Getenv("REDIS_HOST")
 	RedisUser = os.Getenv("REDIS_USER")
 	RedisPass = os.Getenv("REDIS_PASS")
-
-	redisDBIdx := os.Getenv("REDIS_DATABASE_INDEX")
-	RedisDatabaseIndex = 0
-	if redisDBIdx != "" {
-		v, err := strconv.ParseInt(redisDBIdx, 10, 32)
-		if err != nil {
-			slog.Error("Invalid field REDIS_DATABASE_INDEX = %q - Invalid number", redisDBIdx)
-			v = 0
-		}
-		RedisDatabaseIndex = int(v)
-	}
 
 	redisLocalObjectTTL := os.Getenv("REDIS_MAX_LOCAL_TTL")
 	if redisLocalObjectTTL != "" {
