@@ -117,15 +117,11 @@ func makeRedisLayer(config map[string]interface{}, dbh agent.DatabaseHandler, lo
 	redisHost := stringParam(config, "REDIS_HOST")
 	redisUser := stringParam(config, "REDIS_USER")
 	redisPass := stringParam(config, "REDIS_PASS")
-	redisDatabaseIndex := intParam(config, "REDIS_DATABASE_INDEX")
 
-	err := redisDriver.Setup(&redis.RingOptions{
-		Addrs: map[string]string{
-			"server0": redisHost,
-		},
+	err := redisDriver.Setup(&redis.ClusterOptions{
+		Addrs:     []string{redisHost},
 		Username:  redisUser,
 		Password:  redisPass,
-		DB:        redisDatabaseIndex,
 		TLSConfig: tlsConfig,
 	}, 1, time.Second)
 	if err != nil {

@@ -14,7 +14,7 @@ import (
 type Driver struct {
 	proxy ProxiedHandler
 	log   slog.Instance
-	ring  *redis.Ring
+	redis *redis.ClusterClient
 	cache *cache.Cache
 }
 
@@ -47,7 +47,7 @@ func (h *Driver) HealthCheck() error {
 }
 
 // Setup configures the RedisDriver connection and cache ring
-func (h *Driver) Setup(opts *redis.RingOptions, maxLocalObjects int, localObjectTTL time.Duration) error {
+func (h *Driver) Setup(opts *redis.ClusterOptions, maxLocalObjects int, localObjectTTL time.Duration) error {
 	if maxLocalObjects == 0 {
 		return fmt.Errorf("max local objects can't be zero")
 	}
@@ -55,9 +55,9 @@ func (h *Driver) Setup(opts *redis.RingOptions, maxLocalObjects int, localObject
 		return fmt.Errorf("local object TTL can't be zero")
 	}
 
-	h.ring = redis.NewRing(opts)
+	h.redis = redis.NewClusterClient(opts)
 	h.cache = cache.New(&cache.Options{
-		Redis:      h.ring,
+		Redis:      h.redis,
 		LocalCache: cache.NewTinyLFU(maxLocalObjects, localObjectTTL),
 	})
 
