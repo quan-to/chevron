@@ -20,6 +20,10 @@ import (
 type PostgreSQLDBDriver struct {
 	log  slog.Instance
 	conn *sqlx.DB
+
+	// Migrate
+	gpgKeysRows *sqlx.Rows
+	usersRows   *sqlx.Rows
 }
 
 // MakeRethinkDBDriver creates a new database driver for rethinkdb
@@ -67,6 +71,7 @@ func (h *PostgreSQLDBDriver) Connect(connectionString string) error {
 	return nil
 }
 
+// HealthCheck returns nil if everything is OK with the handler
 func (h *PostgreSQLDBDriver) HealthCheck() error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5) // 5 second timeout
 	defer cancel()

@@ -11,16 +11,16 @@ import (
 )
 
 type pgGPGKey struct {
-	ID                     string    `db:"gpg_key_id"`
-	FullFingerprint        string    `db:"gpg_key_full_fingerprint"`
-	Fingerprint16          string    `db:"gpg_key_fingerprint16"`
-	KeyBits                int       `db:"gpg_key_keybits"`
-	ASCIIArmoredPublicKey  string    `db:"gpg_key_public_key"`
-	ASCIIArmoredPrivateKey string    `db:"gpg_key_private_key"`
-	CreatedAt              time.Time `db:"gpg_key_created_at"`
-	UpdatedAt              time.Time `db:"gpg_key_updated_at"`
-	DeletedAt              time.Time `db:"gpg_key_deleted_at"`
-	ParentKeyID            *string   `db:"gpg_key_parent"`
+	ID                     string     `db:"gpg_key_id"`
+	FullFingerprint        string     `db:"gpg_key_full_fingerprint"`
+	Fingerprint16          string     `db:"gpg_key_fingerprint16"`
+	KeyBits                int        `db:"gpg_key_keybits"`
+	ASCIIArmoredPublicKey  string     `db:"gpg_key_public_key"`
+	ASCIIArmoredPrivateKey string     `db:"gpg_key_private_key"`
+	CreatedAt              time.Time  `db:"gpg_key_created_at"`
+	UpdatedAt              time.Time  `db:"gpg_key_updated_at"`
+	DeletedAt              *time.Time `db:"gpg_key_deleted_at"`
+	ParentKeyID            *string    `db:"gpg_key_parent"`
 
 	// Relations
 	keyUids       []*pgGPGKeyUID
@@ -265,14 +265,14 @@ func (k *pgGPGKey) save(tx *sqlx.Tx) error {
 }
 
 type pgGPGKeyUID struct {
-	ID          string    `db:"gpg_key_uid_id"`
-	Parent      string    `db:"gpg_key_uid_parent"`
-	Name        string    `db:"gpg_key_uid_name"`
-	Email       string    `db:"gpg_key_uid_email"`
-	Description string    `db:"gpg_key_uid_description"`
-	CreatedAt   time.Time `db:"gpg_key_uid_created_at"`
-	UpdatedAt   time.Time `db:"gpg_key_uid_updated_at"`
-	DeletedAt   time.Time `db:"gpg_key_uid_deleted_at"`
+	ID          string     `db:"gpg_key_uid_id"`
+	Parent      string     `db:"gpg_key_uid_parent"`
+	Name        string     `db:"gpg_key_uid_name"`
+	Email       string     `db:"gpg_key_uid_email"`
+	Description string     `db:"gpg_key_uid_description"`
+	CreatedAt   time.Time  `db:"gpg_key_uid_created_at"`
+	UpdatedAt   time.Time  `db:"gpg_key_uid_updated_at"`
+	DeletedAt   *time.Time `db:"gpg_key_uid_deleted_at"`
 }
 
 func (k *pgGPGKeyUID) fieldsChanged(m models.GPGKeyUid) bool {

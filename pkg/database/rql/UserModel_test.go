@@ -3,28 +3,21 @@ package rql
 import (
 	"strings"
 	"testing"
-	"time"
+
+	"github.com/quan-to/chevron/pkg/models/testmodels"
 
 	"github.com/kylelemons/godebug/pretty"
-	"github.com/quan-to/chevron/pkg/models"
 	"github.com/quan-to/slog"
 	r "gopkg.in/rethinkdb/rethinkdb-go.v6"
 )
-
-var testUser = models.User{
-	Fingerprint: "DEADBEEF",
-	Username:    "ABC ABC",
-	Password:    "HUEBR",
-	FullName:    "John HUEBR",
-	CreatedAt:   time.Now().Truncate(time.Second),
-}
 
 func TestRethinkDBDriver_AddUser(t *testing.T) {
 	mock := r.NewMock()
 	h := MakeRethinkDBDriver(slog.Scope("TEST"))
 	h.conn = mock
 
-	userToAdd := testUser
+	userToAdd := testmodels.User
+	userToAdd.ID = ""
 
 	mock.On(r.Table(userModelTableInit.TableName).Insert(map[string]interface{}{
 		"Fingerprint": userToAdd.Fingerprint,
@@ -82,7 +75,7 @@ func TestRethinkDBDriver_GetUser(t *testing.T) {
 	h := MakeRethinkDBDriver(slog.Scope("TEST"))
 	h.conn = mock
 
-	expectedUser := testUser
+	expectedUser := testmodels.User
 	expectedUser.ID = "abcd1234"
 
 	mock.ExpectedQueries = append(mock.ExpectedQueries, mock.On(
@@ -136,16 +129,16 @@ func TestRethinkDBDriver_UpdateUser(t *testing.T) {
 	h := MakeRethinkDBDriver(slog.Scope("TEST"))
 	h.conn = mock
 
-	m, _ := convertToRethinkDB(testUser)
+	m, _ := convertToRethinkDB(testmodels.User)
 
 	mock.ExpectedQueries = append(mock.ExpectedQueries, mock.On(r.Table(userModelTableInit.TableName).
-		GetAllByIndex("Username", testUser.Username).
+		GetAllByIndex("Username", testmodels.User.Username).
 		Update(m)).Return(r.WriteResponse{
 		Replaced: 1,
 	}, nil))
 
-	m2, _ := convertToRethinkDB(testUser)
-	m2["Username"] = testUser.Username + "HUEBR"
+	m2, _ := convertToRethinkDB(testmodels.User)
+	m2["Username"] = testmodels.User.Username + "HUEBR"
 
 	mock.ExpectedQueries = append(mock.ExpectedQueries, mock.On(r.Table(userModelTableInit.TableName).
 		GetAllByIndex("Username", m2["Username"]).
@@ -153,13 +146,13 @@ func TestRethinkDBDriver_UpdateUser(t *testing.T) {
 		Replaced: 0,
 	}, nil))
 
-	err := h.UpdateUser(testUser)
+	err := h.UpdateUser(testmodels.User)
 
 	if err != nil {
 		t.Fatalf("Unexpected error %q", err)
 	}
 
-	errorUser := testUser
+	errorUser := testmodels.User
 	errorUser.Username += "HUEBR"
 
 	err = h.UpdateUser(errorUser)

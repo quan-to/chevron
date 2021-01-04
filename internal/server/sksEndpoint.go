@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/quan-to/chevron/internal/agent"
+
 	"github.com/quan-to/chevron/internal/keymagic"
 	"github.com/quan-to/chevron/pkg/interfaces"
 	"github.com/quan-to/chevron/pkg/models"
@@ -20,23 +22,7 @@ type SKSEndpoint struct {
 	log slog.Instance
 	dbh DatabaseHandler
 }
-
-type DatabaseHandler interface {
-	GetUser(username string) (um *models.User, err error)
-	AddUserToken(ut models.UserToken) (string, error)
-	RemoveUserToken(token string) (err error)
-	GetUserToken(token string) (ut *models.UserToken, err error)
-	InvalidateUserTokens() (int, error)
-	AddUser(um models.User) (string, error)
-	UpdateUser(um models.User) error
-	AddGPGKey(key models.GPGKey) (string, bool, error)
-	FindGPGKeyByEmail(email string, pageStart, pageEnd int) ([]models.GPGKey, error)
-	FindGPGKeyByFingerPrint(fingerPrint string, pageStart, pageEnd int) ([]models.GPGKey, error)
-	FindGPGKeyByValue(value string, pageStart, pageEnd int) ([]models.GPGKey, error)
-	FindGPGKeyByName(name string, pageStart, pageEnd int) ([]models.GPGKey, error)
-	FetchGPGKeyByFingerprint(fingerprint string) (*models.GPGKey, error)
-	HealthCheck() error
-}
+type DatabaseHandler agent.DatabaseHandler
 
 // MakeSKSEndpoint creates a handler for SKS Server Endpoint
 func MakeSKSEndpoint(log slog.Instance, sm interfaces.SecretsManager, gpg interfaces.PGPManager, dbHandler DatabaseHandler) *SKSEndpoint {

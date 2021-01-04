@@ -1,7 +1,11 @@
 package agent
 
 import (
+	"crypto/tls"
+
+	"github.com/go-redis/redis/v8"
 	"github.com/quan-to/chevron/internal/config"
+	"github.com/quan-to/chevron/pkg/database/cache"
 	"github.com/quan-to/chevron/pkg/database/memory"
 	"github.com/quan-to/chevron/pkg/database/pg"
 	"github.com/quan-to/chevron/pkg/database/rql"
@@ -10,7 +14,27 @@ import (
 	"github.com/quan-to/slog"
 )
 
-type DatabaseHandler interface {
+type MigrationHandler interface {
+	InitCursor() error
+	FinishCursor() error
+	NextGPGKey(key *models.GPGKey) bool
+	NextUser(user *models.User) bool
+	NumGPGKeys() (int, error)
+}
+
+type GPGRepository interface {
+	AddGPGKey(key models.GPGKey) (string, bool, error)
+	FindGPGKeyByEmail(email string, pageStart, pageEnd int) ([]models.GPGKey, error)
+	FindGPGKeyByFingerPrint(fingerPrint string, pageStart, pageEnd int) ([]models.GPGKey, error)
+	FindGPGKeyByValue(value string, pageStart, pageEnd int) ([]models.GPGKey, error)
+	FindGPGKeyByName(name string, pageStart, pageEnd int) ([]models.GPGKey, error)
+	FetchGPGKeyByFingerprint(fingerprint string) (*models.GPGKey, error)
+	FetchGPGKeysWithoutSubKeys() (res []models.GPGKey, err error)
+	DeleteGPGKey(key models.GPGKey) error
+	UpdateGPGKey(key models.GPGKey) (err error)
+}
+
+type UserRepository interface {
 	GetUser(username string) (um *models.User, err error)
 	AddUserToken(ut models.UserToken) (string, error)
 	RemoveUserToken(token string) (err error)
@@ -18,13 +42,17 @@ type DatabaseHandler interface {
 	InvalidateUserTokens() (int, error)
 	AddUser(um models.User) (string, error)
 	UpdateUser(um models.User) error
-	AddGPGKey(key models.GPGKey) (string, bool, error)
-	FindGPGKeyByEmail(email string, pageStart, pageEnd int) ([]models.GPGKey, error)
-	FindGPGKeyByFingerPrint(fingerPrint string, pageStart, pageEnd int) ([]models.GPGKey, error)
-	FindGPGKeyByValue(value string, pageStart, pageEnd int) ([]models.GPGKey, error)
-	FindGPGKeyByName(name string, pageStart, pageEnd int) ([]models.GPGKey, error)
-	FetchGPGKeyByFingerprint(fingerprint string) (*models.GPGKey, error)
+}
+
+type HealthChecker interface {
 	HealthCheck() error
+}
+
+type DatabaseHandler interface {
+	MigrationHandler
+	GPGRepository
+	UserRepository
+	HealthChecker
 }
 
 func makeRethinkDBHandler(logger slog.Instance) (*rql.RethinkDBDriver, error) {
@@ -56,22 +84,56 @@ func makePostgresDBHandler(logger slog.Instance) (*pg.PostgreSQLDBDriver, error)
 }
 
 // MakeDatabaseHandler initializes a Database Access Handler based on the current configuration
-func MakeDatabaseHandler(logger slog.Instance) (DatabaseHandler, error) {
+func MakeDatabaseHandler(logger slog.Instance) (dbh DatabaseHandler, err error) {
 	if config.EnableDatabase {
 		switch config.DatabaseDialect {
 		case "rethinkdb":
-			return makeRethinkDBHandler(logger)
+			dbh, err = makeRethinkDBHandler(logger)
+			if err != nil {
+				return nil, err
+			}
 		case "postgres":
-			return makePostgresDBHandler(logger)
+			dbh, err = makePostgresDBHandler(logger)
+			if err != nil {
+				return nil, err
+			}
 		case "memory":
-			return memory.MakeMemoryDBDriver(logger), nil
+			dbh = memory.MakeMemoryDBDriver(logger)
 		default:
 			logger.Fatal("Unknown database dialect %q", config.DatabaseDialect)
 		}
 	}
-	logger.Warn("No database handler enabled. Using memory database")
+	if dbh == nil {
+		logger.Warn("No database handler enabled. Using memory database")
+		dbh = memory.MakeMemoryDBDriver(logger)
+	}
 
-	return memory.MakeMemoryDBDriver(logger), nil
+	if config.EnableRedis {
+		logger.Info("Redis enabled. Wrapping cache layer")
+		redisDriver := cache.MakeRedisDriver(dbh, logger)
+		var tlsConfig *tls.Config
+		if config.RedisTLSEnabled {
+			tlsConfig = &tls.Config{
+				InsecureSkipVerify: true,
+			}
+		}
+
+		err = redisDriver.Setup(&redis.RingOptions{
+			Addrs: map[string]string{
+				"server0": config.RedisHost,
+			},
+			Username:  config.RedisUser,
+			Password:  config.RedisPass,
+			DB:        config.RedisDatabaseIndex,
+			TLSConfig: tlsConfig,
+		}, config.RedisMaxLocalObjects, config.RedisLocalObjectTTL)
+		if err != nil {
+			return nil, err
+		}
+		dbh = redisDriver
+	}
+
+	return dbh, nil
 }
 
 // MakeTokenManager creates an instance of token manager. If Rethink is enabled returns an DatabaseTokenManager, if not a MemoryTokenManager

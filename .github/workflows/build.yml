@@ -118,7 +118,6 @@ jobs:
           echo "Code format is not OK!"
           exit 1
         fi
-
     - name: Send coverage to Coveralls
       uses: quan-to/actions-goveralls@v1
       with:

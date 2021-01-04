@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/quan-to/chevron/pkg/models"
+	"github.com/quan-to/chevron/pkg/uuid"
 )
 
 func (h *DbDriver) UpdateGPGKey(key models.GPGKey) error {
@@ -61,7 +61,7 @@ func (h *DbDriver) AddGPGKey(key models.GPGKey) (string, bool, error) {
 		}
 	}
 
-	key.ID = uuid.New().String()
+	key.ID = uuid.EnsureUUID(h.log)
 
 	h.keys = append(h.keys, key)
 
