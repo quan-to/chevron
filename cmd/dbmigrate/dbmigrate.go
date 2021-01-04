@@ -10,8 +10,9 @@ import (
 )
 
 var cli struct {
-	FromConfigFile string `arg:"" name:"path" help:"JSON Config file for the source database" type:"path"`
-	ToConfigFile   string `arg:"" name:"path" help:"JSON Config file for the destination database" type:"path"`
+	FromConfigFile  string `arg:"" name:"path" help:"JSON Config file for the source database" type:"path"`
+	ToConfigFile    string `arg:"" name:"path" help:"JSON Config file for the destination database" type:"path"`
+	NumParallelKeys int    `arg:"" name:"parallelkeys" help:"Number of parallel keys to fetch at once" type:"int" default:"500"`
 }
 
 type dbSource interface {
@@ -69,15 +70,18 @@ func main() {
 	if err != nil {
 		logger.Fatal("Error getting number of keys: %s", err)
 	}
+	if cli.NumParallelKeys <= 0 {
+		cli.NumParallelKeys = 500
+	}
 	logger.Info("Starting migration of %d keys", totalKeys)
 	migratedKeys := 0
 
 	gpgKey := models.GPGKey{}
 	var keys []models.GPGKey
 
-	logger.Info("Fetching <= 500 keys from source")
+	logger.Info("Fetching <= %d keys from source", cli.NumParallelKeys)
 	for src.NextGPGKey(&gpgKey) {
-		if len(keys) >= 500 {
+		if len(keys) >= cli.NumParallelKeys {
 			logger.Info("Saving %d keys to destination", len(keys))
 			_, _, err = dst.AddGPGKeys(keys)
 			if err != nil {
@@ -86,7 +90,7 @@ func main() {
 			migratedKeys += len(keys)
 			logger.Info("Migrated %6d from %6d keys... [%d]", migratedKeys, totalKeys, len(keys))
 			keys = nil
-			logger.Info("Fetching <= 500 keys from source")
+			logger.Info("Fetching <= %d keys from source", cli.NumParallelKeys)
 		}
 		gpgKey.ID = "" // Re-generate the ID
 		keys = append(keys, gpgKey)
