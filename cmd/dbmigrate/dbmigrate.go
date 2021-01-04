@@ -103,7 +103,6 @@ func main() {
 			logger.Fatal("error migrating keys: %s", err)
 		}
 		migratedKeys += len(keys)
-		keys = nil
 	}
 
 	logger.Info("Migrated %d keys...", migratedKeys)
