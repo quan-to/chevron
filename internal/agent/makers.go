@@ -118,13 +118,10 @@ func MakeDatabaseHandler(logger slog.Instance) (dbh DatabaseHandler, err error) 
 			}
 		}
 
-		err = redisDriver.Setup(&redis.RingOptions{
-			Addrs: map[string]string{
-				"server0": config.RedisHost,
-			},
+		err = redisDriver.Setup(&redis.ClusterOptions{
+			Addrs:     []string{config.RedisHost},
 			Username:  config.RedisUser,
 			Password:  config.RedisPass,
-			DB:        config.RedisDatabaseIndex,
 			TLSConfig: tlsConfig,
 		}, config.RedisMaxLocalObjects, config.RedisLocalObjectTTL)
 		if err != nil {
