@@ -31,6 +31,9 @@ type ProxiedGPGRepository interface {
 	// AddGPGKey adds a GPG Key to the database or update an existing one by fingerprint
 	// Returns generated id / hasBeenAdded / error
 	AddGPGKey(key models.GPGKey) (string, bool, error)
+	// AddGPGKey adds a list GPG Key to the database or update an existing one by fingerprint
+	// Same as AddGPGKey but in a single transaction
+	AddGPGKeys(keys []models.GPGKey) (ids []string, addeds []bool, err error)
 	// FindGPGKeyByEmail find all keys that has a underlying UID that contains that email
 	FindGPGKeyByEmail(email string, pageStart, pageEnd int) ([]models.GPGKey, error)
 	// FindGPGKeyByFingerPrint find all keys that has a fingerprint that matches the specified fingerprint

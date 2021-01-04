@@ -1,6 +1,7 @@
 package pg
 
 import (
+	"fmt"
 	"regexp"
 	"testing"
 	"time"
@@ -261,4 +262,62 @@ func TestPostgreSQLDBDriver_NumGPGKeys(t *testing.T) {
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Fatalf(expectationsDidNotMet, err)
 	}
+}
+
+func TestPostgreSQLDBDriver_AddGPGKeys(t *testing.T) {
+	h := MakePostgreSQLDBDriver(nil)
+	converter := sqlmock.ValueConverterOption(customConverter{})
+	// region Test ADD
+	mockDB, mock, _ := sqlmock.New(converter)
+	h.conn = sqlx.NewDb(mockDB, "sqlmock")
+
+	mock.ExpectBegin()
+	// Check existance
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM chevron_gpg_key WHERE gpg_key_fingerprint16 = $1 LIMIT 1`)).
+		WithArgs(tools.FPto16(testmodels.GpgKey.FullFingerprint)).
+		WillReturnError(fmt.Errorf("sql: no rows in result set"))
+	// Insert Key
+	mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO chevron_gpg_key(gpg_key_id, gpg_key_full_fingerprint, gpg_key_fingerprint16, gpg_key_keybits, gpg_key_parent, gpg_key_public_key, gpg_key_private_key) VALUES (?, ?, ?, ?, ?, ?, ?)`)).
+		WithArgs(sqlmock.AnyArg(), testmodels.GpgKey.FullFingerprint, tools.FPto16(testmodels.GpgKey.FullFingerprint), testmodels.GpgKey.KeyBits, (*string)(nil), testmodels.GpgKey.AsciiArmoredPublicKey, testmodels.GpgKey.AsciiArmoredPrivateKey).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	// Insert UIDs
+	for _, uid := range testmodels.GpgKey.KeyUids {
+		mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO chevron_gpg_key_uid(gpg_key_uid_id, gpg_key_uid_name, gpg_key_uid_email, gpg_key_uid_description, gpg_key_uid_parent) VALUES (?, ?, ?, ?, ?)`)).
+			WithArgs(sqlmock.AnyArg(), uid.Name, uid.Email, uid.Description, sqlmock.AnyArg()).
+			WillReturnResult(sqlmock.NewResult(0, 1))
+	}
+	mock.ExpectCommit()
+
+	_, added, err := h.AddGPGKeys([]models.GPGKey{testmodels.GpgKey})
+	if err != nil {
+		t.Fatalf(unexpectedError, err)
+	}
+	if len(added) == 0 || !added[0] {
+		t.Fatalf("expected added but got updated")
+	}
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf(expectationsDidNotMet, err)
+	}
+	// endregion
+	// region Test UPDATE
+	// Test existing key
+	mockDB, mock, _ = sqlmock.New(converter)
+	h.conn = sqlx.NewDb(mockDB, "sqlmock")
+
+	expectToUpdate(mock, true)
+
+	_, added, err = h.AddGPGKeys([]models.GPGKey{testmodels.GpgKey})
+	if err != nil {
+		t.Fatalf(unexpectedError, err)
+	}
+	if len(added) == 0 || added[0] {
+		t.Fatalf("expected updated but got added")
+	}
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf(expectationsDidNotMet, err)
+	}
+	// endregion
 }

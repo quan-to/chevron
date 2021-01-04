@@ -113,3 +113,25 @@ func (h *PostgreSQLDBDriver) NumGPGKeys() (int, error) {
 	err := h.conn.Get(&count, "SELECT COUNT(*) FROM chevron_gpg_key")
 	return count, err
 }
+
+// AddGPGKey adds a list GPG Key to the database or update an existing one by fingerprint
+// Same as AddGPGKey but in a single transaction
+func (h *PostgreSQLDBDriver) AddGPGKeys(keys []models.GPGKey) (ids []string, addeds []bool, err error) {
+	h.log.Debug("AddGPGKeys(...%d)", len(keys))
+	tx, err := h.conn.Beginx()
+	if err != nil {
+		return nil, nil, err
+	}
+	defer func() { h.rollbackIfErrorCommitIfNot(err, tx) }()
+
+	for _, key := range keys {
+		id, added, err := h.addGPGKey(tx, key)
+		if err != nil {
+			return ids, addeds, err
+		}
+		ids = append(ids, id)
+		addeds = append(addeds, added)
+	}
+
+	return ids, addeds, err
+}

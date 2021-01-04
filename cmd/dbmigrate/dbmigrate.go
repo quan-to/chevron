@@ -24,6 +24,7 @@ type dbSource interface {
 
 type dbDestination interface {
 	AddGPGKey(key models.GPGKey) (string, bool, error)
+	AddGPGKeys(keys []models.GPGKey) ([]string, []bool, error)
 	AddUser(um models.User) (string, error)
 	GetUser(username string) (um *models.User, err error)
 	UpdateUser(um models.User) error
@@ -72,18 +73,33 @@ func main() {
 	migratedKeys := 0
 
 	gpgKey := models.GPGKey{}
+	var keys []models.GPGKey
 
+	logger.Info("Fetching <= 500 keys from source")
 	for src.NextGPGKey(&gpgKey) {
+		if len(keys) >= 500 {
+			logger.Info("Saving %d keys to destination", len(keys))
+			_, _, err = dst.AddGPGKeys(keys)
+			if err != nil {
+				logger.Fatal("error migrating keys: %s", err)
+			}
+			migratedKeys += len(keys)
+			logger.Info("Migrated %6d from %6d keys... [%d]", migratedKeys, totalKeys, len(keys))
+			keys = nil
+			logger.Info("Fetching <= 500 keys from source")
+		}
 		gpgKey.ID = "" // Re-generate the ID
-		_, _, err := dst.AddGPGKey(gpgKey)
-		if err != nil {
-			logger.Fatal("error migrating key %s: %s", gpgKey.GetShortFingerPrint(), err)
-		}
+		keys = append(keys, gpgKey)
+	}
 
-		migratedKeys++
-		if migratedKeys%10 == 0 {
-			logger.Info("Migrated %6d from %6d keys...", migratedKeys, totalKeys)
+	if len(keys) > 0 {
+		logger.Info("Saving %d keys to destination", len(keys))
+		_, _, err = dst.AddGPGKeys(keys)
+		if err != nil {
+			logger.Fatal("error migrating keys: %s", err)
 		}
+		migratedKeys += len(keys)
+		keys = nil
 	}
 
 	logger.Info("Migrated %d keys...", migratedKeys)

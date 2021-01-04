@@ -23,3 +23,19 @@ func (h *Driver) NextUser(user *models.User) bool {
 func (h *Driver) NumGPGKeys() (int, error) {
 	return h.proxy.NumGPGKeys()
 }
+
+// AddGPGKey adds a list GPG Key to the database or update an existing one by fingerprint
+// Same as AddGPGKey but in a single transaction
+func (h *Driver) AddGPGKeys(keys []models.GPGKey) ([]string, []bool, error) {
+	h.log.Debug("AddGPGKeys(...%d)", len(keys))
+	id, added, err := h.proxy.AddGPGKeys(keys)
+	// Set the returning ID to the input key so we cache correctly
+	for k, v := range keys {
+		v.ID = id[k]
+		// The cacheKey will log the error
+		// and we don't want to break the flow
+		_ = h.cacheKey(v)
+	}
+
+	return id, added, err
+}

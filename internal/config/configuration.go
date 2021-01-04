@@ -64,6 +64,7 @@ var DatabaseDialect string
 var ConnectionString string
 
 var EnableRedis bool
+var RedisClusterMode bool
 var RedisHost string
 var RedisUser string
 var RedisPass string
@@ -215,6 +216,7 @@ func Setup() {
 	RedisHost = os.Getenv("REDIS_HOST")
 	RedisUser = os.Getenv("REDIS_USER")
 	RedisPass = os.Getenv("REDIS_PASS")
+	RedisClusterMode = os.Getenv("REDIS_CLUSTER_MODE") == "true"
 
 	redisLocalObjectTTL := os.Getenv("REDIS_MAX_LOCAL_TTL")
 	if redisLocalObjectTTL != "" {
