@@ -16,7 +16,7 @@ import (
 	"github.com/quan-to/slog"
 )
 
-func TestDriver_AddGPGKey(t *testing.T) {
+func prepareAddGPGKey(t *testing.T) (*Driver, *memory.DbDriver, redismock.ClientMock) {
 	mem := memory.MakeMemoryDBDriver(nil)
 	db, mock := redismock.NewClientMock()
 	h := MakeRedisDriver(mem, nil)
@@ -41,11 +41,10 @@ func TestDriver_AddGPGKey(t *testing.T) {
 		SetVal("")
 	mock.ExpectSet(gpgKeyByFingerprintPrefix+testKeyToAdd.GetShortFingerPrint(), data, gpgKeyExpiration).
 		SetVal("")
+	return h, mem, mock
+}
 
-	id, added, err := h.AddGPGKey(testmodels.GpgKey)
-	if err != nil {
-		t.Fatalf(unexpectedError, err)
-	}
+func checkKeyAdded(added bool, id string, mem *memory.DbDriver, mock redismock.ClientMock, t *testing.T) {
 	if !added {
 		t.Fatal("expected key to be added")
 	}
@@ -62,6 +61,15 @@ func TestDriver_AddGPGKey(t *testing.T) {
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Fatalf(expectationsWereNotMet, err)
 	}
+}
+
+func TestDriver_AddGPGKey(t *testing.T) {
+	h, mem, mock := prepareAddGPGKey(t)
+	id, added, err := h.AddGPGKey(testmodels.GpgKey)
+	if err != nil {
+		t.Fatalf(unexpectedError, err)
+	}
+	checkKeyAdded(added, id, mem, mock, t)
 }
 
 func TestDriver_DeleteGPGKey(t *testing.T) {

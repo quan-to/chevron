@@ -13,7 +13,7 @@ import (
 	r "gopkg.in/rethinkdb/rethinkdb-go.v6"
 )
 
-func TestRethinkDBDriver_AddGPGKey(t *testing.T) {
+func prepareAdd(t *testing.T) (*RethinkDBDriver, *r.Mock, models.GPGKey) {
 	mock := r.NewMock()
 	h := MakeRethinkDBDriver(slog.Scope("TEST"))
 	h.conn = mock
@@ -48,6 +48,12 @@ func TestRethinkDBDriver_AddGPGKey(t *testing.T) {
 	mock.ExpectedQueries = append(mock.ExpectedQueries, mock.On(r.Table(gpgKeyTableInit.TableName).Get(toUpdate.ID).Update(m2)).Return(r.WriteResponse{
 		Updated: 1,
 	}, nil))
+
+	return h, mock, toUpdate
+}
+
+func TestRethinkDBDriver_AddGPGKey(t *testing.T) {
+	h, mock, toUpdate := prepareAdd(t)
 
 	// Test Create
 	id, added, err := h.AddGPGKey(testmodels.GpgKey)
