@@ -32,7 +32,7 @@ Where is AgentUI??
 
 Agent-UI project has been moved to a separated repository. Check [https://github.com/quan-to/agent-ui](https://github.com/quan-to/agent-ui)
 
-# Environment Variables
+# Environment Variables for Remote Signer
 
 These are the Environment Variables that you can set to manage the webserver:
 
@@ -82,8 +82,6 @@ To enable, use the following environment variables:
 *   `MASTER_GPG_KEY_BASE64_ENCODED` => If the Master GPG Key is base64 encoded (default: true)
 *   `SYSLOG_IP` => IP of the Syslog Server to send Console Messages _(defaults to '127.0.0.1')_ *Does not apply for Windows*
 *   `SYSLOG_FACILITY` => Facility of the Syslog to use. _(defaults to 'LOG_USER')_
-*   `DATABASE_DIALECT` => Dialect of the Database connection (`postgres`, `rethinkdb`. Defaults: none)
-*   `CONNECTION_STRING` => Connection string for the database.
 
 ## Hashicorp Vault Key Backend Environment
 
@@ -94,6 +92,14 @@ To enable, use the following environment variables:
 *   `VAULT_TOKEN_TTL` => Hashicorp Vault Token TTL (for example `24h`, default is `768h`. For more information see https://golang.org/pkg/time/#ParseDuration)
 *   `VAULT_BACKEND` => Hashicorp Vault Backend (for example `secret`)
 *   `VAULT_NAMESPACE` => if a Hashicorp Vault Namespace to use (appended to backend, for example if namespace is `remote-signer` the keys are stored under `secret/remote-signer`)
+
+## Database Configuration
+
+*   `ENABLE_DATABASE` => Enables using database for Key Store ( `default: false `)
+*   `DATABASE_DIALECT` => Dialect of the Database connection (`postgres`, `rethinkdb`. Defaults: none)
+*   `CONNECTION_STRING` => Connection string for the database.
+*   `DATABASE_TOKEN_MANAGER` => Use database connection to manage tokens
+*   `DATABASE_AUTH_MANAGER` => Use database connection to manage agent logins
 
 ## Deprecated Environment Variables
 
