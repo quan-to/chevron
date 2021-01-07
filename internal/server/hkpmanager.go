@@ -3,9 +3,10 @@ package server
 import (
 	"context"
 	"errors"
-	"github.com/quan-to/chevron/internal/keymagic"
-	"github.com/quan-to/chevron/internal/models/HKP"
 	"net/http"
+
+	"github.com/quan-to/chevron/internal/keymagic"
+	"github.com/quan-to/chevron/pkg/models/HKP"
 
 	"github.com/gorilla/mux"
 	"github.com/quan-to/slog"
@@ -22,7 +23,7 @@ func operationGet(ctx context.Context, options, searchData string, machineReadab
 		return k, nil
 	}
 
-	results, err := keymagic.PKSSearch(searchData, 0, 1)
+	results, err := keymagic.PKSSearch(ctx, searchData, 0, 1)
 
 	if err != nil {
 		return "", nil
@@ -142,7 +143,9 @@ func hkpAdd(log slog.Instance, w http.ResponseWriter, r *http.Request) {
 }
 
 // AddHKPEndpoints attach the HKP /lookup and /add endpoints to the specified router with the specified log wrapped into the calls
-func AddHKPEndpoints(log slog.Instance, r *mux.Router) {
-	r.HandleFunc("/lookup", wrapWithLog(log, hkpLookup)).Methods("GET")
-	r.HandleFunc("/add", wrapWithLog(log, hkpAdd)).Methods("POST")
+func AddHKPEndpoints(log slog.Instance, dbHandler DatabaseHandler, r *mux.Router) {
+	lookup := wrapRequestContextWithDatabaseHandler(dbHandler, hkpLookup)
+	add := wrapRequestContextWithDatabaseHandler(dbHandler, hkpAdd)
+	r.HandleFunc("/lookup", wrapWithLog(log, lookup)).Methods("GET")
+	r.HandleFunc("/add", wrapWithLog(log, add)).Methods("POST")
 }

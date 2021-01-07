@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/quan-to/chevron/internal/config"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"time"
+
+	"github.com/quan-to/chevron/internal/config"
 )
 
 const sleepInterval = 1 * 60 * 1000

@@ -4,16 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/quan-to/chevron/internal/config"
-	"github.com/quan-to/chevron/internal/models"
-	"github.com/quan-to/chevron/internal/tools"
-	"github.com/quan-to/chevron/pkg/QuantoError"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/quan-to/chevron/internal/config"
+	"github.com/quan-to/chevron/internal/tools"
+	"github.com/quan-to/chevron/pkg/QuantoError"
+	"github.com/quan-to/chevron/pkg/models"
 
 	"github.com/quan-to/slog"
 )
@@ -147,6 +148,17 @@ func InitHTTPTimer(log slog.Instance, r *http.Request) {
 func wrapWithLog(log slog.Instance, f HTTPHandleFuncWithLog) HTTPHandleFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		f(log, w, r)
+	}
+}
+
+func wrapContextWithDatabaseHandler(dbh DatabaseHandler, ctx context.Context) context.Context {
+	return context.WithValue(ctx, tools.CtxDatabaseHandler, dbh)
+}
+
+func wrapRequestContextWithDatabaseHandler(dbHandler DatabaseHandler, f HTTPHandleFuncWithLog) HTTPHandleFuncWithLog {
+	return func(log slog.Instance, w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), tools.CtxDatabaseHandler, dbHandler)
+		f(log, w, r.WithContext(ctx))
 	}
 }
 

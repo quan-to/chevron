@@ -1,13 +1,14 @@
 package server
 
 import (
+	"net/http"
+	"path"
+	"strings"
+
 	"github.com/gorilla/mux"
 	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/server/agent"
 	"github.com/quan-to/slog"
-	"net/http"
-	"path"
-	"strings"
 )
 
 type StaticGraphiQL struct {

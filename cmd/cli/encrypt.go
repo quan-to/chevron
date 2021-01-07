@@ -3,18 +3,19 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/quan-to/chevron/internal/etc/magicbuilder"
 	"io"
 	"io/ioutil"
 	"os"
 	"time"
+
+	"github.com/quan-to/chevron/internal/etc/magicbuilder"
 )
 
 // EncryptFile encrypts a file / data from input for the specified recipient
 func EncryptFile(input, output, recipient string) {
 	var err error
 	var data []byte
-	pgpMan := magicbuilder.MakePGP(nil)
+	pgpMan := magicbuilder.MakePGP(nil, mem)
 	pgpMan.LoadKeys(ctx)
 
 	ent := pgpMan.GetPublicKeyEntity(ctx, recipient)

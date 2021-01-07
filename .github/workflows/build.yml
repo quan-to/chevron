@@ -35,10 +35,6 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        echo "Installing RethinkDB"
-        echo "deb http://download.rethinkdb.com/apt bionic main" | sudo tee /etc/apt/sources.list.d/rethinkdb.list
-        wget -qO- https://download.rethinkdb.com/apt/pubkey.gpg | sudo apt-key add -
-        sudo apt-get -qq update && sudo apt-get install -y rethinkdb
         echo "Installing vault"
         wget https://releases.hashicorp.com/vault/1.0.2/vault_1.0.2_linux_amd64.zip
         unzip vault_1.0.2_linux_amd64.zip
@@ -66,8 +62,6 @@ jobs:
           echo "::set-output name=format_ok::1"
         fi
 
-        cd cmd/agent-ui && ./placeholders.sh && cd ../..
-
         echo "Starting vault"
         vault server -dev & echo $! > $HOME/vault.pid
         echo "Waiting vault settle" & sleep 2
@@ -75,10 +69,6 @@ jobs:
         vault auth enable userpass
         vault policy write test-policy ./config/vault/test-policy.hcl
         vault write auth/userpass/users/${VAULT_USERNAME} password=${VAULT_PASSWORD} policies=test-policy
-
-        echo "Starting RethinkDB"
-        rethinkdb --no-http-admin --bind 127.0.0.1 & echo $! > $HOME/rethinkdb.pid
-        echo "RethinkDB started with PID `cat $HOME/rethinkdb.pid`"
 
         echo "Running GolangCI Lint"
         golangci-lint run | gawk '{ if(match($0, /([^\:]+):([0-9]*):([0-9]*):(.*)/, m)) print "* **" m[1] "** on line " m[2] ": `" m[4] "`"  }' 2>&1 > lintresult.tmp || true
@@ -99,14 +89,6 @@ jobs:
         go test -v -race ./... -coverprofile=qrs.coverprofile
         echo "Closing Vault"
         sudo kill -9 `cat ~/vault.pid`
-        echo "Closing RethinkDB"
-        sudo kill -9 `cat ~/rethinkdb.pid`
-
-        if [ $LINT_OK == 1 ] || [ $FORMAT_OK == 1 ]
-        then
-          echo "Either Lint or Format went wrong"
-          exit 1
-        fi
 
     - name: comment PR
       uses: quan-to/comment-on-pr@master
@@ -136,7 +118,6 @@ jobs:
           echo "Code format is not OK!"
           exit 1
         fi
-
     - name: Send coverage to Coveralls
       uses: quan-to/actions-goveralls@v1
       with:

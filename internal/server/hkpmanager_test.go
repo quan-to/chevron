@@ -4,23 +4,23 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	config "github.com/quan-to/chevron/internal/config"
-	"github.com/quan-to/chevron/internal/keymagic"
-	"github.com/quan-to/chevron/internal/models/HKP"
-	"github.com/quan-to/chevron/internal/tools"
-	"github.com/quan-to/chevron/pkg/QuantoError"
-	"github.com/quan-to/chevron/test"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"testing"
+
+	config "github.com/quan-to/chevron/internal/config"
+	"github.com/quan-to/chevron/internal/keymagic"
+	"github.com/quan-to/chevron/internal/tools"
+	"github.com/quan-to/chevron/pkg/QuantoError"
+	"github.com/quan-to/chevron/pkg/models/HKP"
+	"github.com/quan-to/chevron/test"
 )
 
 func TestHKPAdd(t *testing.T) {
-	ctx := context.Background()
+	ctx := wrapContextWithDatabaseHandler(dbh, context.Background())
 	config.PushVariables()
 	defer config.PopVariables()
-	config.EnableRethinkSKS = true
 
 	req, err := http.NewRequest("POST", "/pks/add", nil)
 
@@ -111,11 +111,8 @@ func MakeHKPLookup(op, mr, nm, fingerprint, exact, search string) (output string
 }
 
 func TestLookup(t *testing.T) {
-	ctx := context.Background()
-	config.PushVariables()
-	defer config.PopVariables()
-	config.EnableRethinkSKS = true
-	//log.UnsetTestMode()
+	ctx := wrapContextWithDatabaseHandler(dbh, context.Background())
+
 	// Ensure key is in SKS
 	key, _ := gpg.GetPublicKeyASCII(ctx, test.TestKeyFingerprint)
 	_ = keymagic.PKSAdd(ctx, key)

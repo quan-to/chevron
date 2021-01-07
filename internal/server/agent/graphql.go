@@ -1,16 +1,17 @@
 package agent
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/graphql-go/graphql"
 	"github.com/quan-to/chevron/internal/config"
-	"github.com/quan-to/chevron/internal/models"
-	mgql "github.com/quan-to/chevron/internal/models/graphql"
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/QuantoError"
 	"github.com/quan-to/chevron/pkg/interfaces"
+	"github.com/quan-to/chevron/pkg/models"
+	mgql "github.com/quan-to/chevron/pkg/models/graphql"
 	"github.com/quan-to/slog"
-	"time"
 )
 
 const TokenManagerKey = "TokenManager"
@@ -92,7 +93,7 @@ var RootManagementMutation = graphql.NewObject(graphql.ObjectConfig{
 				},
 				"fingerPrint": &graphql.ArgumentConfig{
 					Type:        graphql.String,
-					Description: "FingerPrint of the key to give access to. Defaults to Agent Default",
+					Description: "Fingerprint of the key to give access to. Defaults to Agent Default",
 				},
 				"expiresAfter": &graphql.ArgumentConfig{
 					Type:        graphql.Int,

@@ -2,25 +2,28 @@ package server
 
 import (
 	"context"
-	"github.com/quan-to/chevron/internal/config"
-	"github.com/quan-to/chevron/internal/database"
-	"github.com/quan-to/chevron/internal/models"
+	"net/http"
+
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/internal/vaultManager"
-	"net/http"
+	"github.com/quan-to/chevron/pkg/models"
 
 	"github.com/gorilla/mux"
 	"github.com/quan-to/slog"
-	r "gopkg.in/rethinkdb/rethinkdb-go.v6"
 )
+
+type HealthCheckHandler interface {
+	HealthCheck() error
+}
 
 type TestsEndpoint struct {
 	log slog.Instance
 	vm  *vaultManager.VaultManager
+	db  HealthCheckHandler
 }
 
 // MakeTestsEndpoint creates an instance of healthcheck tests endpoint
-func MakeTestsEndpoint(log slog.Instance, vm *vaultManager.VaultManager) *TestsEndpoint {
+func MakeTestsEndpoint(log slog.Instance, vm *vaultManager.VaultManager, dbHandler HealthCheckHandler) *TestsEndpoint {
 	if log == nil {
 		log = slog.Scope("Tests")
 	} else {
@@ -30,6 +33,7 @@ func MakeTestsEndpoint(log slog.Instance, vm *vaultManager.VaultManager) *TestsE
 	return &TestsEndpoint{
 		log: log,
 		vm:  vm,
+		db:  dbHandler,
 	}
 }
 
@@ -42,22 +46,19 @@ func (ge *TestsEndpoint) checkExternal(ctx context.Context) bool {
 	log := ge.log.Tag(requestID)
 	isHealthy := true
 
-	if config.EnableRethinkSKS {
-		conn := database.GetConnection()
-
-		d, err := r.Expr(1).Run(conn)
+	if ge.db != nil {
+		err := ge.db.HealthCheck()
 		if err != nil {
-			log.Error(err)
+			log.Error("Database Health Check error: %s", err)
 			isHealthy = false
 		}
-		_ = d.Close()
 	}
 
 	if ge.vm != nil {
 		health, err := ge.vm.HealthStatus()
 
 		if err != nil {
-			log.Error(err)
+			log.Error("Vault Health Check error: %s", err)
 			return false
 		}
 

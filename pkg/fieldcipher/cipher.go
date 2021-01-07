@@ -9,13 +9,14 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"strconv"
+	"time"
+
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/openpgp"
 	"github.com/quan-to/chevron/pkg/openpgp/packet"
 	"github.com/quan-to/slog"
-	"reflect"
-	"strconv"
-	"time"
 )
 
 const MAGIC = "FCMN"
@@ -174,7 +175,7 @@ func (c *Cipher) encryptArray(obj []interface{}, baseKey []byte, currentLevel st
 	out := make([]interface{}, len(obj))
 	for i, v := range obj {
 		nodePath := currentLevel + base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%d", i))) + "/"
-		err = nil
+
 		if tools.StringIndexOf(nodePath, skipFields) > -1 {
 			out[i] = v
 			continue

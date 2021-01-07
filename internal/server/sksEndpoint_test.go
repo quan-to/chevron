@@ -5,13 +5,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/quan-to/chevron/internal/config"
-	"github.com/quan-to/chevron/internal/models"
-	"github.com/quan-to/chevron/pkg/QuantoError"
-	"github.com/quan-to/chevron/test"
 	"io/ioutil"
 	"net/http"
 	"testing"
+
+	"github.com/quan-to/chevron/internal/config"
+	"github.com/quan-to/chevron/pkg/QuantoError"
+	"github.com/quan-to/chevron/pkg/models"
+	"github.com/quan-to/chevron/test"
 )
 
 func TestSKSGetKey(t *testing.T) {
@@ -61,7 +62,7 @@ func BaseTestSearch(name, value, endpoint string, t *testing.T) {
 	config.PushVariables()
 	defer config.PopVariables()
 
-	config.EnableRethinkSKS = true
+	config.EnableDatabase = true
 
 	// region Test Get Key
 	req, err := http.NewRequest("GET", endpoint, nil)
@@ -173,7 +174,7 @@ func TestAddKey(t *testing.T) {
 	config.PushVariables()
 	defer config.PopVariables()
 
-	config.EnableRethinkSKS = true
+	config.EnableDatabase = true
 	// region Test Add Key
 	pubKey, _ := gpg.GetPublicKeyASCII(ctx, test.TestKeyFingerprint)
 

@@ -2,10 +2,11 @@ package keymagic
 
 import (
 	"fmt"
-	"github.com/quan-to/chevron/internal/config"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"github.com/quan-to/chevron/internal/config"
 )
 
 func GetSKSKey(fingerPrint string) (string, error) {

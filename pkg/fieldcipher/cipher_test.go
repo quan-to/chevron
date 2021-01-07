@@ -1,8 +1,9 @@
 package fieldcipher
 
 import (
-	"github.com/quan-to/chevron/test"
 	"testing"
+
+	"github.com/quan-to/chevron/test"
 )
 
 func TestCipher_GenerateEncryptedPacket(t *testing.T) {

@@ -5,11 +5,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/quan-to/chevron/internal/models"
-	"github.com/quan-to/chevron/internal/tools"
-	"github.com/quan-to/chevron/pkg/interfaces"
 	"net/http"
 	"strings"
+
+	"github.com/quan-to/chevron/internal/tools"
+	"github.com/quan-to/chevron/pkg/interfaces"
+	"github.com/quan-to/chevron/pkg/models"
 
 	"github.com/gorilla/mux"
 	"github.com/quan-to/slog"

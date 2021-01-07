@@ -1,9 +1,10 @@
 package pages
 
 import (
-	"github.com/quan-to/chevron/internal/models"
 	"html/template"
 	"net/http"
+
+	"github.com/quan-to/chevron/pkg/models"
 )
 
 const addPrivateKeyHTML = `
@@ -35,7 +36,7 @@ const addPrivateKeyHTML = `
                 if (data.errorCode) {
                     setError(data.message);
                 } else {
-                    setInfo("Added key " + data.FingerPrint);
+                    setInfo("Added key " + data.Fingerprint);
                     clearFields();
                 }
                 enableButton();

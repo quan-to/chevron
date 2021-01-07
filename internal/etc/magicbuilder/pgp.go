@@ -11,8 +11,10 @@ import (
 	"github.com/quan-to/slog"
 )
 
+type DatabaseHandler keymagic.DatabaseHandler
+
 // MakePGP creates a new PGPManager using environment variables VaultStorage, KeyPrefix, PrivateKeyFolder
-func MakePGP(log slog.Instance) interfaces.PGPManager {
+func MakePGP(log slog.Instance, dbHandler DatabaseHandler) interfaces.PGPManager {
 	var kb interfaces.StorageBackend
 
 	if config.VaultStorage {
@@ -21,10 +23,10 @@ func MakePGP(log slog.Instance) interfaces.PGPManager {
 		kb = keybackend.MakeSaveToDiskBackend(log, config.PrivateKeyFolder, config.KeyPrefix)
 	}
 
-	return keymagic.MakePGPManager(log, kb, keymagic.MakeKeyRingManager(log))
+	return keymagic.MakePGPManager(log, kb, keymagic.MakeKeyRingManager(log, dbHandler))
 }
 
 // MakeVoidPGP creates a PGPManager that does not store anything anywhere
-func MakeVoidPGP(log slog.Instance) interfaces.PGPManager {
-	return keymagic.MakePGPManager(log, keybackend.MakeVoidBackend(), keymagic.MakeKeyRingManager(log))
+func MakeVoidPGP(log slog.Instance, dbHandler DatabaseHandler) interfaces.PGPManager {
+	return keymagic.MakePGPManager(log, keybackend.MakeVoidBackend(), keymagic.MakeKeyRingManager(log, dbHandler))
 }

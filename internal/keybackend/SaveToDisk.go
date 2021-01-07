@@ -1,13 +1,14 @@
 package keybackend
 
 import (
+	"io/ioutil"
+	"os"
+	"path"
+
 	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/chevron/internal/tools"
 	"github.com/quan-to/chevron/pkg/interfaces"
 	"github.com/quan-to/slog"
-	"io/ioutil"
-	"os"
-	"path"
 )
 
 type diskBackend struct {

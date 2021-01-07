@@ -3,11 +3,14 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/quan-to/chevron/internal/keymagic"
-	"github.com/quan-to/chevron/internal/models"
-	"github.com/quan-to/chevron/pkg/interfaces"
 	"net/http"
 	"strconv"
+
+	"github.com/quan-to/chevron/internal/agent"
+
+	"github.com/quan-to/chevron/internal/keymagic"
+	"github.com/quan-to/chevron/pkg/interfaces"
+	"github.com/quan-to/chevron/pkg/models"
 
 	"github.com/gorilla/mux"
 	"github.com/quan-to/slog"
@@ -17,10 +20,12 @@ type SKSEndpoint struct {
 	sm  interfaces.SecretsManager
 	gpg interfaces.PGPManager
 	log slog.Instance
+	dbh DatabaseHandler
 }
+type DatabaseHandler agent.DatabaseHandler
 
 // MakeSKSEndpoint creates a handler for SKS Server Endpoint
-func MakeSKSEndpoint(log slog.Instance, sm interfaces.SecretsManager, gpg interfaces.PGPManager) *SKSEndpoint {
+func MakeSKSEndpoint(log slog.Instance, sm interfaces.SecretsManager, gpg interfaces.PGPManager, dbHandler DatabaseHandler) *SKSEndpoint {
 	if log == nil {
 		log = slog.Scope("SKS")
 	} else {
@@ -31,6 +36,7 @@ func MakeSKSEndpoint(log slog.Instance, sm interfaces.SecretsManager, gpg interf
 		sm:  sm,
 		gpg: gpg,
 		log: log,
+		dbh: dbHandler,
 	}
 }
 
@@ -44,9 +50,10 @@ func (sks *SKSEndpoint) AttachHandlers(r *mux.Router) {
 }
 
 func (sks *SKSEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
-	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(sks.log, r)
 	InitHTTPTimer(log, r)
+	ctx := wrapContextWithRequestID(r)
+	ctx = wrapContextWithDatabaseHandler(sks.dbh, ctx)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -73,6 +80,8 @@ func (sks *SKSEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 func (sks *SKSEndpoint) searchByName(w http.ResponseWriter, r *http.Request) {
 	log := wrapLogWithRequestID(sks.log, r)
 	InitHTTPTimer(log, r)
+	ctx := wrapContextWithRequestID(r)
+	ctx = wrapContextWithDatabaseHandler(sks.dbh, ctx)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -100,7 +109,7 @@ func (sks *SKSEndpoint) searchByName(w http.ResponseWriter, r *http.Request) {
 		pageEnd = models.DefaultPageEnd
 	}
 
-	gpgKeys, err := keymagic.PKSSearchByName(name, int(pageStart), int(pageEnd))
+	gpgKeys, err := keymagic.PKSSearchByName(ctx, name, int(pageStart), int(pageEnd))
 
 	if err != nil {
 		NotFound("name", err.Error(), w, r, log)
@@ -123,6 +132,8 @@ func (sks *SKSEndpoint) searchByName(w http.ResponseWriter, r *http.Request) {
 func (sks *SKSEndpoint) searchByFingerPrint(w http.ResponseWriter, r *http.Request) {
 	log := wrapLogWithRequestID(sks.log, r)
 	InitHTTPTimer(log, r)
+	ctx := wrapContextWithRequestID(r)
+	ctx = wrapContextWithDatabaseHandler(sks.dbh, ctx)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -150,7 +161,7 @@ func (sks *SKSEndpoint) searchByFingerPrint(w http.ResponseWriter, r *http.Reque
 		pageEnd = models.DefaultPageEnd
 	}
 
-	gpgKeys, err := keymagic.PKSSearchByFingerPrint(fingerPrint, int(pageStart), int(pageEnd))
+	gpgKeys, err := keymagic.PKSSearchByFingerPrint(ctx, fingerPrint, int(pageStart), int(pageEnd))
 
 	if err != nil {
 		NotFound("fingerPrint", err.Error(), w, r, log)
@@ -173,6 +184,8 @@ func (sks *SKSEndpoint) searchByFingerPrint(w http.ResponseWriter, r *http.Reque
 func (sks *SKSEndpoint) searchByEmail(w http.ResponseWriter, r *http.Request) {
 	log := wrapLogWithRequestID(sks.log, r)
 	InitHTTPTimer(log, r)
+	ctx := wrapContextWithRequestID(r)
+	ctx = wrapContextWithDatabaseHandler(sks.dbh, ctx)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -200,7 +213,7 @@ func (sks *SKSEndpoint) searchByEmail(w http.ResponseWriter, r *http.Request) {
 		pageEnd = models.DefaultPageEnd
 	}
 
-	gpgKeys, err := keymagic.PKSSearchByEmail(email, int(pageStart), int(pageEnd))
+	gpgKeys, err := keymagic.PKSSearchByEmail(ctx, email, int(pageStart), int(pageEnd))
 
 	if err != nil {
 		NotFound("email", err.Error(), w, r, log)
@@ -223,6 +236,8 @@ func (sks *SKSEndpoint) searchByEmail(w http.ResponseWriter, r *http.Request) {
 func (sks *SKSEndpoint) search(w http.ResponseWriter, r *http.Request) {
 	log := wrapLogWithRequestID(sks.log, r)
 	InitHTTPTimer(log, r)
+	ctx := wrapContextWithRequestID(r)
+	ctx = wrapContextWithDatabaseHandler(sks.dbh, ctx)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -250,7 +265,7 @@ func (sks *SKSEndpoint) search(w http.ResponseWriter, r *http.Request) {
 		pageEnd = models.DefaultPageEnd
 	}
 
-	gpgKeys, err := keymagic.PKSSearch(valueData, int(pageStart), int(pageEnd))
+	gpgKeys, err := keymagic.PKSSearch(ctx, valueData, int(pageStart), int(pageEnd))
 
 	if err != nil {
 		NotFound("valueData", err.Error(), w, r, log)
@@ -274,6 +289,7 @@ func (sks *SKSEndpoint) addKey(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(sks.log, r)
 	InitHTTPTimer(log, r)
+	ctx = wrapContextWithDatabaseHandler(sks.dbh, ctx)
 
 	var data models.SKSAddKey
 

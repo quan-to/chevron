@@ -10,6 +10,7 @@ import (
 	"bufio"
 	"crypto/aes"
 	"crypto/cipher"
+
 	// skipcq: GSC-G502
 	"crypto/des"
 	"crypto/rsa"

@@ -1,9 +1,10 @@
 package vaultManager
 
 import (
-	"github.com/quan-to/chevron/internal/config"
 	"os"
 	"testing"
+
+	"github.com/quan-to/chevron/internal/config"
 )
 
 var vm *VaultManager

@@ -7,10 +7,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"github.com/quan-to/chevron/internal/models"
-	"github.com/quan-to/chevron/pkg/openpgp"
-	"github.com/quan-to/chevron/pkg/openpgp/armor"
-	"github.com/quan-to/chevron/pkg/openpgp/packet"
 	"io"
 	"io/ioutil"
 	"math/rand"
@@ -22,6 +18,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/mewkiz/pkg/osutil"
 	"github.com/pkg/errors"
+	"github.com/quan-to/chevron/pkg/openpgp"
+	"github.com/quan-to/chevron/pkg/openpgp/armor"
+	"github.com/quan-to/chevron/pkg/openpgp/packet"
 	"github.com/quan-to/slog"
 )
 
@@ -31,7 +30,18 @@ var pgpsig = regexp.MustCompile("(?s)-----BEGIN PGP SIGNATURE-----\n(.*)-----END
 type ContextField string
 
 const (
-	CtxRequestID ContextField = "requestID"
+	CtxRequestID       ContextField = "requestID"
+	CtxDatabaseHandler ContextField = "dbHandler"
+)
+
+const (
+	GPG_MD5       = 1
+	GPG_SHA1      = 2
+	GPG_RIPEMD160 = 3
+	GPG_SHA256    = 8
+	GPG_SHA384    = 9
+	GPG_SHA512    = 10
+	GPG_SHA224    = 11
 )
 
 func StringIndexOf(v string, a []string) int {
@@ -46,11 +56,21 @@ func StringIndexOf(v string, a []string) int {
 
 func ByteFingerPrint2FP16(raw []byte) string {
 	fp := hex.EncodeToString(raw)
-	return strings.ToUpper(fp[len(fp)-16:])
+	return FPto16(fp)
 }
 
 func IssuerKeyIdToFP16(issuerKeyId uint64) string {
-	return strings.ToUpper(fmt.Sprintf("%016x", issuerKeyId))
+	return FPto16(fmt.Sprintf("%016x", issuerKeyId))
+}
+
+// FPto16 returns a 16 byte fingerprint for the specified fingerprint
+// if len(fingerprint) < 16 it returns the same string in upper case
+func FPto16(fingerprint string) string {
+	if len(fingerprint) > 16 {
+		fingerprint = fingerprint[len(fingerprint)-16:]
+	}
+
+	return strings.ToUpper(fingerprint)
 }
 
 func Quanto2GPG(signature string) string {
@@ -417,7 +437,7 @@ func CreateEntityFromKeys(name, comment, email string, lifeTimeInSecs uint32, pu
 			SigType:                   packet.SigTypeSubkeyBinding,
 			PubKeyAlgo:                packet.PubKeyAlgoRSA,
 			Hash:                      config.Hash(),
-			PreferredHash:             []uint8{models.GPG_SHA512},
+			PreferredHash:             []uint8{GPG_SHA512},
 			FlagCertify:               true,
 			FlagSign:                  true,
 			FlagsValid:                true,

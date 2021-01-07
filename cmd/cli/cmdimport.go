@@ -3,18 +3,19 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/quan-to/chevron/internal/etc/magicbuilder"
-	"github.com/quan-to/chevron/internal/tools"
 	"io"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/quan-to/chevron/internal/etc/magicbuilder"
+	"github.com/quan-to/chevron/internal/tools"
 )
 
 func ImportKey(filename, keyPassword string, keyPasswordFd int) {
 	var data []byte
 	var err error
-	pgpMan := magicbuilder.MakePGP(nil)
+	pgpMan := magicbuilder.MakePGP(nil, mem)
 	pgpMan.LoadKeys(ctx)
 
 	if filename == "-" {

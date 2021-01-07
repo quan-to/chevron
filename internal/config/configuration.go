@@ -1,11 +1,13 @@
 package config
 
 import (
-	"github.com/quan-to/chevron/pkg/QuantoError"
-	"github.com/quan-to/slog"
 	"os"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/quan-to/chevron/pkg/QuantoError"
+	"github.com/quan-to/slog"
 )
 
 const SMEncryptedDataOnly = false
@@ -17,7 +19,7 @@ var KeyPrefix string
 var SKSServer string
 var HttpPort int
 var MaxKeyRingCache int
-var EnableRethinkSKS bool
+var EnableDatabase bool
 var RethinkDBHost string
 var RethinkDBPort int
 var RethinkDBUsername string
@@ -48,8 +50,8 @@ var AgentBypassLogin bool
 var OnDemandKeyLoad bool
 var RequestIDHeader string
 
-var RethinkTokenManager bool
-var RethinkAuthManager bool
+var DatabaseTokenManager bool
+var DatabaseAuthManager bool
 var Environment string
 
 var AgentExternalURL string
@@ -58,11 +60,31 @@ var ShowLines bool
 var SingleKeyMode bool
 var SingleKeyPath string
 var SingleKeyPassword string
+var DatabaseDialect string
+var ConnectionString string
+
+var EnableRedis bool
+var RedisClusterMode bool
+var RedisHost string
+var RedisUser string
+var RedisPass string
+var RedisTLSEnabled bool
+var RedisMaxLocalObjects int
+var RedisLocalObjectTTL time.Duration
 
 // LogFormat allows to configure the output log format
 var LogFormat slog.Format
 
+func configDeprecationMessage(userConfig, newConfig string) {
+	if newConfig != "" {
+		slog.Warn("The configuration %q is currently deprecated. Please use %q instead.", userConfig, newConfig)
+	} else {
+		slog.Warn("The configuration %q is currently deprecated. Please refer to https://github.com/quan-to/chevron to more information")
+	}
+}
+
 func Setup() {
+	var err error
 	// Pre init
 	MaxKeyRingCache = -1
 	HttpPort = -1
@@ -70,8 +92,12 @@ func Setup() {
 	RethinkDBPoolSize = -1
 	AgentTokenExpiration = -1
 	ShowLines = false
+	DatabaseDialect = ""
+	ConnectionString = ""
 
 	// Load envvars
+	DatabaseDialect = strings.ToLower(os.Getenv("DATABASE_DIALECT"))
+	ConnectionString = os.Getenv("CONNECTION_STRING")
 	SyslogServer = os.Getenv("SYSLOG_IP")
 	SyslogFacility = os.Getenv("SYSLOG_FACILITY")
 	PrivateKeyFolder = os.Getenv("PRIVATE_KEY_FOLDER")
@@ -101,33 +127,39 @@ func Setup() {
 		HttpPort = int(i)
 	}
 
-	EnableRethinkSKS = strings.ToLower(os.Getenv("ENABLE_RETHINKDB_SKS")) == "true"
+	EnableDatabase = strings.ToLower(os.Getenv("ENABLE_DATABASE")) == "true" || DatabaseDialect == "rethinkdb"
 
-	RethinkDBHost = os.Getenv("RETHINKDB_HOST")
-	RethinkDBUsername = os.Getenv("RETHINKDB_USERNAME")
-	RethinkDBPassword = os.Getenv("RETHINKDB_PASSWORD")
+	if strings.ToLower(os.Getenv("ENABLE_RETHINKDB_SKS")) == "true" || DatabaseDialect == "rethinkdb" {
+		slog.Warn("RethinkDB services are currently deprecated. Please check the project README for more information: https://github.com/quan-to/chevron")
+		// Backwards compatibility
+		DatabaseDialect = "rethinkdb"
+		EnableDatabase = true
+		RethinkDBHost = os.Getenv("RETHINKDB_HOST")
+		RethinkDBUsername = os.Getenv("RETHINKDB_USERNAME")
+		RethinkDBPassword = os.Getenv("RETHINKDB_PASSWORD")
 
-	var rdbport = os.Getenv("RETHINKDB_PORT")
-	if rdbport != "" {
-		i, err := strconv.ParseInt(rdbport, 10, 32)
-		if err != nil {
-			slog.Error("Error parsing RETHINKDB_PORT: %s", err)
-			panic(err)
+		var rdbport = os.Getenv("RETHINKDB_PORT")
+		if rdbport != "" {
+			i, err := strconv.ParseInt(rdbport, 10, 32)
+			if err != nil {
+				slog.Error("Error parsing RETHINKDB_PORT: %s", err)
+				panic(err)
+			}
+			RethinkDBPort = int(i)
 		}
-		RethinkDBPort = int(i)
+
+		var poolSize = os.Getenv("RETHINKDB_POOL_SIZE")
+		if poolSize != "" {
+			i, err := strconv.ParseInt(poolSize, 10, 32)
+			if err != nil {
+				slog.Error("Error parsing RETHINKDB_POOL_SIZE: %s", err)
+				panic(err)
+			}
+			RethinkDBPoolSize = int(i)
+		}
+		DatabaseName = os.Getenv("DATABASE_NAME")
 	}
 
-	var poolSize = os.Getenv("RETHINKDB_POOL_SIZE")
-	if poolSize != "" {
-		i, err := strconv.ParseInt(poolSize, 10, 32)
-		if err != nil {
-			slog.Error("Error parsing RETHINKDB_POOL_SIZE: %s", err)
-			panic(err)
-		}
-		RethinkDBPoolSize = int(i)
-	}
-
-	DatabaseName = os.Getenv("DATABASE_NAME")
 	MasterGPGKeyPath = os.Getenv("MASTER_GPG_KEY_PATH")
 	MasterGPGKeyPasswordPath = os.Getenv("MASTER_GPG_KEY_PASSWORD_PATH")
 	MasterGPGKeyBase64Encoded = strings.ToLower(os.Getenv("MASTER_GPG_KEY_BASE64_ENCODED")) == "true"
@@ -150,11 +182,11 @@ func Setup() {
 	AgentTargetURL = os.Getenv("AGENT_TARGET_URL")
 	AgentKeyFingerPrint = os.Getenv("AGENT_KEY_FINGERPRINT")
 	AgentBypassLogin = os.Getenv("AGENT_BYPASS_LOGIN") == "true"
-	RethinkTokenManager = os.Getenv("RETHINK_TOKEN_MANAGER") == "true"
-	RethinkAuthManager = os.Getenv("RETHINK_AUTH_MANAGER") == "true"
+	DatabaseTokenManager = os.Getenv("RETHINK_TOKEN_MANAGER") == "true" || os.Getenv("DATABASE_TOKEN_MANAGER") == "true"
+	DatabaseAuthManager = os.Getenv("RETHINK_AUTH_MANAGER") == "true" || os.Getenv("AUTH_MANAGER") == "true"
 
-	if (RethinkAuthManager || RethinkTokenManager) && !EnableRethinkSKS {
-		slog.Fatal("Rethink Auth / Token Manager requires Rethink SKS")
+	if (DatabaseAuthManager || DatabaseTokenManager) && !EnableDatabase {
+		slog.Fatal("Database Auth / Token Manager requires a database configuration")
 	}
 
 	RequestIDHeader = os.Getenv("REQUESTID_HEADER")
@@ -178,6 +210,30 @@ func Setup() {
 	SingleKeyMode = os.Getenv("MODE") == "single_key"
 	SingleKeyPath = os.Getenv("SINGLE_KEY_PATH")
 	SingleKeyPassword = os.Getenv("SINGLE_KEY_PASSWORD")
+
+	EnableRedis = os.Getenv("REDIS_ENABLE") == "true"
+	RedisTLSEnabled = os.Getenv("REDIS_TLS_ENABLED") == "true"
+	RedisHost = os.Getenv("REDIS_HOST")
+	RedisUser = os.Getenv("REDIS_USER")
+	RedisPass = os.Getenv("REDIS_PASS")
+	RedisClusterMode = os.Getenv("REDIS_CLUSTER_MODE") == "true"
+
+	redisLocalObjectTTL := os.Getenv("REDIS_MAX_LOCAL_TTL")
+	if redisLocalObjectTTL != "" {
+		if RedisLocalObjectTTL, err = time.ParseDuration(redisLocalObjectTTL); err != nil {
+			slog.Error("Invalid field REDIS_MAX_LOCAL_TTL = %q - Invalid Duration")
+		}
+	}
+
+	redisMaxLocalObjects := os.Getenv("REDIS_MAX_LOCAL_OBJECTS")
+	if redisMaxLocalObjects != "" {
+		v, err := strconv.ParseInt(redisMaxLocalObjects, 10, 32)
+		if err != nil {
+			slog.Error("Invalid field REDIS_MAX_LOCAL_OBJECTS = %q - Invalid number", redisMaxLocalObjects)
+			v = 0
+		}
+		RedisMaxLocalObjects = int(v)
+	}
 
 	// Set defaults if not defined
 	if SyslogServer == "" {
@@ -256,6 +312,18 @@ func Setup() {
 		AgentAdminExternalURL = "/agentAdmin"
 	}
 
+	if RedisMaxLocalObjects == 0 {
+		RedisMaxLocalObjects = 100
+	}
+
+	if RedisLocalObjectTTL == 0 {
+		RedisLocalObjectTTL = time.Minute * 5
+	}
+
+	if RedisHost == "" {
+		RedisHost = "localhost:6379"
+	}
+
 	// Other stuff
 	_ = os.Mkdir(PrivateKeyFolder, 0750)
 
@@ -265,6 +333,17 @@ func Setup() {
 	} else {
 		slog.SetDebug(false)
 		QuantoError.DisableStackTrace()
+	}
+
+	// Deprecation
+	if os.Getenv("RETHINK_TOKEN_MANAGER") != "" {
+		configDeprecationMessage("RETHINK_TOKEN_MANAGER", "DATABASE_TOKEN_MANAGER")
+	}
+	if os.Getenv("RETHINK_AUTH_MANAGER") != "" {
+		configDeprecationMessage("RETHINK_AUTH_MANAGER", "DATABASE_AUTH_MANAGER")
+	}
+	if os.Getenv("ENABLE_RETHINKDB_SKS") != "" {
+		configDeprecationMessage("ENABLE_RETHINKDB_SKS", "DATABASE_DIALECT=rethinkdb")
 	}
 }
 

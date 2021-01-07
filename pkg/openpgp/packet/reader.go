@@ -5,8 +5,9 @@
 package packet
 
 import (
-	"github.com/quan-to/chevron/pkg/openpgp/errors"
 	"io"
+
+	"github.com/quan-to/chevron/pkg/openpgp/errors"
 )
 
 // Reader reads packets from an io.Reader and allows packets to be 'unread' so

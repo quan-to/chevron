@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/quan-to/chevron/internal/etc/magicbuilder"
-	"github.com/quan-to/chevron/internal/models"
 	"os"
 	"strings"
 	"syscall"
+
+	"github.com/quan-to/chevron/internal/etc/magicbuilder"
+	"github.com/quan-to/chevron/pkg/models"
 
 	"golang.org/x/crypto/ssh/terminal"
 )
@@ -14,7 +15,7 @@ import (
 // ExportKey exports the specified public / secret key
 func ExportKey(name, password string, secret bool) {
 	var err error
-	pgpMan := magicbuilder.MakePGP(nil)
+	pgpMan := magicbuilder.MakePGP(nil, mem)
 	pgpMan.LoadKeys(ctx)
 
 	// First Search the key

@@ -1,0 +1,6 @@
+{
+  "DATABASE_DIALECT": "postgres",
+  "CONNECTION_STRING": "postgres://postgres:123456@localhost:5432/postgres?sslmode=disable&search_path=remote_signer",
+  "REDIS_ENABLE": true,
+  "REDIS_HOST": "localhost:6379"
+}

@@ -1,12 +1,13 @@
 package server
 
 import (
-	"github.com/quan-to/chevron/pkg/QuantoError"
-	"github.com/quan-to/slog"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/quan-to/chevron/pkg/QuantoError"
+	"github.com/quan-to/slog"
 )
 
 func TestWriteJSON(test *testing.T) {

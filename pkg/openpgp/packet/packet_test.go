@@ -8,10 +8,11 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"github.com/quan-to/chevron/pkg/openpgp/errors"
 	"io"
 	"io/ioutil"
 	"testing"
+
+	"github.com/quan-to/chevron/pkg/openpgp/errors"
 )
 
 func TestReadFull(t *testing.T) {

@@ -11,8 +11,6 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rsa"
-	// skipcq: GSC-G505
-	"crypto/sha1"
 	_ "crypto/sha256"
 	_ "crypto/sha512"
 	"encoding/binary"
@@ -25,6 +23,9 @@ import (
 
 	"github.com/quan-to/chevron/pkg/openpgp/elgamal"
 	"github.com/quan-to/chevron/pkg/openpgp/errors"
+
+	// skipcq: GSC-G505
+	"crypto/sha1"
 )
 
 var (

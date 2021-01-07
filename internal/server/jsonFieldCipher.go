@@ -3,10 +3,11 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/quan-to/chevron/internal/models"
+	"net/http"
+
 	"github.com/quan-to/chevron/pkg/fieldcipher"
 	"github.com/quan-to/chevron/pkg/interfaces"
-	"net/http"
+	"github.com/quan-to/chevron/pkg/models"
 
 	"github.com/gorilla/mux"
 	"github.com/quan-to/chevron/pkg/openpgp"

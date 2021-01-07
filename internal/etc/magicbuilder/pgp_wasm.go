@@ -5,6 +5,7 @@ import (
 	"github.com/quan-to/chevron/internal/keybackend"
 	"github.com/quan-to/chevron/internal/keymagic"
 	"github.com/quan-to/chevron/pkg/interfaces"
+	"github.com/quan-to/slog"
 )
 
 // MakePGP creates a new PGPManager using environment variables KeyPrefix, PrivateKeyFolder
