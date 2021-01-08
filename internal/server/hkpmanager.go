@@ -14,6 +14,18 @@ import (
 
 /// HKP Server based on https://tools.ietf.org/html/draft-shaw-openpgp-hkp-00
 
+// HKP Lookup godoc
+// @id hkp-lookup
+// @tags SKS
+// @Summary GPG SKS Keyserver Lookup
+// @Accept plain
+// @Produce plain
+// @param op query string true "HKP Operation. Valid values: get, index, vindex"
+// @param options query string true "HKP Operation options. Valid values: mr, nm"
+// @param search query string true "HKP Search Value"
+// @Success 200 {string} result "result of the query"
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /pks/lookup [get]
 func operationGet(ctx context.Context, options, searchData string, machineReadable, noModification bool) (string, error) {
 	if searchData[:2] == "0x" {
 		k, _ := keymagic.PKSGetKey(ctx, searchData[2:])
@@ -120,6 +132,16 @@ func hkpLookup(log slog.Instance, w http.ResponseWriter, r *http.Request) {
 	LogExit(log, r, http.StatusOK, len(result))
 }
 
+// HKP Lookup godoc
+// @id hkp-add
+// @tags SKS
+// @Summary GPG SKS Keyserver Lookup
+// @Accept plain
+// @Produce plain
+// @param publickey body string true "GPG Public Key"
+// @Success 200 {string} result "OK"
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /pks/add [post]
 func hkpAdd(log slog.Instance, w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log = wrapLogWithRequestID(log.SubScope("HKP"), r)
