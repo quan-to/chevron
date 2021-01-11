@@ -71,6 +71,14 @@ func (ge *TestsEndpoint) checkExternal(ctx context.Context) bool {
 	return isHealthy
 }
 
+// Health Check godoc
+// @id tests-hc-ping
+// @tags Tests
+// @Summary Checks if Remote-Signer and all its dependencies are working
+// @Produce plain
+// @Success 200 {string} result "OK"
+// @Failure 503 {string} result "Service Unavailable"
+// @Router /tests/ping [get]
 func (ge *TestsEndpoint) ping(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	isHealthy := ge.checkExternal(ctx)

@@ -46,6 +46,15 @@ func (kre *KeyRingEndpoint) AttachHandlers(r *mux.Router) {
 	r.HandleFunc("/deletePrivateKey", kre.deletePrivateKey).Methods("POST")
 }
 
+// Get GPG Key godoc
+// @id kre-get-key
+// @tags Key Ring
+// @Summary Fetches a public key from the server
+// @Produce plain
+// @param fingerPrint query string true "Fingerprint of the key you want to fetch"
+// @Success 200 {string} result "gpg public key"
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /sks/getKey [get]
 func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(kre.log, r)
@@ -75,6 +84,14 @@ func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 	LogExit(log, r, 200, n)
 }
 
+// Get Cached Keys godoc
+// @id kre-get-cached-keys
+// @tags Key Ring
+// @Summary Fetches a list of cached keys in the server
+// @Produce json
+// @Success 200 {object} []models.KeyInfo
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /sks/cachedKeys [get]
 func (kre *KeyRingEndpoint) getCachedKeys(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(kre.log, r)
@@ -103,6 +120,14 @@ func (kre *KeyRingEndpoint) getCachedKeys(w http.ResponseWriter, r *http.Request
 	LogExit(log, r, 200, n)
 }
 
+// Get Loaded Private Keys godoc
+// @id kre-get-loaded-private-keys
+// @tags Key Ring
+// @Summary Fetches a list of loaded private keys in the server
+// @Produce json
+// @Success 200 {object} []models.KeyInfo
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /sks/privateKeys [get]
 func (kre *KeyRingEndpoint) getLoadedPrivateKeys(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(kre.log, r)
@@ -130,6 +155,16 @@ func (kre *KeyRingEndpoint) getLoadedPrivateKeys(w http.ResponseWriter, r *http.
 	LogExit(log, r, 200, n)
 }
 
+// Delete Private Key godoc
+// @id kre-del-private-key
+// @tags Key Ring, Key Store
+// @Summary Delete a private key from the server
+// @Accepts json
+// @Produce json
+// @param message body models.KeyRingDeletePrivateKeyData true "Private Key Information"
+// @Success 200 {object} models.GPGDeletePrivateKeyReturn
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /sks/deletePrivateKey [post]
 func (kre *KeyRingEndpoint) deletePrivateKey(w http.ResponseWriter, r *http.Request) {
 	var data models.KeyRingDeletePrivateKeyData
 	ctx := wrapContextWithRequestID(r)
@@ -166,6 +201,16 @@ func (kre *KeyRingEndpoint) deletePrivateKey(w http.ResponseWriter, r *http.Requ
 	LogExit(log, r, 200, n)
 }
 
+// Add Private Key godoc
+// @id kre-add-private-key
+// @tags Key Ring, Key Store
+// @Summary Adds a private key to the server
+// @Accepts json
+// @Produce json
+// @param message body models.KeyRingAddPrivateKeyData true "Private Key Information"
+// @Success 200 {object} models.GPGAddPrivateKeyReturn
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /sks/addPrivateKey [post]
 func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request) {
 	var data models.KeyRingAddPrivateKeyData
 	ctx := wrapContextWithRequestID(r)

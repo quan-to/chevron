@@ -40,6 +40,16 @@ func (jfc *JFCEndpoint) AttachHandlers(r *mux.Router) {
 	r.HandleFunc("/decipher", jfc.decipher).Methods("POST")
 }
 
+// Field Cipher godoc
+// @id field-cipher-cipher
+// @tags Field Cipher
+// @Summary Encrypt JSON fields to specified gpg keys.
+// @Accept json
+// @Produce json
+// @param message body models.FieldCipherInput true "The encryption parameters"
+// @Success 200 {object} fieldcipher.CipherPacket
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /fieldCipher/cipher [post]
 func (jfc *JFCEndpoint) cipher(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(jfc.log, r)
@@ -90,6 +100,16 @@ func (jfc *JFCEndpoint) cipher(w http.ResponseWriter, r *http.Request) {
 	LogExit(log, r, 200, n)
 }
 
+// Field Decipher godoc
+// @id field-cipher-decipher
+// @tags Field Cipher
+// @Summary Decrypt JSON fields from specified gpg keys.
+// @Accept json
+// @Produce json
+// @param message body models.FieldDecipherInput true "The decryption parameters"
+// @Success 200 {object} fieldcipher.DecipherPacket
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /fieldCipher/decipher [post]
 func (jfc *JFCEndpoint) decipher(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(jfc.log, r)

@@ -20,23 +20,38 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
-// @title Swagger Remote Signer API
-// @version 1.0
+// @title Remote Signer API
+// @version 1.4
 // @description This is a chevron remote-signer server
 // @license.name MIT
 // @license.url https://tldrlegal.com/license/mit-license
 // @BasePath /remoteSigner
+
 // @tag.name GPG Operations
 // @tag.description Operations using GPG Keys like Encrypt, Decrypt, Sign, Verify
+
 // @tag.name Field Cipher
 // @tag.description Operations for encrypting / decrypting JSON Data
+
 // @tag.name Key Store
 // @tag.description Operations for key load and store
+
 // @tag.name Public Key Server
 // @tag.description Operations for a REST optimized Public Key Server
+
 // @tag.name SKS
 // @tag.description Operations for Standard PGP Public Key Server
 // @tag.docs.url https://tools.ietf.org/html/draft-shaw-openpgp-hkp-00
+
+// @tag.name Agent
+// @tag.description Remote-Signer Agent for Proxied Signed Calls. This endpoint is for making a signed POST request to a target server in a transparent way.
+// @tag.docs.url https://github.com/quan-to/chevron/wiki/Quanto-Agent
+
+// @tag.name Key Ring
+// @tag.description Key Ring Manipulation Queries
+
+// @tag.name Tests
+// @tag.description Endpoint for testing remote-signer (like health-checks)
 
 // GenRemoteSignerServerMux generates a remote signer HTTP Router
 func GenRemoteSignerServerMux(slog slog.Instance, sm interfaces.SecretsManager, gpg interfaces.PGPManager, dbh DatabaseHandler) *mux.Router {

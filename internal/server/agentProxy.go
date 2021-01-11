@@ -53,6 +53,24 @@ func injectUniquenessFields(log slog.Instance, json map[string]interface{}) erro
 	return nil
 }
 
+// graphqlQueryExample is an example to be used in swagger agent-proxy
+type graphqlQueryExample struct {
+	Query     string                 `json:"query" example:"query me { User_viewer { me { baseName } } }"`
+	Variables map[string]interface{} `json:"variables"`
+}
+
+// Agent Proxy Call godoc
+// @id agent-proxy-call
+// @tags Agent
+// @Summary This signs the request with the key that the specified token is using.
+// @Accept json
+// @Produce json
+// @param proxyToken header string false "Proxy Token generated with agentAdmin. It is required if running with authentication enabled"
+// @param serverUrl header string false "Target server URL. Defaults to environment variable AGENT_TARGET_URL"
+// @param message body graphqlQueryExample true "POST Content to send signed to the target server. The message body will be sent to the target server with it's signature in a header field named 'signature'."
+// @Success 200 {string} result "result of the query"
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /agent [post]
 func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) {
 	var res *http.Response
 	var req *http.Request
