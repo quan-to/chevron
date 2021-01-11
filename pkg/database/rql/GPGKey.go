@@ -18,9 +18,9 @@ func (h *RethinkDBDriver) initGPGKeyTable() error {
 
 func (h *RethinkDBDriver) migrateGPGKeyTable() error {
 	// Legacy fields
-	h.log.Info("Migrating old fields to new fields")
+	h.log.Info("[GPGKeys] Migrating old fields to new fields")
 	result, err := r.Table(gpgKeyTableInit.TableName).
-		Filter(r.Row.HasFields("FullFingerPrint")).
+		Filter(r.Row.HasFields("FullFingerprint").Not()).
 		Update(map[string]interface{}{
 			"FullFingerprint": r.Row.Field("FullFingerPrint"),
 		}).RunWrite(h.conn)
@@ -29,7 +29,7 @@ func (h *RethinkDBDriver) migrateGPGKeyTable() error {
 		return err
 	}
 
-	h.log.Info("Migrated %d tokens FullFingerPrint -> FullFingerprint", result.Updated)
+	h.log.Info("[GPGKeys] Migrated %d gpg keys FullFingerPrint -> FullFingerprint", result.Updated)
 	return nil
 }
 
