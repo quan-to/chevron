@@ -19,9 +19,9 @@ func (h *RethinkDBDriver) initUserTokenTable() error {
 
 func (h *RethinkDBDriver) migrateUserTokenTable() error {
 	// Legacy fields
-	h.log.Info("Migrating old fields to new fields")
+	h.log.Info("[UserToken] Migrating old fields to new fields")
 	result, err := r.Table(userTokenTableInit.TableName).
-		Filter(r.Row.HasFields("FingerPrint")).
+		Filter(r.Row.HasFields("Fingerprint").Not()).
 		Update(map[string]interface{}{
 			"Fingerprint": r.Row.Field("FingerPrint"),
 		}).RunWrite(h.conn)
@@ -30,7 +30,7 @@ func (h *RethinkDBDriver) migrateUserTokenTable() error {
 		return err
 	}
 
-	h.log.Info("Migrated %d tokens FingerPrint -> Fingerprint", result.Updated)
+	h.log.Info("[UserToken] Migrated %d tokens FingerPrint -> Fingerprint", result.Updated)
 	return nil
 }
 
