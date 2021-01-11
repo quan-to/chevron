@@ -18,9 +18,9 @@ func (h *RethinkDBDriver) initUserTable() error {
 
 func (h *RethinkDBDriver) migrateUserTable() error {
 	// Legacy fields
-	h.log.Info("Migrating old fields to new fields")
+	h.log.Info("[User] Migrating old fields to new fields")
 	result, err := r.Table(userModelTableInit.TableName).
-		Filter(r.Row.HasFields("FingerPrint")).
+		Filter(r.Row.HasFields("Fingerprint").Not()).
 		Update(map[string]interface{}{
 			"Fingerprint": r.Row.Field("FingerPrint"),
 		}).RunWrite(h.conn)
@@ -29,11 +29,11 @@ func (h *RethinkDBDriver) migrateUserTable() error {
 		return err
 	}
 
-	h.log.Info("Migrated %d users FingerPrint -> Fingerprint", result.Updated)
+	h.log.Info("[User] Migrated %d users FingerPrint -> Fingerprint", result.Updated)
 
-	h.log.Info("Migrating old fields to new fields")
+	h.log.Info("[User] Migrating old fields to new fields")
 	result, err = r.Table(userModelTableInit.TableName).
-		Filter(r.Row.HasFields("Fullname")).
+		Filter(r.Row.HasFields("FullName").Not()).
 		Update(map[string]interface{}{
 			"FullName": r.Row.Field("Fullname"),
 		}).RunWrite(h.conn)
@@ -42,7 +42,7 @@ func (h *RethinkDBDriver) migrateUserTable() error {
 		return err
 	}
 
-	h.log.Info("Migrated %d users Fullname -> FullName", result.Updated)
+	h.log.Info("[User] Migrated %d users Fullname -> FullName", result.Updated)
 	return nil
 }
 
