@@ -46,7 +46,7 @@ require (
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b // indirect
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a // indirect
 	golang.org/x/text v0.3.5 // indirect
-	golang.org/x/tools v0.0.0-20210107193943-4ed967dd8eff // indirect
+	golang.org/x/tools v0.0.0-20210112183307-1e6ecd4bf1b0 // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/rethinkdb/rethinkdb-go.v6 v6.1.1
 )
