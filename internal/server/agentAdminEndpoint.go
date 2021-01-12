@@ -100,7 +100,7 @@ func (gi *graphIntercept) WriteHeader(statusCode int) {
 // @Accept json
 // @Produce json
 // @param proxyToken header string true "Proxy Token of the admin user. It is required for all calls besides the login"
-// @param message body graphqlQueryExample true "The JSON content of the graphql query"
+// @param message body string true "The JSON content of the graphql query"
 // @Success 200 {string} result "result of the query"
 // @Failure default {object} QuantoError.ErrorObject
 // @Router /agentAdmin [post]

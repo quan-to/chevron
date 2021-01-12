@@ -89,8 +89,9 @@ func GenRemoteSignerServerMux(slog slog.Instance, sm interfaces.SecretsManager, 
 	}
 
 	r := mux.NewRouter()
-
-	r.PathPrefix("/swagger").HandlerFunc(httpSwagger.Handler())
+	if config.EnableSwagger {
+		r.PathPrefix("/swagger").HandlerFunc(httpSwagger.Handler())
+	}
 
 	// Add for /
 	AddHKPEndpoints(log, dbh, r.PathPrefix("/pks").Subrouter())

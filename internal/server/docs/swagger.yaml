@@ -494,15 +494,6 @@ definitions:
           -----END PGP PUBLIC KEY BLOCK-----
         type: string
     type: object
-  server.graphqlQueryExample:
-    properties:
-      query:
-        example: query me { User_viewer { me { baseName } } }
-        type: string
-      variables:
-        additionalProperties: true
-        type: object
-    type: object
 info:
   contact: {}
   description: This is a chevron remote-signer server
@@ -534,7 +525,7 @@ paths:
         name: message
         required: true
         schema:
-          $ref: '#/definitions/server.graphqlQueryExample'
+          type: string
       produces:
       - application/json
       responses:
@@ -566,7 +557,7 @@ paths:
         name: message
         required: true
         schema:
-          $ref: '#/definitions/server.graphqlQueryExample'
+          type: string
       produces:
       - application/json
       responses:
