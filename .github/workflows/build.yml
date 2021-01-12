@@ -70,6 +70,9 @@ jobs:
         vault policy write test-policy ./config/vault/test-policy.hcl
         vault write auth/userpass/users/${VAULT_USERNAME} password=${VAULT_PASSWORD} policies=test-policy
 
+        echo "Running go generate"
+        go generate ./...
+
         echo "Running GolangCI Lint"
         golangci-lint run | gawk '{ if(match($0, /([^\:]+):([0-9]*):([0-9]*):(.*)/, m)) print "* **" m[1] "** on line " m[2] ": `" m[4] "`"  }' 2>&1 > lintresult.tmp || true
         results=$(cat lintresult.tmp)
