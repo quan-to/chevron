@@ -52,7 +52,7 @@ func (sks *SKSEndpoint) AttachHandlers(r *mux.Router) {
 // Get GPG Key godoc
 // @id pks-get-key
 // @tags Public Key Server, Key Store
-// @Summary Fetches a public key from the server
+// @Summary Fetches a GPG Public Key
 // @Produce plain
 // @param fingerPrint query string true "Fingerprint of the key you want to fetch"
 // @Success 200 {string} result "gpg public key"
@@ -89,9 +89,9 @@ func (sks *SKSEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 // Search GPG Key by Name godoc
 // @id pks-search-by-name
 // @tags Public Key Server, Key Store
-// @Summary Search for GPG keys by using it's identifier name field.
+// @Summary Searches for GPG Keys by its identifier name
 // @Produce json
-// @param name query string true "Name of the key you want to fetch"
+// @param name query string true "Name of the Key to be fetched"
 // @param pageStart query int false "Pagination Start Index (default: 0)"
 // @param pageEnd query int false "Pagination End Index (default: 100)"
 // @Success 200 {object} []models.GPGKey
@@ -152,9 +152,9 @@ func (sks *SKSEndpoint) searchByName(w http.ResponseWriter, r *http.Request) {
 // Search GPG Key by Fingerprint godoc
 // @id pks-search-by-fingerprint
 // @tags Public Key Server, Key Store
-// @Summary Search for GPG keys by using it's fingerprint field.
+// @Summary Searches for GPG Keys by its fingerprint
 // @Produce json
-// @param fingerPrint query string true "Fingerprint of the key you want to fetch"
+// @param fingerPrint query string true "Fingerprint to be fetched"
 // @param pageStart query int false "Pagination Start Index (default: 0)"
 // @param pageEnd query int false "Pagination End Index (default: 100)"
 // @Success 200 {object} []models.GPGKey
@@ -215,9 +215,9 @@ func (sks *SKSEndpoint) searchByFingerPrint(w http.ResponseWriter, r *http.Reque
 // Search GPG Key by Email godoc
 // @id pks-search-by-email
 // @tags Public Key Server, Key Store
-// @Summary Search for GPG keys by using it's email field.
+// @Summary Searches for GPG Keys by its email
 // @Produce json
-// @param email query string true "Email of the key you want to fetch"
+// @param email query string true "Email of the Key to be fetched"
 // @param pageStart query int false "Pagination Start Index (default: 0)"
 // @param pageEnd query int false "Pagination End Index (default: 100)"
 // @Success 200 {object} []models.GPGKey
@@ -278,9 +278,9 @@ func (sks *SKSEndpoint) searchByEmail(w http.ResponseWriter, r *http.Request) {
 // Search GPG Key by Value godoc
 // @id pks-search-by-value
 // @tags Public Key Server, Key Store
-// @Summary Search for GPG keys by using it all fields.
+// @Summary Searches for GPG Keys by any field
 // @Produce json
-// @param valueData query string true "Value of the key you want to fetch"
+// @param valueData query string true "Value of the Key to be fetched"
 // @param pageStart query int false "Pagination Start Index (default: 0)"
 // @param pageEnd query int false "Pagination End Index (default: 100)"
 // @Success 200 {object} []models.GPGKey
@@ -341,10 +341,10 @@ func (sks *SKSEndpoint) search(w http.ResponseWriter, r *http.Request) {
 // Add Public Key godoc
 // @id pks-add-public-key
 // @tags Public Key Server, Key Store
-// @Summary Adds a public key to the server
+// @Summary Adds a GPG Public Key
 // @Accept json
 // @Produce plain
-// @Param message body models.SKSAddKey true "Information of the public key"
+// @Param message body models.SKSAddKey true "GPG Public Key in an Armored format"
 // @Success 200 {string} result "OK"
 // @Failure default {object} QuantoError.ErrorObject
 // @Router /sks/addKey [post]

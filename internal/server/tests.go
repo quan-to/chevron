@@ -74,7 +74,7 @@ func (ge *TestsEndpoint) checkExternal(ctx context.Context) bool {
 // Health Check godoc
 // @id tests-hc-ping
 // @tags Tests
-// @Summary Checks if Remote-Signer and all its dependencies are working
+// @Summary Checks if Chevron and its dependencies are up and ready
 // @Produce plain
 // @Success 200 {string} result "OK"
 // @Failure 503 {string} result "Service Unavailable"

@@ -39,7 +39,7 @@ var doc = `{
                 "tags": [
                     "Agent"
                 ],
-                "summary": "This signs the request with the key that the specified token is using.",
+                "summary": "Signs the request with GPG key specified by the token",
                 "operationId": "agent-proxy-call",
                 "parameters": [
                     {
@@ -91,7 +91,7 @@ var doc = `{
                 "tags": [
                     "Agent"
                 ],
-                "summary": "This is the GraphQL Endpoint for administration of the agent proxy tokens.",
+                "summary": "Administration of the Agent proxy tokens.",
                 "operationId": "agent-proxy-admin",
                 "parameters": [
                     {
@@ -138,7 +138,7 @@ var doc = `{
                 "tags": [
                     "Field Cipher"
                 ],
-                "summary": "Encrypt JSON fields to specified gpg keys.",
+                "summary": "Encrypts JSON fields to specified GPG keys",
                 "operationId": "field-cipher-cipher",
                 "parameters": [
                     {
@@ -178,7 +178,7 @@ var doc = `{
                 "tags": [
                     "Field Cipher"
                 ],
-                "summary": "Decrypt JSON fields from specified gpg keys.",
+                "summary": "Decrypts JSON fields from specified GPG keys.",
                 "operationId": "field-cipher-decipher",
                 "parameters": [
                     {
@@ -218,7 +218,7 @@ var doc = `{
                 "tags": [
                     "GPG Operations"
                 ],
-                "summary": "Decrypts data using loaded GPG Private Key",
+                "summary": "Decrypts data using the specified GPG Key. The private key should be previously loaded.",
                 "operationId": "gpg-data-decrypt",
                 "parameters": [
                     {
@@ -258,7 +258,7 @@ var doc = `{
                 "tags": [
                     "GPG Operations"
                 ],
-                "summary": "Encrypts data for a GPG Key",
+                "summary": "Encrypts data for the specified GPG Public Key",
                 "operationId": "gpg-data-encrypt",
                 "parameters": [
                     {
@@ -299,7 +299,7 @@ var doc = `{
                 "tags": [
                     "GPG Operations"
                 ],
-                "summary": "Generates a new GPG Key",
+                "summary": "Generates a new GPG Key pair",
                 "operationId": "gpg-key-generate",
                 "parameters": [
                     {
@@ -340,7 +340,7 @@ var doc = `{
                 "tags": [
                     "GPG Operations"
                 ],
-                "summary": "Signs a payload in GPG Format",
+                "summary": "Signs a payload with a standard GPG signature format",
                 "operationId": "gpg-data-sign",
                 "parameters": [
                     {
@@ -381,7 +381,7 @@ var doc = `{
                 "tags": [
                     "GPG Operations"
                 ],
-                "summary": "Signs a payload in Quanto Format",
+                "summary": "Signs a payload with a Quanto's signature format",
                 "operationId": "gpg-data-sign-quanto",
                 "parameters": [
                     {
@@ -422,7 +422,7 @@ var doc = `{
                 "tags": [
                     "GPG Operations"
                 ],
-                "summary": "Unlocks a pre-loaded key",
+                "summary": "Unlocks a pre-loaded GPG Private Key",
                 "operationId": "gpg-key-unlock",
                 "parameters": [
                     {
@@ -462,7 +462,7 @@ var doc = `{
                 "tags": [
                     "GPG Operations"
                 ],
-                "summary": "Verifies a signature in GPG Format",
+                "summary": "Verifies a signature in the standard GPG format",
                 "operationId": "gpg-data-verify",
                 "parameters": [
                     {
@@ -502,7 +502,7 @@ var doc = `{
                 "tags": [
                     "GPG Operations"
                 ],
-                "summary": "Verifies a signature in Quanto Format",
+                "summary": "Verifies a signature in Quanto's signature format",
                 "operationId": "gpg-data-verify-quanto",
                 "parameters": [
                     {
@@ -542,7 +542,7 @@ var doc = `{
                 "tags": [
                     "SKS"
                 ],
-                "summary": "GPG SKS Keyserver Lookup",
+                "summary": "GPG SKS Keyserver add public key",
                 "operationId": "hkp-add",
                 "parameters": [
                     {
@@ -582,7 +582,7 @@ var doc = `{
                 "tags": [
                     "SKS"
                 ],
-                "summary": "GPG SKS Keyserver Lookup",
+                "summary": "GPG SKS Keyserver lookup",
                 "operationId": "hkp-lookup",
                 "parameters": [
                     {
@@ -635,11 +635,11 @@ var doc = `{
                     "Public Key Server",
                     "Key Store"
                 ],
-                "summary": "Adds a public key to the server",
+                "summary": "Adds a GPG Public Key",
                 "operationId": "pks-add-public-key",
                 "parameters": [
                     {
-                        "description": "Information of the public key",
+                        "description": "GPG Public Key in an Armored format",
                         "name": "message",
                         "in": "body",
                         "required": true,
@@ -673,7 +673,7 @@ var doc = `{
                     "Key Ring",
                     "Key Store"
                 ],
-                "summary": "Adds a private key to the server",
+                "summary": "Adds a GPG Private Key",
                 "operationId": "kre-add-private-key",
                 "parameters": [
                     {
@@ -710,7 +710,7 @@ var doc = `{
                 "tags": [
                     "Key Ring"
                 ],
-                "summary": "Fetches a list of cached keys in the server",
+                "summary": "Fetches a list of cached keys",
                 "operationId": "kre-get-cached-keys",
                 "responses": {
                     "200": {
@@ -740,7 +740,7 @@ var doc = `{
                     "Key Ring",
                     "Key Store"
                 ],
-                "summary": "Delete a private key from the server",
+                "summary": "Deletes a GPG Private Key",
                 "operationId": "kre-del-private-key",
                 "parameters": [
                     {
@@ -777,12 +777,12 @@ var doc = `{
                 "tags": [
                     "Key Ring"
                 ],
-                "summary": "Fetches a public key from the server",
+                "summary": "Fetches a GPG public key",
                 "operationId": "kre-get-key",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Fingerprint of the key you want to fetch",
+                        "description": "Fingerprint of the GPG Key to be fetched",
                         "name": "fingerPrint",
                         "in": "query",
                         "required": true
@@ -790,7 +790,7 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "gpg public key",
+                        "description": "GPG public key",
                         "schema": {
                             "type": "string"
                         }
@@ -812,7 +812,7 @@ var doc = `{
                 "tags": [
                     "Key Ring"
                 ],
-                "summary": "Fetches a list of loaded private keys in the server",
+                "summary": "Fetches a list of loaded private keys",
                 "operationId": "kre-get-loaded-private-keys",
                 "responses": {
                     "200": {
@@ -842,12 +842,12 @@ var doc = `{
                     "Public Key Server",
                     "Key Store"
                 ],
-                "summary": "Search for GPG keys by using it all fields.",
+                "summary": "Searches for GPG Keys by any field",
                 "operationId": "pks-search-by-value",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Value of the key you want to fetch",
+                        "description": "Value of the Key to be fetched",
                         "name": "valueData",
                         "in": "query",
                         "required": true
@@ -893,12 +893,12 @@ var doc = `{
                     "Public Key Server",
                     "Key Store"
                 ],
-                "summary": "Search for GPG keys by using it's email field.",
+                "summary": "Searches for GPG Keys by its email",
                 "operationId": "pks-search-by-email",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Email of the key you want to fetch",
+                        "description": "Email of the Key to be fetched",
                         "name": "email",
                         "in": "query",
                         "required": true
@@ -944,12 +944,12 @@ var doc = `{
                     "Public Key Server",
                     "Key Store"
                 ],
-                "summary": "Search for GPG keys by using it's fingerprint field.",
+                "summary": "Searches for GPG Keys by its fingerprint",
                 "operationId": "pks-search-by-fingerprint",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Fingerprint of the key you want to fetch",
+                        "description": "Fingerprint to be fetched",
                         "name": "fingerPrint",
                         "in": "query",
                         "required": true
@@ -995,12 +995,12 @@ var doc = `{
                     "Public Key Server",
                     "Key Store"
                 ],
-                "summary": "Search for GPG keys by using it's identifier name field.",
+                "summary": "Searches for GPG Keys by its identifier name",
                 "operationId": "pks-search-by-name",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Name of the key you want to fetch",
+                        "description": "Name of the Key to be fetched",
                         "name": "name",
                         "in": "query",
                         "required": true
@@ -1045,7 +1045,7 @@ var doc = `{
                 "tags": [
                     "Tests"
                 ],
-                "summary": "Checks if Remote-Signer and all its dependencies are working",
+                "summary": "Checks if Chevron and its dependencies are up and ready",
                 "operationId": "tests-hc-ping",
                 "responses": {
                     "200": {

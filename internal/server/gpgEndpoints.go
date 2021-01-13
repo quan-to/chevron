@@ -51,7 +51,7 @@ func (ge *GPGEndpoint) AttachHandlers(r *mux.Router) {
 // Decrypt godoc
 // @id gpg-data-decrypt
 // @tags GPG Operations
-// @Summary Decrypts data using loaded GPG Private Key
+// @Summary Decrypts data using the specified GPG Key. The private key should be previously loaded.
 // @Accept json
 // @Produce json
 // @Param message body models.GPGDecryptData true "Information to decrypt"
@@ -92,7 +92,7 @@ func (ge *GPGEndpoint) decrypt(w http.ResponseWriter, r *http.Request) {
 // Encrypt godoc
 // @id gpg-data-encrypt
 // @tags GPG Operations
-// @Summary Encrypts data for a GPG Key
+// @Summary Encrypts data for the specified GPG Public Key
 // @Accept json
 // @Produce json
 // @Param message body models.GPGEncryptData true "Information to encrypt to public key"
@@ -138,7 +138,7 @@ func (ge *GPGEndpoint) encrypt(w http.ResponseWriter, r *http.Request) {
 // VerifySignature godoc
 // @id gpg-data-verify
 // @tags GPG Operations
-// @Summary Verifies a signature in GPG Format
+// @Summary Verifies a signature in the standard GPG format
 // @Accept json
 // @Produce json
 // @Param message body models.GPGVerifySignatureDataNonQuanto true "Information to verify a signature in GPG format"
@@ -189,7 +189,7 @@ func (ge *GPGEndpoint) verifySignature(w http.ResponseWriter, r *http.Request) {
 // VerifySignatureQuanto godoc
 // @id gpg-data-verify-quanto
 // @tags GPG Operations
-// @Summary Verifies a signature in Quanto Format
+// @Summary Verifies a signature in Quanto's signature format
 // @Accept json
 // @Produce json
 // @Param message body models.GPGVerifySignatureData true "Information to verify a signature in quanto format"
@@ -245,7 +245,7 @@ func (ge *GPGEndpoint) verifySignatureQuanto(w http.ResponseWriter, r *http.Requ
 // Sign godoc
 // @id gpg-data-sign
 // @tags GPG Operations
-// @Summary Signs a payload in GPG Format
+// @Summary Signs a payload with a standard GPG signature format
 // @Description Signs a payload using the specified GPG key and returns the signature in GPG Format
 // @Accept json
 // @Produce plain
@@ -292,7 +292,7 @@ func (ge *GPGEndpoint) sign(w http.ResponseWriter, r *http.Request) {
 // SignQuanto godoc
 // @id gpg-data-sign-quanto
 // @tags GPG Operations
-// @Summary Signs a payload in Quanto Format
+// @Summary Signs a payload with a Quanto's signature format
 // @Description Signs a payload using the specified GPG key and returns the signature in Quanto Format
 // @Accept json
 // @Produce plain
@@ -341,7 +341,7 @@ func (ge *GPGEndpoint) signQuanto(w http.ResponseWriter, r *http.Request) {
 // UnlockKey godoc
 // @id gpg-key-unlock
 // @tags GPG Operations
-// @Summary Unlocks a pre-loaded key
+// @Summary Unlocks a pre-loaded GPG Private Key
 // @Description Unlocks a locked pre-loaded key inside remote signer
 // @Accept json
 // @Produce plain
@@ -385,7 +385,7 @@ func (ge *GPGEndpoint) unlockKey(w http.ResponseWriter, r *http.Request) {
 // GenerateKey godoc
 // @id gpg-key-generate
 // @tags GPG Operations
-// @Summary Generates a new GPG Key
+// @Summary Generates a new GPG Key pair
 // @Description Generates a new GPG Key by specifying the Identifier, Bits and Password
 // @Accept json
 // @Produce json

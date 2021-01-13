@@ -17,7 +17,7 @@ import (
 // HKP Lookup godoc
 // @id hkp-lookup
 // @tags SKS
-// @Summary GPG SKS Keyserver Lookup
+// @Summary GPG SKS Keyserver lookup
 // @Accept plain
 // @Produce plain
 // @param op query string true "HKP Operation. Valid values: get, index, vindex"
@@ -132,10 +132,10 @@ func hkpLookup(log slog.Instance, w http.ResponseWriter, r *http.Request) {
 	LogExit(log, r, http.StatusOK, len(result))
 }
 
-// HKP Lookup godoc
+// HKP Add key godoc
 // @id hkp-add
 // @tags SKS
-// @Summary GPG SKS Keyserver Lookup
+// @Summary GPG SKS Keyserver add public key
 // @Accept plain
 // @Produce plain
 // @param publickey body string true "GPG Public Key"

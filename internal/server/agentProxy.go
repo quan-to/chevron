@@ -56,7 +56,7 @@ func injectUniquenessFields(log slog.Instance, json map[string]interface{}) erro
 // Agent Proxy Call godoc
 // @id agent-proxy-call
 // @tags Agent
-// @Summary This signs the request with the key that the specified token is using.
+// @Summary Signs the request with GPG key specified by the token
 // @Accept json
 // @Produce json
 // @param proxyToken header string false "Proxy Token generated with agentAdmin. It is required if running with authentication enabled"

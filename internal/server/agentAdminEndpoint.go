@@ -96,7 +96,7 @@ func (gi *graphIntercept) WriteHeader(statusCode int) {
 // Agent Admin GraphQL godoc
 // @id agent-proxy-admin
 // @tags Agent
-// @Summary This is the GraphQL Endpoint for administration of the agent proxy tokens.
+// @Summary Administration of the Agent proxy tokens.
 // @Accept json
 // @Produce json
 // @param proxyToken header string true "Proxy Token of the admin user. It is required for all calls besides the login"

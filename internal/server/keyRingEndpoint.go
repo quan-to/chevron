@@ -49,10 +49,10 @@ func (kre *KeyRingEndpoint) AttachHandlers(r *mux.Router) {
 // Get GPG Key godoc
 // @id kre-get-key
 // @tags Key Ring
-// @Summary Fetches a public key from the server
+// @Summary Fetches a GPG public key
 // @Produce plain
-// @param fingerPrint query string true "Fingerprint of the key you want to fetch"
-// @Success 200 {string} result "gpg public key"
+// @param fingerPrint query string true "Fingerprint of the GPG Key to be fetched"
+// @Success 200 {string} result "GPG public key"
 // @Failure default {object} QuantoError.ErrorObject
 // @Router /sks/getKey [get]
 func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
@@ -87,7 +87,7 @@ func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 // Get Cached Keys godoc
 // @id kre-get-cached-keys
 // @tags Key Ring
-// @Summary Fetches a list of cached keys in the server
+// @Summary Fetches a list of cached keys
 // @Produce json
 // @Success 200 {object} []models.KeyInfo
 // @Failure default {object} QuantoError.ErrorObject
@@ -123,7 +123,7 @@ func (kre *KeyRingEndpoint) getCachedKeys(w http.ResponseWriter, r *http.Request
 // Get Loaded Private Keys godoc
 // @id kre-get-loaded-private-keys
 // @tags Key Ring
-// @Summary Fetches a list of loaded private keys in the server
+// @Summary Fetches a list of loaded private keys
 // @Produce json
 // @Success 200 {object} []models.KeyInfo
 // @Failure default {object} QuantoError.ErrorObject
@@ -158,7 +158,7 @@ func (kre *KeyRingEndpoint) getLoadedPrivateKeys(w http.ResponseWriter, r *http.
 // Delete Private Key godoc
 // @id kre-del-private-key
 // @tags Key Ring, Key Store
-// @Summary Delete a private key from the server
+// @Summary Deletes a GPG Private Key
 // @Accepts json
 // @Produce json
 // @param message body models.KeyRingDeletePrivateKeyData true "Private Key Information"
@@ -204,7 +204,7 @@ func (kre *KeyRingEndpoint) deletePrivateKey(w http.ResponseWriter, r *http.Requ
 // Add Private Key godoc
 // @id kre-add-private-key
 // @tags Key Ring, Key Store
-// @Summary Adds a private key to the server
+// @Summary Adds a GPG Private Key
 // @Accepts json
 // @Produce json
 // @param message body models.KeyRingAddPrivateKeyData true "Private Key Information"

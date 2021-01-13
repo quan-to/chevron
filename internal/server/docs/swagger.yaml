@@ -537,7 +537,7 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: This signs the request with the key that the specified token is using.
+      summary: Signs the request with GPG key specified by the token
       tags:
       - Agent
   /agentAdmin:
@@ -569,8 +569,7 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: This is the GraphQL Endpoint for administration of the agent proxy
-        tokens.
+      summary: Administration of the Agent proxy tokens.
       tags:
       - Agent
   /fieldCipher/cipher:
@@ -596,7 +595,7 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: Encrypt JSON fields to specified gpg keys.
+      summary: Encrypts JSON fields to specified GPG keys
       tags:
       - Field Cipher
   /fieldCipher/decipher:
@@ -622,7 +621,7 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: Decrypt JSON fields from specified gpg keys.
+      summary: Decrypts JSON fields from specified GPG keys.
       tags:
       - Field Cipher
   /gpg/decrypt:
@@ -648,7 +647,8 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: Decrypts data using loaded GPG Private Key
+      summary: Decrypts data using the specified GPG Key. The private key should be
+        previously loaded.
       tags:
       - GPG Operations
   /gpg/encrypt:
@@ -674,7 +674,7 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: Encrypts data for a GPG Key
+      summary: Encrypts data for the specified GPG Public Key
       tags:
       - GPG Operations
   /gpg/generateKey:
@@ -703,7 +703,7 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: Generates a new GPG Key
+      summary: Generates a new GPG Key pair
       tags:
       - GPG Operations
   /gpg/sign:
@@ -732,7 +732,7 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: Signs a payload in GPG Format
+      summary: Signs a payload with a standard GPG signature format
       tags:
       - GPG Operations
   /gpg/signQuanto:
@@ -760,7 +760,7 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: Signs a payload in Quanto Format
+      summary: Signs a payload with a Quanto's signature format
       tags:
       - GPG Operations
   /gpg/unlockKey:
@@ -787,7 +787,7 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: Unlocks a pre-loaded key
+      summary: Unlocks a pre-loaded GPG Private Key
       tags:
       - GPG Operations
   /gpg/verifySignature:
@@ -813,7 +813,7 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: Verifies a signature in GPG Format
+      summary: Verifies a signature in the standard GPG format
       tags:
       - GPG Operations
   /gpg/verifySignatureQuanto:
@@ -839,7 +839,7 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: Verifies a signature in Quanto Format
+      summary: Verifies a signature in Quanto's signature format
       tags:
       - GPG Operations
   /pks/add:
@@ -865,7 +865,7 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: GPG SKS Keyserver Lookup
+      summary: GPG SKS Keyserver add public key
       tags:
       - SKS
   /pks/lookup:
@@ -900,7 +900,7 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: GPG SKS Keyserver Lookup
+      summary: GPG SKS Keyserver lookup
       tags:
       - SKS
   /sks/addKey:
@@ -909,7 +909,7 @@ paths:
       - application/json
       operationId: pks-add-public-key
       parameters:
-      - description: Information of the public key
+      - description: GPG Public Key in an Armored format
         in: body
         name: message
         required: true
@@ -926,7 +926,7 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: Adds a public key to the server
+      summary: Adds a GPG Public Key
       tags:
       - Public Key Server
       - Key Store
@@ -951,7 +951,7 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: Adds a private key to the server
+      summary: Adds a GPG Private Key
       tags:
       - Key Ring
       - Key Store
@@ -971,7 +971,7 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: Fetches a list of cached keys in the server
+      summary: Fetches a list of cached keys
       tags:
       - Key Ring
   /sks/deletePrivateKey:
@@ -995,7 +995,7 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: Delete a private key from the server
+      summary: Deletes a GPG Private Key
       tags:
       - Key Ring
       - Key Store
@@ -1003,7 +1003,7 @@ paths:
     get:
       operationId: kre-get-key
       parameters:
-      - description: Fingerprint of the key you want to fetch
+      - description: Fingerprint of the GPG Key to be fetched
         in: query
         name: fingerPrint
         required: true
@@ -1012,14 +1012,14 @@ paths:
       - text/plain
       responses:
         "200":
-          description: gpg public key
+          description: GPG public key
           schema:
             type: string
         default:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: Fetches a public key from the server
+      summary: Fetches a GPG public key
       tags:
       - Key Ring
   /sks/privateKeys:
@@ -1038,14 +1038,14 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: Fetches a list of loaded private keys in the server
+      summary: Fetches a list of loaded private keys
       tags:
       - Key Ring
   /sks/search:
     get:
       operationId: pks-search-by-value
       parameters:
-      - description: Value of the key you want to fetch
+      - description: Value of the Key to be fetched
         in: query
         name: valueData
         required: true
@@ -1071,7 +1071,7 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: Search for GPG keys by using it all fields.
+      summary: Searches for GPG Keys by any field
       tags:
       - Public Key Server
       - Key Store
@@ -1079,7 +1079,7 @@ paths:
     get:
       operationId: pks-search-by-email
       parameters:
-      - description: Email of the key you want to fetch
+      - description: Email of the Key to be fetched
         in: query
         name: email
         required: true
@@ -1105,7 +1105,7 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: Search for GPG keys by using it's email field.
+      summary: Searches for GPG Keys by its email
       tags:
       - Public Key Server
       - Key Store
@@ -1113,7 +1113,7 @@ paths:
     get:
       operationId: pks-search-by-fingerprint
       parameters:
-      - description: Fingerprint of the key you want to fetch
+      - description: Fingerprint to be fetched
         in: query
         name: fingerPrint
         required: true
@@ -1139,7 +1139,7 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: Search for GPG keys by using it's fingerprint field.
+      summary: Searches for GPG Keys by its fingerprint
       tags:
       - Public Key Server
       - Key Store
@@ -1147,7 +1147,7 @@ paths:
     get:
       operationId: pks-search-by-name
       parameters:
-      - description: Name of the key you want to fetch
+      - description: Name of the Key to be fetched
         in: query
         name: name
         required: true
@@ -1173,7 +1173,7 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/QuantoError.ErrorObject'
-      summary: Search for GPG keys by using it's identifier name field.
+      summary: Searches for GPG Keys by its identifier name
       tags:
       - Public Key Server
       - Key Store
@@ -1191,7 +1191,7 @@ paths:
           description: Service Unavailable
           schema:
             type: string
-      summary: Checks if Remote-Signer and all its dependencies are working
+      summary: Checks if Chevron and its dependencies are up and ready
       tags:
       - Tests
 swagger: "2.0"

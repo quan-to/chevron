@@ -43,7 +43,7 @@ func (jfc *JFCEndpoint) AttachHandlers(r *mux.Router) {
 // Field Cipher godoc
 // @id field-cipher-cipher
 // @tags Field Cipher
-// @Summary Encrypt JSON fields to specified gpg keys.
+// @Summary Encrypts JSON fields to specified GPG keys
 // @Accept json
 // @Produce json
 // @param message body models.FieldCipherInput true "The encryption parameters"
@@ -103,7 +103,7 @@ func (jfc *JFCEndpoint) cipher(w http.ResponseWriter, r *http.Request) {
 // Field Decipher godoc
 // @id field-cipher-decipher
 // @tags Field Cipher
-// @Summary Decrypt JSON fields from specified gpg keys.
+// @Summary Decrypts JSON fields from specified GPG keys.
 // @Accept json
 // @Produce json
 // @param message body models.FieldDecipherInput true "The decryption parameters"
