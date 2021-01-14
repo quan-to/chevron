@@ -53,6 +53,18 @@ func injectUniquenessFields(log slog.Instance, json map[string]interface{}) erro
 	return nil
 }
 
+// Agent Proxy Call godoc
+// @id agent-proxy-call
+// @tags Agent
+// @Summary Signs the request with GPG key specified by the token
+// @Accept json
+// @Produce json
+// @param proxyToken header string false "Proxy Token generated with agentAdmin. It is required if running with authentication enabled"
+// @param serverUrl header string false "Target server URL. Defaults to environment variable AGENT_TARGET_URL"
+// @param message body string true "POST Content to send signed to the target server. The message body will be sent to the target server with it's signature in a header field named 'signature'."
+// @Success 200 {string} result "result of the query"
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /agent [post]
 func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) {
 	var res *http.Response
 	var req *http.Request

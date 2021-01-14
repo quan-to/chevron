@@ -48,6 +48,16 @@ func (ge *GPGEndpoint) AttachHandlers(r *mux.Router) {
 	r.HandleFunc("/decrypt", ge.decrypt).Methods("POST")
 }
 
+// Decrypt godoc
+// @id gpg-data-decrypt
+// @tags GPG Operations
+// @Summary Decrypts data using the specified GPG Key. The private key should be previously loaded.
+// @Accept json
+// @Produce json
+// @Param message body models.GPGDecryptData true "Information to decrypt"
+// @Success 200 {object} models.GPGDecryptedData
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /gpg/decrypt [post]
 func (ge *GPGEndpoint) decrypt(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
@@ -75,10 +85,20 @@ func (ge *GPGEndpoint) decrypt(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	n, _ := w.Write([]byte(d))
+	n, _ := w.Write(d)
 	LogExit(log, r, 200, n)
 }
 
+// Encrypt godoc
+// @id gpg-data-encrypt
+// @tags GPG Operations
+// @Summary Encrypts data for the specified GPG Public Key
+// @Accept json
+// @Produce json
+// @Param message body models.GPGEncryptData true "Information to encrypt to public key"
+// @Success 200 {string} Encrypted Data "wcDMA8HPMfuMKotZAQwADzmQgwJiz3p5suaYpPwCbOluqvu2O5kVitJNO86KfkSYgbR0y67c+fGk5nO+Zm66qeolXLqVBHUvSnpZf9jMupRZLRmSZ0JmmvXoJIdiahj+NLwF6NVBvmoJ8BkMEQkr5oCNkKBveaCYXdQ7Gba2buICwxxwEmq3LV6/D0Zg4AmKX/k2N1kjRGJaUeHH3oU1YEjPo3A3bo9EZLGLI+J5VSlxkydxXUkF2TISKCr2rkhUmH5E7CUFu6H2nOofxk9tJDoSfjACkEjFKdg3BbTqNlYeuNmdJHwLfHDI+WcbL3/Hsl5MVnyHGeztsj0jn2bAIcT9FHfw1W3LUpaTNlemfrn52la7zN3r2588JDRbSaqLQ/d5+3hHWyE7RsRL0jdpEj/HM3ue2mi6GfyxDZy1DxdZsy7kqoYbBIwbtCdqZetU+bH6hWk92BY89AJUpV7xPCzRozw5WvCTsPYsu10JDvvPvj1c47BA9KlJ1wTcB2lYhmoX39T3ymjMKJ+6NAOF0uAB5PToGBs3BjE4MsxQHMLchK3hTuXg+uAY4fVU4I3jFyDPs8zYKsfgCOIHYBV84Obhm9rgqOAh4Ifi+klQeOCf4+p0IGeF6b6+4IPiAtTxRuB+5KnAAWAlBpwJWAqwNJ68HIjiN9UOgeGU+wA="
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /gpg/encrypt [post]
 func (ge *GPGEndpoint) encrypt(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
@@ -115,6 +135,16 @@ func (ge *GPGEndpoint) encrypt(w http.ResponseWriter, r *http.Request) {
 	LogExit(log, r, 200, n)
 }
 
+// VerifySignature godoc
+// @id gpg-data-verify
+// @tags GPG Operations
+// @Summary Verifies a signature in the standard GPG format
+// @Accept json
+// @Produce json
+// @Param message body models.GPGVerifySignatureDataNonQuanto true "Information to verify a signature in GPG format"
+// @Success 200 {string} Returns OK
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /gpg/verifySignature [post]
 func (ge *GPGEndpoint) verifySignature(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
@@ -156,6 +186,16 @@ func (ge *GPGEndpoint) verifySignature(w http.ResponseWriter, r *http.Request) {
 	LogExit(log, r, 200, n)
 }
 
+// VerifySignatureQuanto godoc
+// @id gpg-data-verify-quanto
+// @tags GPG Operations
+// @Summary Verifies a signature in Quanto's signature format
+// @Accept json
+// @Produce json
+// @Param message body models.GPGVerifySignatureData true "Information to verify a signature in quanto format"
+// @Success 200 {string} Returns OK
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /gpg/verifySignatureQuanto [post]
 func (ge *GPGEndpoint) verifySignatureQuanto(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
@@ -202,6 +242,17 @@ func (ge *GPGEndpoint) verifySignatureQuanto(w http.ResponseWriter, r *http.Requ
 	LogExit(log, r, 200, n)
 }
 
+// Sign godoc
+// @id gpg-data-sign
+// @tags GPG Operations
+// @Summary Signs a payload with a standard GPG signature format
+// @Description Signs a payload using the specified GPG key and returns the signature in GPG Format
+// @Accept json
+// @Produce plain
+// @Param message body models.GPGSignData true "Data to sign"
+// @Success 200 {string} Signature "-----BEGIN PGP SIGNATURE-----\n\nwsDcBAABCgAQBQJf+LriCRAFUfRSq+RjpAAAuL0MAGGrSJfK/tnMkwZ2Rkh3JcvF\nE8WU8jwc8quz+0p9gMDscby0jShJ2G2XXMm3WAYXW88J6h8u2E/lTb6l3oBq/FPb\n15gTM5Ie0p0kHBUlgP5bkV9EF9+VQif40fhVX7OPrS27jWtVNP374ARzSIgKMLa6\nKBZhV1eQecLIlEYXahUP9jyt4cR4A4d9P+YJS/L6d/tQT4g9DBo66hYt5lu4sagG\nDHsW2HK9I7fizCBaE8azLtQd3RRFTWZshln7OGVypwcdbzWbYr5uEhituxAnZKS4\nSWwI0hgj1OkZeOhKwaydtITnaeH+nmlLBzhGKQWjCiLlsDNkkp3/4FKOuYJkYXeZ\nm61GV6G5ZpW/gFVJXXyPz6ElNfWCorZQvxLbY4YWTBLdLyblHnp9kshav6dnexN1\nwQyBDk8jxucmKNE8kCu591dPj/g/H38/zpGZQhj8Firb0rCFumqsAwxFeyTEFjVI\ncyDHa5K+ytmSrITIdQUUsp1M4UQiRH63c1HYOLQurw==\n=BRZt\n-----END PGP SIGNATURE-----"
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /gpg/sign [post]
 func (ge *GPGEndpoint) sign(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
@@ -238,6 +289,17 @@ func (ge *GPGEndpoint) sign(w http.ResponseWriter, r *http.Request) {
 	LogExit(log, r, 200, n)
 }
 
+// SignQuanto godoc
+// @id gpg-data-sign-quanto
+// @tags GPG Operations
+// @Summary Signs a payload with a Quanto's signature format
+// @Description Signs a payload using the specified GPG key and returns the signature in Quanto Format
+// @Accept json
+// @Produce plain
+// @Param message body models.GPGSignData true "Data to sign"
+// @Success 200 {string} Signature 0551F452ABE463A4_SHA512_wsDcBAABCgAQBQJf+LYnCRAFUfRSq+RjpAAA7/oMACHJPMtQs4rr0uxX4AMZ8akb+x2p5ZYL+uRug+zctp82sJEJmL76HG++UyzDmMUCagJ+LBWp2RcCQvfsIhX5MqD7lPkEdtl0uNCIU40apvzn1+0kndl7LnFtzyHMWrHrRqEFGJ0E2APPqv7g1pehVKeusMOkTNUmmsJNgZBYrluZxHnai/Rudoe9jBxihY4ALF0eOyTCHbtWy0z6fll3Bo/iPe777kplDXmTBzCEM8uD3/VZmY6pGn6oXUov/z8Dcrg2x5qT4i5DgdF8OSLbsxVW2OIV8DwCicQCT2tK95fctBqJ22vfmhNlxI3KzI9ShxeV6Eci5p5Zydgoh77pDiWDysrq1dOZ+o7T+ij72K3s63w3loERFVoDxDuKG3jS3+fj+ggqqtpUpm957+9+4QlnJqZk0v9TKT661HnoH4MfZR3muBir8/dgF4mNtuQLSswOxdVs1sHSC3ssTIzzpQqeI2iy3m8Svgl5unAdv2QE81EM/wT5brc2R/abSRz52A===J34T
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /gpg/signQuanto [post]
 func (ge *GPGEndpoint) signQuanto(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
@@ -276,6 +338,17 @@ func (ge *GPGEndpoint) signQuanto(w http.ResponseWriter, r *http.Request) {
 	LogExit(log, r, 200, n)
 }
 
+// UnlockKey godoc
+// @id gpg-key-unlock
+// @tags GPG Operations
+// @Summary Unlocks a pre-loaded GPG Private Key
+// @Description Unlocks a locked pre-loaded key inside remote signer
+// @Accept json
+// @Produce plain
+// @Param message body models.GPGUnlockKeyData true "Unlock Data"
+// @Success 200 {string} Result Returns OK on success
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /gpg/unlockKey [post]
 func (ge *GPGEndpoint) unlockKey(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
@@ -309,6 +382,17 @@ func (ge *GPGEndpoint) unlockKey(w http.ResponseWriter, r *http.Request) {
 	LogExit(log, r, 200, n)
 }
 
+// GenerateKey godoc
+// @id gpg-key-generate
+// @tags GPG Operations
+// @Summary Generates a new GPG Key pair
+// @Description Generates a new GPG Key by specifying the Identifier, Bits and Password
+// @Accept json
+// @Produce json
+// @Param message body models.GPGGenerateKeyData true "Information to generate the key. The minimum acceptable bits is 2048."
+// @Success 200 {string} Generated GPG Key
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /gpg/generateKey [post]
 func (ge *GPGEndpoint) generateKey(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)

@@ -23,6 +23,12 @@ jobs:
         go-version: 1.13
     - name: Build ChevronLib
       run: |
+        echo "Running go generate"
+        export PATH=$PATH:`go env GOPATH`/bin
+        go get -u github.com/go-bindata/go-bindata/...
+        go get -u github.com/swaggo/swag/cmd/swag
+        go generate ./...
+
         cd tools/wrappers
         echo "Building linux chevron.dylib"
         go build -o chevron.dylib -buildmode=c-shared
