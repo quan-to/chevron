@@ -5,9 +5,6 @@ package server
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-
 	"github.com/gorilla/mux"
 	"github.com/quan-to/chevron/internal/agent"
 	"github.com/quan-to/chevron/internal/config"
@@ -18,6 +15,8 @@ import (
 	"github.com/quan-to/chevron/pkg/interfaces"
 	"github.com/quan-to/slog"
 	httpSwagger "github.com/swaggo/http-swagger"
+	"io/ioutil"
+	"net/http"
 )
 
 // @title Remote Signer API
@@ -93,6 +92,8 @@ func GenRemoteSignerServerMux(slog slog.Instance, sm interfaces.SecretsManager, 
 		r.PathPrefix("/swagger").HandlerFunc(httpSwagger.Handler())
 	}
 
+	r.Use(LoggingMiddleware)
+
 	// Add for /
 	AddHKPEndpoints(log, dbh, r.PathPrefix("/pks").Subrouter())
 	ge.AttachHandlers(r.PathPrefix("/gpg").Subrouter())
@@ -101,8 +102,8 @@ func GenRemoteSignerServerMux(slog slog.Instance, sm interfaces.SecretsManager, 
 	kre.AttachHandlers(r.PathPrefix("/keyRing").Subrouter())
 	sks.AttachHandlers(r.PathPrefix("/sks").Subrouter())
 	jfc.AttachHandlers(r.PathPrefix("/fieldCipher").Subrouter())
-
 	// Add for /remoteSigner
+
 	AddHKPEndpoints(log, dbh, r.PathPrefix("/remoteSigner/pks").Subrouter())
 	ge.AttachHandlers(r.PathPrefix("/remoteSigner/gpg").Subrouter())
 	ie.AttachHandlers(r.PathPrefix("/remoteSigner/__internal").Subrouter())
