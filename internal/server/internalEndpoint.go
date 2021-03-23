@@ -41,7 +41,6 @@ func (ie *InternalEndpoint) AttachHandlers(r *mux.Router) {
 func (ie *InternalEndpoint) triggerKeyUnlock(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ie.log, r)
-	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -53,14 +52,12 @@ func (ie *InternalEndpoint) triggerKeyUnlock(w http.ResponseWriter, r *http.Requ
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	n, _ := w.Write([]byte("OK"))
-	LogExit(log, r, 200, n)
+	w.Write([]byte("OK"))
 }
 
 func (ie *InternalEndpoint) getUnlockPasswords(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ie.log, r)
-	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -74,14 +71,12 @@ func (ie *InternalEndpoint) getUnlockPasswords(w http.ResponseWriter, r *http.Re
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	n, _ := w.Write(bodyData)
-	LogExit(log, r, 200, n)
+	w.Write(bodyData)
 }
 
 func (ie *InternalEndpoint) postUnlockPasswords(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ie.log, r)
-	InitHTTPTimer(log, r)
 
 	var passwords map[string]string
 
@@ -101,6 +96,5 @@ func (ie *InternalEndpoint) postUnlockPasswords(w http.ResponseWriter, r *http.R
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	n, _ := w.Write([]byte("OK"))
-	LogExit(log, r, 200, n)
+	w.Write([]byte("OK"))
 }

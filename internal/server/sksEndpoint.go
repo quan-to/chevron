@@ -60,7 +60,6 @@ func (sks *SKSEndpoint) AttachHandlers(r *mux.Router) {
 // @Router /sks/getKey [get]
 func (sks *SKSEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 	log := wrapLogWithRequestID(sks.log, r)
-	InitHTTPTimer(log, r)
 	ctx := wrapContextWithRequestID(r)
 	ctx = wrapContextWithDatabaseHandler(sks.dbh, ctx)
 
@@ -82,8 +81,7 @@ func (sks *SKSEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	n, _ := w.Write([]byte(key))
-	LogExit(log, r, 200, n)
+	w.Write([]byte(key))
 }
 
 // Search GPG Key by Name godoc
@@ -99,7 +97,6 @@ func (sks *SKSEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 // @Router /sks/searchByName [get]
 func (sks *SKSEndpoint) searchByName(w http.ResponseWriter, r *http.Request) {
 	log := wrapLogWithRequestID(sks.log, r)
-	InitHTTPTimer(log, r)
 	ctx := wrapContextWithRequestID(r)
 	ctx = wrapContextWithDatabaseHandler(sks.dbh, ctx)
 
@@ -145,8 +142,7 @@ func (sks *SKSEndpoint) searchByName(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	n, _ := w.Write(bodyData)
-	LogExit(log, r, 200, n)
+	w.Write(bodyData)
 }
 
 // Search GPG Key by Fingerprint godoc
@@ -162,7 +158,6 @@ func (sks *SKSEndpoint) searchByName(w http.ResponseWriter, r *http.Request) {
 // @Router /sks/searchByFingerPrint [get]
 func (sks *SKSEndpoint) searchByFingerPrint(w http.ResponseWriter, r *http.Request) {
 	log := wrapLogWithRequestID(sks.log, r)
-	InitHTTPTimer(log, r)
 	ctx := wrapContextWithRequestID(r)
 	ctx = wrapContextWithDatabaseHandler(sks.dbh, ctx)
 
@@ -208,8 +203,7 @@ func (sks *SKSEndpoint) searchByFingerPrint(w http.ResponseWriter, r *http.Reque
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	n, _ := w.Write(bodyData)
-	LogExit(log, r, 200, n)
+	w.Write(bodyData)
 }
 
 // Search GPG Key by Email godoc
@@ -225,7 +219,6 @@ func (sks *SKSEndpoint) searchByFingerPrint(w http.ResponseWriter, r *http.Reque
 // @Router /sks/searchByEmail [get]
 func (sks *SKSEndpoint) searchByEmail(w http.ResponseWriter, r *http.Request) {
 	log := wrapLogWithRequestID(sks.log, r)
-	InitHTTPTimer(log, r)
 	ctx := wrapContextWithRequestID(r)
 	ctx = wrapContextWithDatabaseHandler(sks.dbh, ctx)
 
@@ -271,8 +264,7 @@ func (sks *SKSEndpoint) searchByEmail(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	n, _ := w.Write(bodyData)
-	LogExit(log, r, 200, n)
+	w.Write(bodyData)
 }
 
 // Search GPG Key by Value godoc
@@ -288,7 +280,6 @@ func (sks *SKSEndpoint) searchByEmail(w http.ResponseWriter, r *http.Request) {
 // @Router /sks/search [get]
 func (sks *SKSEndpoint) search(w http.ResponseWriter, r *http.Request) {
 	log := wrapLogWithRequestID(sks.log, r)
-	InitHTTPTimer(log, r)
 	ctx := wrapContextWithRequestID(r)
 	ctx = wrapContextWithDatabaseHandler(sks.dbh, ctx)
 
@@ -334,8 +325,7 @@ func (sks *SKSEndpoint) search(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	n, _ := w.Write(bodyData)
-	LogExit(log, r, 200, n)
+	w.Write(bodyData)
 }
 
 // Add Public Key godoc
@@ -351,7 +341,6 @@ func (sks *SKSEndpoint) search(w http.ResponseWriter, r *http.Request) {
 func (sks *SKSEndpoint) addKey(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(sks.log, r)
-	InitHTTPTimer(log, r)
 	ctx = wrapContextWithDatabaseHandler(sks.dbh, ctx)
 
 	var data models.SKSAddKey
@@ -375,6 +364,5 @@ func (sks *SKSEndpoint) addKey(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	n, _ := w.Write([]byte("OK"))
-	LogExit(log, r, 200, n)
+	w.Write([]byte("OK"))
 }

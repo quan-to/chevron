@@ -53,7 +53,6 @@ func (jfc *JFCEndpoint) AttachHandlers(r *mux.Router) {
 func (jfc *JFCEndpoint) cipher(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(jfc.log, r)
-	InitHTTPTimer(log, r)
 
 	var data models.FieldCipherInput
 
@@ -96,8 +95,7 @@ func (jfc *JFCEndpoint) cipher(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	n, _ := w.Write([]byte(d))
-	LogExit(log, r, 200, n)
+	w.Write([]byte(d))
 }
 
 // Field Decipher godoc
@@ -113,7 +111,6 @@ func (jfc *JFCEndpoint) cipher(w http.ResponseWriter, r *http.Request) {
 func (jfc *JFCEndpoint) decipher(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(jfc.log, r)
-	InitHTTPTimer(log, r)
 
 	var data models.FieldDecipherInput
 
@@ -156,6 +153,5 @@ func (jfc *JFCEndpoint) decipher(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	n, _ := w.Write([]byte(d))
-	LogExit(log, r, 200, n)
+	w.Write([]byte(d))
 }

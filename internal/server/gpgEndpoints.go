@@ -61,7 +61,6 @@ func (ge *GPGEndpoint) AttachHandlers(r *mux.Router) {
 func (ge *GPGEndpoint) decrypt(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
-	InitHTTPTimer(log, r)
 
 	var data models.GPGDecryptData
 	if !UnmarshalBodyOrDie(&data, w, r, log) {
@@ -85,8 +84,7 @@ func (ge *GPGEndpoint) decrypt(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	n, _ := w.Write(d)
-	LogExit(log, r, 200, n)
+	w.Write(d)
 }
 
 // Encrypt godoc
@@ -102,7 +100,6 @@ func (ge *GPGEndpoint) decrypt(w http.ResponseWriter, r *http.Request) {
 func (ge *GPGEndpoint) encrypt(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
-	InitHTTPTimer(log, r)
 	var data models.GPGEncryptData
 
 	if !UnmarshalBodyOrDie(&data, w, r, log) {
@@ -131,8 +128,7 @@ func (ge *GPGEndpoint) encrypt(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	n, _ := w.Write([]byte(encrypted))
-	LogExit(log, r, 200, n)
+	w.Write([]byte(encrypted))
 }
 
 // VerifySignature godoc
@@ -148,7 +144,6 @@ func (ge *GPGEndpoint) encrypt(w http.ResponseWriter, r *http.Request) {
 func (ge *GPGEndpoint) verifySignature(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
-	InitHTTPTimer(log, r)
 	var data models.GPGVerifySignatureData
 
 	if !UnmarshalBodyOrDie(&data, w, r, log) {
@@ -182,8 +177,7 @@ func (ge *GPGEndpoint) verifySignature(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	n, _ := w.Write([]byte("OK"))
-	LogExit(log, r, 200, n)
+	w.Write([]byte("OK"))
 }
 
 // VerifySignatureQuanto godoc
@@ -199,7 +193,6 @@ func (ge *GPGEndpoint) verifySignature(w http.ResponseWriter, r *http.Request) {
 func (ge *GPGEndpoint) verifySignatureQuanto(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
-	InitHTTPTimer(log, r)
 	var data models.GPGVerifySignatureData
 
 	if !UnmarshalBodyOrDie(&data, w, r, log) {
@@ -238,8 +231,7 @@ func (ge *GPGEndpoint) verifySignatureQuanto(w http.ResponseWriter, r *http.Requ
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	n, _ := w.Write([]byte("OK"))
-	LogExit(log, r, 200, n)
+	w.Write([]byte("OK"))
 }
 
 // Sign godoc
@@ -256,7 +248,6 @@ func (ge *GPGEndpoint) verifySignatureQuanto(w http.ResponseWriter, r *http.Requ
 func (ge *GPGEndpoint) sign(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
-	InitHTTPTimer(log, r)
 	var data models.GPGSignData
 
 	if !UnmarshalBodyOrDie(&data, w, r, log) {
@@ -285,8 +276,7 @@ func (ge *GPGEndpoint) sign(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	n, _ := w.Write([]byte(signature))
-	LogExit(log, r, 200, n)
+	w.Write([]byte(signature))
 }
 
 // SignQuanto godoc
@@ -303,7 +293,6 @@ func (ge *GPGEndpoint) sign(w http.ResponseWriter, r *http.Request) {
 func (ge *GPGEndpoint) signQuanto(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
-	InitHTTPTimer(log, r)
 	var data models.GPGSignData
 
 	if !UnmarshalBodyOrDie(&data, w, r, log) {
@@ -334,8 +323,7 @@ func (ge *GPGEndpoint) signQuanto(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	n, _ := w.Write([]byte(quantoSig))
-	LogExit(log, r, 200, n)
+	w.Write([]byte(quantoSig))
 }
 
 // UnlockKey godoc
@@ -352,7 +340,6 @@ func (ge *GPGEndpoint) signQuanto(w http.ResponseWriter, r *http.Request) {
 func (ge *GPGEndpoint) unlockKey(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
-	InitHTTPTimer(log, r)
 	var data models.GPGUnlockKeyData
 
 	if !UnmarshalBodyOrDie(&data, w, r, log) {
@@ -378,8 +365,7 @@ func (ge *GPGEndpoint) unlockKey(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	n, _ := w.Write([]byte("OK"))
-	LogExit(log, r, 200, n)
+	w.Write([]byte("OK"))
 }
 
 // GenerateKey godoc
@@ -396,7 +382,6 @@ func (ge *GPGEndpoint) unlockKey(w http.ResponseWriter, r *http.Request) {
 func (ge *GPGEndpoint) generateKey(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(ge.log, r)
-	InitHTTPTimer(log, r)
 	var data models.GPGGenerateKeyData
 
 	if !UnmarshalBodyOrDie(&data, w, r, log) {
@@ -428,6 +413,5 @@ func (ge *GPGEndpoint) generateKey(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	n, _ := w.Write([]byte(key))
-	LogExit(log, r, 200, n)
+	w.Write([]byte(key))
 }
