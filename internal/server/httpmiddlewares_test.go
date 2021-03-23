@@ -5,13 +5,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/quan-to/chevron/internal/config"
-	"github.com/quan-to/slog"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
 	"time"
+
+	"github.com/quan-to/chevron/internal/config"
+	"github.com/quan-to/slog"
 )
 
 // TestLoggingMiddleware stores the middleware logs in a buffer and validates their contents
@@ -33,7 +34,7 @@ func TestLoggingMiddleware(t *testing.T) {
 	mockHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(time.Duration(waitMs) * time.Millisecond)
 		w.WriteHeader(expectedCode)
-		w.Write(someResponse)
+		_, _ = w.Write(someResponse)
 	})
 
 	req := httptest.NewRequest(http.MethodPost, someURL.String(), nil)
@@ -59,10 +60,10 @@ func TestLoggingMiddleware(t *testing.T) {
 			t.Fatalf("[scope] Got %s; want %s", currentScope, expectedScope)
 		}
 
-		currentURL := logMap["endpoint"]
-		expectURL := someURL.Path
-		if currentURL != expectURL {
-			t.Fatalf("[url] Got %s; want %s", currentURL, expectURL)
+		currentEndpoint := logMap["endpoint"]
+		expectedEndpoint := someURL.Path
+		if currentEndpoint != expectedEndpoint {
+			t.Fatalf("[endpoint] Got %s; want %s", currentEndpoint, expectedEndpoint)
 		}
 
 		currentMethod := logMap["method"]

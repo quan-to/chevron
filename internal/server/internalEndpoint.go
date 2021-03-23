@@ -52,7 +52,7 @@ func (ie *InternalEndpoint) triggerKeyUnlock(w http.ResponseWriter, r *http.Requ
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	w.Write([]byte("OK"))
+	_, _ = w.Write([]byte("OK"))
 }
 
 func (ie *InternalEndpoint) getUnlockPasswords(w http.ResponseWriter, r *http.Request) {
@@ -71,7 +71,7 @@ func (ie *InternalEndpoint) getUnlockPasswords(w http.ResponseWriter, r *http.Re
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	w.Write(bodyData)
+	_, _ = w.Write(bodyData)
 }
 
 func (ie *InternalEndpoint) postUnlockPasswords(w http.ResponseWriter, r *http.Request) {
@@ -96,5 +96,5 @@ func (ie *InternalEndpoint) postUnlockPasswords(w http.ResponseWriter, r *http.R
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	w.Write([]byte("OK"))
+	_, _ = w.Write([]byte("OK"))
 }

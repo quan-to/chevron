@@ -53,7 +53,7 @@ func (gql *StaticGraphiQL) displayFile(filename string, w http.ResponseWriter, r
 	}
 
 	w.WriteHeader(200)
-	w.Write([]byte(fileData))
+	_, _ = w.Write([]byte(fileData))
 }
 
 func (gql *StaticGraphiQL) AttachHandlers(r *mux.Router) {

@@ -127,7 +127,7 @@ func hkpLookup(log slog.Instance, w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(result))
+	_, _ = w.Write([]byte(result))
 }
 
 // HKP Add key godoc
@@ -157,7 +157,7 @@ func hkpAdd(log slog.Instance, w http.ResponseWriter, r *http.Request) {
 	result := keymagic.PKSAdd(ctx, key)
 	log.Done("Key add result: %s", result)
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(result))
+	_, _ = w.Write([]byte(result))
 }
 
 // AddHKPEndpoints attach the HKP /lookup and /add endpoints to the specified router with the specified log wrapped into the calls

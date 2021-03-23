@@ -2,16 +2,17 @@ package server
 
 import (
 	"fmt"
-	"github.com/quan-to/slog"
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/quan-to/slog"
 )
 
 // ResponseWriter is a http.ResponseWriter wrapper that provides the status code and content length info.
 type ResponseWriter struct {
 	http.ResponseWriter
-	status int
+	status        int
 	contentLength int
 }
 

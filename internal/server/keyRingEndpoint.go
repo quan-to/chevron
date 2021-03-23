@@ -79,7 +79,7 @@ func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	w.Write([]byte(key))
+	_, _ = w.Write([]byte(key))
 }
 
 // Get Cached Keys godoc
@@ -113,7 +113,7 @@ func (kre *KeyRingEndpoint) getCachedKeys(w http.ResponseWriter, r *http.Request
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	w.Write(bodyData)
+	_, _ = w.Write(bodyData)
 }
 
 // Get Loaded Private Keys godoc
@@ -146,7 +146,7 @@ func (kre *KeyRingEndpoint) getLoadedPrivateKeys(w http.ResponseWriter, r *http.
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	w.Write(bodyData)
+	_, _ = w.Write(bodyData)
 }
 
 // Delete Private Key godoc
@@ -190,7 +190,7 @@ func (kre *KeyRingEndpoint) deletePrivateKey(w http.ResponseWriter, r *http.Requ
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	w.Write(d)
+	_, _ = w.Write(d)
 }
 
 // Add Private Key godoc
@@ -268,5 +268,5 @@ func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	w.Write(d)
+	_, _ = w.Write(d)
 }

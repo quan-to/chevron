@@ -52,7 +52,7 @@ func WriteJSON(data interface{}, statusCode int, w http.ResponseWriter, r *http.
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(statusCode)
-	w.Write(b)
+	_, _ = w.Write(b)
 }
 
 // UnmarshalBodyOrDie tries to unmarshal the request body into the specified interface and returns InvalidFieldData to the client if something is wrong

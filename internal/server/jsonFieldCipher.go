@@ -95,7 +95,7 @@ func (jfc *JFCEndpoint) cipher(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	w.Write([]byte(d))
+	_, _ = w.Write([]byte(d))
 }
 
 // Field Decipher godoc
@@ -153,5 +153,5 @@ func (jfc *JFCEndpoint) decipher(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	w.Write([]byte(d))
+	_, _ = w.Write([]byte(d))
 }

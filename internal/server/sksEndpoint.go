@@ -81,7 +81,7 @@ func (sks *SKSEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	w.Write([]byte(key))
+	_, _ = w.Write([]byte(key))
 }
 
 // Search GPG Key by Name godoc
@@ -142,7 +142,7 @@ func (sks *SKSEndpoint) searchByName(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	w.Write(bodyData)
+	_, _ = w.Write(bodyData)
 }
 
 // Search GPG Key by Fingerprint godoc
@@ -203,7 +203,7 @@ func (sks *SKSEndpoint) searchByFingerPrint(w http.ResponseWriter, r *http.Reque
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	w.Write(bodyData)
+	_, _ = w.Write(bodyData)
 }
 
 // Search GPG Key by Email godoc
@@ -264,7 +264,7 @@ func (sks *SKSEndpoint) searchByEmail(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	w.Write(bodyData)
+	_, _ = w.Write(bodyData)
 }
 
 // Search GPG Key by Value godoc
@@ -325,7 +325,7 @@ func (sks *SKSEndpoint) search(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	w.Write(bodyData)
+	_, _ = w.Write(bodyData)
 }
 
 // Add Public Key godoc
@@ -364,5 +364,5 @@ func (sks *SKSEndpoint) addKey(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	w.Write([]byte("OK"))
+	_, _ = w.Write([]byte("OK"))
 }

@@ -213,7 +213,7 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 
 	log.Info("Sending response")
 	w.WriteHeader(http.StatusOK)
-	io.Copy(w, res.Body)
+	_, _ = io.Copy(w, res.Body)
 }
 
 func (proxy *AgentProxy) AddHandlers(r *mux.Router) {

@@ -84,7 +84,7 @@ func (ge *GPGEndpoint) decrypt(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	w.Write(d)
+	_, _ = w.Write(d)
 }
 
 // Encrypt godoc
@@ -128,7 +128,7 @@ func (ge *GPGEndpoint) encrypt(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	w.Write([]byte(encrypted))
+	_, _ = w.Write([]byte(encrypted))
 }
 
 // VerifySignature godoc
@@ -177,7 +177,7 @@ func (ge *GPGEndpoint) verifySignature(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	w.Write([]byte("OK"))
+	_, _ = w.Write([]byte("OK"))
 }
 
 // VerifySignatureQuanto godoc
@@ -231,7 +231,7 @@ func (ge *GPGEndpoint) verifySignatureQuanto(w http.ResponseWriter, r *http.Requ
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	w.Write([]byte("OK"))
+	_, _ = w.Write([]byte("OK"))
 }
 
 // Sign godoc
@@ -276,7 +276,7 @@ func (ge *GPGEndpoint) sign(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	w.Write([]byte(signature))
+	_, _ = w.Write([]byte(signature))
 }
 
 // SignQuanto godoc
@@ -323,7 +323,7 @@ func (ge *GPGEndpoint) signQuanto(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	w.Write([]byte(quantoSig))
+	_, _ = w.Write([]byte(quantoSig))
 }
 
 // UnlockKey godoc
@@ -365,7 +365,7 @@ func (ge *GPGEndpoint) unlockKey(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	w.Write([]byte("OK"))
+	_, _ = w.Write([]byte("OK"))
 }
 
 // GenerateKey godoc
@@ -413,5 +413,5 @@ func (ge *GPGEndpoint) generateKey(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	w.Write([]byte(key))
+	_, _ = w.Write([]byte(key))
 }
