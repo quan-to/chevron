@@ -78,7 +78,7 @@ func TestLoggingMiddleware(t *testing.T) {
 		currentContentLength := logMap["contentLength"]
 		expectedContentLength := len(someResponse)
 		if fmt.Sprint(currentContentLength) != fmt.Sprint(expectedContentLength) {
-			t.Fatalf("[status code] Got %s; want %v", currentContentLength, expectedContentLength)
+			t.Fatalf("[content length] Got %s; want %v", currentContentLength, expectedContentLength)
 		}
 
 		currentStatus := logMap["statusCode"]
