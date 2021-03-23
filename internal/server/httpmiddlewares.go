@@ -2,26 +2,26 @@ package server
 
 import (
 	"fmt"
-	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/slog"
 	"net"
 	"net/http"
 	"time"
 )
 
-// ResponseWriter is a http.ResponseWriter wrapper that provides the status code info.
+// ResponseWriter is a http.ResponseWriter wrapper that provides the status code and content length info.
 type ResponseWriter struct {
 	http.ResponseWriter
 	status int
 	contentLength int
 }
 
-// WriteHeader implements the http.ResponseWriter WriteHeader function. It makes enable to store the response status code.
+// WriteHeader implements the http.ResponseWriter.WriteHeader function. It makes enable to store the response status code.
 func (rw *ResponseWriter) WriteHeader(code int) {
 	rw.status = code
 	rw.ResponseWriter.WriteHeader(code)
 }
 
+// Write implements the http.ResponseWriter.Write function. It makes enable to store the response content length.
 func (rw *ResponseWriter) Write(b []byte) (int, error) {
 	rw.contentLength = len(b)
 	return rw.ResponseWriter.Write(b)
@@ -39,17 +39,14 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 
 		startTime := time.Now()
 		host, _, _ := net.SplitHostPort(r.RemoteAddr)
-		requestID := r.Header.Get(config.RequestIDHeader)
 
 		logParams := map[string]interface{}{
 			"endpoint": r.URL.Path,
 			"method":   r.Method,
 			"host":     host,
-			"requestID": requestID,
 		}
 
-		log = log.WithFields(logParams)
-
+		log = wrapLogWithRequestID(log, r).WithFields(logParams)
 		log.Await("incoming request %s %s", r.Method, r.URL.Path)
 
 		rw := wrapResponseWriter(w)

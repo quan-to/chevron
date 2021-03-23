@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/slog"
 	"net/http"
 	"net/http/httptest"
@@ -19,12 +20,14 @@ func TestLoggingMiddleware(t *testing.T) {
 	slog.UnsetTestMode()
 	slog.SetDefaultOutput(&logBuffer)
 	slog.SetLogFormat(slog.JSON)
+	config.RequestIDHeader = "X-Request-ID"
 
 	expectedScope := "LoggingMiddleware"
 	expectedHTTPMethod := http.MethodPost
 	someURL, _ := url.Parse("http://huehuebr.com/resource/subresource")
 	someResponse := []byte("huehuebrbr")
 	expectedCode := 200
+	expectedRequestID := "01101000-01110101-01100101"
 	waitMs := float64(150)
 
 	mockHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -34,6 +37,7 @@ func TestLoggingMiddleware(t *testing.T) {
 	})
 
 	req := httptest.NewRequest(http.MethodPost, someURL.String(), nil)
+	req.Header.Set(config.RequestIDHeader, expectedRequestID)
 
 	LoggingMiddleware(mockHandler).ServeHTTP(httptest.NewRecorder(), req)
 
@@ -85,6 +89,11 @@ func TestLoggingMiddleware(t *testing.T) {
 		currentResponseTime := logMap["elapsedTime"].(float64)
 		if currentResponseTime < waitMs {
 			t.Fatalf("[response time] Got %f; want greater than %f", currentResponseTime, waitMs)
+		}
+
+		currentRequestID := logMap["tag"]
+		if fmt.Sprint(currentRequestID) != fmt.Sprint(expectedRequestID) {
+			t.Fatalf("[request ID] Got %s; want %v", currentRequestID, expectedRequestID)
 		}
 
 	}

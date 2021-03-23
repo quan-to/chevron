@@ -176,10 +176,10 @@ func wrapContextWithRequestID(r *http.Request) context.Context {
 }
 
 func wrapLogWithRequestID(log slog.Instance, r *http.Request) slog.Instance {
-	id, ok := r.Header[config.RequestIDHeader]
-	if ok && len(id) >= 1 {
+	id := r.Header.Get(config.RequestIDHeader)
+	if id != "" {
 		// Tag the log
-		return log.Tag(id[0])
+		return log.Tag(id)
 	}
 
 	return log.Tag(tools.DefaultTag)
