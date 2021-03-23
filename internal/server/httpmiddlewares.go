@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"github.com/quan-to/chevron/internal/config"
 	"github.com/quan-to/slog"
 	"net"
 	"net/http"
@@ -12,12 +13,18 @@ import (
 type ResponseWriter struct {
 	http.ResponseWriter
 	status int
+	contentLength int
 }
 
 // WriteHeader implements the http.ResponseWriter WriteHeader function. It makes enable to store the response status code.
 func (rw *ResponseWriter) WriteHeader(code int) {
 	rw.status = code
 	rw.ResponseWriter.WriteHeader(code)
+}
+
+func (rw *ResponseWriter) Write(b []byte) (int, error) {
+	rw.contentLength = len(b)
+	return rw.ResponseWriter.Write(b)
 }
 
 func wrapResponseWriter(w http.ResponseWriter) *ResponseWriter {
@@ -31,13 +38,14 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		startTime := time.Now()
-
 		host, _, _ := net.SplitHostPort(r.RemoteAddr)
+		requestID := r.Header.Get(config.RequestIDHeader)
 
 		logParams := map[string]interface{}{
 			"endpoint": r.URL.Path,
 			"method":   r.Method,
 			"host":     host,
+			"requestID": requestID,
 		}
 
 		log = log.WithFields(logParams)
@@ -49,6 +57,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 
 		duration := time.Since(startTime)
 
+		logParams["contentLength"] = rw.contentLength
 		logParams["statusCode"] = fmt.Sprint(rw.status)
 		logParams["elapsedTime"] = duration.Milliseconds()
 

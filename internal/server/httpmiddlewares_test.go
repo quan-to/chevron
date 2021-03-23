@@ -23,12 +23,14 @@ func TestLoggingMiddleware(t *testing.T) {
 	expectedScope := "LoggingMiddleware"
 	expectedHTTPMethod := http.MethodPost
 	someURL, _ := url.Parse("http://huehuebr.com/resource/subresource")
+	someResponse := []byte("huehuebrbr")
 	expectedCode := 200
 	waitMs := float64(150)
 
 	mockHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(time.Duration(waitMs) * time.Millisecond)
 		w.WriteHeader(expectedCode)
+		w.Write(someResponse)
 	})
 
 	req := httptest.NewRequest(http.MethodPost, someURL.String(), nil)
@@ -53,7 +55,7 @@ func TestLoggingMiddleware(t *testing.T) {
 			t.Fatalf("[scope] Got %s; want %s", currentScope, expectedScope)
 		}
 
-		currentURL := logMap["url"]
+		currentURL := logMap["endpoint"]
 		expectURL := someURL.Path
 		if currentURL != expectURL {
 			t.Fatalf("[url] Got %s; want %s", currentURL, expectURL)
@@ -69,12 +71,18 @@ func TestLoggingMiddleware(t *testing.T) {
 			continue
 		}
 
+		currentContentLength := logMap["contentLength"]
+		expectedContentLength := len(someResponse)
+		if fmt.Sprint(currentContentLength) != fmt.Sprint(expectedContentLength) {
+			t.Fatalf("[status code] Got %s; want %v", currentContentLength, expectedContentLength)
+		}
+
 		currentStatus := logMap["statusCode"]
 		if fmt.Sprint(currentStatus) != fmt.Sprint(expectedCode) {
 			t.Fatalf("[status code] Got %s; want %v", currentStatus, expectedCode)
 		}
 
-		currentResponseTime := logMap["responseTime"].(float64)
+		currentResponseTime := logMap["elapsedTime"].(float64)
 		if currentResponseTime < waitMs {
 			t.Fatalf("[response time] Got %f; want greater than %f", currentResponseTime, waitMs)
 		}
