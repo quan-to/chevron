@@ -212,7 +212,7 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	log.Info("Sending response")
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(res.StatusCode)
 	_, _ = io.Copy(w, res.Body)
 }
 
