@@ -72,7 +72,6 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(proxy.log, r)
-	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -213,8 +212,8 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	log.Info("Sending response")
-	n, _ := io.Copy(w, res.Body)
-	LogExit(log, r, res.StatusCode, int(n))
+	w.WriteHeader(res.StatusCode)
+	_, _ = io.Copy(w, res.Body)
 }
 
 func (proxy *AgentProxy) AddHandlers(r *mux.Router) {

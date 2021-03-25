@@ -62,7 +62,6 @@ func hkpLookup(log slog.Instance, w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log = wrapLogWithRequestID(log.SubScope("HKP"), r)
 
-	InitHTTPTimer(log, r)
 	q := r.URL.Query()
 	op := q.Get("op")
 	options := q.Get("options")
@@ -129,7 +128,6 @@ func hkpLookup(log slog.Instance, w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte(result))
-	LogExit(log, r, http.StatusOK, len(result))
 }
 
 // HKP Add key godoc
@@ -146,7 +144,6 @@ func hkpAdd(log slog.Instance, w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log = wrapLogWithRequestID(log.SubScope("HKP"), r)
 
-	InitHTTPTimer(log, r)
 	log.Await("Parsing Form Fields")
 	err := r.ParseForm()
 	log.Done("Parsed")
@@ -161,7 +158,6 @@ func hkpAdd(log slog.Instance, w http.ResponseWriter, r *http.Request) {
 	log.Done("Key add result: %s", result)
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte(result))
-	LogExit(log, r, http.StatusOK, len(result))
 }
 
 // AddHKPEndpoints attach the HKP /lookup and /add endpoints to the specified router with the specified log wrapped into the calls

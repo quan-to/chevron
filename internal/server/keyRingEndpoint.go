@@ -59,7 +59,6 @@ func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(kre.log, r)
 	ctx = wrapContextWithDatabaseHandler(kre.dbh, ctx)
-	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -80,8 +79,7 @@ func (kre *KeyRingEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	n, _ := w.Write([]byte(key))
-	LogExit(log, r, 200, n)
+	_, _ = w.Write([]byte(key))
 }
 
 // Get Cached Keys godoc
@@ -96,7 +94,6 @@ func (kre *KeyRingEndpoint) getCachedKeys(w http.ResponseWriter, r *http.Request
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(kre.log, r)
 	ctx = wrapContextWithDatabaseHandler(kre.dbh, ctx)
-	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -116,8 +113,7 @@ func (kre *KeyRingEndpoint) getCachedKeys(w http.ResponseWriter, r *http.Request
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	n, _ := w.Write(bodyData)
-	LogExit(log, r, 200, n)
+	_, _ = w.Write(bodyData)
 }
 
 // Get Loaded Private Keys godoc
@@ -132,7 +128,6 @@ func (kre *KeyRingEndpoint) getLoadedPrivateKeys(w http.ResponseWriter, r *http.
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(kre.log, r)
 	ctx = wrapContextWithDatabaseHandler(kre.dbh, ctx)
-	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -151,8 +146,7 @@ func (kre *KeyRingEndpoint) getLoadedPrivateKeys(w http.ResponseWriter, r *http.
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	n, _ := w.Write(bodyData)
-	LogExit(log, r, 200, n)
+	_, _ = w.Write(bodyData)
 }
 
 // Delete Private Key godoc
@@ -170,7 +164,6 @@ func (kre *KeyRingEndpoint) deletePrivateKey(w http.ResponseWriter, r *http.Requ
 	ctx := wrapContextWithRequestID(r)
 	ctx = wrapContextWithDatabaseHandler(kre.dbh, ctx)
 	log := wrapLogWithRequestID(kre.log, r)
-	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -197,8 +190,7 @@ func (kre *KeyRingEndpoint) deletePrivateKey(w http.ResponseWriter, r *http.Requ
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	n, _ := w.Write(d)
-	LogExit(log, r, 200, n)
+	_, _ = w.Write(d)
 }
 
 // Add Private Key godoc
@@ -216,7 +208,6 @@ func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request
 	ctx := wrapContextWithRequestID(r)
 	ctx = wrapContextWithDatabaseHandler(kre.dbh, ctx)
 	log := wrapLogWithRequestID(kre.log, r)
-	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -277,6 +268,5 @@ func (kre *KeyRingEndpoint) addPrivateKey(w http.ResponseWriter, r *http.Request
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	n, _ = w.Write(d)
-	LogExit(log, r, 200, n)
+	_, _ = w.Write(d)
 }

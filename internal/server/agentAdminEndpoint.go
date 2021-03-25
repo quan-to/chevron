@@ -106,7 +106,6 @@ func (gi *graphIntercept) WriteHeader(statusCode int) {
 // @Router /agentAdmin [post]
 func (admin *AgentAdmin) handleGraphQL(w http.ResponseWriter, r *http.Request) {
 	log := wrapLogWithRequestID(admin.log, r)
-	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -130,7 +129,6 @@ func (admin *AgentAdmin) handleGraphQL(w http.ResponseWriter, r *http.Request) {
 		ctx = context.WithValue(ctx, agent.LoggedUserKey, user)
 	}
 	admin.handler.ContextHandler(ctx, &gi, r)
-	LogExit(log, r, gi.StatusCode, gi.WrittenBytes)
 }
 
 func (admin *AgentAdmin) AddHandlers(r *mux.Router) {

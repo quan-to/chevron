@@ -93,6 +93,8 @@ func GenRemoteSignerServerMux(slog slog.Instance, sm interfaces.SecretsManager, 
 		r.PathPrefix("/swagger").HandlerFunc(httpSwagger.Handler())
 	}
 
+	r.Use(LoggingMiddleware)
+
 	// Add for /
 	AddHKPEndpoints(log, dbh, r.PathPrefix("/pks").Subrouter())
 	ge.AttachHandlers(r.PathPrefix("/gpg").Subrouter())
@@ -124,7 +126,6 @@ func GenRemoteSignerServerMux(slog slog.Instance, sm interfaces.SecretsManager, 
 
 	// Catch All for unhandled endpoints
 	r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		InitHTTPTimer(log, r)
 		CatchAllRouter(w, r, log)
 	})
 

@@ -52,8 +52,7 @@ func WriteJSON(data interface{}, statusCode int, w http.ResponseWriter, r *http.
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(statusCode)
-	n, _ := w.Write(b)
-	LogExit(logI, r, statusCode, n)
+	_, _ = w.Write(b)
 }
 
 // UnmarshalBodyOrDie tries to unmarshal the request body into the specified interface and returns InvalidFieldData to the client if something is wrong
@@ -177,10 +176,10 @@ func wrapContextWithRequestID(r *http.Request) context.Context {
 }
 
 func wrapLogWithRequestID(log slog.Instance, r *http.Request) slog.Instance {
-	id, ok := r.Header[config.RequestIDHeader]
-	if ok && len(id) >= 1 {
+	id := r.Header.Get(config.RequestIDHeader)
+	if id != "" {
 		// Tag the log
-		return log.Tag(id[0])
+		return log.Tag(id)
 	}
 
 	return log.Tag(tools.DefaultTag)
