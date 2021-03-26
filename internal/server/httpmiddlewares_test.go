@@ -102,3 +102,25 @@ func TestLoggingMiddleware(t *testing.T) {
 	slog.SetTestMode()
 	slog.SetLogFormat(slog.PIPE)
 }
+
+func TestSkipEndpointLoggingMiddleware(t *testing.T) {
+	var logBuffer bytes.Buffer
+	slog.UnsetTestMode()
+	slog.SetDefaultOutput(&logBuffer)
+	slog.SetLogFormat(slog.JSON)
+
+	mockHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { })
+
+	for endpoint := range skipEndpoints {
+		req := httptest.NewRequest(http.MethodPost, fmt.Sprintf("http://huehuebr.com%s", endpoint), nil)
+
+		LoggingMiddleware(mockHandler).ServeHTTP(httptest.NewRecorder(), req)
+
+		if logBuffer.Len() != 0 {
+			t.Fatalf("Got %s; want an empty log from endpoint %s", logBuffer.String(), endpoint)
+		}
+	}
+
+	slog.SetTestMode()
+	slog.SetLogFormat(slog.PIPE)
+}

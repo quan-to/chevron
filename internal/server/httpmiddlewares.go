@@ -9,6 +9,11 @@ import (
 	"github.com/quan-to/slog"
 )
 
+// skipEndpoints represents the endpoints that must be skipped in LoggingMiddleware
+var skipEndpoints = map[string]bool{
+	"/test/ping": true,
+}
+
 // ResponseWriter is a http.ResponseWriter wrapper that provides the status code and content length info.
 type ResponseWriter struct {
 	http.ResponseWriter
@@ -37,6 +42,11 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 	log := slog.Scope("LoggingMiddleware")
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		if skipEndpoints[r.URL.Path] {
+			next.ServeHTTP(w, r)
+			return
+		}
 
 		startTime := time.Now()
 		host, _, _ := net.SplitHostPort(r.RemoteAddr)
