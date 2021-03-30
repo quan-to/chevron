@@ -11,7 +11,7 @@ import (
 
 // skipEndpoints represents the endpoints that must be skipped in LoggingMiddleware
 var skipEndpoints = map[string]bool{
-	"/test/ping": true,
+	"/tests/ping": true,
 }
 
 // ResponseWriter is a http.ResponseWriter wrapper that provides the status code and content length info.
