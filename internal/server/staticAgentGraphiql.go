@@ -29,7 +29,6 @@ func MakeStaticGraphiQL(log slog.Instance) *StaticGraphiQL {
 
 func (gql *StaticGraphiQL) displayFile(filename string, w http.ResponseWriter, r *http.Request) {
 	log := wrapLogWithRequestID(gql.log, r)
-	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -54,8 +53,7 @@ func (gql *StaticGraphiQL) displayFile(filename string, w http.ResponseWriter, r
 	}
 
 	w.WriteHeader(200)
-	n, _ := w.Write([]byte(fileData))
-	LogExit(log, r, 200, n)
+	_, _ = w.Write([]byte(fileData))
 }
 
 func (gql *StaticGraphiQL) AttachHandlers(r *mux.Router) {

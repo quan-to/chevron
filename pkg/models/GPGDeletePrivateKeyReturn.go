@@ -1,5 +1,5 @@
 package models
 
 type GPGDeletePrivateKeyReturn struct {
-	Status string
+	Status string `example:"OK"`
 }

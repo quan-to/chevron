@@ -49,6 +49,7 @@ var AgentKeyFingerPrint string
 var AgentBypassLogin bool
 var OnDemandKeyLoad bool
 var RequestIDHeader string
+var EnableSwagger bool
 
 var DatabaseTokenManager bool
 var DatabaseAuthManager bool
@@ -104,6 +105,7 @@ func Setup() {
 	SKSServer = os.Getenv("SKS_SERVER")
 	KeyPrefix = os.Getenv("KEY_PREFIX")
 	ShowLines = os.Getenv("SHOW_LINES") == "true"
+	EnableSwagger = os.Getenv("ENABLE_SWAGGER") == "" || os.Getenv("ENABLE_SWAGGER") == "true"
 	LogFormat = slog.ToFormat(os.Getenv("LOG_FORMAT"))
 	slog.SetShowLines(ShowLines)
 

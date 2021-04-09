@@ -49,9 +49,17 @@ func (sks *SKSEndpoint) AttachHandlers(r *mux.Router) {
 	r.HandleFunc("/addKey", sks.addKey).Methods("POST")
 }
 
+// Get GPG Key godoc
+// @id pks-get-key
+// @tags Public Key Server, Key Store
+// @Summary Fetches a GPG Public Key
+// @Produce plain
+// @param fingerPrint query string true "Fingerprint of the key you want to fetch"
+// @Success 200 {string} result "gpg public key"
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /sks/getKey [get]
 func (sks *SKSEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 	log := wrapLogWithRequestID(sks.log, r)
-	InitHTTPTimer(log, r)
 	ctx := wrapContextWithRequestID(r)
 	ctx = wrapContextWithDatabaseHandler(sks.dbh, ctx)
 
@@ -73,13 +81,22 @@ func (sks *SKSEndpoint) getKey(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	n, _ := w.Write([]byte(key))
-	LogExit(log, r, 200, n)
+	_, _ = w.Write([]byte(key))
 }
 
+// Search GPG Key by Name godoc
+// @id pks-search-by-name
+// @tags Public Key Server, Key Store
+// @Summary Searches for GPG Keys by its identifier name
+// @Produce json
+// @param name query string true "Name of the Key to be fetched"
+// @param pageStart query int false "Pagination Start Index (default: 0)"
+// @param pageEnd query int false "Pagination End Index (default: 100)"
+// @Success 200 {object} []models.GPGKey
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /sks/searchByName [get]
 func (sks *SKSEndpoint) searchByName(w http.ResponseWriter, r *http.Request) {
 	log := wrapLogWithRequestID(sks.log, r)
-	InitHTTPTimer(log, r)
 	ctx := wrapContextWithRequestID(r)
 	ctx = wrapContextWithDatabaseHandler(sks.dbh, ctx)
 
@@ -125,13 +142,22 @@ func (sks *SKSEndpoint) searchByName(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	n, _ := w.Write(bodyData)
-	LogExit(log, r, 200, n)
+	_, _ = w.Write(bodyData)
 }
 
+// Search GPG Key by Fingerprint godoc
+// @id pks-search-by-fingerprint
+// @tags Public Key Server, Key Store
+// @Summary Searches for GPG Keys by its fingerprint
+// @Produce json
+// @param fingerPrint query string true "Fingerprint to be fetched"
+// @param pageStart query int false "Pagination Start Index (default: 0)"
+// @param pageEnd query int false "Pagination End Index (default: 100)"
+// @Success 200 {object} []models.GPGKey
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /sks/searchByFingerPrint [get]
 func (sks *SKSEndpoint) searchByFingerPrint(w http.ResponseWriter, r *http.Request) {
 	log := wrapLogWithRequestID(sks.log, r)
-	InitHTTPTimer(log, r)
 	ctx := wrapContextWithRequestID(r)
 	ctx = wrapContextWithDatabaseHandler(sks.dbh, ctx)
 
@@ -177,13 +203,22 @@ func (sks *SKSEndpoint) searchByFingerPrint(w http.ResponseWriter, r *http.Reque
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	n, _ := w.Write(bodyData)
-	LogExit(log, r, 200, n)
+	_, _ = w.Write(bodyData)
 }
 
+// Search GPG Key by Email godoc
+// @id pks-search-by-email
+// @tags Public Key Server, Key Store
+// @Summary Searches for GPG Keys by its email
+// @Produce json
+// @param email query string true "Email of the Key to be fetched"
+// @param pageStart query int false "Pagination Start Index (default: 0)"
+// @param pageEnd query int false "Pagination End Index (default: 100)"
+// @Success 200 {object} []models.GPGKey
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /sks/searchByEmail [get]
 func (sks *SKSEndpoint) searchByEmail(w http.ResponseWriter, r *http.Request) {
 	log := wrapLogWithRequestID(sks.log, r)
-	InitHTTPTimer(log, r)
 	ctx := wrapContextWithRequestID(r)
 	ctx = wrapContextWithDatabaseHandler(sks.dbh, ctx)
 
@@ -229,13 +264,22 @@ func (sks *SKSEndpoint) searchByEmail(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	n, _ := w.Write(bodyData)
-	LogExit(log, r, 200, n)
+	_, _ = w.Write(bodyData)
 }
 
+// Search GPG Key by Value godoc
+// @id pks-search-by-value
+// @tags Public Key Server, Key Store
+// @Summary Searches for GPG Keys by any field
+// @Produce json
+// @param valueData query string true "Value of the Key to be fetched"
+// @param pageStart query int false "Pagination Start Index (default: 0)"
+// @param pageEnd query int false "Pagination End Index (default: 100)"
+// @Success 200 {object} []models.GPGKey
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /sks/search [get]
 func (sks *SKSEndpoint) search(w http.ResponseWriter, r *http.Request) {
 	log := wrapLogWithRequestID(sks.log, r)
-	InitHTTPTimer(log, r)
 	ctx := wrapContextWithRequestID(r)
 	ctx = wrapContextWithDatabaseHandler(sks.dbh, ctx)
 
@@ -281,14 +325,22 @@ func (sks *SKSEndpoint) search(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeJSON)
 	w.WriteHeader(200)
-	n, _ := w.Write(bodyData)
-	LogExit(log, r, 200, n)
+	_, _ = w.Write(bodyData)
 }
 
+// Add Public Key godoc
+// @id pks-add-public-key
+// @tags Public Key Server, Key Store
+// @Summary Adds a GPG Public Key
+// @Accept json
+// @Produce plain
+// @Param message body models.SKSAddKey true "GPG Public Key in an Armored format"
+// @Success 200 {string} result "OK"
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /sks/addKey [post]
 func (sks *SKSEndpoint) addKey(w http.ResponseWriter, r *http.Request) {
 	ctx := wrapContextWithRequestID(r)
 	log := wrapLogWithRequestID(sks.log, r)
-	InitHTTPTimer(log, r)
 	ctx = wrapContextWithDatabaseHandler(sks.dbh, ctx)
 
 	var data models.SKSAddKey
@@ -312,6 +364,5 @@ func (sks *SKSEndpoint) addKey(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", models.MimeText)
 	w.WriteHeader(200)
-	n, _ := w.Write([]byte("OK"))
-	LogExit(log, r, 200, n)
+	_, _ = w.Write([]byte("OK"))
 }

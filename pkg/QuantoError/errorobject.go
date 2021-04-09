@@ -24,9 +24,9 @@ func ShowStackTrace() bool {
 }
 
 type ErrorObject struct {
-	ErrorCode  string      `json:"errorCode"`
-	ErrorField string      `json:"errorField"`
-	Message    string      `json:"message"`
+	ErrorCode  string      `json:"errorCode" example:"INVALID_FIELD_DATA"`
+	ErrorField string      `json:"errorField" example:"fieldName"`
+	Message    string      `json:"message" example:"error example"`
 	ErrorData  interface{} `json:"errorData"`
 	StackTrace string      `json:"stackTrace"`
 }

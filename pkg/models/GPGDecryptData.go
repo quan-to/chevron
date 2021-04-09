@@ -1,6 +1,6 @@
 package models
 
 type GPGDecryptData struct {
-	AsciiArmoredData string
-	DataOnly         bool
+	AsciiArmoredData string `example:"wcDMA8HPMfuMKotZAQwADzmQgwJiz3p5suaYpPwCbOluqvu2O5kVitJNO86KfkSYgbR0y67c+fGk5nO+Zm66qeolXLqVBHUvSnpZf9jMupRZLRmSZ0JmmvXoJIdiahj+NLwF6NVBvmoJ8BkMEQkr5oCNkKBveaCYXdQ7Gba2buICwxxwEmq3LV6/D0Zg4AmKX/k2N1kjRGJaUeHH3oU1YEjPo3A3bo9EZLGLI+J5VSlxkydxXUkF2TISKCr2rkhUmH5E7CUFu6H2nOofxk9tJDoSfjACkEjFKdg3BbTqNlYeuNmdJHwLfHDI+WcbL3/Hsl5MVnyHGeztsj0jn2bAIcT9FHfw1W3LUpaTNlemfrn52la7zN3r2588JDRbSaqLQ/d5+3hHWyE7RsRL0jdpEj/HM3ue2mi6GfyxDZy1DxdZsy7kqoYbBIwbtCdqZetU+bH6hWk92BY89AJUpV7xPCzRozw5WvCTsPYsu10JDvvPvj1c47BA9KlJ1wTcB2lYhmoX39T3ymjMKJ+6NAOF0uAB5PToGBs3BjE4MsxQHMLchK3hTuXg+uAY4fVU4I3jFyDPs8zYKsfgCOIHYBV84Obhm9rgqOAh4Ifi+klQeOCf4+p0IGeF6b6+4IPiAtTxRuB+5KnAAWAlBpwJWAqwNJ68HIjiN9UOgeGU+wA="`
+	DataOnly         bool   `example:"true"`
 }

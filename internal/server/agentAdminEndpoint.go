@@ -93,9 +93,19 @@ func (gi *graphIntercept) WriteHeader(statusCode int) {
 	gi.originalHandler.WriteHeader(statusCode)
 }
 
+// Agent Admin GraphQL godoc
+// @id agent-proxy-admin
+// @tags Agent
+// @Summary Administration of the Agent proxy tokens.
+// @Accept json
+// @Produce json
+// @param proxyToken header string true "Proxy Token of the admin user. It is required for all calls besides the login"
+// @param message body string true "The JSON content of the graphql query"
+// @Success 200 {string} result "result of the query"
+// @Failure default {object} QuantoError.ErrorObject
+// @Router /agentAdmin [post]
 func (admin *AgentAdmin) handleGraphQL(w http.ResponseWriter, r *http.Request) {
 	log := wrapLogWithRequestID(admin.log, r)
-	InitHTTPTimer(log, r)
 
 	defer func() {
 		if rec := recover(); rec != nil {
@@ -119,7 +129,6 @@ func (admin *AgentAdmin) handleGraphQL(w http.ResponseWriter, r *http.Request) {
 		ctx = context.WithValue(ctx, agent.LoggedUserKey, user)
 	}
 	admin.handler.ContextHandler(ctx, &gi, r)
-	LogExit(log, r, gi.StatusCode, gi.WrittenBytes)
 }
 
 func (admin *AgentAdmin) AddHandlers(r *mux.Router) {

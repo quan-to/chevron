@@ -29,6 +29,12 @@ jobs:
     # Runs a set of commands using the runners shell
     - name: Build ChevronLib
       run: |
+        echo "Running go generate"
+        export PATH=$PATH:`go env GOPATH`/bin
+        go get -u github.com/go-bindata/go-bindata/...
+        go get -u github.com/swaggo/swag/cmd/swag
+        go generate ./...
+
         cd tools/wrappers/
         echo "Building linux chevron.so"
         go build -o chevron.so -buildmode=c-shared

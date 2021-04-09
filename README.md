@@ -47,6 +47,7 @@ These are the Environment Variables that you can set to manage the webserver:
 *   `KEY_PREFIX` => Prefix of the name of the keys to load (for example a key prefix `test_` will load any key named `test_XXXX`).
 *   `MODE` => Mode of remote-signer (`single_key`, `default`)
 *   `ON_DEMAND_KEY_LOAD` => Do not attempt to load all keys from keybackend. Load them as needed (defaults `false`)
+*   `ENABLE_SWAGGER` => Enables swagger on `/swagger` for Remote Signer. (defaults to `true`)
 
 ## Caching Configuration
 
