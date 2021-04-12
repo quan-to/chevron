@@ -1,7 +1,7 @@
 #!/bin/bash
 
 BUILD_LINUX_ARCH="arm arm64 386 amd64"
-BUILD_OTHER_ARCH="386 amd64"
+BUILD_OTHER_ARCH="amd64"
 BUILD_OS="windows freebsd darwin openbsd"
 
 export GOCACHE=/tmp/gocache
