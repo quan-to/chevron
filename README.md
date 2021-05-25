@@ -69,6 +69,7 @@ To enable, use the following environment variables:
 *   `AGENT_KEY_FINGERPRINT` => Default Key FingerPrint for Agent
 *   `AGENT_BYPASS_LOGIN` => If the Login for using Quanto Agent should be bypassed. *DO NOT USE THIS IN EXPOSED REMOTESIGNER*
 *   `AGENT_EXTERNAL_URL` => External URL used by GraphiQL to access agent. Defaults to `/agent`
+*   `AGENT_FORCE_URL` => If true, forces agent URL to be the value defined by `AGENT_EXTERNAL_URL`
 *   `AGENTADMIN_EXTERNAL_URL` => External URL used by GraphiQL to access agent admin. Defaults to `/agentAdmin`
 *   `READONLY_KEYPATH` => If the keypath is readonly. If `true` then it will create a temporary folder in `/tmp` and copy all keys to there so it can work over it. 
 *   `HTTP_PORT` => HTTP Port that Remote Signer will run

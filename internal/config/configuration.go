@@ -44,6 +44,7 @@ var VaultBackend string
 var VaultSkipDataType bool
 var VaultTokenTTL string
 var AgentTargetURL string
+var AgentForceURL bool
 var AgentTokenExpiration int
 var AgentKeyFingerPrint string
 var AgentBypassLogin bool
@@ -183,6 +184,7 @@ func Setup() {
 	VaultTokenTTL = os.Getenv("VAULT_TOKEN_TTL")
 	AgentTargetURL = os.Getenv("AGENT_TARGET_URL")
 	AgentKeyFingerPrint = os.Getenv("AGENT_KEY_FINGERPRINT")
+	AgentForceURL = os.Getenv("AGENT_FORCE_URL") == "true"
 	AgentBypassLogin = os.Getenv("AGENT_BYPASS_LOGIN") == "true"
 	DatabaseTokenManager = os.Getenv("RETHINK_TOKEN_MANAGER") == "true" || os.Getenv("DATABASE_TOKEN_MANAGER") == "true"
 	DatabaseAuthManager = os.Getenv("RETHINK_AUTH_MANAGER") == "true" || os.Getenv("AUTH_MANAGER") == "true"
@@ -332,9 +334,11 @@ func Setup() {
 	if Environment == "development" {
 		slog.SetDebug(true)
 		QuantoError.EnableStackTrace()
+		QuantoError.EnableErrorData()
 	} else {
 		slog.SetDebug(false)
 		QuantoError.DisableStackTrace()
+		QuantoError.DisableErrorData()
 	}
 
 	// Deprecation
