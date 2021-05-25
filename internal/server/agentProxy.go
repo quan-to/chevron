@@ -83,7 +83,7 @@ func (proxy *AgentProxy) defaultHandler(w http.ResponseWriter, r *http.Request) 
 
 	targetURL := config.AgentTargetURL
 
-	if h.Get("serverUrl") != "" {
+	if h.Get("serverUrl") != "" && !config.AgentForceURL {
 		targetURL = h.Get("serverUrl")
 	}
 

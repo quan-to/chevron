@@ -48,6 +48,19 @@ These are the Environment Variables that you can set to manage the webserver:
 *   `MODE` => Mode of remote-signer (`single_key`, `default`)
 *   `ON_DEMAND_KEY_LOAD` => Do not attempt to load all keys from keybackend. Load them as needed (defaults `false`)
 *   `ENABLE_SWAGGER` => Enables swagger on `/swagger` for Remote Signer. (defaults to `true`)
+*   `SET_EXPOSED_SERVICES` => Enable only services described by `EXPOSED_SERVICES`
+*   `EXPOSED_SERVICES` => List of comma separated values with the services that should be exposed
+    * `__internal` => `/__internal` endpoint (needed for cluster key password sharing)
+    * `gpg` => `/gpg` endpoint
+    * `tests` => `/tests` endpoint
+    * `keyRing` => `/keyRing` endpoint
+    * `sks` => `/sks` endpoint
+    * `fieldCipher` => `/fieldCipher` endpoint
+    * `pks` => `/pks` endpoint
+    * `agent` => `/agent` endpoint
+    * `agentAdmin` => `/agentAdmin` endpoint
+    * `graphiql` => `/graphiql` and `/assets` endpoints
+    * `agent` => `/agent` endpoint
 
 ## Caching Configuration
 
@@ -69,6 +82,7 @@ To enable, use the following environment variables:
 *   `AGENT_KEY_FINGERPRINT` => Default Key FingerPrint for Agent
 *   `AGENT_BYPASS_LOGIN` => If the Login for using Quanto Agent should be bypassed. *DO NOT USE THIS IN EXPOSED REMOTESIGNER*
 *   `AGENT_EXTERNAL_URL` => External URL used by GraphiQL to access agent. Defaults to `/agent`
+*   `AGENT_FORCE_URL` => If true, forces agent URL to be the value defined by `AGENT_EXTERNAL_URL`
 *   `AGENTADMIN_EXTERNAL_URL` => External URL used by GraphiQL to access agent admin. Defaults to `/agentAdmin`
 *   `READONLY_KEYPATH` => If the keypath is readonly. If `true` then it will create a temporary folder in `/tmp` and copy all keys to there so it can work over it. 
 *   `HTTP_PORT` => HTTP Port that Remote Signer will run

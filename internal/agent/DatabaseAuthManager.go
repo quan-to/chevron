@@ -76,17 +76,21 @@ func (ram *DatabaseAuthManager) LoginAuth(username, password string) (fingerPrin
 	um, err := ram.dbAuth.GetUser(username)
 
 	if err != nil || um == nil {
-		return "", "", fmt.Errorf("invalid username or password")
+		// To avoid timing attack pretend that we have a valid user
+		um = &models.User{ID: invalidUserId}
 	}
 
 	hash, err := base64.StdEncoding.DecodeString(um.Password)
 	if err != nil {
 		ram.log.Error("Error decoding hash: %v", err)
-		return "", "", fmt.Errorf("invalid username or password")
+		// Same here, let's pretend we have a hash
+		hash = []byte(bcryptFallbackHash)
+		// Unset password to avoid knowing the correct password from the hash above
+		password = ""
 	}
 
-	err = bcrypt.CompareHashAndPassword(hash, []byte(password))
-	if err != nil {
+	err = bcrypt.CompareHashAndPassword(hash, []byte(password)) // Execute even if we know it's invalid
+	if um.ID == invalidUserId || err != nil {                   // Now we check for a invalid user
 		return "", "", fmt.Errorf("invalid username or password")
 	}
 
