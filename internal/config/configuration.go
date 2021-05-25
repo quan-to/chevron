@@ -74,8 +74,27 @@ var RedisTLSEnabled bool
 var RedisMaxLocalObjects int
 var RedisLocalObjectTTL time.Duration
 
+var SetExposedServices bool
+var ExposedServices []string
+
 // LogFormat allows to configure the output log format
 var LogFormat slog.Format
+
+func IsServiceExposed(name string) bool {
+	if !SetExposedServices {
+		return true
+	}
+
+	name = strings.ToLower(name)
+
+	for _, v := range ExposedServices {
+		if v == name {
+			return true
+		}
+	}
+
+	return false
+}
 
 func configDeprecationMessage(userConfig, newConfig string) {
 	if newConfig != "" {
@@ -238,6 +257,9 @@ func Setup() {
 		}
 		RedisMaxLocalObjects = int(v)
 	}
+
+	SetExposedServices = os.Getenv("SET_EXPOSED_SERVICES") == "true"
+	ExposedServices = strings.Split(os.Getenv("EXPOSED_SERVICES"), ",")
 
 	// Set defaults if not defined
 	if SyslogServer == "" {

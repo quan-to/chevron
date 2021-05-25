@@ -48,6 +48,19 @@ These are the Environment Variables that you can set to manage the webserver:
 *   `MODE` => Mode of remote-signer (`single_key`, `default`)
 *   `ON_DEMAND_KEY_LOAD` => Do not attempt to load all keys from keybackend. Load them as needed (defaults `false`)
 *   `ENABLE_SWAGGER` => Enables swagger on `/swagger` for Remote Signer. (defaults to `true`)
+*   `SET_EXPOSED_SERVICES` => Enable only services described by `EXPOSED_SERVICES`
+*   `EXPOSED_SERVICES` => List of comma separated values with the services that should be exposed
+    * `__internal` => `/__internal` endpoint (needed for cluster key password sharing)
+    * `gpg` => `/gpg` endpoint
+    * `tests` => `/tests` endpoint
+    * `keyRing` => `/keyRing` endpoint
+    * `sks` => `/sks` endpoint
+    * `fieldCipher` => `/fieldCipher` endpoint
+    * `pks` => `/pks` endpoint
+    * `agent` => `/agent` endpoint
+    * `agentAdmin` => `/agentAdmin` endpoint
+    * `graphiql` => `/graphiql` and `/assets` endpoints
+    * `agent` => `/agent` endpoint
 
 ## Caching Configuration
 
