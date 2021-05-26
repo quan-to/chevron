@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"github.com/quan-to/chevron/internal/tools"
+	"github.com/quan-to/chevron/pkg/interfaces"
+	"github.com/quan-to/chevron/pkg/openpgp"
 )
 
 // GenerateKey generates a new key using specified bits and identifier and encrypts it using the specified password
@@ -55,4 +57,20 @@ func ChangeKeyPassword(keyData, currentPassword, newPassword string) (newKeyData
 // GetPublicKey returns the cached public key from the specified fingerprint
 func GetPublicKey(fingerprint string) (keyData string, err error) {
 	return pgpBackend.GetPublicKeyASCII(ctx, fingerprint)
+}
+
+// GetPublicKeyEntity returns the public key entity for the specified fingerprint
+func GetPublicKeyEntity(fingerprint string) *openpgp.Entity {
+	return pgpBackend.GetPublicKeyEntity(ctx, fingerprint)
+}
+
+// GetPrivateKeyEntity returns the private key entity list for the specified fingerprint
+func GetPrivateKeyEntity(fingerprint string) openpgp.EntityList {
+	return pgpBackend.GetPrivate(ctx, fingerprint)
+}
+
+// GetPGPManager returns the PGP Manager instance of Chevron Lib
+// Use with care
+func GetPGPManager() interfaces.PGPManager {
+	return pgpBackend
 }
