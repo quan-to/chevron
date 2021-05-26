@@ -44,6 +44,7 @@ var VaultBackend string
 var VaultSkipDataType bool
 var VaultTokenTTL string
 var AgentTargetURL string
+var AgentForceURL bool
 var AgentTokenExpiration int
 var AgentKeyFingerPrint string
 var AgentBypassLogin bool
@@ -73,8 +74,27 @@ var RedisTLSEnabled bool
 var RedisMaxLocalObjects int
 var RedisLocalObjectTTL time.Duration
 
+var SetExposedServices bool
+var ExposedServices []string
+
 // LogFormat allows to configure the output log format
 var LogFormat slog.Format
+
+func IsServiceExposed(name string) bool {
+	if !SetExposedServices {
+		return true
+	}
+
+	name = strings.ToLower(name)
+
+	for _, v := range ExposedServices {
+		if v == name {
+			return true
+		}
+	}
+
+	return false
+}
 
 func configDeprecationMessage(userConfig, newConfig string) {
 	if newConfig != "" {
@@ -183,6 +203,7 @@ func Setup() {
 	VaultTokenTTL = os.Getenv("VAULT_TOKEN_TTL")
 	AgentTargetURL = os.Getenv("AGENT_TARGET_URL")
 	AgentKeyFingerPrint = os.Getenv("AGENT_KEY_FINGERPRINT")
+	AgentForceURL = os.Getenv("AGENT_FORCE_URL") == "true"
 	AgentBypassLogin = os.Getenv("AGENT_BYPASS_LOGIN") == "true"
 	DatabaseTokenManager = os.Getenv("RETHINK_TOKEN_MANAGER") == "true" || os.Getenv("DATABASE_TOKEN_MANAGER") == "true"
 	DatabaseAuthManager = os.Getenv("RETHINK_AUTH_MANAGER") == "true" || os.Getenv("AUTH_MANAGER") == "true"
@@ -236,6 +257,9 @@ func Setup() {
 		}
 		RedisMaxLocalObjects = int(v)
 	}
+
+	SetExposedServices = os.Getenv("SET_EXPOSED_SERVICES") == "true"
+	ExposedServices = strings.Split(os.Getenv("EXPOSED_SERVICES"), ",")
 
 	// Set defaults if not defined
 	if SyslogServer == "" {
@@ -332,9 +356,11 @@ func Setup() {
 	if Environment == "development" {
 		slog.SetDebug(true)
 		QuantoError.EnableStackTrace()
+		QuantoError.EnableErrorData()
 	} else {
 		slog.SetDebug(false)
 		QuantoError.DisableStackTrace()
+		QuantoError.DisableErrorData()
 	}
 
 	// Deprecation

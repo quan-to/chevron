@@ -109,7 +109,7 @@ func TestSkipEndpointLoggingMiddleware(t *testing.T) {
 	slog.SetDefaultOutput(&logBuffer)
 	slog.SetLogFormat(slog.JSON)
 
-	mockHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { })
+	mockHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
 
 	for endpoint := range skipEndpoints {
 		req := httptest.NewRequest(http.MethodPost, fmt.Sprintf("http://huehuebr.com%s", endpoint), nil)

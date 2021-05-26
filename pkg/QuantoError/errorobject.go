@@ -9,6 +9,7 @@ import (
 )
 
 var stackEnabled = true
+var errorDataEnabled = true
 
 func EnableStackTrace() {
 	stackEnabled = true
@@ -16,6 +17,14 @@ func EnableStackTrace() {
 
 func DisableStackTrace() {
 	stackEnabled = false
+}
+
+func EnableErrorData() {
+	errorDataEnabled = true
+}
+
+func DisableErrorData() {
+	errorDataEnabled = false
 }
 
 //Flag to define if a stack trace is returned in response or not
@@ -32,13 +41,19 @@ type ErrorObject struct {
 }
 
 func New(errorCode, errorField, message string, errorData interface{}) *ErrorObject {
-	return &ErrorObject{
+	eo := &ErrorObject{
 		ErrorCode:  errorCode,
 		ErrorField: errorField,
-		ErrorData:  errorData,
 		Message:    message,
-		StackTrace: string(debug.Stack()),
 	}
+
+	if errorDataEnabled {
+		eo.ErrorData = errorData
+	}
+	if stackEnabled {
+		eo.StackTrace = string(debug.Stack())
+	}
+	return eo
 }
 
 func (e *ErrorObject) Error() string {
@@ -59,7 +74,9 @@ func (e *ErrorObject) ToFormattedError() gqlerrors.FormattedError {
 	if stackEnabled {
 		baseErr.Extensions["stackTrace"] = e.StackTrace
 	}
-	baseErr.Extensions["errorData"] = e.ErrorData
+	if errorDataEnabled {
+		baseErr.Extensions["errorData"] = e.ErrorData
+	}
 
 	return baseErr
 }

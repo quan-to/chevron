@@ -104,17 +104,21 @@ func (jam *JSONAuthManager) LoginAuth(username, password string) (fingerPrint, f
 	user, exists := jam.users[username]
 
 	if !exists {
-		return "", "", fmt.Errorf("invalid username or password")
+		// To avoid timing attack pretend that we have a valid user
+		user = jsonUser{Username: invalidUserId}
 	}
 
 	hash, err := base64.StdEncoding.DecodeString(user.Password)
 	if err != nil {
 		jam.log.Error("Error decoding hash: %v", err)
-		return "", "", fmt.Errorf("invalid username or password")
+		// Same here, let's pretend we have a hash
+		hash = []byte(bcryptFallbackHash)
+		// Unset password to avoid knowing the correct password from the hash above
+		password = ""
 	}
 
-	err = bcrypt.CompareHashAndPassword(hash, []byte(password))
-	if err != nil {
+	err = bcrypt.CompareHashAndPassword(hash, []byte(password)) // Execute even if we know it's invalid
+	if user.Username == invalidUserId || err != nil {
 		return "", "", fmt.Errorf("invalid username or password")
 	}
 

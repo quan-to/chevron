@@ -95,34 +95,56 @@ func GenRemoteSignerServerMux(slog slog.Instance, sm interfaces.SecretsManager, 
 
 	r.Use(LoggingMiddleware)
 
-	// Add for /
-	AddHKPEndpoints(log, dbh, r.PathPrefix("/pks").Subrouter())
-	ge.AttachHandlers(r.PathPrefix("/gpg").Subrouter())
-	ie.AttachHandlers(r.PathPrefix("/__internal").Subrouter())
-	te.AttachHandlers(r.PathPrefix("/tests").Subrouter())
-	kre.AttachHandlers(r.PathPrefix("/keyRing").Subrouter())
-	sks.AttachHandlers(r.PathPrefix("/sks").Subrouter())
-	jfc.AttachHandlers(r.PathPrefix("/fieldCipher").Subrouter())
+	if config.IsServiceExposed("pks") {
+		AddHKPEndpoints(log, dbh, r.PathPrefix("/pks").Subrouter())
+		AddHKPEndpoints(log, dbh, r.PathPrefix("/remoteSigner/pks").Subrouter())
+	}
 
-	// Add for /remoteSigner
-	AddHKPEndpoints(log, dbh, r.PathPrefix("/remoteSigner/pks").Subrouter())
-	ge.AttachHandlers(r.PathPrefix("/remoteSigner/gpg").Subrouter())
-	ie.AttachHandlers(r.PathPrefix("/remoteSigner/__internal").Subrouter())
-	te.AttachHandlers(r.PathPrefix("/remoteSigner/tests").Subrouter())
-	kre.AttachHandlers(r.PathPrefix("/remoteSigner/keyRing").Subrouter())
-	sks.AttachHandlers(r.PathPrefix("/remoteSigner/sks").Subrouter())
-	jfc.AttachHandlers(r.PathPrefix("/remoteSigner/fieldCipher").Subrouter())
+	if config.IsServiceExposed("gpg") {
+		ge.AttachHandlers(r.PathPrefix("/gpg").Subrouter())
+		ge.AttachHandlers(r.PathPrefix("/remoteSigner/gpg").Subrouter())
+	}
 
-	// Agent
-	ap.AddHandlers(r.PathPrefix("/agent").Subrouter())
+	if config.IsServiceExposed("__internal") {
+		ie.AttachHandlers(r.PathPrefix("/__internal").Subrouter())
+		ie.AttachHandlers(r.PathPrefix("/remoteSigner/__internal").Subrouter())
+	}
 
-	// Agent Admin
-	agentAdmin.AddHandlers(r.PathPrefix("/agentAdmin").Subrouter())
+	if config.IsServiceExposed("tests") {
+		te.AttachHandlers(r.PathPrefix("/tests").Subrouter())
+		te.AttachHandlers(r.PathPrefix("/remoteSigner/tests").Subrouter())
+	}
 
-	// Static GraphiQL
-	sGql.AttachHandlers(r.PathPrefix("/graphiql").Subrouter())
+	if config.IsServiceExposed("keyRing") {
+		kre.AttachHandlers(r.PathPrefix("/keyRing").Subrouter())
+		kre.AttachHandlers(r.PathPrefix("/remoteSigner/keyRing").Subrouter())
+	}
 
-	pages.AddHandlers(r.PathPrefix("/assets").Subrouter())
+	if config.IsServiceExposed("sks") {
+		sks.AttachHandlers(r.PathPrefix("/sks").Subrouter())
+		sks.AttachHandlers(r.PathPrefix("/remoteSigner/sks").Subrouter())
+	}
+
+	if config.IsServiceExposed("fieldCipher") {
+		jfc.AttachHandlers(r.PathPrefix("/fieldCipher").Subrouter())
+		jfc.AttachHandlers(r.PathPrefix("/remoteSigner/fieldCipher").Subrouter())
+	}
+
+	if config.IsServiceExposed("agent") {
+		// Agent
+		ap.AddHandlers(r.PathPrefix("/agent").Subrouter())
+	}
+	if config.IsServiceExposed("agentAdmin") {
+		// Agent Admin
+		agentAdmin.AddHandlers(r.PathPrefix("/agentAdmin").Subrouter())
+	}
+
+	if config.IsServiceExposed("graphiql") {
+		// Static GraphiQL
+		sGql.AttachHandlers(r.PathPrefix("/graphiql").Subrouter())
+
+		pages.AddHandlers(r.PathPrefix("/assets").Subrouter())
+	}
 
 	// Catch All for unhandled endpoints
 	r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
