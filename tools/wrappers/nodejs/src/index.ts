@@ -212,7 +212,7 @@ const quantoVerifySignature = async function(data: string, signature: string) : 
  * @param {string} keyData - The private key
  * @param {string} currentPassword - The current password of the key
  * @param {string} newPassword - The new password for the key
- * @returns {Promise<string>>} the same private key encrypted with the newPassword
+ * @returns {Promise<string>} the same private key encrypted with the newPassword
  */
 const changeKeyPassword = async function(keyData: string, currentPassword: string, newPassword: string): Promise<string|void> {
     return new Promise((resolve, reject) => {

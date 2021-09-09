@@ -76,63 +76,49 @@ struct LoadKey_return {
 };
 
 // LoadKey loads a private or public key into the memory keyring
-
-extern struct LoadKey_return LoadKey(char* p0, char* p1, int p2);
+extern struct LoadKey_return LoadKey(char* keyData, char* result, int resultLen);
 
 // UnlockKey unlocks a private key to be used
-
-extern int UnlockKey(char* p0, char* p1, char* p2, int p3);
+extern int UnlockKey(char* fingerprint, char* password, char* result, int resultLen);
 
 // VerifySignature verifies a signature using a already loaded public key
-
-extern int VerifySignature(char* p0, int p1, char* p2, char* p3, int p4);
+extern int VerifySignature(char* data, int dataLen, char* signature, char* result, int resultLen);
 
 // QuantoVerifySignature verifies a signature in Quanto Signature Format using a already loaded public key
-
-extern int QuantoVerifySignature(char* p0, int p1, char* p2, char* p3, int p4);
+extern int QuantoVerifySignature(char* data, int dataLen, char* signature, char* result, int resultLen);
 
 // VerifyBase64DataSignature verifies a signature using a already loaded public key. The b64data is a raw binary data encoded in base64 string
-
-extern int VerifyBase64DataSignature(char* p0, char* p1, char* p2, int p3);
+extern int VerifyBase64DataSignature(char* b64data, char* signature, char* result, int resultLen);
 
 // QuantoVerifyBase64DataSignature verifies a signature in Quanto Signature Format using a already loaded public key.
 // The b64data is a raw binary data encoded in base64 string
-
-extern int QuantoVerifyBase64DataSignature(char* p0, char* p1, char* p2, int p3);
+extern int QuantoVerifyBase64DataSignature(char* b64data, char* signature, char* result, int resultLen);
 
 // SignData signs data using a already loaded and unlocked private key
-
-extern int SignData(char* p0, int p1, char* p2, char* p3, int p4);
+extern int SignData(char* data, int dataLen, char* fingerprint, char* result, int resultLen);
 
 // QuantoSignData signs data using a already loaded and unlocked private key and returns in Quanto Signature Format
-
-extern int QuantoSignData(char* p0, int p1, char* p2, char* p3, int p4);
+extern int QuantoSignData(char* data, int dataLen, char* fingerprint, char* result, int resultLen);
 
 // SignBase64Data signs data using a already loaded and unlocked private key.
 // The b64data is a raw binary data encoded in base64 string
-
-extern int SignBase64Data(char* p0, char* p1, char* p2, int p3);
+extern int SignBase64Data(char* b64data, char* fingerprint, char* result, int resultLen);
 
 // SignBase64Data signs data using a already loaded and unlocked private key. Returns in Quanto Signature Format
 // The b64data is a raw binary data encoded in base64 string
-
-extern int QuantoSignBase64Data(char* p0, char* p1, char* p2, int p3);
+extern int QuantoSignBase64Data(char* b64data, char* fingerprint, char* result, int resultLen);
 
 // GetKeyFingerprints returns all fingerprints in CSV format from a ASCII Armored PGP Keychain
-
-extern int GetKeyFingerprints(char* p0, char* p1, int p2);
+extern int GetKeyFingerprints(char* keyData, char* result, int resultLen);
 
 // ChangeKeyPassword re-encrypts the input key using newPassword
-
-extern int ChangeKeyPassword(char* p0, char* p1, char* p2, char* p3, int p4);
+extern int ChangeKeyPassword(char* keyData, char* currentPassword, char* newPassword, char* result, int resultLen);
 
 // GetPublicKey returns the cached public key from the specified fingerprint
-
-extern int GetPublicKey(char* p0, char* p1, int p2);
+extern int GetPublicKey(char* fingerprint, char* result, int resultLen);
 
 // GenerateKey generates a new key using specified bits and identifier and encrypts it using the specified password
-
-extern int GenerateKey(char* p0, char* p1, int p2, char* p3, int p4);
+extern int GenerateKey(char* password, char* identifier, int bits, char* result, int resultLen);
 
 #ifdef __cplusplus
 }
